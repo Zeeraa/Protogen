@@ -1,0 +1,7 @@
+/.vscode
+/data
+/node_modules
+/dist
+.env
+.env.sample
+swagger.json
