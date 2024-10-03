@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
-import { SavedVideo } from "../../../database/models/videoplayer/SavedVideos.model";
+import { SavedVideo } from "../../../database/models/video-player/SavedVideos.model";
 import { Equal } from "typeorm";
 import { VideoDownloadJob } from "../../../remote-worker/RemoteWorker";
+import { readdirSync, statSync, unlinkSync } from "fs";
+import { extname, join } from "path";
 
 export class VideoPlayerRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -153,8 +155,12 @@ export class VideoPlayerRouter extends AbstractRouter {
         in: 'body',
         description: 'Save video',
         schema: {
+          sortingNumber: 1,
+          name: "Test",
           url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
           mirrorVideo: false,
+          isStream: false,
+          hideUrl: false
         }
       }
       */
@@ -197,8 +203,12 @@ export class VideoPlayerRouter extends AbstractRouter {
         in: 'body',
         description: 'Update a saved video',
         schema: {
+          sortingNumber: 1,
+          name: "Test",
           url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
           mirrorVideo: false,
+          isStream: false,
+          hideUrl: false
         }
       }
       */
@@ -351,6 +361,39 @@ export class VideoPlayerRouter extends AbstractRouter {
       }
     });
     //#endregion
+
+    this.router.delete("/cache", async (req, res) => {
+      /*
+      #swagger.path = '/video_player/cache'
+      #swagger.tags = ['Video Player'],
+      #swagger.description = "Clear downloaded video cache"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "Failed to delete files" }
+      */
+      try {
+        const directory = this.protogen.videoPlaybackManager.videoDirectory;
+
+        const files = readdirSync(directory);
+        let deletedCount = 0;
+
+        files.forEach(file => {
+          const filePath = join(directory, file);
+          const stat = statSync(filePath);
+
+          if (stat.isFile() && extname(file).toLowerCase() === '.mp4') {
+            unlinkSync(filePath);
+            deletedCount++;
+          }
+        });
+
+        res.json({
+          deletedCount: deletedCount,
+        });
+      } catch (error) {
+        console.error('Error while deleting mp4 files:', error);
+        throw error;
+      }
+    });
   }
 
   private get playbackManager() {

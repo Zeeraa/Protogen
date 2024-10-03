@@ -3,10 +3,11 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { cyan, yellow } from "colors";
-import { VideoPlayerRouter } from "./routes/videoplayer/VideoPlayerRouter";
 import { existsSync, readFileSync } from "fs";
 import swaggerUi from "swagger-ui-express";
+import { VideoPlayerRouter } from "./routes/video-player/VideoPlayerRouter";
 import { AudioRouter } from "./routes/volume/AudioRouter";
+import { VisorRouter } from "./routes/viror/VisorRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -21,6 +22,7 @@ export class ProtogenWebServer {
 
     new VideoPlayerRouter(this).register();
     new AudioRouter(this).register();
+    new VisorRouter(this).register();
 
     if (existsSync("./swagger.json")) {
       this.protogen.logger.info("WebServer", "Reading swagger.json");

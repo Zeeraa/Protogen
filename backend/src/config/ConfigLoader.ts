@@ -105,12 +105,15 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
+  const tempDirectory = process.env["TEMP_DIRECTORY"] || "./temp";
+
   return {
     web: web,
     database: database,
     flaschenTaschen: flaschenTaschen,
     ledMatrix: ledMatrix,
     remoteWorker: remoteWorker,
+    tempDirectory: tempDirectory,
   }
 }
 

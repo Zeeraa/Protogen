@@ -1,3 +1,4 @@
+import { existsSync, mkdirSync } from "fs";
 import { Configuration } from "./config/objects/Configurations";
 import { Database } from "./database/Database";
 import { Logger } from "./logger/Logger";
@@ -19,13 +20,23 @@ export class Protogen {
 
   constructor(config: Configuration) {
     this._config = config;
+
+    if (!existsSync(this.config.tempDirectory)) {
+      mkdirSync(this.config.tempDirectory);
+    }
+
+    const videoTempDirectory = this.config.tempDirectory + "/videos";
+    if (!existsSync(videoTempDirectory)) {
+      mkdirSync(videoTempDirectory);
+    }
+
     this._logger = new Logger();
     this._database = new Database(this);
     this._webServer = new ProtogenWebServer(this);
     this._flaschenTaschen = new FlaschenTaschen(this.config.flaschenTaschen.host, this.config.flaschenTaschen.port);
     this._visor = new ProtogenVisor(this);
     this._remoteWorker = new ProtogenRemoteWorker(this);
-    this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, "./temp");
+    this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
   }
 
   public async init() {

@@ -1,5 +1,4 @@
 import { Request, Response, Router } from "express";
-import { Protogen } from "../Protogen";
 import { ProtogenWebServer } from "./ProtogenWebServer";
 import { cyan, yellow } from "colors";
 
@@ -13,7 +12,6 @@ export abstract class AbstractRouter {
     this._webServer = webServer;
     this._path = path;
     this._router = Router();
-
   }
 
   protected get router() {

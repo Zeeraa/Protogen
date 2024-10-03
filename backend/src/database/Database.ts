@@ -1,7 +1,6 @@
 import { DataSource } from "typeorm";
-import { cyan } from "colors";
 import { Protogen } from "../Protogen";
-import { SavedVideo } from "./models/videoplayer/SavedVideos.model";
+import { SavedVideo } from "./models/video-player/SavedVideos.model";
 
 export class Database {
   private _protogen;

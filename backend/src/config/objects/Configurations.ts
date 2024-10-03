@@ -10,4 +10,5 @@ export interface Configuration {
   flaschenTaschen: FlaschenTaschenConfiguration,
   ledMatrix: LedMatrixConfiguration,
   remoteWorker: RemoteWorkerConfiguration,
+  tempDirectory: string;
 }

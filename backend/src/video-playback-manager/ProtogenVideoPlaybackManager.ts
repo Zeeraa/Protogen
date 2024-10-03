@@ -16,6 +16,7 @@ export class ProtogenVideoPlaybackManager {
   private _status: VideoDownloadJobStatus | null = null;
   private _videoDirectory;
   private _vlcProcess: ChildProcess | null = null;
+  private _isDownloading = false;
 
   constructor(protogen: Protogen, videoDirectory: string) {
     this._protogen = protogen;
@@ -88,9 +89,12 @@ export class ProtogenVideoPlaybackManager {
       this.protogen.logger.info("VideoPlaybackManager", "Video already in cache. Skipping download");
     } else {
       try {
-        this.protogen.remoteWorker.downloadVideo(hash, output);
+        this._isDownloading = true;
+        await this.protogen.remoteWorker.downloadVideo(hash, output);
+        this._isDownloading = false;
       } catch (err) {
         this.protogen.logger.error("VideoPlaybackManager", "An error occured while downloading video. " + (err as any).message);
+        this._isDownloading = false;
         console.log(err);
       }
     }
@@ -149,12 +153,18 @@ export class ProtogenVideoPlaybackManager {
     }
   }
 
-  public kill() {
+  public kill(stopTrackingJob = true) {
+    let didStopTracking = false;
+    if (this._monitoredJob != null && stopTrackingJob) {
+      this._monitoredJob = null;
+      didStopTracking = true;
+    }
+
     if (this._vlcProcess != null) {
       this._vlcProcess.kill();
       return true;
     }
-    return false;
+    return didStopTracking;
   }
 
   public async streamVideo(url: string) {
@@ -184,5 +194,13 @@ export class ProtogenVideoPlaybackManager {
 
   public get vlcProcess() {
     return this._vlcProcess;
+  }
+
+  public get isDownloading() {
+    return this._isDownloading;
+  }
+
+  public get videoDirectory() {
+    return this._videoDirectory;
   }
 }
