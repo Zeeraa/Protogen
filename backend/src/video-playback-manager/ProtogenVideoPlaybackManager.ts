@@ -95,6 +95,12 @@ export class ProtogenVideoPlaybackManager {
       }
     }
 
+    await this.killAndAwait();
+    this.startPlayback(resolve(output));
+    return true;
+  }
+
+  private async killAndAwait() {
     // Kill existing before starting new playback
     if (this.kill()) {
       let didExit = false;
@@ -118,8 +124,6 @@ export class ProtogenVideoPlaybackManager {
         await sleep(1000);
       }
     }
-    this.startPlayback(resolve(output));
-    return true;
   }
 
   private startPlayback(source: string) {
@@ -130,6 +134,7 @@ export class ProtogenVideoPlaybackManager {
       this.protogen.visor.appendRenderLock(LockName);
 
       const commandline = vlcPath + " --play-and-exit --vout flaschen --flaschen-display=" + ftHost + " --flaschen-width=" + this.ledConfig.width + " --flaschen-height=" + this.ledConfig.height + " " + source;
+      console.debug(commandline);
 
       this._vlcProcess = exec(commandline);
       this._vlcProcess.on('exit', (code) => {
@@ -150,6 +155,11 @@ export class ProtogenVideoPlaybackManager {
       return true;
     }
     return false;
+  }
+
+  public async streamVideo(url: string) {
+    await this.killAndAwait();
+    this.startPlayback(url);
   }
 
   public async playVideo(url: string, mirror: boolean = false) {

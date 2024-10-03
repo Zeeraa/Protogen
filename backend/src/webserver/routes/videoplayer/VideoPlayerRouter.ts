@@ -59,6 +59,40 @@ export class VideoPlayerRouter extends AbstractRouter {
       }
     });
 
+    this.router.post("/stream", async (req, res) => {
+      /*
+      #swagger.path = '/video_player/stream'
+      #swagger.tags = ['Video Player'],
+      #swagger.description = "Stream video from a url"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for details" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Begin video playback',
+        schema: {
+          url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        }
+      }
+      */
+      try {
+        const parsed = StreamVideoModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        this.playbackManager.streamVideo(data.url);
+
+        res.json({ status: "ok" });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.post("/stop", async (req, res) => {
       /*
       #swagger.path = '/video_player/stop'
@@ -86,4 +120,8 @@ export class VideoPlayerRouter extends AbstractRouter {
 const PlayVideoModel = z.object({
   url: z.string().url().max(1024),
   mirrorVideo: z.boolean(),
+});
+
+const StreamVideoModel = z.object({
+  url: z.string().url().max(1024),
 });
