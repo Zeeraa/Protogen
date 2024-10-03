@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { cyan } from "colors";
 import { Protogen } from "../Protogen";
+import { SavedVideo } from "./models/videoplayer/SavedVideos.model";
 
 export class Database {
   private _protogen;
@@ -18,7 +19,9 @@ export class Database {
       logging: this.config.logging,
       synchronize: true,
       migrationsTableName: "protogen_typeorm_migrations",
-      entities: []
+      entities: [
+        SavedVideo
+      ]
     });
   }
 

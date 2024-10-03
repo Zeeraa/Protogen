@@ -4,6 +4,7 @@ import { VideoDownloadJob, VideoDownloadJobStatus } from "../remote-worker/Remot
 import { existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { ChildProcess, exec } from "child_process";
+import { sleep } from "../utils/Utils";
 
 const LockName = "ProtogenVideoPlaybackManager";
 
@@ -93,7 +94,30 @@ export class ProtogenVideoPlaybackManager {
         console.log(err);
       }
     }
-    this.kill(); // Kill existing before starting new playback
+
+    // Kill existing before starting new playback
+    if (this.kill()) {
+      let didExit = false;
+      for (let i = 0; i < 50; i++) {
+        if (this.vlcProcess == null) {
+          didExit = true;
+          break;
+        }
+        await sleep(100);
+      }
+
+      if (!didExit) {
+        // Failed to close VLC. Try to taskkill it and wait 1 second
+        this.protogen.logger.warn("VideoPlaybackManager", "Vlc process did not exit after kill attempt");
+        try {
+          exec("killall vlc");
+        } catch (err) {
+          console.error(err);
+        }
+        this._vlcProcess = null;
+        await sleep(1000);
+      }
+    }
     this.startPlayback(resolve(output));
     return true;
   }
@@ -145,5 +169,9 @@ export class ProtogenVideoPlaybackManager {
 
   public get monitoredJob() {
     return this._monitoredJob;
+  }
+
+  public get vlcProcess() {
+    return this._vlcProcess;
   }
 }

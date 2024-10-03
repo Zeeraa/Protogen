@@ -2,8 +2,10 @@ import { Protogen } from "../Protogen";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { cyan } from "colors";
-import { z } from "zod";
+import { cyan, yellow } from "colors";
+import { VideoPlayerRouter } from "./routes/videoplayer/VideoPlayerRouter";
+import { existsSync, readFileSync } from "fs";
+import swaggerUi from "swagger-ui-express";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -12,27 +14,19 @@ export class ProtogenWebServer {
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this._express = express();
+
     this.express.use(cors())
     this.express.use(bodyParser.json());
 
-    this._express.post("/play_video", async (req, res) => {
-      const parsed = VideoDownloadJobModel.safeParse(req.body);
-      if (!parsed.success) {
-        res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
-        return;
-      }
+    new VideoPlayerRouter(this).register();
 
-      const data = parsed.data;
-
-      this.protogen.videoPlaybackManager.playVideo(data.url, data.mirrorVideo);
-
-      res.json({});
-    });
-
-    this._express.post("/kill_video", async (req, res) => {
-      this.protogen.videoPlaybackManager.kill();
-      res.json({});
-    })
+    if (existsSync("./swagger.json")) {
+      this.protogen.logger.info("WebServer", "Reading swagger.json");
+      const swagger = JSON.parse(readFileSync("./swagger.json").toString());
+      this.express.use("/", swaggerUi.serve, swaggerUi.setup(swagger));
+    } else {
+      this.protogen.logger.warn("WebServer", yellow("Could not find swagger.json. No api documentation will be available"));
+    }
   }
 
   public init() {
@@ -61,10 +55,3 @@ export class ProtogenWebServer {
     return this._protogen;
   }
 }
-
-export const VideoDownloadJobModel = z.object({
-  url: z.string().url().max(1024),
-  mirrorVideo: z.boolean()
-});
-
-export type VideoDownloadJobDTO = z.infer<typeof VideoDownloadJobModel>;

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import dotenv from "dotenv";
 import consoleStamp from "console-stamp";
 import { loadConfiguration } from "./config/ConfigLoader";
