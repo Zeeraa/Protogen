@@ -17,9 +17,16 @@ export class SavedVideo {
   sortingNumber: number;
 
   @Column({
-    name: "url",
+    name: "name",
     type: "varchar",
     length: 255,
+  })
+  name: string;
+
+  @Column({
+    name: "url",
+    type: "varchar",
+    length: 1024,
   })
   url: string;
 
@@ -29,4 +36,18 @@ export class SavedVideo {
     default: false,
   })
   mirrorVideo: boolean;
+
+  @Column({
+    name: "is_stream",
+    type: "boolean",
+    default: false,
+  })
+  isStream: boolean;
+
+  @Column({
+    name: "hide_url",
+    type: "boolean",
+    default: false,
+  })
+  hideUrl: boolean;
 }

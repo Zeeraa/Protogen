@@ -6,6 +6,7 @@ import { cyan, yellow } from "colors";
 import { VideoPlayerRouter } from "./routes/videoplayer/VideoPlayerRouter";
 import { existsSync, readFileSync } from "fs";
 import swaggerUi from "swagger-ui-express";
+import { AudioRouter } from "./routes/volume/AudioRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -19,6 +20,7 @@ export class ProtogenWebServer {
     this.express.use(bodyParser.json());
 
     new VideoPlayerRouter(this).register();
+    new AudioRouter(this).register();
 
     if (existsSync("./swagger.json")) {
       this.protogen.logger.info("WebServer", "Reading swagger.json");
