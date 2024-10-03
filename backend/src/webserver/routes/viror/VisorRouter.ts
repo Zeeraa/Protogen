@@ -15,10 +15,12 @@ export class VisorRouter extends AbstractRouter {
       */
       try {
         const activeRenderer = this.protogen.visor.activeRenderer == null ? null : rendererToInfo(this.protogen.visor.activeRenderer);
+        const renderLocks = this.protogen.visor.renderLocks;
 
         res.json({
           activeRenderer: activeRenderer,
-          hasRenderLock: this.protogen.visor.hasRenderLock,
+          hasRenderLock: renderLocks.length > 0,
+          renderLocks: renderLocks,
         });
       } catch (err) {
         return this.handleError(err, req, res);
