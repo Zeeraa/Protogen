@@ -1,0 +1,54 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>System status</h1>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <h5>OS</h5>
+    </div>
+
+    <div class="col-12 mt-2">
+      <span>
+        OS Name:
+        <span class="text-info">{{osName}}</span>
+      </span>
+    </div>
+
+    <div class="col-12 mt-2">
+      <div class="btn btn-danger" (click)="openShutdownModal()">Shutdown</div>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <h5>Hardware</h5>
+    </div>
+
+    <div class="col-12 com-md-6 mt-1">
+      <h6>CPU</h6>
+      <ngb-progressbar class="mt-1" type="info" [value]="cpuUsage" [max]="100" [showValue]="true" />
+    </div>
+
+    <div class="col-12 com-md-6 mt-1">
+      <h6>RAM</h6>
+      <ngb-progressbar class="mt-1" type="info" [value]="ramUsage" [max]="100" [showValue]="true" />
+    </div>
+  </div>
+</div>
+
+<ng-template #shutdownModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-danger" id="shutdown-modal-title">Confirm shutdown</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>Do you really want to shutdown the host os?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="shutdown()">Shutdown</button>
+  </div>
+</ng-template>

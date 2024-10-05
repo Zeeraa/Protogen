@@ -11,6 +11,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { NavbarModule } from './features/navbar/navbar.module';
 import { VisorModule } from './features/visor/visor.module';
 import { VideoPlayerModule } from './features/video-player/video-player.module';
+import { SystemModule } from './features/system/system.module';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { VideoPlayerModule } from './features/video-player/video-player.module';
     NavbarModule,
     VisorModule,
     VideoPlayerModule,
+    SystemModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi())
