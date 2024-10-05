@@ -14,7 +14,7 @@ import { VideoPlayerModule } from './features/video-player/video-player.module';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     BrowserModule,

@@ -9,7 +9,7 @@ import { SavedVideoCardComponent } from './components/saved-video-card/saved-vid
 @NgModule({
   declarations: [
     VideoPlayerPageComponent,
-    SavedVideoCardComponent
+    SavedVideoCardComponent,
   ],
   imports: [
     CommonModule,
