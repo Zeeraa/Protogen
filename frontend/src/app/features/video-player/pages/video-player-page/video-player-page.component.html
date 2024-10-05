@@ -1,0 +1,135 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col">
+      <h1>Video playback</h1>
+    </div>
+  </div>
+
+  @if(isDownloading) {
+  <div class="alert alert-info" role="alert">
+    Video download job running. Status: {{downloadJobStatusText}}
+  </div>
+  }
+
+  @if(isPlaying) {
+  <div class="alert alert-primary" role="alert">
+    A video is currently being played
+  </div>
+  }
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" [(ngModel)]="videoInputUrl" placeholder="Video URL">
+        <button class="btn btn-primary" type="button" (click)="startPlayback()">Play</button>
+      </div>
+    </div>
+
+    <div class="col-auto mt-1">
+      <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
+        <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo" [disabled]="stream"
+          [(ngModel)]="mirrorVideo">
+        <label class="form-check-label" for="cbx_splitVideo">Mirror video</label>
+      </div>
+    </div>
+
+    <div class="col-auto mt-1">
+      <div class="form-check form-switch" title="Stream the video instead of downloading and processing it">
+        <input class="form-check-input" type="checkbox" role="switch" id="cbx_streamVideo" [(ngModel)]="stream">
+        <label class="form-check-label" for="cbx_streamVideo">Stream</label>
+      </div>
+    </div>
+
+    <div class="col-12 mt-4">
+      <button class="btn btn-danger" type="button" (click)="stopPlayback()">Stop playback</button>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <label for="vp_volumeRange" class="form-label">System volume ({{volume}}%)</label>
+      <input type="range" class="form-range" min="0" max="100" id="vp_volumeRange" [(ngModel)]="volume"
+        (change)="onVolumeChange($event)">
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Saved videos</h4>
+    </div>
+
+    <div class="col-auto mt-1">
+      <button (click)="showSaveVideoModal()" class="btn btn-primary btn-sm">Add</button>
+    </div>
+
+    <div class="col-auto mt-1">
+      <div class="form-check form-switch" title="Allow editing and deleting saved videos">
+        <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo" [disabled]="stream"
+          [(ngModel)]="allowEditSavedVideos">
+        <label class="form-check-label" for="cbx_splitVideo">Allow editing</label>
+      </div>
+    </div>
+
+    <div class="col-12"></div>
+
+    @for (video of savedVideos; track $index) {
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+      <app-saved-video-card [video]="video" [showEditOptions]="allowEditSavedVideos"
+        (savedVideoChanged)="fetchSavedVideos(true)" />
+    </div>
+    }
+  </div>
+</div>
+
+<ng-template #addVideoModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="add-saved-video-modal-title">Save video</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="addVideoForm">
+      <div class="mb-3">
+        <label for="sv_url" class="form-label">URL</label>
+        <input class="form-control" type="url" id="sv_url" formControlName="url" placeholder="Video URL">
+      </div>
+
+      <div class="mb-3">
+        <label for="sv_name" class="form-label">Name</label>
+        <input class="form-control" type="url" id="sv_name" formControlName="name" placeholder="Name to show">
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Stream the video instead of downloading and processing it">
+          <input class="form-check-input" type="checkbox" role="switch" id="sv_stream" formControlName="stream">
+          <label class="form-check-label" for="sv_stream">Stream</label>
+        </div>
+      </div>
+
+      @if(showMirrorOption) {
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
+          <input class="form-check-input" type="checkbox" role="switch" id="sv_mirror" formControlName="mirror">
+          <label class="form-check-label" for="sv_mirror">Mirror video</label>
+        </div>
+      </div>
+      }
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Hide the URL from the web ui">
+          <input class="form-check-input" type="checkbox" role="switch" id="sv_hideUrl" formControlName="hideUrl">
+          <label class="form-check-label" for="sv_hideUrl">Hide URL</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="sv_sortingNumber" class="form-label">Sorting (optional)</label>
+        <input class="form-control" type="number" id="sv_sortingNumber" formControlName="sorting"
+          placeholder="Optional sorting number">
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveVideo()" [disabled]="isSaving">Save</button>
+  </div>
+</ng-template>

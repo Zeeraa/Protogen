@@ -6,6 +6,11 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { DashboardModule } from './features/dashboard/dashboard.module';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NavbarModule } from './features/navbar/navbar.module';
+import { VisorModule } from './features/visor/visor.module';
+import { VideoPlayerModule } from './features/video-player/video-player.module';
 
 @NgModule({
   declarations: [
@@ -16,9 +21,17 @@ import { ToastrModule } from 'ngx-toastr';
     AppRoutingModule,
     NgbModule,
     BrowserAnimationsModule,
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
+    DashboardModule,
+    NavbarModule,
+    VisorModule,
+    VideoPlayerModule,
   ],
-  providers: [],
+  providers: [
+    provideHttpClient(withInterceptorsFromDi())
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+

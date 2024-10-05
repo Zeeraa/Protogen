@@ -1,0 +1,80 @@
+<div class="card w-100">
+  <!--<img src="..." class="card-img-top" alt="...">-->
+  @if(isYoutubeVideo) {
+  <img src="https://i.ytimg.com/vi/{{youtubeVideoId}}/0.jpg" class="card-img-top" alt="{{video.name}}">
+  }
+  <div class="card-body">
+    <h5 class="card-title">{{video.name}}</h5>
+
+    @if(video.isStream) {
+    <p class="card-text">
+      <span class="badge text-bg-info">Stream</span>
+    </p>
+    } @else if(video.mirrorVideo) {
+    <span class="badge text-bg-info">Mirrored</span>
+    }
+
+    @if(!video.hideUrl) {
+    <p class="card-text">{{video.url}}</p>
+    }
+
+    @if(showEditOptions) {
+    <button class="btn btn-danger mt-1 me-1" (click)="deleteVideo()" [disabled]="isDeleting">Delete</button>
+    <button class="btn btn-primary mt-1 me-1" (click)="showEditVideo()" [disabled]="isDeleting">Edit</button>
+    }
+    <button class="btn btn-success mt-1" (click)="play()" [disabled]="isDeleting">Play</button>
+  </div>
+</div>
+
+<ng-template #editVideoModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="edit-saved-video-modal-title">Save video</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editVideoForm">
+      <div class="mb-3">
+        <label for="esv_url" class="form-label">URL</label>
+        <input class="form-control" type="url" id="esv_url" formControlName="url" placeholder="Video URL">
+      </div>
+
+      <div class="mb-3">
+        <label for="esv_name" class="form-label">Name</label>
+        <input class="form-control" type="url" id="esv_name" formControlName="name" placeholder="Name to show">
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Stream the video instead of downloading and processing it">
+          <input class="form-check-input" type="checkbox" role="switch" id="esv_stream" formControlName="stream">
+          <label class="form-check-label" for="esv_stream">Stream</label>
+        </div>
+      </div>
+
+      @if(showMirrorOption) {
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
+          <input class="form-check-input" type="checkbox" role="switch" id="esv_mirror" formControlName="mirror">
+          <label class="form-check-label" for="esv_mirror">Mirror video</label>
+        </div>
+      </div>
+      }
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Hide the URL from the web ui">
+          <input class="form-check-input" type="checkbox" role="switch" id="esv_hideUrl" formControlName="hideUrl">
+          <label class="form-check-label" for="esv_hideUrl">Hide URL</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="esv_sortingNumber" class="form-label">Sorting</label>
+        <input class="form-control" type="number" id="esv_sortingNumber" formControlName="sorting"
+          placeholder="Sorting number">
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveVideo()" [disabled]="isSaving">Save</button>
+  </div>
+</ng-template>
