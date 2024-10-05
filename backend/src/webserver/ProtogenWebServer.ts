@@ -8,6 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import { VideoPlayerRouter } from "./routes/video-player/VideoPlayerRouter";
 import { AudioRouter } from "./routes/volume/AudioRouter";
 import { VisorRouter } from "./routes/viror/VisorRouter";
+import { SystemRouter } from "./routes/system/SystemRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -23,6 +24,7 @@ export class ProtogenWebServer {
     new VideoPlayerRouter(this).register();
     new AudioRouter(this).register();
     new VisorRouter(this).register();
+    new SystemRouter(this).register();
 
     if (existsSync("./swagger.json")) {
       this.protogen.logger.info("WebServer", "Reading swagger.json");
