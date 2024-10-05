@@ -17,7 +17,7 @@ export class ApiBaseService {
     protected toastr: ToastrService,
   ) { }
 
-  protected defaultErrorHandler(err: HttpErrorResponse) {
+  protected defaultErrorHandler = (err: HttpErrorResponse) => {
     if (err.status == 0) {
       console.error("Got status 0 from request");
       this.toastr.error("Failed to communicate with the server. Check your connection and try again");
