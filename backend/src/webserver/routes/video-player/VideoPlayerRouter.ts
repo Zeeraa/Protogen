@@ -353,7 +353,7 @@ export class VideoPlayerRouter extends AbstractRouter {
         }
 
         res.json({
-          isStream: isStream,
+          ...savedVideo,
           downloadJob: downloadJob,
         });
       } catch (err) {

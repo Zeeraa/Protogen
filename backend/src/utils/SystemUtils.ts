@@ -6,6 +6,10 @@ import { promisify } from 'util';
 // Promisify exec to use it with async/await
 export const execAsync = promisify(exec);
 
+export async function shutdown() {
+  await execAsync("sudo systemctl poweroff");
+}
+
 // Function to get temperature (requires `vcgencmd` to be installed on your Pi)
 export const getTemperature = async (): Promise<number> => {
   try {
