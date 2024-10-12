@@ -7,6 +7,7 @@ import { ProtogenVideoPlaybackManager } from "./video-playback-manager/ProtogenV
 import { FlaschenTaschen } from "./visor/flaschen-taschen/FlaschenTaschen";
 import { ProtogenVisor } from "./visor/ProtogenVisor";
 import { ProtogenWebServer } from "./webserver/ProtogenWebServer";
+import { SerialManager } from "./serial/SerialManager";
 
 export class Protogen {
   private _config: Configuration;
@@ -17,6 +18,7 @@ export class Protogen {
   private _flaschenTaschen: FlaschenTaschen;
   private _remoteWorker: ProtogenRemoteWorker;
   private _videoPlaybackManager: ProtogenVideoPlaybackManager;
+  private _serial: SerialManager;
 
   constructor(config: Configuration) {
     this._config = config;
@@ -37,6 +39,7 @@ export class Protogen {
     this._visor = new ProtogenVisor(this);
     this._remoteWorker = new ProtogenRemoteWorker(this);
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
+    this._serial = new SerialManager(this);
   }
 
   public async init() {
@@ -78,6 +81,10 @@ export class Protogen {
 
   public get videoPlaybackManager() {
     return this._videoPlaybackManager;
+  }
+
+  public get serial() {
+    return this._serial;
   }
   //#endregion
 }
