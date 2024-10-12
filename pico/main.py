@@ -63,19 +63,17 @@ def handle_input(input):
                 np[i] = (r, g, b)
 
         np.write()  # Update the NeoPixels once after processing all colors
-        print("OK:RGB")
+        print("OK:RGB") 
     if input.startswith('TIME:'):
         unix_timestamp = int(input[5:].strip())
         time_tuple = time.localtime(unix_timestamp)
         rtc.datetime((time_tuple[0], time_tuple[1], time_tuple[2], 0, time_tuple[3], time_tuple[4], time_tuple[5], 0))
         print("OK:TIME:" + format_rtc_datetime(rtc.datetime()))
     if input == 'REBOOT':
-        machine.reset
+        machine.reset()
 
-previous_time = time.ticks_ms()
 while True:
     user_input = non_blocking_input()
     
     if user_input:
         handle_input(user_input)
-    time.sleep_ms(250)
