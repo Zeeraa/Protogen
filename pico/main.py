@@ -6,7 +6,7 @@ import time
 import sh1106
 
 # ========== Config ==========
-PROTO_LED_PIN = 4
+PROTO_LED_PIN = 5
 PROTO_LED_COUNT = 24 * 2
         
 
