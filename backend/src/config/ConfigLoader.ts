@@ -3,6 +3,7 @@ import { DatabaseConfiguration } from "./objects/DatabaseConfiguration";
 import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfiguration";
 import { LedMatrixConfiguration } from "./objects/LedMatrixConfiguration";
 import { RemoteWorkerConfiguration } from "./objects/RemoteWorkerConfiguration";
+import { SerialConfiguration } from "./objects/SerialConfiguration";
 import { WebConfiguration } from "./objects/WebConfiguration";
 
 export function loadConfiguration(): Configuration {
@@ -30,7 +31,7 @@ export function loadConfiguration(): Configuration {
   }
 
   if (dbHost == null) {
-    throw new Error("Missing: DB_PORT");
+    throw new Error("Missing: DB_HOST");
   }
 
   if (dbUsername == null) {
@@ -105,6 +106,24 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
+  //#region Arduino
+  const serialPort = process.env["SERIAL_PORT"];
+  const serialBaudRate = parseInt(String(process.env["SERIAL_BAUD_RATE"]));
+
+  if (isNaN(serialBaudRate) || serialBaudRate <= 0) {
+    throw new Error("Missing or invalid: SERIAL_BAUD_RATE");
+  }
+
+  if (serialPort == null) {
+    throw new Error("Missing: SERIAL_PORT");
+  }
+
+  const serialConfig: SerialConfiguration = {
+    port: serialPort,
+    baudRate: serialBaudRate,
+  }
+  //#endregion
+
   const tempDirectory = process.env["TEMP_DIRECTORY"] || "./temp";
 
   return {
@@ -113,6 +132,7 @@ export function loadConfiguration(): Configuration {
     flaschenTaschen: flaschenTaschen,
     ledMatrix: ledMatrix,
     remoteWorker: remoteWorker,
+    serial: serialConfig,
     tempDirectory: tempDirectory,
   }
 }
