@@ -28,7 +28,7 @@ export class SerialManager {
           this.write(string);
         }
       }
-    }, 1000 / 20);
+    }, 1000 / 10);
 
     setInterval(() => {
       this.syncTime();
