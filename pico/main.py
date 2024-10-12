@@ -37,43 +37,47 @@ def format_rtc_datetime(rtc_datetime):
     return f"{year:04}-{month:02}-{day:02} {hour:02}:{minute:02}:{second:02}"
 
 def handle_input(input):
-    if input.startswith('RGB:'):
-        color_values = input[4:].strip()  # Get everything after 'RGB:'
-        # Split the string into a list of integers
-        rgb_list = list(map(int, color_values.split(',')))
+    try:
+        if input.startswith('RGB:'):
+            color_values = input[4:].strip()  # Get everything after 'RGB:'
+            # Split the string into a list of integers
+            rgb_list = list(map(int, color_values.split(',')))
 
-        # Validate the length of the list
-        if len(rgb_list) % 1 != 0:
-            print("Error: RGB values must be a valid list of integers.")
-            return  # Exit if the length is invalid
+            # Validate the length of the list
+            if len(rgb_list) % 1 != 0:
+                print("Error: RGB values must be a valid list of integers.")
+                return  # Exit if the length is invalid
 
-        # Clear the NeoPixel buffer
-        for i in range(PROTO_LED_COUNT):
-            np[i] = (0, 0, 0)  # Set all pixels to off
-        
-        # Process color values
-        for i in range(len(rgb_list)):  # Process each integer color
-            if i < PROTO_LED_COUNT:  # Ensure we do not exceed the LED count
-                color = rgb_list[i]
-                r = (color >> 16) & 0xFF  # Extract red
-                g = (color >> 8) & 0xFF   # Extract green
-                b = color & 0xFF          # Extract blue
-                
-                # Update NeoPixel with the received color
-                np[i] = (r, g, b)
+            # Clear the NeoPixel buffer
+            for i in range(PROTO_LED_COUNT):
+                np[i] = (0, 0, 0)  # Set all pixels to off
+            
+            # Process color values
+            for i in range(len(rgb_list)):  # Process each integer color
+                if i < PROTO_LED_COUNT:  # Ensure we do not exceed the LED count
+                    color = rgb_list[i]
+                    r = (color >> 16) & 0xFF  # Extract red
+                    g = (color >> 8) & 0xFF   # Extract green
+                    b = color & 0xFF          # Extract blue
+                    
+                    # Update NeoPixel with the received color
+                    np[i] = (r, g, b)
 
-        np.write()  # Update the NeoPixels once after processing all colors
-        print("OK:RGB") 
-    if input.startswith('TIME:'):
-        unix_timestamp = int(input[5:].strip())
-        time_tuple = time.localtime(unix_timestamp)
-        rtc.datetime((time_tuple[0], time_tuple[1], time_tuple[2], 0, time_tuple[3], time_tuple[4], time_tuple[5], 0))
-        print("OK:TIME:" + format_rtc_datetime(rtc.datetime()))
-    if input == 'REBOOT':
-        machine.reset()
+            np.write()  # Update the NeoPixels once after processing all colors
+            print("OK:RGB") 
+        elif input.startswith('TIME:'):
+            unix_timestamp = int(input[5:].strip())
+            time_tuple = time.localtime(unix_timestamp)
+            rtc.datetime((time_tuple[0], time_tuple[1], time_tuple[2], 0, time_tuple[3], time_tuple[4], time_tuple[5], 0))
+            print("OK:TIME:" + format_rtc_datetime(rtc.datetime()))
+        elif input == 'REBOOT':
+            machine.reset()
+    except Exception as e:
+        print(f"ERR:{e}")
 
 while True:
     user_input = non_blocking_input()
     
     if user_input:
         handle_input(user_input)
+
