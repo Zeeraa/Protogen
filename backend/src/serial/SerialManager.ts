@@ -1,34 +1,15 @@
 import { SerialPort } from "serialport";
 import { Protogen } from "../Protogen";
 import { ReadlineParser } from '@serialport/parser-readline';
-import { cyan, green, magenta } from "colors";
-import { encodeRGB } from "../utils/Utils";
+import { cyan, magenta } from "colors";
 
 export class SerialManager {
   private _protogen;
   private _port: SerialPort | null = null;
 
-  counter = 0;
-
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this.connect();
-    setInterval(() => {
-      if (this._port != null) {
-        if (this._port.isOpen) {
-          const colors = [encodeRGB(255, 0, 0), encodeRGB(255, 255, 0), encodeRGB(0, 255, 0), encodeRGB(0, 255, 255), encodeRGB(0, 255, 255), encodeRGB(255, 0, 255)];
-          const toSend: string[] = [];
-          let string = "RGB:";
-          this.counter++;
-          for (let i = 0; i < 48; i++) {
-            toSend.push(String(colors[(i + this.counter) % colors.length]));
-          }
-          string += toSend.join(",");
-          //console.log("Send color bytes.", green(string));
-          this.write(string);
-        }
-      }
-    }, 1000 / 10);
 
     setInterval(() => {
       this.syncTime();

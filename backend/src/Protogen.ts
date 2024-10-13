@@ -8,6 +8,7 @@ import { FlaschenTaschen } from "./visor/flaschen-taschen/FlaschenTaschen";
 import { ProtogenVisor } from "./visor/ProtogenVisor";
 import { ProtogenWebServer } from "./webserver/ProtogenWebServer";
 import { SerialManager } from "./serial/SerialManager";
+import { RgbManager } from "./rgb/RgbManager";
 
 export class Protogen {
   private _config: Configuration;
@@ -19,6 +20,7 @@ export class Protogen {
   private _remoteWorker: ProtogenRemoteWorker;
   private _videoPlaybackManager: ProtogenVideoPlaybackManager;
   private _serial: SerialManager;
+  private _rgb: RgbManager;
 
   constructor(config: Configuration) {
     this._config = config;
@@ -40,11 +42,13 @@ export class Protogen {
     this._remoteWorker = new ProtogenRemoteWorker(this);
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
     this._serial = new SerialManager(this);
+    this._rgb = new RgbManager(this);
   }
 
   public async init() {
     await this.database.init();
     await this.webServer.init();
+    await this.rgb.loadScenes();
     this.logger.info("Protogen", "Protogen::init() finished");
 
     await this.visor.init(); // Init visor render loop
@@ -85,6 +89,10 @@ export class Protogen {
 
   public get serial() {
     return this._serial;
+  }
+
+  public get rgb() {
+    return this._rgb;
   }
   //#endregion
 }

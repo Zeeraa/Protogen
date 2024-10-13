@@ -3,6 +3,7 @@ import { DatabaseConfiguration } from "./objects/DatabaseConfiguration";
 import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfiguration";
 import { LedMatrixConfiguration } from "./objects/LedMatrixConfiguration";
 import { RemoteWorkerConfiguration } from "./objects/RemoteWorkerConfiguration";
+import { RgbConfiguration } from "./objects/RgbConfiguration";
 import { SerialConfiguration } from "./objects/SerialConfiguration";
 import { WebConfiguration } from "./objects/WebConfiguration";
 
@@ -124,6 +125,23 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
+  //#region RGB
+  const ledCount = parseInt(String(process.env["RGB_LED_COUNT"]));
+  const ledRefreshRate = parseInt(String(process.env["RGB_REFRESH_RATE"]));
+  if (isNaN(ledCount) || ledCount < 0) {
+    throw new Error("Missing or invalid: RGB_LED_COUNT");
+  }
+
+  if (isNaN(ledRefreshRate) || ledCount < 0) {
+    throw new Error("Missing or invalid: RGB_REFRESH_RATE");
+  }
+
+  const rgb: RgbConfiguration = {
+    ledCount: ledCount,
+    refreshRate: ledRefreshRate,
+  }
+  //#endregion
+
   const tempDirectory = process.env["TEMP_DIRECTORY"] || "./temp";
 
   return {
@@ -133,6 +151,7 @@ export function loadConfiguration(): Configuration {
     ledMatrix: ledMatrix,
     remoteWorker: remoteWorker,
     serial: serialConfig,
+    rgb: rgb,
     tempDirectory: tempDirectory,
   }
 }

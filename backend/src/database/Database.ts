@@ -1,6 +1,9 @@
 import { DataSource } from "typeorm";
 import { Protogen } from "../Protogen";
 import { SavedVideo } from "./models/video-player/SavedVideos.model";
+import { StoredRgbScene } from "./models/rgb/StoredRgbScene.model";
+import { RgbSceneEffect } from "./models/rgb/RgbSceneEffect.model";
+import { RgbSceneEffectProperty } from "./models/rgb/RgbSceneEffectProperty.model";
 
 export class Database {
   private _protogen;
@@ -19,7 +22,13 @@ export class Database {
       synchronize: true,
       migrationsTableName: "protogen_typeorm_migrations",
       entities: [
-        SavedVideo
+        // ---------- Video manager ----------
+        SavedVideo,
+
+        // ---------- RGB ----------
+        StoredRgbScene,
+        RgbSceneEffect,
+        RgbSceneEffectProperty,
       ]
     });
   }

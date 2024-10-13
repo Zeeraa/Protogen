@@ -9,6 +9,7 @@ import { VideoPlayerRouter } from "./routes/video-player/VideoPlayerRouter";
 import { AudioRouter } from "./routes/volume/AudioRouter";
 import { VisorRouter } from "./routes/viror/VisorRouter";
 import { SystemRouter } from "./routes/system/SystemRouter";
+import { RgbRouter } from "./routes/rgb/RgbRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -25,6 +26,7 @@ export class ProtogenWebServer {
     new AudioRouter(this).register();
     new VisorRouter(this).register();
     new SystemRouter(this).register();
+    new RgbRouter(this).register();
 
     if (existsSync("./swagger.json")) {
       this.protogen.logger.info("WebServer", "Reading swagger.json");

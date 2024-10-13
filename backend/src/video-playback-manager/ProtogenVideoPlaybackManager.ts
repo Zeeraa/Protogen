@@ -6,6 +6,7 @@ import { resolve } from "path";
 import { ChildProcess, exec } from "child_process";
 import { sleep } from "../utils/Utils";
 
+
 const LockName = "ProtogenVideoPlaybackManager";
 
 export class ProtogenVideoPlaybackManager {
