@@ -2,7 +2,7 @@ import { z } from "zod";
 import { RgbScene } from "../../../rgb/scenes/RgbScene";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
-import { RgbEffects } from "../../../rgb/effects/RgbEffects";
+import { constructRgbEffect, RgbEffects } from "../../../rgb/effects/RgbEffects";
 
 export class RgbRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -97,6 +97,133 @@ export class RgbRouter extends AbstractRouter {
       }
     });
 
+    this.router.post("/scenes/:id/effect", async (req, res) => {
+      /*
+      #swagger.path = '/rgb/scenes/{id}/effect'
+      #swagger.tags = ['RGB'],
+      #swagger.description = "Edd effect to scene"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Scene or effect not found" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Create a new scene',
+        schema: {
+          effect: "Effect name",
+          displayName: "Effect display name"
+        }
+      }
+      */
+      try {
+        const parsed = AddEffectModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
+        if (scene == null) {
+          res.status(404).send({ message: "Scene not found" });
+          return;
+        }
+
+        const effect = constructRgbEffect(data.effect, data.displayName);
+        if (effect == null) {
+          res.status(404).send({ message: "Effect not found" });
+          return;
+        }
+
+        scene.addEffect(effect);
+        scene.updateRenderOrder();
+        const saveResult = await this.protogen.rgb.saveScene(scene);
+
+        res.json(saveResult);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.put("/scenes/:id/effect/:effectId", async (req, res) => {
+      /*
+      #swagger.path = '/rgb/scenes/{id}/effect/{effectId}'
+      #swagger.tags = ['RGB'],
+      #swagger.description = "Update an effect"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Scene or effect not found" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Create a new scene',
+        schema: {
+          displayName: "Effect display name"
+        }
+      }
+      */
+      try {
+        const parsed = UpdateEffectModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
+        if (scene == null) {
+          res.status(404).send({ message: "Scene not found" });
+          return;
+        }
+
+        const effect = scene.effects.find(e => e.id == req.params.effectId);
+        if (effect == null) {
+          res.status(404).send({ message: "Effect not found" });
+          return;
+        }
+
+        effect.displayName = data.displayName;
+
+        const saveResult = await this.protogen.rgb.saveScene(scene);
+
+        res.json(saveResult);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.delete("/scenes/:id/effect/:effectId", async (req, res) => {
+      /*
+      #swagger.path = '/rgb/scenes/{id}/effect/{effectId}'
+      #swagger.tags = ['RGB'],
+      #swagger.description = "Remove an effect"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Scene or effect not found" }
+      */
+      try {
+        const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
+        if (scene == null) {
+          res.status(404).send({ message: "Scene not found" });
+          return;
+        }
+
+        const effect = scene.effects.find(e => e.id == req.params.effectId);
+        if (effect == null) {
+          res.status(404).send({ message: "Effect not found" });
+          return;
+        }
+
+        scene.removeEffect(effect);
+        scene.updateRenderOrder();
+
+        const saveResult = await this.protogen.rgb.saveScene(scene);
+
+        res.json(saveResult);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.put("/scenes/:id/effect/:effectId/property/:property", async (req, res) => {
       /*
       #swagger.path = '/rgb/scenes/{id}/effect/{effectId}/property/{property}'
@@ -108,7 +235,7 @@ export class RgbRouter extends AbstractRouter {
 
       #swagger.parameters['body'] = {
         in: 'body',
-        description: 'Create a new scene',
+        description: 'Set a propertys',
         schema: {
           value: "New value"
         }
@@ -148,6 +275,8 @@ export class RgbRouter extends AbstractRouter {
           res.status(400).send({ message: "Failed to set property", error: result.error });
           return;
         }
+
+        scene.updateRenderOrder();
 
         const saveResult = await this.protogen.rgb.saveScene(scene);
 
@@ -194,6 +323,15 @@ const CreateNewSceneModel = z.object({
 
 const SetPropertyModel = z.object({
   value: z.any(),
+});
+
+const UpdateEffectModel = z.object({
+  displayName: z.string().trim().min(1).max(255),
+});
+
+const AddEffectModel = z.object({
+  effect: z.string().trim().min(1).max(255),
+  displayName: z.string().trim().min(1).max(255),
 });
 
 interface EffectData {

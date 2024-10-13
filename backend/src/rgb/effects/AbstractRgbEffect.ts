@@ -1,5 +1,5 @@
 import { AbstractRgbEffectProperty, SetPropertyResult } from "./properties/AbstractRgbEffectProperty";
-import { RgbEffectIntProperty } from "./properties/RgbEffectIntProperty";
+import { RgbEffectIntProperty } from "./properties/variants/RgbEffectIntProperty";
 
 export const DefaultEffectMaxWidth = 2048;
 
@@ -27,7 +27,7 @@ export abstract class AbstractRgbEffect {
     this.addProperty(this._propRenderOrder);
   }
 
-  public abstract render(): number[];
+  public abstract render(): (number | null)[];
 
   public get id() {
     return this._id;
@@ -37,11 +37,12 @@ export abstract class AbstractRgbEffect {
     return this._name;
   }
 
-  protected addProperty(prop: AbstractRgbEffectProperty<any>) {
+  protected addProperty<T>(prop: AbstractRgbEffectProperty<T>): AbstractRgbEffectProperty<T> {
     if (this._propertyMap[prop.name] !== undefined) {
       throw new Error("Tried to add property named " + prop.name + " but there was already a property with that name");
     }
     this._propertyMap[prop.name] = prop;
+    return prop;
   }
 
   public get propertyMap() {

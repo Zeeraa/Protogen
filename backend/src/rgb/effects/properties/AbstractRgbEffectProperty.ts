@@ -25,6 +25,10 @@ export abstract class AbstractRgbEffectProperty<T> {
     this._value = value;
   }
 
+  public stringifyValue(): string {
+    return String(this.value);
+  }
+
   public abstract set(value: T): SetPropertyResult;
 
   public abstract setRaw(raw: string): SetPropertyResult;

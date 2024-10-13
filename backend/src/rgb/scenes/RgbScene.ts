@@ -11,10 +11,6 @@ export class RgbScene {
     this._id = id;
     this._name = name;
     this._effects = [];
-
-    //TODO: remove
-    this._effects.push(new StaticRgbEffect(uuidv7(), "Static", "New effect"));
-    this.updateRenderOrder();
   }
 
   public get id() {
@@ -37,6 +33,14 @@ export class RgbScene {
     this.effects.sort((a, b) => a.renderOrder - b.renderOrder);
   }
 
+  removeEffect(effect: AbstractRgbEffect) {
+    this._effects = this.effects.filter(e => e.id != effect.id);
+  }
+
+  addEffect(effect: AbstractRgbEffect) {
+    this.effects.push(effect);
+  }
+
   public render(originalArray: number[]) {
     const ledCount = originalArray.length;
 
@@ -50,10 +54,12 @@ export class RgbScene {
 
       for (let i = 0; i < newArray.length; i++) {
         if (offset + i < originalArray.length) {
-          originalArray[offset + i] = newArray[i];
+          const val = newArray[i];
+          if (val != null) {
+            originalArray[offset + i] = val;
+          }
         }
       }
     });
-    //TODO: Implement
   }
 }

@@ -4,6 +4,9 @@ import { Protogen } from "../Protogen";
 import { RgbScene } from "./scenes/RgbScene";
 import { uuidv7 } from "uuidv7";
 import { ProtoColors } from "../utils/ProtoColors";
+import { RgbSceneEffect } from "../database/models/rgb/RgbSceneEffect.model";
+import { RgbSceneEffectProperty } from "../database/models/rgb/RgbSceneEffectProperty.model";
+import { constructRgbEffect } from "./effects/RgbEffects";
 
 export class RgbManager {
   private _protogen;
@@ -41,6 +44,10 @@ export class RgbManager {
   }
 
   public tick() {
+    for (let i = 0; i < this._ledBuffer.length; i++) {
+      this._ledBuffer[i] = ProtoColors.black;
+    }
+
     if (this.activeScene != null) {
       this.activeScene.render(this._ledBuffer);
     }
@@ -70,6 +77,25 @@ export class RgbManager {
 
     scenes.forEach(scene => {
       const loadedScene = new RgbScene(scene.id, scene.name);
+
+      scene.effects.forEach(effect => {
+        const loadedEffect = constructRgbEffect(effect.effect, effect.displayName, effect.id);
+        if (loadedEffect == null) {
+          this.protogen.logger.error("RgbManager", "Failed to load RGB effect by name " + effect.effect);
+          return;
+        }
+
+        effect.properties.forEach(prop => {
+          const result = loadedEffect.setProperty(prop.key, prop.value);
+          if (!result.success) {
+            this.protogen.logger.warn("RgbManager", "Tried to set property " + prop.key + " of effect " + effect.effect + " to " + prop.value + " but got error " + result.error);
+          }
+        });
+
+        loadedScene.effects.push(loadedEffect);
+      });
+
+      loadedScene.updateRenderOrder();
       this._scenes.push(loadedScene);
     });
     this.protogen.logger.info("RgbManager", this.scenes.length + " scenes loaded");
@@ -88,16 +114,43 @@ export class RgbManager {
       relations: ["effects", "effects.properties"]
     });
 
-    let savedScene;
+    let dbScene;
     if (existing != null) {
-      savedScene = existing;
+      dbScene = existing;
     } else {
-      savedScene = new StoredRgbScene();
-      savedScene.id = scene.id;
-      savedScene.name = scene.name;
+      dbScene = new StoredRgbScene();
+      dbScene.id = scene.id;
+      dbScene.name = scene.name;
+      dbScene.effects = [];
     }
 
-    return await repo.save(savedScene);
+    // Remove any deleted effects
+    dbScene.effects = dbScene.effects.filter(se => scene.effects.find(e => e.id == se.id) != null);
+
+    scene.effects.forEach(effect => {
+      let dbEffect = dbScene.effects.find(e => e.id == effect.id);
+      if (dbEffect == null) {
+        dbEffect = new RgbSceneEffect();
+        dbEffect.id = effect.id;
+        dbEffect.properties = [];
+        dbScene.effects.push(dbEffect);
+      }
+
+      dbEffect.displayName = effect.displayName;
+      dbEffect.effect = effect.name;
+
+      Object.values(effect.propertyMap).forEach(prop => {
+        let dbProp = dbEffect.properties.find(p => p.key == prop.name);
+        if (dbProp == null) {
+          dbProp = new RgbSceneEffectProperty();
+          dbProp.key = prop.name;
+          dbEffect.properties.push(dbProp);
+        }
+        dbProp.value = prop.stringifyValue();
+      });
+    });
+
+    return await repo.save(dbScene);
   }
 
   public async createBlankScene(name: string) {

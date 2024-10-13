@@ -1,10 +1,10 @@
-import { AbstractRgbEffectProperty, SetPropertyResult } from "./AbstractRgbEffectProperty";
+import { AbstractRgbEffectProperty, SetPropertyResult } from "../AbstractRgbEffectProperty";
 
 export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
   private _options;
 
   constructor(name: string, defaultValue: number, options: IntPropOptions) {
-    super("P_INT", name, defaultValue);
+    super("IntProp", name, defaultValue);
     this._options = options;
   }
 

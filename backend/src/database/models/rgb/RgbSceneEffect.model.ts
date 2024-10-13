@@ -1,11 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { StoredRgbScene } from "./StoredRgbScene.model";
 import { RgbSceneEffectProperty } from "./RgbSceneEffectProperty.model";
 
 @Entity({ name: "rgb_scene_effect" })
 export class RgbSceneEffect {
-  @PrimaryGeneratedColumn({ name: "id", unsigned: true })
-  id: number;
+  @PrimaryColumn({ name: "id", type: "varchar", length: 36 })
+  id: string;
 
   @Column({
     name: "effect",
