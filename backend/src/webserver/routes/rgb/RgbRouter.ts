@@ -112,6 +112,27 @@ export class RgbRouter extends AbstractRouter {
       }
     });
 
+    this.router.get("/scenes/:id", async (req, res) => {
+      /*
+      #swagger.path = '/rgb/scenes/{id}'
+      #swagger.tags = ['RGB'],
+      #swagger.description = "Get scene by id"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Scene not found" }
+      */
+      try {
+        const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
+        if (scene == null) {
+          res.status(404).send({ message: "Scene not found" });
+          return;
+        }
+
+        res.json(scene);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.post("/scenes/:id/activate", async (req, res) => {
       /*
       #swagger.path = '/rgb/scenes/{id}/activate'
