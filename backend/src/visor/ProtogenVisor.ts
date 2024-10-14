@@ -3,7 +3,9 @@ import { Protogen } from "../Protogen";
 import { cyan } from "colors";
 import { VisorRenderer } from "./rendering/VisorRenderer";
 import { FaceRendererId, VisorFaceRenderer } from "./rendering/renderers/VisorFaceRenderLayer";
-import { BSODRenderer, BSODRendererId } from "./rendering/renderers/special/BSODRenderer";
+import { BSODRenderer } from "./rendering/renderers/special/BSODRenderer";
+
+export const KV_ActiveRendererKey = "ActiveVisorRenderer";
 
 export class ProtogenVisor {
   private _protogen;
@@ -32,9 +34,8 @@ export class ProtogenVisor {
     this._availableRenderers.push(this._faceRenderer);
     this._availableRenderers.push(new BSODRenderer(this));
 
-    this.activateRenderer(FaceRendererId);
-
-    // Activate face
+    // Default to the face renderer
+    this.activateRenderer(FaceRendererId, false);
   }
 
   public handleBoopState(boopState: boolean) {
@@ -146,10 +147,48 @@ export class ProtogenVisor {
     return this._availableRenderers;
   }
 
-  public activateRenderer(id: string): boolean {
+  public async loadActiveRendererFromDatabase() {
+    this.protogen.logger.info("Visor", "Reading last active renderer from database");
+    try {
+      const value = await this.protogen.database.getData(KV_ActiveRendererKey);
+      if (value != null) {
+        const renderer = this._availableRenderers.find(r => r.id == value);
+        if (renderer != null) {
+          this.activateRenderer(renderer.id, false);
+          this.protogen.logger.info("Visor", "Activating last used renderer " + renderer.name);
+        } else {
+          this.protogen.logger.warn("Visor", "Last used renderer was no longer found");
+        }
+      } else {
+        this.protogen.logger.info("Visor", "No value for last used renderer");
+      }
+      return true;
+    } catch (err) {
+      this.protogen.logger.error("Visor", "Failed to load active renderer from database");
+      console.error(err);
+    }
+    return false;
+  }
+
+  public async saveActiveRenderer() {
+    try {
+      const value = this._activeRenderer == null ? null : this._activeRenderer.id;
+      await this.protogen.database.setData(KV_ActiveRendererKey, value);
+      return true;
+    } catch (err) {
+      this.protogen.logger.error("Visor", "Failed to set active renderer");
+      console.error(err);
+    }
+    return false;
+  }
+
+  public activateRenderer(id: string, updateDatabase = true): boolean {
     const renderer = this.availableRenderers.find(r => r.id == id);
     if (renderer != null) {
       this._activeRenderer = renderer;
+      if (updateDatabase) {
+        this.saveActiveRenderer();
+      }
     } else {
       this.protogen.logger.error("Visor", "Attempted to activate non existing renderer with id " + id);
     }

@@ -49,6 +49,8 @@ export class Protogen {
     await this.database.init();
     await this.webServer.init();
     await this.rgb.loadScenes();
+    await this.rgb.applyLastScene();
+    await this.visor.loadActiveRendererFromDatabase();
     this.logger.info("Protogen", "Protogen::init() finished");
 
     await this.visor.init(); // Init visor render loop

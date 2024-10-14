@@ -8,6 +8,8 @@ import { RgbSceneEffect } from "../database/models/rgb/RgbSceneEffect.model";
 import { RgbSceneEffectProperty } from "../database/models/rgb/RgbSceneEffectProperty.model";
 import { constructRgbEffect } from "./effects/RgbEffects";
 
+export const KV_LastUsedRgbScene = "LastUsedRgbScene";
+
 export class RgbManager {
   private _protogen;
   private _ledBuffer: number[];
@@ -58,6 +60,46 @@ export class RgbManager {
     return this._activeScene;
   }
 
+  public async applyLastScene() {
+    this.protogen.logger.info("RGB", "Fetching last used RGB scene");
+    try {
+      const id = await this.protogen.database.getData(KV_LastUsedRgbScene);
+      if (id != null) {
+        const scene = await this.scenes.find(s => s.id == id);
+        if (scene != null) {
+          this.setActiveScene(scene, false);
+          this.protogen.logger.info("RGB", "Activating last used scene " + scene.name);
+        } else {
+          this.protogen.logger.warn("RGB", "Last used scene was no longer found");
+        }
+      } else {
+        this.protogen.logger.info("RGB", "No value for last used scene");
+      }
+      return true;
+    } catch (err) {
+
+    }
+    return false;
+  }
+
+  public async saveLastUsedScene() {
+    try {
+      const value = this.activeScene == null ? null : this.activeScene.id;
+      await this.protogen.database.setData(KV_LastUsedRgbScene, value);
+      return true;
+    } catch (err) {
+      this.protogen.logger.error("RGB", "Failed to set  last used scene");
+      console.error(err);
+    }
+  }
+
+  public setActiveScene(scene: RgbScene | null, updateDatabase = true) {
+    this._activeScene = scene;
+    if (updateDatabase) {
+      this.saveLastUsedScene();
+    }
+  }
+
   private send() {
     if (this._ledBuffer.length == 0) {
       return; // Cant send an empty rgb packet
@@ -99,10 +141,6 @@ export class RgbManager {
       this._scenes.push(loadedScene);
     });
     this.protogen.logger.info("RgbManager", this.scenes.length + " scenes loaded");
-
-    if (this._scenes.length > 0) {
-      this._activeScene = this._scenes[0];//TODO: remove
-    }
   }
 
   public async saveScene(scene: RgbScene) {
