@@ -89,6 +89,47 @@ export class RgbRouter extends AbstractRouter {
       }
     });
 
+    this.router.put("/scenes/:id", async (req, res) => {
+      /*
+      #swagger.path = '/rgb/scenes/{id}'
+      #swagger.tags = ['RGB'],
+      #swagger.description = "Update a scene"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Scene not found" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Create a new scene',
+        schema: {
+          name: "Scene name"
+        }
+      }
+      */
+      try {
+        const parsed = UpdateSceneModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
+        if (scene == null) {
+          res.status(404).send({ message: "Scene not found" });
+          return;
+        }
+
+        scene.name = data.name;
+
+        await this.protogen.rgb.saveScene(scene);
+
+        res.json(sceneToDTO(scene));
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.delete("/scenes/:id", async (req, res) => {
       /*
       #swagger.path = '/rgb/scenes/{id}'
@@ -365,6 +406,7 @@ function sceneToDTO(scene: RgbScene) {
     effects.push({
       id: effect.id,
       name: effect.name,
+      displayName: effect.displayName,
       properties: properties,
     })
   });
@@ -377,6 +419,10 @@ function sceneToDTO(scene: RgbScene) {
 }
 
 const CreateNewSceneModel = z.object({
+  name: z.string().min(1).max(255),
+});
+
+const UpdateSceneModel = z.object({
   name: z.string().min(1).max(255),
 });
 
@@ -396,6 +442,7 @@ const AddEffectModel = z.object({
 interface EffectData {
   id: string;
   name: string;
+  displayName: string;
   properties: PropertyData[];
 }
 
