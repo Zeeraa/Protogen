@@ -79,7 +79,7 @@ export class Database {
       where: {
         key: Equal(key),
       },
-      select: ["key"],
+      select: ["value"],
     });
     return entry == null ? null : entry.value;
   }
