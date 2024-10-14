@@ -106,7 +106,7 @@ export class RgbRouter extends AbstractRouter {
 
         await this.protogen.rgb.deleteScene(scene);
 
-        res.json(scene);
+        res.json({});
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -127,7 +127,7 @@ export class RgbRouter extends AbstractRouter {
           return;
         }
 
-        res.json(scene);
+        res.json(sceneToDTO(scene));
       } catch (err) {
         this.handleError(err, req, res);
       }
