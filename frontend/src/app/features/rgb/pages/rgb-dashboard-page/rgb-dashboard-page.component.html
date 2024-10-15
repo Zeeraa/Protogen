@@ -1,0 +1,29 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col">
+      <h1>RGB Light manager</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <button class="btn btn-danger mt-1 me-1" (click)="disable()">Disable</button>
+      <button class="btn btn-primary mt-1 me-1" (click)="addBlank()">Add new effect</button>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Scenes</h4>
+    </div>
+  </div>
+
+  <div class="row mt-1">
+    @for (scene of scenes; track $index) {
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+      <app-rgb-scene-card [scene]="scene" />
+    </div>
+    }
+
+  </div>
+</div>

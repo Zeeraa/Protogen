@@ -4,6 +4,8 @@ import { DashboardPageComponent } from './features/dashboard/pages/dashboard-pag
 import { VisorPageComponent } from './features/visor/pages/visor-page/visor-page.component';
 import { VideoPlayerPageComponent } from './features/video-player/pages/video-player-page/video-player-page.component';
 import { SystemPageComponent } from './features/system/pages/system-page/system-page.component';
+import { RgbDashboardPageComponent } from './features/rgb/pages/rgb-dashboard-page/rgb-dashboard-page.component';
+import { RgbEditorPageComponent } from './features/rgb/pages/rgb-editor-page/rgb-editor-page.component';
 
 export const routes: Routes = [
   {
@@ -21,6 +23,14 @@ export const routes: Routes = [
   {
     path: "system",
     component: SystemPageComponent
+  },
+  {
+    path: "rgb",
+    component: RgbDashboardPageComponent
+  },
+  {
+    path: "rgb/editor/:id",
+    component: RgbEditorPageComponent
   }
 ];
 

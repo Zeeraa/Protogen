@@ -1,0 +1,31 @@
+<div class="card w-100">
+  <div class="card-body">
+    <h5 class="card-title">{{effect.name}}</h5>
+    <p>
+      {{description}}
+    </p>
+
+    <div>
+      <input maxlength="255" type="text" class="form-control" placeholder="Effect name"
+        [(ngModel)]="this.effect.displayName" (change)="handleDisplayNameChange()">
+    </div>
+  </div>
+
+  <div class="card-body">
+    <h6>Properties</h6>
+    <div class="container-fluid mt-1">
+      <div class="row">
+        @for (property of effect.properties; track $index) {
+        <div class="col-12 mt-1 mb-1">
+          <p>{{property.name}}</p>
+          <p>{{property.value}}</p>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <button class="btn btn-danger mt-1 me-1" (click)="remove()">Remove</button>
+  </div>
+</div>
