@@ -38,6 +38,7 @@ display_i2c = machine.I2C(0, scl=machine.Pin(PROTO_OLED_SCL), sda=machine.Pin(PR
 display = sh1106.SH1106_I2C(128, 64, display_i2c, machine.Pin(2), 0x3c)
 display.sleep(False)
 
+text_array = ["", "", "", "", ""] # Define the available line count here
 
 buffer = ""
 def non_blocking_input():
@@ -93,7 +94,16 @@ def handle_input(input):
             rtc.datetime((time_tuple[0], time_tuple[1], time_tuple[2], 0, time_tuple[3], time_tuple[4], time_tuple[5], 0))
             print("OK:TIME:" + format_rtc_datetime(rtc.datetime()))
         elif input == 'REBOOT':
+            print("OK:RESET")
             machine.reset()
+        elif input.startswith('TEXT:'):
+            lines = input[5:].strip().split("|")
+            if(len(lines) > len(text_array)):
+                print("ERR:Input text exceeds the available lien count of " + str(len(text_array)))
+            else:
+                for index, value in enumerate(lines):
+                    text_array[index] = value
+                print("OK:TEXT")
     except Exception as e:
         print(f"ERR:{e}")
 
@@ -118,5 +128,9 @@ with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr
             last_time = current_time
             display.fill(0)
             fr.text(format_rtc_datetime(rtc.datetime()), 0, 0, 255)
+            
+            text_start = 12
+            for index, value in enumerate(text_array):
+                fr.text(value, 0, text_start + (10 * index), 255)
             display.show()
 
