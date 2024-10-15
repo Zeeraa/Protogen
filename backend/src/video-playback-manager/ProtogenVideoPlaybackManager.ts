@@ -40,6 +40,13 @@ export class ProtogenVideoPlaybackManager {
     return this._protogen;
   }
 
+  get isPlaying() {
+    if (this.vlcProcess != null) {
+      return this.vlcProcess.exitCode == null;
+    }
+    return false;
+  }
+
   private async tick() {
     if (this._nextCheck <= 0) {
       this._nextCheck = 20;
@@ -195,10 +202,6 @@ export class ProtogenVideoPlaybackManager {
 
   public get vlcProcess() {
     return this._vlcProcess;
-  }
-
-  public get isDownloading() {
-    return this._isDownloading;
   }
 
   public get videoDirectory() {

@@ -15,7 +15,7 @@ export class ProtogenVisor {
   private _activeRenderer: VisorRenderer | null;
   private _availableRenderers: VisorRenderer[];
   private _lastFrame: Buffer;
-
+  private _initCalled = false;
   private _faceRenderer: VisorFaceRenderer;
 
   constructor(protogen: Protogen) {
@@ -59,13 +59,19 @@ export class ProtogenVisor {
   }
 
   public async init() {
+    if (this._initCalled) {
+      this.protogen.logger.error("Visor", "ProtogenVisor::init() called twice");
+      return;
+    }
+    this._initCalled = true;
+
     for (let i = 0; i < this.availableRenderers.length; i++) {
       const renderer = this.availableRenderers[i];
       try {
         await renderer.init();
       } catch (err) {
         console.error(err);
-        this.protogen.logger.error("ProtogenVisor", "An error occured while calling init on renderer with id " + cyan(renderer.id) + " (" + cyan(renderer.name) + ")");
+        this.protogen.logger.error("Visor", "An error occured while calling init on renderer with id " + cyan(renderer.id) + " (" + cyan(renderer.name) + ")");
       }
     }
 

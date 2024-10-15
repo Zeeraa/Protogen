@@ -14,6 +14,10 @@ export class SerialManager {
     setInterval(() => {
       this.syncTime();
     }, 1000 * 60);
+
+    setInterval(() => {
+      this.updateDisplay();
+    }, 1000 * 1);
   }
 
   protected get config() {
@@ -36,6 +40,36 @@ export class SerialManager {
       }
     }
     return false;
+  }
+
+  public updateDisplay() {
+    let visorStatus = "Visor: " + cleanText(this.protogen.visor.activeRenderer?.name || "None");
+    if (this.protogen.videoPlaybackManager.isPlaying) {
+      visorStatus = "Visor: Video playing";
+    }
+
+    const rgbStatus = "RGB: " + cleanText(this.protogen.rgb.activeScene?.name || "None");
+
+    const additionalInfo: string[] = [];
+
+    if (!this.protogen.netowrkManager.hasConnectivity) {
+      additionalInfo.push("Connectivity issues!");
+    }
+
+    if (this.protogen.videoPlaybackManager.monitoredJob != null) {
+      additionalInfo.push("Video DL: " + this.protogen.videoPlaybackManager.status);
+    }
+
+    const lineArray = [visorStatus, rgbStatus];
+    while (lineArray.length < this.config.oledTextLines) {
+      if (additionalInfo.length > 0) {
+        lineArray.push(String(additionalInfo.shift()));
+      } else {
+        lineArray.push("");
+      }
+    }
+
+    this.write("TEXT:" + lineArray.join("|"));
   }
 
   public syncTime() {
@@ -76,7 +110,11 @@ export class SerialManager {
         return;
       }
 
-      console.log(`Received serial message: ${cyan(string)}`);
+      if (string.startsWith("OK:TEXT")) {
+        return;
+      }
+
+      this.protogen.logger.info("Serial", `Received serial message: ${cyan(string)}`);
     });
 
     this._port.on('open', () => {
@@ -94,4 +132,8 @@ export class SerialManager {
       this.protogen.logger.warn("Serial", "Serial connection closed");
     });
   }
+}
+
+function cleanText(input: string) {
+  return input.replace(/[^a-zA-Z0-9 .,!\-_]/g, '');
 }

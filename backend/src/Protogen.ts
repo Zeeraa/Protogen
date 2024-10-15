@@ -9,6 +9,7 @@ import { ProtogenVisor } from "./visor/ProtogenVisor";
 import { ProtogenWebServer } from "./webserver/ProtogenWebServer";
 import { SerialManager } from "./serial/SerialManager";
 import { RgbManager } from "./rgb/RgbManager";
+import { NetworkManager } from "./network-manager/NetworkManager";
 
 export class Protogen {
   private _config: Configuration;
@@ -21,6 +22,7 @@ export class Protogen {
   private _videoPlaybackManager: ProtogenVideoPlaybackManager;
   private _serial: SerialManager;
   private _rgb: RgbManager;
+  private _networkManager: NetworkManager;
 
   constructor(config: Configuration) {
     this._config = config;
@@ -43,17 +45,18 @@ export class Protogen {
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
     this._serial = new SerialManager(this);
     this._rgb = new RgbManager(this);
+    this._networkManager = new NetworkManager(this);
   }
 
   public async init() {
+    this._networkManager.runConnectivityCheck();
     await this.database.init();
     await this.webServer.init();
     await this.rgb.loadScenes();
     await this.rgb.applyLastScene();
     await this.visor.loadActiveRendererFromDatabase();
+    await this.visor.init();
     this.logger.info("Protogen", "Protogen::init() finished");
-
-    await this.visor.init(); // Init visor render loop
   }
 
   //#region Getters
@@ -95,6 +98,10 @@ export class Protogen {
 
   public get rgb() {
     return this._rgb;
+  }
+
+  public get netowrkManager() {
+    return this._networkManager;
   }
   //#endregion
 }

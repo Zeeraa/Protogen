@@ -255,7 +255,7 @@ export class RgbRouter extends AbstractRouter {
 
       #swagger.parameters['body'] = {
         in: 'body',
-        description: 'Create a new scene',
+        description: 'Update an effect',
         schema: {
           displayName: "Effect display name"
         }

@@ -110,18 +110,26 @@ export function loadConfiguration(): Configuration {
   //#region Arduino
   const serialPort = process.env["SERIAL_PORT"];
   const serialBaudRate = parseInt(String(process.env["SERIAL_BAUD_RATE"]));
+  const oledTextLines = parseInt(String(process.env["OLED_TEXT_LINES"]));
 
   if (isNaN(serialBaudRate) || serialBaudRate <= 0) {
     throw new Error("Missing or invalid: SERIAL_BAUD_RATE");
+  }
+
+  if (isNaN(oledTextLines) || oledTextLines <= 0) {
+    throw new Error("Missing or invalid: OLED_TEXT_LINES");
   }
 
   if (serialPort == null) {
     throw new Error("Missing: SERIAL_PORT");
   }
 
+
+
   const serialConfig: SerialConfiguration = {
     port: serialPort,
     baudRate: serialBaudRate,
+    oledTextLines: oledTextLines,
   }
   //#endregion
 

@@ -1,4 +1,4 @@
-import { getCPUUsage, getOSVersion, getRAMUsage, getTemperature, shutdown } from "../../../utils/SystemUtils";
+import { getCPUUsage, getOSVersion, getRAMUsage, getTemperature, restartFlaschenTaschen, shutdown } from "../../../utils/SystemUtils";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 
@@ -25,6 +25,11 @@ export class SystemRouter extends AbstractRouter {
           osVersion: osVersion,
           cpuUsage: cpuUsage,
           ramUsage: ramUsage,
+          network: {
+            hasConnectivity: this.protogen.netowrkManager.hasConnectivity,
+            ip: this.protogen.netowrkManager.ip,
+            isp: this.protogen.netowrkManager.isp,
+          }
         });
       } catch (err) {
         return this.handleError(err, req, res);
@@ -41,6 +46,22 @@ export class SystemRouter extends AbstractRouter {
       */
       try {
         await shutdown();
+        res.json({});
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
+
+    this.router.post("/restart-flaschen-taschen", async (req, res) => {
+      /*
+      #swagger.path = '/system/restart-flaschen-taschen'
+      #swagger.tags = ['System'],
+      #swagger.description = "Restart the flaschen-taschen service"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An error occured while executing command" }
+      */
+      try {
+        await restartFlaschenTaschen();
         res.json({});
       } catch (err) {
         return this.handleError(err, req, res);

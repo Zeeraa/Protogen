@@ -10,6 +10,10 @@ export async function shutdown() {
   await execAsync("sudo systemctl poweroff");
 }
 
+export async function restartFlaschenTaschen() {
+  await execAsync("sudo service flaschen-taschen restart");
+}
+
 // Function to get temperature (requires `vcgencmd` to be installed on your Pi)
 export const getTemperature = async (): Promise<number> => {
   try {
