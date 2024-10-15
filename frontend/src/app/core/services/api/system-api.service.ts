@@ -22,6 +22,10 @@ export class SystemApiService extends ApiBaseService {
   shutdown() {
     return this.http.post(this.apiBaseUrl + "/system/shutdown", {}).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
   }
+
+  restartFlaschenTaschen() {
+    return this.http.post(this.apiBaseUrl + "/system/restart-flaschen-taschen", {}).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+  }
 }
 
 export interface SystemOverview {
@@ -29,4 +33,11 @@ export interface SystemOverview {
   osVersion: string;
   cpuUsage: number;
   ramUsage: number;
+  network: Network;
+}
+
+export interface Network {
+  hasConnectivity: boolean;
+  ip: string | null;
+  isp: string | null;
 }

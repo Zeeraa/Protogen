@@ -4,24 +4,47 @@ import machine
 import neopixel
 import time
 import sh1106
+import font
+import utime
 
 # ========== Config ==========
-PROTO_LED_PIN = 5
+PROTO_LED_PIN = 6
 PROTO_LED_COUNT = 24 * 2
-        
+
+# ========== Boop sensor ==========
+PROTO_BOOP_SENSOR_PIN = 7
+PROTO_BOOP_SENSOR_INVERT = True # True if a the sensor pulls down on detection
+
+# ========== OLED ==========
+PROTO_OLED_SDA = 4
+PROTO_OLED_SCL = 5
+PROTO_OLED_WIDTH  = 128
+PROTO_OLED_HEIGHT = 64
 
 # ========== Main ==========
+print("LOG:Init neopixel")
 np = neopixel.NeoPixel(machine.Pin(PROTO_LED_PIN), PROTO_LED_COUNT)
 for i in range(PROTO_LED_COUNT):
-    np[i] = (0, 0, 0)
+    np[i] = (0, 0, 0) # type: ignore
 np.write()
 rtc = machine.RTC()
+
+print("LOG:Init boop sensor")
+last_boop_state = False
+boop_pin = machine.Pin(PROTO_BOOP_SENSOR_PIN, machine.Pin.IN)
+
+print("LOG:Init display")
+display_i2c = machine.I2C(0, scl=machine.Pin(PROTO_OLED_SCL), sda=machine.Pin(PROTO_OLED_SDA), freq=400000)
+display = sh1106.SH1106_I2C(128, 64, display_i2c, machine.Pin(2), 0x3c)
+display.sleep(False)
+
+text_array = ["", "", "", "", ""] # Define the available line count here
 
 buffer = ""
 def non_blocking_input():
     global buffer
     # Check if there's input waiting
-    if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+    if sys.stdin in select.select([sys.stdin], [], [], 0)[0]: # type: ignore
         while True:
             char = sys.stdin.read(1)  # Read one character at a time
             if char == '\n':  # Check for the Enter key
@@ -50,7 +73,7 @@ def handle_input(input):
 
             # Clear the NeoPixel buffer
             for i in range(PROTO_LED_COUNT):
-                np[i] = (0, 0, 0)  # Set all pixels to off
+                np[i] = (0, 0, 0)  # type: ignore # Set all pixels to off
             
             # Process color values
             for i in range(len(rgb_list)):  # Process each integer color
@@ -61,7 +84,7 @@ def handle_input(input):
                     b = color & 0xFF          # Extract blue
                     
                     # Update NeoPixel with the received color
-                    np[i] = (r, g, b)
+                    np[i] = (r, g, b) # type: ignore
 
             np.write()  # Update the NeoPixels once after processing all colors
             print("OK:RGB") 
@@ -71,13 +94,43 @@ def handle_input(input):
             rtc.datetime((time_tuple[0], time_tuple[1], time_tuple[2], 0, time_tuple[3], time_tuple[4], time_tuple[5], 0))
             print("OK:TIME:" + format_rtc_datetime(rtc.datetime()))
         elif input == 'REBOOT':
+            print("OK:RESET")
             machine.reset()
+        elif input.startswith('TEXT:'):
+            lines = input[5:].strip().split("|")
+            if(len(lines) > len(text_array)):
+                print("ERR:Input text exceeds the available lien count of " + str(len(text_array)))
+            else:
+                for index, value in enumerate(lines):
+                    text_array[index] = value
+                print("OK:TEXT")
     except Exception as e:
         print(f"ERR:{e}")
 
-while True:
-    user_input = non_blocking_input()
-    
-    if user_input:
-        handle_input(user_input)
+print("LOG:Loading font")
+last_time = utime.ticks_ms()
+with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr:
+    print("LOG:Start main loop")
+    while True:
+        user_input = non_blocking_input()
+        
+        if user_input:
+            handle_input(user_input)
+        
+        boop_state = bool(boop_pin.value() ^ PROTO_BOOP_SENSOR_INVERT)
+        if boop_state is not last_boop_state:
+            last_boop_state = boop_state
+            print("BOOP:" + str(boop_state))
+        
+        # Run display update every 250ms
+        current_time = utime.ticks_ms()
+        if utime.ticks_diff(current_time, last_time) >= 250:
+            last_time = current_time
+            display.fill(0)
+            fr.text(format_rtc_datetime(rtc.datetime()), 0, 0, 255)
+            
+            text_start = 12
+            for index, value in enumerate(text_array):
+                fr.text(value, 0, text_start + (10 * index), 255)
+            display.show()
 

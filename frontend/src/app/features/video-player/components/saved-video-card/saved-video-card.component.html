@@ -17,11 +17,13 @@
     <p class="card-text">{{video.url}}</p>
     }
 
-    @if(showEditOptions) {
-    <button class="btn btn-danger mt-1 me-1" (click)="deleteVideo()" [disabled]="isDeleting">Delete</button>
-    <button class="btn btn-primary mt-1 me-1" (click)="showEditVideo()" [disabled]="isDeleting">Edit</button>
-    }
-    <button class="btn btn-success mt-1" (click)="play()" [disabled]="isDeleting">Play</button>
+    <div>
+      @if(showEditOptions) {
+      <button class="btn btn-danger mt-1 me-1" (click)="deleteVideo()" [disabled]="isDeleting">Delete</button>
+      <button class="btn btn-primary mt-1 me-1" (click)="showEditVideo()" [disabled]="isDeleting">Edit</button>
+      }
+      <button class="btn btn-success mt-1" (click)="play()" [disabled]="isDeleting">Play</button>
+    </div>
   </div>
 </div>
 

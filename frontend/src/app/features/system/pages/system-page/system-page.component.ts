@@ -15,6 +15,24 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   updateInterval: any = null;
   shutdownModalRef: null | NgbModalRef = null;
 
+  get hasConnectivity() {
+    return this.overview?.network.hasConnectivity || false;
+  }
+
+  get ip() {
+    if (this.overview?.network.ip != null) {
+      return this.overview?.network.ip;
+    }
+    return "Unknown";
+  }
+
+  get isp() {
+    if (this.overview?.network.isp != null) {
+      return this.overview?.network.isp;
+    }
+    return "Unknown";
+  }
+
   get cpuUsage() {
     if (this.overview?.cpuUsage !== undefined) {
       return this.overview.cpuUsage;
@@ -43,6 +61,16 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   openShutdownModal() {
     this.shutdownModalRef?.close();
     this.shutdownModalRef = this.modal.open(this.shutdownModalTemplate, { ariaLabelledBy: 'shutdown-modal-title' });
+  }
+
+  restartFlaschenTaschen() {
+    this.api.restartFlaschenTaschen().pipe(catchError(err => {
+      console.error(err);
+      this.toastr.error("Failed to run command");
+      throw err;
+    })).subscribe(() => {
+      this.toastr.success("Restarting service");
+    });
   }
 
   update() {
