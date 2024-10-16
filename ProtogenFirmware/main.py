@@ -27,7 +27,6 @@ np = neopixel.NeoPixel(machine.Pin(PROTO_LED_PIN), PROTO_LED_COUNT)
 for i in range(PROTO_LED_COUNT):
     np[i] = (0, 0, 0) # type: ignore
 np.write()
-rtc = machine.RTC()
 
 print("LOG:Init boop sensor")
 last_boop_state = False
@@ -37,8 +36,9 @@ print("LOG:Init display")
 display_i2c = machine.I2C(0, scl=machine.Pin(PROTO_OLED_SCL), sda=machine.Pin(PROTO_OLED_SDA), freq=400000)
 display = sh1106.SH1106_I2C(128, 64, display_i2c, machine.Pin(2), 0x3c)
 display.sleep(False)
+display_changed = False
 
-text_array = ["", "", "", "", ""] # Define the available line count here
+text_array = ["", "", "", "", "", ""] # Define the available line count here
 
 buffer = ""
 def non_blocking_input():
@@ -55,11 +55,8 @@ def non_blocking_input():
                 buffer += char  # Add the character to the buffer
     return None
 
-def format_rtc_datetime(rtc_datetime):
-    year, month, day, _, hour, minute, second, _ = rtc_datetime
-    return f"{year:04}-{month:02}-{day:02} {hour:02}:{minute:02}:{second:02}"
-
 def handle_input(input):
+    global display_changed
     try:
         if input.startswith('RGB:'):
             color_values = input[4:].strip()  # Get everything after 'RGB:'
@@ -88,11 +85,6 @@ def handle_input(input):
 
             np.write()  # Update the NeoPixels once after processing all colors
             print("OK:RGB") 
-        elif input.startswith('TIME:'):
-            unix_timestamp = int(input[5:].strip())
-            time_tuple = time.localtime(unix_timestamp)
-            rtc.datetime((time_tuple[0], time_tuple[1], time_tuple[2], 0, time_tuple[3], time_tuple[4], time_tuple[5], 0))
-            print("OK:TIME:" + format_rtc_datetime(rtc.datetime()))
         elif input == 'REBOOT':
             print("OK:RESET")
             machine.reset()
@@ -103,6 +95,7 @@ def handle_input(input):
             else:
                 for index, value in enumerate(lines):
                     text_array[index] = value
+                    display_changed = True
                 print("OK:TEXT")
     except Exception as e:
         print(f"ERR:{e}")
@@ -122,15 +115,11 @@ with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr
             last_boop_state = boop_state
             print("BOOP:" + str(boop_state))
         
-        # Run display update every 250ms
-        current_time = utime.ticks_ms()
-        if utime.ticks_diff(current_time, last_time) >= 250:
-            last_time = current_time
+        if display_changed:
+            display_changed = False
             display.fill(0)
-            fr.text(format_rtc_datetime(rtc.datetime()), 0, 0, 255)
-            
-            text_start = 12
+            text_start = 1
             for index, value in enumerate(text_array):
-                fr.text(value, 0, text_start + (10 * index), 255)
+                fr.text(value, 0, text_start + (12 * index), 255)
             display.show()
 
