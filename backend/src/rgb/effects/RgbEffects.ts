@@ -1,12 +1,18 @@
 import { uuidv7 } from "uuidv7";
 import { AbstractRgbEffect } from "./AbstractRgbEffect";
 import { StaticRgbEffect } from "./implementations/StaticRgbEffect";
+import { RgbWaveEffect } from "./implementations/RgbWaveEffect";
 
 export const RgbEffects: RgbEffect[] = [
   {
     name: "Static",
     description: "Static non animated color",
     class: StaticRgbEffect,
+  },
+  {
+    name: "RGB Wave",
+    description: "An animated rgb wave. Speed can be set to 0 to disable animation",
+    class: RgbWaveEffect,
   }
 ]
 
