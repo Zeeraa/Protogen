@@ -398,7 +398,8 @@ function sceneToDTO(scene: RgbScene) {
       properties.push({
         name: property.name,
         type: property.type,
-        restriction: property.restrictions,
+        restrictions: property.restrictions,
+        metadata: property.metadata,
         value: property.value,
       });
     });
@@ -449,5 +450,6 @@ interface PropertyData {
   type: string;
   name: string;
   value: any;
-  restriction: any;
+  restrictions: any;
+  metadata: any;
 }

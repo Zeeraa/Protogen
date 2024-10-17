@@ -33,10 +33,16 @@ export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
     return { success: true };
   }
 
-  public get restrictions(): any {
+  public override get restrictions(): any {
     return {
       min: this._options.min,
       max: this._options.max,
+    }
+  }
+
+  public override get metadata() {
+    return {
+      intInputType: this._options.inputType || IntPropInputType.Default,
     }
   }
 }
@@ -44,4 +50,10 @@ export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
 interface IntPropOptions {
   min?: number;
   max?: number;
+  inputType?: IntPropInputType;
+}
+
+export enum IntPropInputType {
+  Default = "DEFAULT",
+  Slider = "SLIDER",
 }

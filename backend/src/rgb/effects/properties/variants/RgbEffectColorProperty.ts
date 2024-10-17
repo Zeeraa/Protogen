@@ -31,7 +31,7 @@ export class RgbEffectColorProperty extends AbstractRgbEffectProperty<number> {
     return { success: true };
   }
 
-  public get restrictions() {
+  public override get restrictions() {
     return {
       min: ProtoColors.black,
       max: ProtoColors.white,

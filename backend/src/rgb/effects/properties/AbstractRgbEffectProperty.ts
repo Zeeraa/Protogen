@@ -33,7 +33,17 @@ export abstract class AbstractRgbEffectProperty<T> {
 
   public abstract setRaw(raw: string): SetPropertyResult;
 
-  public abstract get restrictions(): any;
+  public get restrictions() {
+    return {};
+  }
+
+  public get metadata(): RgbPropertyMetadata {
+    return {};
+  }
 }
 
 export type SetPropertyResult = | { success: true } | { success: false; error: string };
+
+interface RgbPropertyMetadata {
+  [key: string]: any;
+}
