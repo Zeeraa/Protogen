@@ -15,3 +15,17 @@ export function encodeRGB(r: number, g: number, b: number): number {
   // Combine RGB into a single number (0xRRGGBB format)
   return (r << 16) | (g << 8) | b;
 }
+
+export function compareStringArrays(arr1: string[], arr2: string[]): boolean {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}

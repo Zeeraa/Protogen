@@ -11,7 +11,7 @@ export class StaticRgbEffect extends AbstractRgbEffect {
     this.addProperty(this._propColor);
   }
 
-  public render(): (number | null)[] {
+  public render(_: number): (number | null)[] {
     const leds: number[] = [];
     for (let i = 0; i < this.width; i++) {
       leds.push(this._propColor.value);

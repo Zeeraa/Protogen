@@ -10,6 +10,10 @@ export async function shutdown() {
   await execAsync("sudo systemctl poweroff");
 }
 
+export async function killPID(pid: string) {
+  await execAsync("kill -9 " + pid);
+}
+
 export async function restartFlaschenTaschen() {
   await execAsync("sudo service flaschen-taschen restart");
 }

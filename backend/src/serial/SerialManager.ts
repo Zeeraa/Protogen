@@ -2,18 +2,16 @@ import { SerialPort } from "serialport";
 import { Protogen } from "../Protogen";
 import { ReadlineParser } from '@serialport/parser-readline';
 import { cyan, magenta } from "colors";
+import { compareStringArrays } from "../utils/Utils";
 
 export class SerialManager {
   private _protogen;
   private _port: SerialPort | null = null;
+  private _lastDisplayContent: string[] = []
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this.connect();
-
-    setInterval(() => {
-      this.syncTime();
-    }, 1000 * 60);
 
     setInterval(() => {
       this.updateDisplay();
@@ -69,14 +67,12 @@ export class SerialManager {
       }
     }
 
-    this.write("TEXT:" + lineArray.join("|"));
-  }
-
-  public syncTime() {
-    const unixTime = Math.floor(Date.now() / 1000);
-    if (this.write("TIME:" + unixTime + "\n")) {
-      this.protogen.logger.info("Serial", "Sending time sync");
+    if (compareStringArrays(lineArray, this._lastDisplayContent)) {
+      return;
     }
+    this._lastDisplayContent = lineArray;
+
+    this.write("TEXT:" + lineArray.join("|"));
   }
 
   get isReady() {
@@ -119,9 +115,6 @@ export class SerialManager {
 
     this._port.on('open', () => {
       this.protogen.logger.info("Serial", 'Serial Port Opened');
-      setTimeout(() => {
-        this.syncTime();
-      }, 1000);
     });
 
     this._port.on('error', (err) => {

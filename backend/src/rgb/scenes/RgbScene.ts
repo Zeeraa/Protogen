@@ -1,6 +1,4 @@
-import { uuidv7 } from "uuidv7";
 import { AbstractRgbEffect } from "../effects/AbstractRgbEffect";
-import { StaticRgbEffect } from "../effects/implementations/StaticRgbEffect";
 
 export class RgbScene {
   private _id: string;
@@ -43,6 +41,7 @@ export class RgbScene {
 
   public render(originalArray: number[]) {
     const ledCount = originalArray.length;
+    const time = Date.now();
 
     this.effects.forEach(effect => {
       const offset = effect.startIndex - 1;
@@ -50,7 +49,7 @@ export class RgbScene {
         return;
       }
 
-      const newArray = effect.render();
+      const newArray = effect.render(time);
 
       for (let i = 0; i < newArray.length; i++) {
         if (offset + i < originalArray.length) {

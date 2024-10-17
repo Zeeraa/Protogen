@@ -27,7 +27,7 @@ export abstract class AbstractRgbEffect {
     this.addProperty(this._propRenderOrder);
   }
 
-  public abstract render(): (number | null)[];
+  public abstract render(time: number): (number | null)[];
 
   public get id() {
     return this._id;
