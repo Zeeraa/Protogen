@@ -35,12 +35,19 @@
               <h5>Hardware</h5>
             </div>
 
-            <div class="col-12 com-md-6 mt-1">
+            <div class="col-12 mt-1">
+              <h6>Temperature</h6>
+              <ngb-progressbar class="mt-1" [type]="temperatureColor" [value]="tempBarValue" [max]="100">
+                {{realTemperature}} &deg;C
+              </ngb-progressbar>
+            </div>
+
+            <div class="col-12 mt-1">
               <h6>CPU</h6>
               <ngb-progressbar class="mt-1" type="info" [value]="cpuUsage" [max]="100" [showValue]="true" />
             </div>
 
-            <div class="col-12 com-md-6 mt-1">
+            <div class="col-12 mt-1">
               <h6>RAM</h6>
               <ngb-progressbar class="mt-1" type="info" [value]="ramUsage" [max]="100" [showValue]="true" />
             </div>
