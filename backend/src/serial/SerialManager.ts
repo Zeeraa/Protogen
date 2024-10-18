@@ -3,6 +3,7 @@ import { Protogen } from "../Protogen";
 import { ReadlineParser } from '@serialport/parser-readline';
 import { cyan, magenta } from "colors";
 import { compareStringArrays } from "../utils/Utils";
+import { ProtogenEvents } from "../utils/ProtogenEvents";
 
 export class SerialManager {
   private _protogen;
@@ -107,6 +108,14 @@ export class SerialManager {
       }
 
       if (string.startsWith("OK:TEXT")) {
+        return;
+      }
+
+      if (string.startsWith("BOOP:")) {
+        console.debug("Raw boop state value: " + string.split(":")[1].toLowerCase().trim());
+        const state = string.split(":")[1].toLowerCase().trim() == "true";
+        this.protogen.logger.info("Serial", "Boop state change to " + state);
+        this.protogen.eventEmitter.emit(ProtogenEvents.Booped, state);
         return;
       }
 

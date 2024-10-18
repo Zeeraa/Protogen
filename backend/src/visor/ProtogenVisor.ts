@@ -4,6 +4,8 @@ import { cyan } from "colors";
 import { VisorRenderer } from "./rendering/VisorRenderer";
 import { FaceRendererId, VisorFaceRenderer } from "./rendering/renderers/VisorFaceRenderLayer";
 import { BSODRenderer } from "./rendering/renderers/special/BSODRenderer";
+import { ProtogenEvents } from "../utils/ProtogenEvents";
+import { boolean } from "zod";
 
 export const KV_ActiveRendererKey = "ActiveVisorRenderer";
 
@@ -28,6 +30,10 @@ export class ProtogenVisor {
     this._activeRenderer = null;
     this._availableRenderers = [];
 
+    this.protogen.eventEmitter.on(ProtogenEvents.Booped, (state: boolean) => {
+      this.handleBoopState(state);
+    });
+
     // ========== Init renderers ==========
     // Animated face
     this._faceRenderer = new VisorFaceRenderer(this);
@@ -38,7 +44,7 @@ export class ProtogenVisor {
     this.activateRenderer(FaceRendererId, false);
   }
 
-  public handleBoopState(boopState: boolean) {
+  private handleBoopState(boopState: boolean) {
     this._activeRenderer?.handleBoopState(boopState);
   }
 
@@ -191,6 +197,7 @@ export class ProtogenVisor {
   public activateRenderer(id: string, updateDatabase = true): boolean {
     const renderer = this.availableRenderers.find(r => r.id == id);
     if (renderer != null) {
+      renderer.onActivate();
       this._activeRenderer = renderer;
       if (updateDatabase) {
         this.saveActiveRenderer();

@@ -442,6 +442,7 @@ function sceneToDTO(scene: RgbScene) {
       id: effect.id,
       name: effect.name,
       properties: properties,
+      displayName: effect.displayName,
     })
   });
 
@@ -478,6 +479,7 @@ interface EffectData {
   id: string;
   name: string;
   properties: PropertyData[];
+  displayName: string;
 }
 
 interface PropertyData {
