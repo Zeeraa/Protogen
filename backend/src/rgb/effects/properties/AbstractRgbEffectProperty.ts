@@ -29,9 +29,9 @@ export abstract class AbstractRgbEffectProperty<T> {
     return String(this.value);
   }
 
-  public abstract set(value: T): SetPropertyResult;
+  public abstract set(value: T): SetPropertyResult<T>;
 
-  public abstract setRaw(raw: string): SetPropertyResult;
+  public abstract setRaw(raw: string): SetPropertyResult<T>;
 
   public get restrictions() {
     return {};
@@ -42,7 +42,7 @@ export abstract class AbstractRgbEffectProperty<T> {
   }
 }
 
-export type SetPropertyResult = | { success: true } | { success: false; error: string };
+export type SetPropertyResult<T> = | { success: true, property: AbstractRgbEffectProperty<T> } | { success: false; error: string };
 
 interface RgbPropertyMetadata {
   [key: string]: any;

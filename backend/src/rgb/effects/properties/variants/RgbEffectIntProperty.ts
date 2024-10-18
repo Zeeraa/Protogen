@@ -8,7 +8,7 @@ export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
     this._options = options;
   }
 
-  public setRaw(raw: string): SetPropertyResult {
+  public setRaw(raw: string): SetPropertyResult<number> {
     const intVal = parseInt(raw);
     if (isNaN(intVal)) {
       return {
@@ -20,7 +20,7 @@ export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
     return this.set(intVal);
   }
 
-  public set(value: number): SetPropertyResult {
+  public set(value: number): SetPropertyResult<number> {
     if (this._options.min !== undefined && value < this._options.min) {
       return { success: false, error: "Value below minimum" };
     }
@@ -30,7 +30,7 @@ export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
     }
 
     this.value = value;
-    return { success: true };
+    return { success: true, property: this };
   }
 
   public override get restrictions(): any {

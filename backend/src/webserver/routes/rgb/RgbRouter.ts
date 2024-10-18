@@ -3,6 +3,8 @@ import { RgbScene } from "../../../rgb/scenes/RgbScene";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { constructRgbEffect, RgbEffects } from "../../../rgb/effects/RgbEffects";
+import { RgbSceneEffectProperty } from "../../../database/models/rgb/RgbSceneEffectProperty.model";
+import { Equal } from "typeorm";
 
 export class RgbRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -333,6 +335,13 @@ export class RgbRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for details" }
       #swagger.responses[404] = { description: "Scene, effect or property not found" }
 
+      #swagger.parameters['fullSave'] = {
+        in: 'query',
+        description: 'True to do a full save of the object'
+        type: 'boolean',
+        required: 'false'
+      }
+
       #swagger.parameters['body'] = {
         in: 'body',
         description: 'Set a propertys',
@@ -340,6 +349,7 @@ export class RgbRouter extends AbstractRouter {
           value: "New value"
         }
       }
+
       */
       try {
         const parsed = SetPropertyModel.safeParse(req.body);
@@ -378,9 +388,33 @@ export class RgbRouter extends AbstractRouter {
 
         scene.updateRenderOrder();
 
-        const saveResult = await this.protogen.rgb.saveScene(scene);
+        if (String(req.query.fullSave).toLowerCase() == "true") {
+          await this.protogen.rgb.saveScene(scene);
+        } else {
+          const repo = this.protogen.database.dataSource.getRepository(RgbSceneEffectProperty);
 
-        res.json(saveResult);
+          const prop = await repo.findOne({
+            where: {
+              key: Equal(req.params.property),
+              effect: {
+                id: Equal(effect.id),
+                scene: {
+                  id: Equal(scene.id)
+                }
+              }
+            }
+          });
+
+          if (prop != null) {
+            prop.value = result.property.stringifyValue();
+
+            await repo.save(prop);
+          } else {
+            this.protogen.logger.warn("RgbRouter", "Failed to fetch property " + req.params.property + " for saving");
+          }
+        }
+
+        res.json(sceneToDTO(scene));
       } catch (err) {
         this.handleError(err, req, res);
       }
