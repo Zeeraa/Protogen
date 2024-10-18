@@ -479,6 +479,7 @@ interface EffectData {
   id: string;
   name: string;
   properties: PropertyData[];
+  displayName: string;
 }
 
 interface PropertyData {
