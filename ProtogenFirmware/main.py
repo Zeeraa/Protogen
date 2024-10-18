@@ -2,7 +2,6 @@ import sys
 import select
 import machine
 import neopixel
-import time
 import sh1106
 import font
 import utime
@@ -43,6 +42,8 @@ text_array = ["", "", "", "", "", ""] # Define the available line count here
 # Startup text
 text_array[0] = "Protogen V1.0"
 text_array[1] = "Waiting for connection"
+
+machine.Pin.board.LED.value(0)
 
 buffer = ""
 def non_blocking_input():
@@ -117,6 +118,7 @@ with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr
         boop_state = bool(boop_pin.value() ^ PROTO_BOOP_SENSOR_INVERT)
         if boop_state is not last_boop_state:
             last_boop_state = boop_state
+            machine.Pin.board.LED.value(boop_state)
             print("BOOP:" + str(boop_state))
         
         if display_changed:
