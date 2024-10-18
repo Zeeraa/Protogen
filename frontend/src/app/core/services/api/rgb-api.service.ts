@@ -30,6 +30,12 @@ export class RgbApiService extends ApiBaseService {
     }).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RgbEffectInfo[]>;
   }
 
+  setEffectProperty(sceneId: string, effectId: string, propertyName: string, value: string, fullSave = false) {
+    return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId + "/property/" + propertyName + "?fullSave=" + (fullSave ? "true" : "false"), {
+      value: value,
+    }).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RgbEffectInfo[]>;
+  }
+
   updateEffect(sceneId: string, effectId: string, data: { displayName: string; }) {
     return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId, data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
   }
@@ -88,7 +94,7 @@ export interface RgbEffectProperty {
   type: string;
   restrictions: PropertyKVData<any>;
   metadata: PropertyKVData<any>;
-  value: number;
+  value: any;
 }
 
 export type PropertyKVData<T> = {

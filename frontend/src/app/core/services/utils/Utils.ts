@@ -23,3 +23,11 @@ export function nullToUndefined<T>(input: T | null): T | undefined {
   }
   return input;
 }
+
+
+export function undefinedToNull<T>(input: T | null | undefined): T | null {
+  if (input == undefined) {
+    return null;
+  }
+  return input;
+}

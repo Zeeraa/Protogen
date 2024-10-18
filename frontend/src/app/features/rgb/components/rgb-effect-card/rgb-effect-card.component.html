@@ -17,8 +17,7 @@
       <div class="row">
         @for (property of effect.properties; track $index) {
         <div class="col-12 mt-1 mb-1">
-          <p>{{property.name}}</p>
-          <p>{{property.value}}</p>
+          <app-rgb-property [effect]="effect" [scene]="scene" [property]="property" />
         </div>
         }
       </div>

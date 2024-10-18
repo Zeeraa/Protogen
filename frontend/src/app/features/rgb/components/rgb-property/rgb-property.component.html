@@ -1,0 +1,18 @@
+<div class="mb-2">
+  @if(propertyType == "IntProp") {
+  <app-rgb-int-property [effect]="effect" [scene]="scene" [property]="property" [inputId]="id" />
+  } @else if (propertyType == "ColorProp") {
+  <app-rgb-color-property [effect]="effect" [scene]="scene" [property]="property" [inputId]="id" />
+  } @else if (propertyType == "BoolProp") {
+  <app-rgb-boolean-property [effect]="effect" [scene]="scene" [property]="property" [inputId]="id" />
+  } @else {
+  <p class="text-danger" [id]="id">
+    Unknown property type: {{propertyType}}
+  </p>
+
+  <p>
+    Raw data:<br>
+    Value: <span>{{value}}</span>
+  </p>
+  }
+</div>

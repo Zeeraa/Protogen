@@ -1,0 +1,3 @@
+<label [htmlFor]="inputId" class="form-label">{{property.name}}</label>
+<input type="color" class="form-control form-control-color" [id]="inputId" [(ngModel)]="hexColor" title="Select color"
+  (change)="onChange($event)">

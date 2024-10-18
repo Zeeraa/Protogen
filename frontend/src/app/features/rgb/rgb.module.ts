@@ -6,6 +6,10 @@ import { RgbSceneCardComponent } from './components/rgb-scene-card/rgb-scene-car
 import { RouterLink } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RgbEffectCardComponent } from './components/rgb-effect-card/rgb-effect-card.component';
+import { RgbPropertyComponent } from './components/rgb-property/rgb-property.component';
+import { RgbIntPropertyComponent } from './components/properties/rgb-int-property/rgb-int-property.component';
+import { RgbColorPropertyComponent } from './components/properties/rgb-color-property/rgb-color-property.component';
+import { RgbBooleanPropertyComponent } from './components/properties/rgb-boolean-property/rgb-boolean-property.component';
 
 @NgModule({
   declarations: [
@@ -13,6 +17,10 @@ import { RgbEffectCardComponent } from './components/rgb-effect-card/rgb-effect-
     RgbEditorPageComponent,
     RgbSceneCardComponent,
     RgbEffectCardComponent,
+    RgbPropertyComponent,
+    RgbIntPropertyComponent,
+    RgbColorPropertyComponent,
+    RgbBooleanPropertyComponent,
   ],
   imports: [
     CommonModule,
@@ -23,6 +31,7 @@ import { RgbEffectCardComponent } from './components/rgb-effect-card/rgb-effect-
   exports: [
     RgbDashboardPageComponent,
     RgbEditorPageComponent,
+    RgbPropertyComponent,
   ]
 })
 export class RgbModule { }
