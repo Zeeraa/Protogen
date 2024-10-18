@@ -43,6 +43,8 @@ export abstract class VisorRenderer {
     await this.onInit();
   }
 
+  onActivate() { }
+
   public activate() {
     return this.visor.activateRenderer(this.id);
   }

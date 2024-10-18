@@ -10,6 +10,7 @@ import { ProtogenWebServer } from "./webserver/ProtogenWebServer";
 import { SerialManager } from "./serial/SerialManager";
 import { RgbManager } from "./rgb/RgbManager";
 import { NetworkManager } from "./network-manager/NetworkManager";
+import EventEmitter from "events";
 
 export class Protogen {
   private _config: Configuration;
@@ -23,6 +24,7 @@ export class Protogen {
   private _serial: SerialManager;
   private _rgb: RgbManager;
   private _networkManager: NetworkManager;
+  private _eventEmitter: EventEmitter;
 
   constructor(config: Configuration) {
     this._config = config;
@@ -35,6 +37,8 @@ export class Protogen {
     if (!existsSync(videoTempDirectory)) {
       mkdirSync(videoTempDirectory);
     }
+
+    this._eventEmitter = new EventEmitter();
 
     this._logger = new Logger();
     this._database = new Database(this);
@@ -102,6 +106,10 @@ export class Protogen {
 
   public get netowrkManager() {
     return this._networkManager;
+  }
+
+  public get eventEmitter() {
+    return this._eventEmitter;
   }
   //#endregion
 }
