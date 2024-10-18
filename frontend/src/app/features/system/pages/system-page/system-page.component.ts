@@ -33,6 +33,35 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     return "Unknown";
   }
 
+  get temperatureColor() {
+    if (this.overview != null) {
+      if (this.overview.cpuTemperature > 80) {
+        return "danger";
+      }
+
+      if (this.overview.cpuTemperature > 60) {
+        return "warning";
+      }
+    }
+    return "success";
+  }
+
+  get realTemperature() {
+    return this.overview?.cpuTemperature || 0;
+  }
+
+  get tempBarValue() {
+    if (this.overview == null || this.overview.cpuTemperature < 0) {
+      return 0;
+    }
+
+    if (this.overview.cpuTemperature > 100) {
+      return 100;
+    }
+
+    return this.overview.cpuTemperature;
+  }
+
   get cpuUsage() {
     if (this.overview?.cpuUsage !== undefined) {
       return this.overview.cpuUsage;

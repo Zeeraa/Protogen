@@ -36,9 +36,13 @@ print("LOG:Init display")
 display_i2c = machine.I2C(0, scl=machine.Pin(PROTO_OLED_SCL), sda=machine.Pin(PROTO_OLED_SDA), freq=400000)
 display = sh1106.SH1106_I2C(128, 64, display_i2c, machine.Pin(2), 0x3c)
 display.sleep(False)
-display_changed = False
+display_changed = True
 
 text_array = ["", "", "", "", "", ""] # Define the available line count here
+
+# Startup text
+text_array[0] = "Protogen V1.0"
+text_array[1] = "Waiting for connection"
 
 buffer = ""
 def non_blocking_input():
@@ -122,4 +126,5 @@ with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr
             for index, value in enumerate(text_array):
                 fr.text(value, 0, text_start + (12 * index), 255)
             display.show()
+
 

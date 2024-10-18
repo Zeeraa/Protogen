@@ -86,10 +86,11 @@ export interface RgbEffect {
 export interface RgbEffectProperty {
   name: string;
   type: string;
-  restriction: PropertyRestriction;
+  restrictions: PropertyKVData<any>;
+  metadata: PropertyKVData<any>;
   value: number;
 }
 
-export type PropertyRestriction = {
-  [key: string]: any;
+export type PropertyKVData<T> = {
+  [key: string]: T;
 }
