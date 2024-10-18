@@ -442,6 +442,7 @@ function sceneToDTO(scene: RgbScene) {
       id: effect.id,
       name: effect.name,
       properties: properties,
+      displayName: effect.displayName,
     })
   });
 
