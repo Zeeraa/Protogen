@@ -53,7 +53,7 @@ export abstract class AbstractRgbEffect {
     return this._propertyMap[key];
   }
 
-  public setProperty(key: string, value: string): SetPropertyResult {
+  public setProperty(key: string, value: string): SetPropertyResult<any> {
     if (this._propertyMap[key] == null) {
       return { success: false, error: "Could not find property " + key }
     }

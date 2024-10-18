@@ -1,25 +1,33 @@
 import { hueToRGB } from "../../../utils/ProtoColors";
 import { encodeRGB } from "../../../utils/Utils";
 import { AbstractRgbEffect } from "../AbstractRgbEffect";
-import { RgbEffectIntProperty } from "../properties/variants/RgbEffectIntProperty";
+import { BoolPropInputType, RgbEffectBoolProperty } from "../properties/variants/RgbEffectBoolProperty";
+import { IntPropInputType, RgbEffectIntProperty } from "../properties/variants/RgbEffectIntProperty";
 
 export class RgbWaveEffect extends AbstractRgbEffect {
   private _propHueStart;
   private _propHueEnd;
   private _propSpeed;
+  private _invertProperty;
 
   constructor(id: string, name: string, displayName: string) {
     super(id, name, displayName);
     this._propHueStart = new RgbEffectIntProperty("HueStart", 0, { min: 0, max: 360 });
     this._propHueEnd = new RgbEffectIntProperty("HueEnd", 360, { min: 0, max: 360 });
-    this._propSpeed = new RgbEffectIntProperty("Speed", 5, { min: 0, max: 30 });
+    this._propSpeed = new RgbEffectIntProperty("Speed", 5, { min: 0, max: 30, inputType: IntPropInputType.Slider });
+    this._invertProperty = new RgbEffectBoolProperty("Invert", false, { inputType: BoolPropInputType.Switch });
     this.addProperty(this._propHueStart);
     this.addProperty(this._propHueEnd);
     this.addProperty(this._propSpeed);
+    this.addProperty(this._invertProperty);
   }
 
   public render(time: number): (number | null)[] {
     const encodedValues: number[] = [];
+
+    if (this._invertProperty.value == true) {
+      time = 0 - time;
+    }
 
     let offset = 0;
     if (this._propSpeed.value > 0) {
