@@ -14,6 +14,14 @@ export async function loadConfiguration(): Promise<Configuration> {
 
     const trustProxy = String(process.env["TRUST_PROXY"]).toLowerCase() == "true"
 
+    let apiKey: string | null = null;
+    if (process.env["API_KEY"] != null) {
+        apiKey = process.env["API_KEY"];
+        if (apiKey.trim().length == 0) {
+            apiKey = null;
+        }
+    }
+
     let sslKey: null | string = null;
     let sslCert: null | string = null;
     if (process.env["SSL_KEY"] != null || process.env["SSL_CERT"] != null) {
@@ -46,12 +54,14 @@ export async function loadConfiguration(): Promise<Configuration> {
     //#endregion
 
     return {
-        web: webConfig
+        web: webConfig,
+        apiKey: apiKey,
     }
 }
 
 export interface Configuration {
     web: WebConfig;
+    apiKey: string | null;
 }
 
 export interface WebConfig {

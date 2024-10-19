@@ -42,6 +42,22 @@ export class Server {
         }
         //#endregion
 
+        if (this._configuration.apiKey == null) {
+            console.warn(red("No api key defined. The server will not use authentication"));
+        } else {
+            console.log("Using api key for authentication");
+            this._express.use((req, res, next) => {
+                if (req.headers.authorization == null) {
+                    return res.status(401).send({ message: "Missing auth header" });
+                }
+                const headerValue = req.headers.authorization.startsWith('Bearer ') ? req.headers.authorization.replace('Bearer ', '') : req.headers.authorization;
+                if (headerValue == this._configuration.apiKey) {
+                    return next();
+                }
+                return res.status(401).send({ message: "Invalid api key" });
+            });
+        }
+
         this.init().then(() => {
             console.log(green("Ready"));
 
