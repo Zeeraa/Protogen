@@ -96,6 +96,10 @@ export function loadConfiguration(): Configuration {
 
   //#region Remote Worker
   const remoteWorkerUrl = process.env["REMOTE_WORKER_URL"];
+  let workerKey = "";
+  if (process.env["REMOTE_WORKER_KEY"] != null) {
+    workerKey = process.env["REMOTE_WORKER_KEY"];
+  }
 
   if (remoteWorkerUrl == null) {
     throw new Error("Missing: REMOTE_WORKER_URL");
@@ -104,6 +108,7 @@ export function loadConfiguration(): Configuration {
 
   const remoteWorker: RemoteWorkerConfiguration = {
     url: removeTrailingSlash(remoteWorkerUrl),
+    key: workerKey,
   }
   //#endregion
 

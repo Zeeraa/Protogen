@@ -9,18 +9,28 @@ export class ProtogenRemoteWorker {
     this._protogen = protogen;
   }
 
+  private get headers(): any {
+    const headers: any = {};
+
+    if (this.protogen.config.remoteWorker.key != null) {
+      headers["Authorization"] = this.protogen.config.remoteWorker.key;
+    }
+
+    return headers;
+  }
+
   public async createJob(url: string, mirror: boolean, flip: boolean): Promise<VideoDownloadJob> {
     const result = await axios.post(this.config.url + "/video_downloader/job", {
       url: url,
       mirrorVideo: mirror,
       flipVideo: flip,
-    });
+    }, { headers: this.headers });
     return result.data as VideoDownloadJob;
   }
 
   public async getJob(jobId: string): Promise<VideoDownloadJob | null> {
     try {
-      const result = await axios.get(this.config.url + "/video_downloader/job/" + jobId);
+      const result = await axios.get(this.config.url + "/video_downloader/job/" + jobId, { headers: this.headers });
       return result.data as VideoDownloadJob;
     } catch (err) {
       if (isAxiosError(err)) {
@@ -41,6 +51,7 @@ export class ProtogenRemoteWorker {
           url: this.config.url + "/video_downloader/download/" + hash,
           method: 'GET',
           responseType: 'stream',
+          headers: this.headers,
         });
 
         response.data.pipe(writer);
