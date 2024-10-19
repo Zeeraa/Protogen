@@ -38,6 +38,13 @@ export class SavedVideo {
   mirrorVideo: boolean;
 
   @Column({
+    name: "flip_video",
+    type: "boolean",
+    default: false,
+  })
+  flipVideo: boolean;
+
+  @Column({
     name: "is_stream",
     type: "boolean",
     default: false,

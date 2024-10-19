@@ -180,6 +180,7 @@ export class VideoPlayerRouter extends AbstractRouter {
         savedVideo.mirrorVideo = data.mirrorVideo;
         savedVideo.isStream = data.isStream;
         savedVideo.hideUrl = data.hideUrl || false;
+        savedVideo.flipVideo = data.flipVideo;
 
         const result = await savedVideoRepo.save(savedVideo);
 
@@ -260,6 +261,10 @@ export class VideoPlayerRouter extends AbstractRouter {
 
         if (data.hideUrl != undefined) {
           savedVideo.hideUrl = data.hideUrl;
+        }
+
+        if (data.flipVideo != undefined) {
+          savedVideo.flipVideo = data.flipVideo;
         }
 
         const result = await savedVideoRepo.save(savedVideo);
@@ -349,7 +354,7 @@ export class VideoPlayerRouter extends AbstractRouter {
         if (isStream) {
           await this.protogen.videoPlaybackManager.streamVideo(savedVideo.url);
         } else {
-          downloadJob = await this.protogen.videoPlaybackManager.playVideo(savedVideo.url, savedVideo.mirrorVideo);
+          downloadJob = await this.protogen.videoPlaybackManager.playVideo(savedVideo.url, savedVideo.mirrorVideo, savedVideo.flipVideo);
         }
 
         res.json({
@@ -406,6 +411,7 @@ const SavedVideoModel = z.object({
   name: z.string().trim().min(1).max(255),
   url: z.string().url().max(1024),
   mirrorVideo: z.boolean(),
+  flipVideo: z.boolean(),
   isStream: z.boolean(),
   hideUrl: z.boolean().optional(),
 });
@@ -415,6 +421,7 @@ const UpdateSavedVideoModel = z.object({
   name: z.string().trim().min(1).max(255).optional(),
   url: z.string().url().max(1024).optional(),
   mirrorVideo: z.boolean().optional(),
+  flipVideo: z.boolean(),
   isStream: z.boolean().optional(),
   hideUrl: z.boolean().optional(),
 });
@@ -422,6 +429,7 @@ const UpdateSavedVideoModel = z.object({
 const PlayVideoModel = z.object({
   url: z.string().url().max(1024),
   mirrorVideo: z.boolean(),
+  flipVideo: z.boolean(),
 });
 
 const StreamVideoModel = z.object({

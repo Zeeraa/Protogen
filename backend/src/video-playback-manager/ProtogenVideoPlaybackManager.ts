@@ -180,10 +180,10 @@ export class ProtogenVideoPlaybackManager {
     this.startPlayback(url);
   }
 
-  public async playVideo(url: string, mirror: boolean = false): Promise<VideoDownloadJob> {
+  public async playVideo(url: string, mirror: boolean = false, flip: boolean = false): Promise<VideoDownloadJob> {
     this._canceled = false;
     this.protogen.logger.info("VideoPlaybackManager", "Requesting job for video " + cyan(url) + ". Mirror: " + (mirror ? green("true") : red("false")));
-    const job = await this.protogen.remoteWorker.createJob(url, mirror);
+    const job = await this.protogen.remoteWorker.createJob(url, mirror, flip);
     this.protogen.logger.info("VideoPlaybackManager", "Job ID is " + job.jobId);
     if (!this._canceled) {
       this._monitoredJob = job;
