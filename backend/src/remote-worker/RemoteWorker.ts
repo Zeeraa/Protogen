@@ -9,10 +9,11 @@ export class ProtogenRemoteWorker {
     this._protogen = protogen;
   }
 
-  public async createJob(url: string, mirror: boolean): Promise<VideoDownloadJob> {
+  public async createJob(url: string, mirror: boolean, flip: boolean): Promise<VideoDownloadJob> {
     const result = await axios.post(this.config.url + "/video_downloader/job", {
       url: url,
-      mirrorVideo: mirror
+      mirrorVideo: mirror,
+      flipVideo: flip,
     });
     return result.data as VideoDownloadJob;
   }
