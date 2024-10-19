@@ -34,6 +34,14 @@
     </div>
 
     <div class="col-auto mt-1">
+      <div class="form-check form-switch" title="Flip the right side video (viewers perspective)">
+        <input class="form-check-input" type="checkbox" role="switch" id="cbx_flipVideo"
+          [disabled]="stream || !mirrorVideo" [(ngModel)]="flipVideo">
+        <label class="form-check-label" for="cbx_flipVideo">Flip video</label>
+      </div>
+    </div>
+
+    <div class="col-auto mt-1">
       <div class="form-check form-switch" title="Stream the video instead of downloading and processing it">
         <input class="form-check-input" type="checkbox" role="switch" id="cbx_streamVideo" [(ngModel)]="stream">
         <label class="form-check-label" for="cbx_streamVideo">Stream</label>
@@ -64,7 +72,7 @@
 
     <div class="col-auto mt-1">
       <div class="form-check form-switch" title="Allow editing and deleting saved videos">
-        <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo" [disabled]="stream"
+        <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo"
           [(ngModel)]="allowEditSavedVideos">
         <label class="form-check-label" for="cbx_splitVideo">Allow editing</label>
       </div>
@@ -110,6 +118,13 @@
         <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
           <input class="form-check-input" type="checkbox" role="switch" id="sv_mirror" formControlName="mirror">
           <label class="form-check-label" for="sv_mirror">Mirror video</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Flip the right side video (viewers perspective)">
+          <input class="form-check-input" type="checkbox" role="switch" id="sv_flip" formControlName="mirror">
+          <label class="form-check-label" for="sv_flip">Flip video</label>
         </div>
       </div>
       }

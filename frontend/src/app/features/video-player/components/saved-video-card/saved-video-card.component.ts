@@ -25,6 +25,7 @@ export class SavedVideoCardComponent implements OnDestroy {
     stream: new FormControl(false),
     mirror: new FormControl(false),
     hideUrl: new FormControl(false),
+    flip: new FormControl(false),
     sorting: new FormControl<number | null>(null),
   })
   editFormRef: null | NgbModalRef = null;
@@ -62,6 +63,7 @@ export class SavedVideoCardComponent implements OnDestroy {
     this.editVideoForm.get("stream")?.setValue(this.video.isStream);
     this.editVideoForm.get("mirror")?.setValue(this.video.mirrorVideo);
     this.editVideoForm.get("hideUrl")?.setValue(this.video.hideUrl);
+    this.editVideoForm.get("flip")?.setValue(this.video.flipVideo);
     this.editVideoForm.get("sorting")?.setValue(this.video.sortingNumber);
     this.editFormRef = this.modal.open(this.editModalTemplate, { ariaLabelledBy: 'edit-saved-video-modal-title' });
   }
@@ -76,6 +78,7 @@ export class SavedVideoCardComponent implements OnDestroy {
     const stream = this.editVideoForm.get("stream")!.value === true;
     const mirror = this.editVideoForm.get("mirror")!.value === true;
     const hideUrl = this.editVideoForm.get("hideUrl")!.value === true;
+    const flip = this.editVideoForm.get("flip")!.value === true;
     const sorting = this.editVideoForm.get("sorting")!.value;
 
     if (url == null || !UrlPattern.test(url)) {
@@ -99,6 +102,7 @@ export class SavedVideoCardComponent implements OnDestroy {
       mirrorVideo: mirror,
       name: name,
       url: url,
+      flipVideo: flip,
       sortingNumber: sorting,
     }
 
