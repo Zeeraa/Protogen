@@ -106,6 +106,7 @@ export class VideoDownloadManager {
         newJob.jobId = uuidv7();
         newJob.videoUrl = options.url;
         newJob.mirrorVideo = options.mirrorVideo;
+        newJob.flipVideo = options.flipVideo;
 
         const job = await this._dataSource.getRepository(VideoDownloaderJob).save(newJob);
         this.processJob(job).catch(err => {
@@ -167,7 +168,13 @@ export class VideoDownloadManager {
                 job.status = VideoDownloaderJobStatus.ENCODING_2;
                 await repo.save(job);
                 const stage2Out = resolve(this._tempFolder + "/" + job.jobId + "_stage2." + this.videoFileExtension);
-                const cmd = `${this._ffmpegCommand} -i "${this.escapeDoubleQuotes(resolve(stage1Out))}" -filter_complex "[0:v]split=2[v1][v2];[v2]hflip[mirrored];[0:a]asplit=2[a1][a2];[v1][mirrored]hstack=inputs=2[v];[a1][a2]amerge=inputs=2[a]" -map "[v]" -map "[a]" -preset ${this._ffmpegPreset} "${this.escapeDoubleQuotes(stage2Out)}"`;
+
+                let complexFilter = "[0:v]split=2[v1][v2];[0:a]asplit=2[a1][a2];[v1][v2]hstack=inputs=2[v];[a1][a2]amerge=inputs=2[a]";
+                if (job.flipVideo) {
+                    complexFilter = "[0:v]split=2[v1][v2];[v2]hflip[mirrored];[0:a]asplit=2[a1][a2];[v1][mirrored]hstack=inputs=2[v];[a1][a2]amerge=inputs=2[a]";
+                }
+
+                const cmd = `${this._ffmpegCommand} -i "${this.escapeDoubleQuotes(resolve(stage1Out))}" -filter_complex "${complexFilter}" -map "[v]" -map "[a]" -preset ${this._ffmpegPreset} "${this.escapeDoubleQuotes(stage2Out)}"`;
                 const stage2CommandOutput = await executeCommand(cmd);
                 if (stage2CommandOutput != 0) {
                     job.status = VideoDownloaderJobStatus.FAILED;

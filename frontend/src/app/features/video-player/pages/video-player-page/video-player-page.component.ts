@@ -15,6 +15,7 @@ import { catchError } from 'rxjs';
 export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   videoInputUrl = "";
   mirrorVideo = true;
+  flipVideo = false;
   stream = false;
   lastStatus: VideoPlayerStatus | null = null;
   updateInterval: any = null;
@@ -27,6 +28,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     name: new FormControl(""),
     stream: new FormControl(false),
     mirror: new FormControl(false),
+    flip: new FormControl(false),
     hideUrl: new FormControl(false),
     sorting: new FormControl<number | null>(null),
   })
@@ -46,7 +48,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
         this.toastr.success("Stream started");
       });
     } else {
-      this.api.playVideo(this.videoInputUrl, this.mirrorVideo).subscribe(() => {
+      this.api.playVideo(this.videoInputUrl, this.mirrorVideo, this.flipVideo).subscribe(() => {
         this.toastr.success("Preparing video");
       });
     }
@@ -134,6 +136,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     const name = this.addVideoForm.get("name")!.value;
     const stream = this.addVideoForm.get("stream")!.value === true;
     const mirror = this.addVideoForm.get("mirror")!.value === true;
+    const flip = this.addVideoForm.get("flip")!.value === true;
     const hideUrl = this.addVideoForm.get("hideUrl")!.value === true;
     const sorting = nullToUndefined(this.addVideoForm.get("sorting")!.value);
 
@@ -158,6 +161,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
       mirrorVideo: mirror,
       name: name,
       url: url,
+      flipVideo: flip,
       sortingNumber: sorting,
     }
 

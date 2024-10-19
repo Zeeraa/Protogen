@@ -40,6 +40,13 @@ export class VideoDownloaderJob {
     mirrorVideo: boolean;
 
     @Column({
+        type: "boolean",
+        name: "flip_video",
+    })
+    @Index()
+    flipVideo: boolean;
+
+    @Column({
         type: "varchar",
         length: 64,
         name: "output_hash",

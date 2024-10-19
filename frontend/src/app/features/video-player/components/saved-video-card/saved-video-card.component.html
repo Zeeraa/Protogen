@@ -7,10 +7,16 @@
 
     @if(video.isStream) {
     <p class="card-text">
-      <span class="badge text-bg-info">Stream</span>
+      <span class="badge text-bg-info mt-1 me-1">Stream</span>
     </p>
-    } @else if(video.mirrorVideo) {
-    <span class="badge text-bg-info">Mirrored</span>
+    } @else {
+    @if(video.mirrorVideo) {
+    <span class="badge text-bg-info mt-1 me-1">Mirrored</span>
+    }
+
+    @if(video.flipVideo) {
+    <span class="badge text-bg-info mt-1 me-1">Flipped</span>
+    }
     }
 
     @if(!video.hideUrl) {
@@ -56,6 +62,13 @@
         <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
           <input class="form-check-input" type="checkbox" role="switch" id="esv_mirror" formControlName="mirror">
           <label class="form-check-label" for="esv_mirror">Mirror video</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
+          <input class="form-check-input" type="checkbox" role="switch" id="esv_flip" formControlName="flip">
+          <label class="form-check-label" for="esv_flip">Flip video</label>
         </div>
       </div>
       }

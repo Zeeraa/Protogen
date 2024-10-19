@@ -15,10 +15,11 @@ export class VideoPlayerApiService extends ApiBaseService {
     super(http, toastr);
   }
 
-  playVideo(url: string, mirror: boolean): Observable<VideoDownloadJob> {
+  playVideo(url: string, mirror: boolean, flip: boolean): Observable<VideoDownloadJob> {
     const payload = {
       url: url,
       mirrorVideo: mirror,
+      flipVideo: flip,
     }
 
     return this.http.post(this.apiBaseUrl + "/video_player/play", payload).pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoDownloadJob>;
@@ -66,6 +67,7 @@ export interface SaveVideoPayload {
   name: string;
   url: string;
   mirrorVideo: boolean;
+  flipVideo: boolean;
   isStream: boolean;
   hideUrl: boolean;
 }
@@ -91,6 +93,7 @@ export interface SavedVideo {
   name: string;
   url: string;
   mirrorVideo: boolean;
+  flipVideo: boolean;
   isStream: boolean;
   hideUrl: boolean;
 }
