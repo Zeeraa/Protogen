@@ -4,8 +4,6 @@ import { VideoPlayerPageComponent } from './pages/video-player-page/video-player
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SavedVideoCardComponent } from './components/saved-video-card/saved-video-card.component';
 
-
-
 @NgModule({
   declarations: [
     VideoPlayerPageComponent,

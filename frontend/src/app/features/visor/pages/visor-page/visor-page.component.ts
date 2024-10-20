@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { VisorApiService, VisorRenderer, VisorStatus } from '../../../../core/services/api/visor-api.service';
-import { catchError } from 'rxjs';
+import { catchError, Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
+import { SocketService } from '../../../../core/services/socket/socket.service';
 
 @Component({
   selector: 'app-visor-page',
@@ -9,6 +11,8 @@ import { ToastrService } from 'ngx-toastr';
   styleUrl: './visor-page.component.scss'
 })
 export class VisorPageComponent implements OnInit, OnDestroy {
+  private socketSubscription: Subscription | null = null;
+
   status: VisorStatus | null = null;
   renderers: VisorRenderer[] = [];
   updateInterval: any = null;
@@ -42,7 +46,7 @@ export class VisorPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  async updatePreview() {
+  async updatePreviewHttp() {
     try {
       this.previewImage = await this.api.getPreviewBase64();
     } catch (err) {
@@ -54,20 +58,31 @@ export class VisorPageComponent implements OnInit, OnDestroy {
   constructor(
     private api: VisorApiService,
     private toastr: ToastrService,
+    private socket: SocketService,
   ) { }
 
   ngOnInit(): void {
     this.update();
     this.fetchRenderers();
-    this.updatePreview();
+    this.updatePreviewHttp();
 
     this.updateInterval = setInterval(() => {
       this.update();
     }, 1000);
 
     this.updatePreviewInterval = setInterval(() => {
-      this.updatePreview();
+      if (!this.socket.connected) {
+        this.updatePreviewHttp();
+      }
     }, 2000);
+
+    this.socketSubscription = this.socket.messageObservable.subscribe(msg => {
+      if (msg.type == SocketMessageType.S2C_VisorPreview) {
+        const base64 = msg.data.base64 as string;
+        this.previewImage = "data:image/png;base64," + base64;
+      }
+    })
+    this.socket.sendMessage(SocketMessageType.C2S_EnableVisorPreview, true);
   }
 
   ngOnDestroy(): void {
@@ -78,5 +93,9 @@ export class VisorPageComponent implements OnInit, OnDestroy {
     if (this.updatePreviewInterval != null) {
       clearInterval(this.updatePreviewInterval);
     }
+
+    this.socketSubscription?.unsubscribe();
+    this.socket.sendMessage(SocketMessageType.C2S_EnableVisorPreview, false);
+    this.socketSubscription = null;
   }
 }

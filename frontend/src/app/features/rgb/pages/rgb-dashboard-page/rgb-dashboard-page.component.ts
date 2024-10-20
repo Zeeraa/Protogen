@@ -1,19 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
+import { SocketService } from '../../../../core/services/socket/socket.service';
 
 @Component({
   selector: 'app-rgb-dashboard-page',
   templateUrl: './rgb-dashboard-page.component.html',
   styleUrl: './rgb-dashboard-page.component.scss'
 })
-export class RgbDashboardPageComponent implements OnInit {
+export class RgbDashboardPageComponent implements OnInit, OnDestroy {
   scenes: RgbScene[] = [];
 
   constructor(
     private toastr: ToastrService,
     private rgbApi: RgbApiService,
+    private socket: SocketService,
   ) { }
 
   addBlank() {
@@ -46,5 +49,10 @@ export class RgbDashboardPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadEffects();
+    this.socket.sendMessage(SocketMessageType.C2S_EnableRgbPreview, true);
+  }
+
+  ngOnDestroy(): void {
+    this.socket.sendMessage(SocketMessageType.C2S_EnableRgbPreview, false);
   }
 }
