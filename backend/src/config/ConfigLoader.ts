@@ -2,6 +2,7 @@ import { Configuration } from "./objects/Configurations";
 import { DatabaseConfiguration } from "./objects/DatabaseConfiguration";
 import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfiguration";
 import { LedMatrixConfiguration } from "./objects/LedMatrixConfiguration";
+import { MiscConfiguration } from "./objects/MiscConfiguration";
 import { RemoteWorkerConfiguration } from "./objects/RemoteWorkerConfiguration";
 import { RgbConfiguration } from "./objects/RgbConfiguration";
 import { SerialConfiguration } from "./objects/SerialConfiguration";
@@ -155,6 +156,17 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
+  //#region Misc
+  const visorPreviewInterval = parseInt(String(process.env["VISOR_PREVIEW_INTERVAL"]));
+  if (isNaN(visorPreviewInterval) || visorPreviewInterval < 1) {
+    throw new Error("Missing or invalid: VISOR_PREVIEW_INTERVAL");
+  }
+
+  const misc: MiscConfiguration = {
+    visorPreviewInterval: visorPreviewInterval
+  }
+  //#endregion
+
   const tempDirectory = process.env["TEMP_DIRECTORY"] || "./temp";
 
   return {
@@ -166,6 +178,7 @@ export function loadConfiguration(): Configuration {
     serial: serialConfig,
     rgb: rgb,
     tempDirectory: tempDirectory,
+    misc: misc,
   }
 }
 

@@ -6,6 +6,7 @@ import { FaceRendererId, VisorFaceRenderer } from "./rendering/renderers/VisorFa
 import { BSODRenderer } from "./rendering/renderers/special/BSODRenderer";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { boolean } from "zod";
+import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 
 export const KV_ActiveRendererKey = "ActiveVisorRenderer";
 
@@ -42,6 +43,22 @@ export class ProtogenVisor {
 
     // Default to the face renderer
     this.activateRenderer(FaceRendererId, false);
+
+    setInterval(() => {
+      this.sendVisorPreview();
+    }, this.protogen.config.misc.visorPreviewInterval);
+  }
+
+  public sendVisorPreview() {
+    let base64: string | undefined; // Do not set until we know a client is trying to view the visor
+    this.protogen.webServer.socketSessions.filter(s => s.enableVisorPreview).forEach(socket => {
+      if (base64 == undefined) {
+        base64 = this._lastFrame.toString('base64')
+      }
+      socket.sendMessage(SocketMessageType.S2C_VisorPreview, {
+        base64: base64,
+      });
+    });
   }
 
   private handleBoopState(boopState: boolean) {

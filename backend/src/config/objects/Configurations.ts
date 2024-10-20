@@ -15,4 +15,5 @@ export interface Configuration {
   serial: SerialConfiguration;
   rgb: RgbConfiguration;
   tempDirectory: string;
+  misc: MiscConfiguration;
 }

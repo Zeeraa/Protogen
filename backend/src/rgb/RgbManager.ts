@@ -7,6 +7,8 @@ import { ProtoColors } from "../utils/ProtoColors";
 import { RgbSceneEffect } from "../database/models/rgb/RgbSceneEffect.model";
 import { RgbSceneEffectProperty } from "../database/models/rgb/RgbSceneEffectProperty.model";
 import { constructRgbEffect } from "./effects/RgbEffects";
+import { Socket } from "socket.io";
+import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 
 export const KV_LastUsedRgbScene = "LastUsedRgbScene";
 
@@ -104,6 +106,13 @@ export class RgbManager {
     if (this._ledBuffer.length == 0) {
       return; // Cant send an empty rgb packet
     }
+
+    this.protogen.webServer.socketSessions.filter(s => s.enableRgbPreview).forEach(socket => {
+      socket.sendMessage(SocketMessageType.S2C_RgbPreview, {
+        leds: this._ledBuffer,
+      });
+    })
+
     const data = "RGB:" + this._ledBuffer.join(",");
     this.protogen.serial.write(data);
   }

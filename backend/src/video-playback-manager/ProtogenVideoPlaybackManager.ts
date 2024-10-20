@@ -40,6 +40,10 @@ export class ProtogenVideoPlaybackManager {
     return this._protogen;
   }
 
+  public get isDownloading() {
+    return this._isDownloading;
+  }
+
   get isPlaying() {
     if (this.vlcProcess != null) {
       return this.vlcProcess.exitCode == null;
@@ -59,22 +63,22 @@ export class ProtogenVideoPlaybackManager {
             } else {
               this._monitoredJob = job;
             }
-            if (this._status != this._monitoredJob.status) {
-              this.protogen.logger.info("VideoPlaybackManager", "Job with ID " + this._monitoredJob.jobId + " changed status from " + this._status + " to " + this._monitoredJob.status);
-              this._status = this._monitoredJob.status;
+            if (this._status != this._monitoredJob!.status) {
+              this.protogen.logger.info("VideoPlaybackManager", "Job with ID " + this._monitoredJob!.jobId + " changed status from " + this._status + " to " + this._monitoredJob!.status);
+              this._status = this._monitoredJob!.status;
             }
 
             //console.debug("Status: " + this._monitoredJob.status);
-            if (this._monitoredJob.status == VideoDownloadJobStatus.DONE) {
-              this.protogen.logger.info("VideoPlaybackManager", "Job with ID " + this._monitoredJob.jobId + " is done. Attempting to download it and start playback");
-              const hash = this._monitoredJob.outputHash;
+            if (this._monitoredJob!.status == VideoDownloadJobStatus.DONE) {
+              this.protogen.logger.info("VideoPlaybackManager", "Job with ID " + this._monitoredJob!.jobId + " is done. Attempting to download it and start playback");
+              const hash = this._monitoredJob!.outputHash;
               this._monitoredJob = null;
               if (hash == null) {
                 throw new Error("Video hash was null after success");
               }
               await this.downloadAndStartPlayback(hash);
-            } else if (this._monitoredJob.status == VideoDownloadJobStatus.FAILED) {
-              this.protogen.logger.error("VideoPlaybackManager", "Job with ID " + this._monitoredJob.jobId + " failed with message " + this._monitoredJob.errorMessage);
+            } else if (this._monitoredJob!.status == VideoDownloadJobStatus.FAILED) {
+              this.protogen.logger.error("VideoPlaybackManager", "Job with ID " + this._monitoredJob!.jobId + " failed with message " + this._monitoredJob!.errorMessage);
               this._monitoredJob = null;
             }
           }

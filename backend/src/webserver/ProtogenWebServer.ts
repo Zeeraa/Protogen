@@ -13,6 +13,8 @@ import { RgbRouter } from "./routes/rgb/RgbRouter";
 import { createServer } from "http";
 import { Server, Socket } from 'socket.io';
 import { UserSocketSession } from "./socket/UserSocketSession";
+import { SocketMessageType } from "./socket/SocketMessageType";
+import { SocketMessage } from "./socket/SocketMessage";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -27,7 +29,9 @@ export class ProtogenWebServer {
 
     this._express = express();
     this._http = createServer(this._express);
-    this._socket = new Server(this._http);
+    this._socket = new Server(this._http, {
+      path: "/protogen-websocket.io",
+    });
 
     this.express.use(cors())
     this.express.use(bodyParser.json());
@@ -41,7 +45,7 @@ export class ProtogenWebServer {
     this.socket.on("connection", (socket: Socket) => {
       const session = new UserSocketSession(this.protogen, socket);
       this._sessions.push(session);
-      this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId));
+      this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
     });
 
 
@@ -52,12 +56,16 @@ export class ProtogenWebServer {
     } else {
       this.protogen.logger.warn("WebServer", yellow("Could not find swagger.json. No api documentation will be available"));
     }
+
+    setInterval(() => {
+      this.broadcastMessage(SocketMessageType.S2C_Ping, {});
+    }, 5000);
   }
 
   public disconnectSocket(session: UserSocketSession) {
     session.disconnect();
     this._sessions = this._sessions.filter(s => s.sessionId != session.sessionId);
-    this.protogen.logger.info("WebServer", "Socket with id " + cyan(session.sessionId) + " disconnected");
+    this.protogen.logger.info("WebServer", "Socket with id " + cyan(session.sessionId) + " disconnected. Client count: " + cyan(String(this._sessions.length)));
   }
 
   public init() {
@@ -74,6 +82,10 @@ export class ProtogenWebServer {
     });
   }
 
+  public get socketSessions() {
+    return this._sessions;
+  }
+
   private get config() {
     return this.protogen.config.web;
   }
@@ -88,5 +100,13 @@ export class ProtogenWebServer {
 
   public get socket() {
     return this._socket;
+  }
+
+  public broadcastMessage(type: SocketMessageType, data: any) {
+    const message: SocketMessage = {
+      type: type,
+      data: data,
+    }
+    this._socket.emit("message", message);
   }
 }
