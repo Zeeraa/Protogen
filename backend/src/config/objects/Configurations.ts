@@ -5,6 +5,7 @@ import { LedMatrixConfiguration } from "./LedMatrixConfiguration";
 import { RemoteWorkerConfiguration } from "./RemoteWorkerConfiguration";
 import { WebConfiguration } from "./WebConfiguration";
 import { RgbConfiguration } from "./RgbConfiguration";
+import { MiscConfiguration } from "./MiscConfiguration";
 
 export interface Configuration {
   web: WebConfiguration;

@@ -23,7 +23,6 @@ export class UserSocketSession {
     });
 
     this._socket.on('message', (msg: any) => {
-      console.log('Raw message received:', msg);
       this.handleMessage(msg as SocketMessage);
     });
   }
@@ -77,12 +76,17 @@ export class UserSocketSession {
 
     if (type == SocketMessageType.C2S_EnableRgbPreview) {
       const enable = message.data === true;
+      if (this._enableRgbPreview != enable) {
+        console.log("Socket " + this.sessionId + " " + (enable ? "enabled" : "disabled") + " rgb preview");
+      }
       this._enableRgbPreview = enable;
-      console.log("Socket " + this.sessionId + " " + (enable ? "enabled" : "disabled") + " rgb preview");
+
     } else if (type == SocketMessageType.C2S_EnableVisorPreview) {
       const enable = message.data === true;
+      if (this._enableVisorPreview != enable) {
+        console.log("Socket " + this.sessionId + " " + (enable ? "enabled" : "disabled") + " visor preview");
+      }
       this._enableVisorPreview = enable;
-      console.log("Socket " + this.sessionId + " " + (enable ? "enabled" : "disabled") + " visor preview");
     }
 
   }
