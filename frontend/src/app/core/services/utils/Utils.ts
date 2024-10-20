@@ -31,3 +31,14 @@ export function undefinedToNull<T>(input: T | null | undefined): T | null {
   }
   return input;
 }
+
+export function numberToHexColor(num: number): string {
+  num = Math.max(0, Math.min(0xFFFFFF, num));
+  let hex = num.toString(16).toUpperCase();
+  return "#" + hex.padStart(6, "0");
+}
+
+export function hexColorToNumber(hex: string): number {
+  hex = hex.replace("#", "");
+  return parseInt(hex, 16);
+}
