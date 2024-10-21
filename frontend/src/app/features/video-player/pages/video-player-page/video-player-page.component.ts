@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { SavedVideo, SaveVideoPayload, VideoDownloaderJobStatus, VideoPlayerApiService, VideoPlayerStatus } from '../../../../core/services/api/video-player-api.service';
+import { SavedVideo, SaveVideoPayload, VideoDownloaderJobStatus, VideoGroup, VideoPlayerApiService, VideoPlayerStatus } from '../../../../core/services/api/video-player-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { AudioApiService } from '../../../../core/services/api/audio-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -22,6 +22,16 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   updateInterval: any = null;
   volumeUpdateInterval: any = null;
   volume = 0;
+  groups: VideoGroup[] = [];
+  groupedVideos: SavedVideo[] = [];
+  nonGroupedVideos: SavedVideo[] = [];
+
+  @ViewChild("createGroupModal") createGroupModalTemplate!: TemplateRef<any>;
+  createGroupFrom = new FormGroup({
+    name: new FormControl(""),
+  })
+  createGroupModalRef: null | NgbModalRef = null;
+  isSavingGroup = false;
 
   @ViewChild("addVideoModal") addModalTemplate!: TemplateRef<any>;
   addVideoForm = new FormGroup({
@@ -32,11 +42,58 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     flip: new FormControl(false),
     hideUrl: new FormControl(false),
     sorting: new FormControl<number | null>(null),
+    groupId: new FormControl<number>(-1),
   })
-  savedVideos: SavedVideo[] = [];
   allowEditSavedVideos = false;
   addFormRef: null | NgbModalRef = null;
   isSaving = false;
+
+  deleteGroup(groupId: number) {
+    this.api.deleteGroup(groupId).pipe(catchError(err => {
+      this.toastr.error("Failed to delete group");
+      throw err;
+    })).subscribe(() => {
+      this.toastr.success("Group deleted");
+      this.groups = this.groups.filter(g => g.id != groupId);
+      this.fetchSavedVideos();
+    })
+  }
+
+  saveGroup() {
+    const name = this.createGroupFrom.get("name")?.value || "";
+    if (name.length == 0) {
+      this.toastr.error("Name cant be empty");
+      return;
+    }
+
+    this.isSavingGroup = true;
+    this.api.createGroup({ name: name }).pipe(catchError(err => {
+      this.toastr.error("Failed to create group");
+      this.isSavingGroup = false;
+      throw err;
+    })).subscribe(group => {
+      this.groups.push(group);
+      this.createGroupModalRef?.close();
+      this.toastr.success("Group created");
+    })
+  }
+
+  get groupedVideoList(): GroupedVideos[] {
+    return this.groups.map(group => {
+      return {
+        id: group.id,
+        name: group.name,
+        videos: this.groupedVideos.filter(v => v.group?.id == group.id),
+      }
+    })
+  }
+
+  showCreateGroupModal() {
+    this.createGroupModalRef?.close();
+    this.createGroupFrom.get("name")?.setValue("");
+    console.log(this.createGroupModalTemplate);
+    this.createGroupModalRef = this.modal.open(this.createGroupModalTemplate, { ariaLabelledBy: 'create-group-modal-title' });
+  }
 
   startPlayback() {
     if (!UrlPattern.test(this.videoInputUrl)) {
@@ -73,12 +130,21 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  fetchVideoGroups() {
+    this.groups = [];
+    this.api.getGroups().subscribe(groups => {
+      this.groups = groups;
+    });
+  }
+
   fetchSavedVideos(clearOldArray = false) {
     if (clearOldArray) {
-      this.savedVideos = [];
+      this.nonGroupedVideos = [];
+      this.groupedVideos = [];
     }
     this.api.getSavedVideos().subscribe(videos => {
-      this.savedVideos = videos;
+      this.nonGroupedVideos = videos.filter(v => v.group == null);
+      this.groupedVideos = videos.filter(v => v.group != null);
     });
   }
 
@@ -129,6 +195,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     this.addVideoForm.get("mirror")?.setValue(false);
     this.addVideoForm.get("hideUrl")?.setValue(false);
     this.addVideoForm.get("sorting")?.setValue(null);
+    this.addVideoForm.get("groupId")?.setValue(-1);
     this.addFormRef = this.modal.open(this.addModalTemplate, { ariaLabelledBy: 'add-saved-video-modal-title' });
   }
 
@@ -140,6 +207,8 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     const flip = this.addVideoForm.get("flip")!.value === true;
     const hideUrl = this.addVideoForm.get("hideUrl")!.value === true;
     const sorting = nullToUndefined(this.addVideoForm.get("sorting")!.value);
+    const rawGroupId = this.addVideoForm.get("groupId")?.value || -1;
+    const groupId = rawGroupId == -1 ? null : parseInt(String(rawGroupId));
 
     if (url == null || !UrlPattern.test(url)) {
       this.toastr.error("Invalid URL");
@@ -164,6 +233,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
       url: url,
       flipVideo: flip,
       sortingNumber: sorting,
+      groupId: groupId,
     }
 
     this.isSaving = true;
@@ -190,6 +260,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.update();
     this.updateVolume();
+    this.fetchVideoGroups();
     this.fetchSavedVideos();
     this.updateInterval = setInterval(() => {
       this.update();
@@ -204,6 +275,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.addFormRef?.close();
+    this.createGroupModalRef?.close();
 
     if (this.updateInterval != null) {
       clearInterval(this.updateInterval);
@@ -213,4 +285,10 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
       clearInterval(this.volumeUpdateInterval);
     }
   }
+}
+
+interface GroupedVideos {
+  id: number;
+  name: string;
+  videos: SavedVideo[];
 }

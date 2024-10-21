@@ -60,6 +60,31 @@ export class VideoPlayerApiService extends ApiBaseService {
   deleteSavedVideo(id: number): Observable<PlaySavedVideoResponse> {
     return this.http.delete(this.apiBaseUrl + "/video_player/saved/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<PlaySavedVideoResponse>;
   }
+
+  getGroups(): Observable<VideoGroup[]> {
+    return this.http.get(this.apiBaseUrl + "/video_player/groups").pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoGroup[]>;
+  }
+
+  createGroup(group: AlterGroupModel): Observable<VideoGroup> {
+    return this.http.post(this.apiBaseUrl + "/video_player/groups", group).pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoGroup>;
+  }
+
+  editGroup(id: number, group: AlterGroupModel): Observable<VideoGroup> {
+    return this.http.put(this.apiBaseUrl + "/video_player/groups/" + id, group).pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoGroup>;
+  }
+
+  deleteGroup(id: number): Observable<any> {
+    return this.http.delete(this.apiBaseUrl + "/video_player/groups/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+  }
+}
+
+interface AlterGroupModel {
+  name: string;
+}
+
+export interface VideoGroup {
+  id: number;
+  name: string;
 }
 
 export interface SaveVideoPayload {
@@ -70,6 +95,7 @@ export interface SaveVideoPayload {
   flipVideo: boolean;
   isStream: boolean;
   hideUrl: boolean;
+  groupId: number | null;
 }
 
 export interface PlaySavedVideoResponse extends SavedVideo {
@@ -96,6 +122,12 @@ export interface SavedVideo {
   flipVideo: boolean;
   isStream: boolean;
   hideUrl: boolean;
+  group: VideoGroup | null;
+}
+
+export interface VideoGroup {
+  id: number;
+  name: string;
 }
 
 export interface VideoPlayerStatus {

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
-import { SavedVideo, SaveVideoPayload, VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
+import { SavedVideo, SaveVideoPayload, VideoGroup, VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
 import { extractYouTubeVideoId, UrlPattern } from '../../../../core/services/utils/Utils';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -14,6 +14,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 export class SavedVideoCardComponent implements OnDestroy {
   @Input({ required: true }) video!: SavedVideo;
   @Input({ required: true }) showEditOptions!: boolean;
+  @Input({ required: true }) groups!: VideoGroup[];
   @Output() savedVideoChanged = new EventEmitter<void>();
   isDeleting = false;
   isSaving = false;
@@ -27,6 +28,7 @@ export class SavedVideoCardComponent implements OnDestroy {
     hideUrl: new FormControl(false),
     flip: new FormControl(false),
     sorting: new FormControl<number | null>(null),
+    groupId: new FormControl<number>(-1),
   })
   editFormRef: null | NgbModalRef = null;
 
@@ -56,6 +58,8 @@ export class SavedVideoCardComponent implements OnDestroy {
   }
 
   showEditVideo() {
+    const groupId = this.video.group == null ? -1 : this.video.group.id;
+
     this.isSaving = false;
     this.editFormRef?.close();
     this.editVideoForm.get("url")?.setValue(this.video.url);
@@ -65,6 +69,7 @@ export class SavedVideoCardComponent implements OnDestroy {
     this.editVideoForm.get("hideUrl")?.setValue(this.video.hideUrl);
     this.editVideoForm.get("flip")?.setValue(this.video.flipVideo);
     this.editVideoForm.get("sorting")?.setValue(this.video.sortingNumber);
+    this.editVideoForm.get("groupId")?.setValue(groupId);
     this.editFormRef = this.modal.open(this.editModalTemplate, { ariaLabelledBy: 'edit-saved-video-modal-title' });
   }
 
@@ -80,6 +85,8 @@ export class SavedVideoCardComponent implements OnDestroy {
     const hideUrl = this.editVideoForm.get("hideUrl")!.value === true;
     const flip = this.editVideoForm.get("flip")!.value === true;
     const sorting = this.editVideoForm.get("sorting")!.value;
+    const rawGroupId = this.editVideoForm.get("groupId")?.value || -1;
+    const groupId = rawGroupId == -1 ? null : parseInt(String(rawGroupId));
 
     if (url == null || !UrlPattern.test(url)) {
       this.toastr.error("Invalid URL");
@@ -104,6 +111,7 @@ export class SavedVideoCardComponent implements OnDestroy {
       url: url,
       flipVideo: flip,
       sortingNumber: sorting,
+      groupId: groupId,
     }
 
     this.isSaving = true;

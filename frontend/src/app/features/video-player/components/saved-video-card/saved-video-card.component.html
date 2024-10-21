@@ -85,6 +85,24 @@
         <input class="form-control" type="number" id="esv_sortingNumber" formControlName="sorting"
           placeholder="Sorting number">
       </div>
+
+      <div class="mb-3">
+        <label for="esv_sortingNumber" class="form-label">Sorting</label>
+        <input class="form-control" type="number" id="esv_sortingNumber" formControlName="sorting"
+          placeholder="Sorting number">
+      </div>
+
+      <div class="mb-3">
+        <label for="sv_group" class="form-label">Group</label>
+        <select class="form-select" id="sv_group" formControlName="groupId">
+          <option value="-1">No group</option>
+          @for(group of groups; track $index) {
+          <option [value]="group.id">
+            {{group.name}}
+          </option>
+          }
+        </select>
+      </div>
     </form>
   </div>
   <div class="modal-footer">

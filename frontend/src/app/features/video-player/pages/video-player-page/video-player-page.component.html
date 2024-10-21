@@ -71,6 +71,10 @@
     </div>
 
     <div class="col-auto mt-1">
+      <button (click)="showCreateGroupModal()" class="btn btn-primary btn-sm">Create group</button>
+    </div>
+
+    <div class="col-auto mt-1">
       <div class="form-check form-switch" title="Allow editing and deleting saved videos">
         <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo"
           [(ngModel)]="allowEditSavedVideos">
@@ -80,10 +84,48 @@
 
     <div class="col-12"></div>
 
-    @for (video of savedVideos; track $index) {
+    @if(groupedVideos.length > 0) {
+    <div class="col-12 mt-2">
+      <div ngbAccordion #accordion="ngbAccordion">
+        @for (group of groupedVideoList; track $index) {
+        <div ngbAccordionItem="v_{{group.id}}">
+          <h2 ngbAccordionHeader>
+            <button ngbAccordionButton>{{group.name}}</button>
+          </h2>
+          <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+              <ng-template>
+                <div class="row">
+                  @for (video of group.videos; track $index) {
+                  <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+                    <app-saved-video-card [video]="video" [showEditOptions]="allowEditSavedVideos"
+                      (savedVideoChanged)="fetchSavedVideos(true)" [groups]="groups" />
+                  </div>
+                  }
+                </div>
+
+                @if(allowEditSavedVideos) {
+                <div class="row mt-2">
+                  <div class="col">
+                    <button class="btn btn-danger" (click)="deleteGroup(group.id)">
+                      Delete group
+                    </button>
+                  </div>
+                </div>
+                }
+              </ng-template>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @for (video of nonGroupedVideos; track $index) {
     <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
       <app-saved-video-card [video]="video" [showEditOptions]="allowEditSavedVideos"
-        (savedVideoChanged)="fetchSavedVideos(true)" />
+        (savedVideoChanged)="fetchSavedVideos(true)" [groups]="groups" />
     </div>
     }
   </div>
@@ -141,10 +183,42 @@
         <input class="form-control" type="number" id="sv_sortingNumber" formControlName="sorting"
           placeholder="Optional sorting number">
       </div>
+
+      <div class="mb-3">
+        <label for="sv_group" class="form-label">Group</label>
+        <select class="form-select" id="sv_group" formControlName="groupId">
+          <option value="-1">No group</option>
+          @for(group of groups; track $index) {
+          <option [value]="group.id">
+            {{group.name}}
+          </option>
+          }
+        </select>
+      </div>
     </form>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
     <button type="button" class="btn btn-primary" (click)="saveVideo()" [disabled]="isSaving">Save</button>
+  </div>
+</ng-template>
+
+<ng-template #createGroupModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Create group</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="createGroupFrom">
+      <div class="mb-3">
+        <label for="vg_name" class="form-label">Name</label>
+        <input class="form-control" type="url" id="vg_name" maxlength="255" formControlName="name"
+          placeholder="Name of the group">
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveGroup()" [disabled]="isSavingGroup">Save</button>
   </div>
 </ng-template>
