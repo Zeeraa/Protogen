@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { SavedVideoGroup } from "./SavedVideoGroup.model";
 
 @Entity({ name: "saved_videos" })
 export class SavedVideo {
@@ -57,4 +58,8 @@ export class SavedVideo {
     default: false,
   })
   hideUrl: boolean;
+
+  @ManyToOne(() => SavedVideoGroup, g => g.videos, { onDelete: "SET NULL", onUpdate: "CASCADE" })
+  @JoinColumn({ name: "group_id" })
+  group: SavedVideoGroup | null;
 }

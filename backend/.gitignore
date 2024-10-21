@@ -21,3 +21,4 @@ dist
 swagger.json
 
 /temp
+.env

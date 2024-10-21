@@ -6,12 +6,14 @@ import { Equal } from "typeorm";
 import { VideoDownloadJob } from "../../../remote-worker/RemoteWorker";
 import { readdirSync, statSync, unlinkSync } from "fs";
 import { extname, join } from "path";
+import { SavedVideoGroup } from "../../../database/models/video-player/SavedVideoGroup.model";
 
 export class VideoPlayerRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/video_player");
 
     const savedVideoRepo = this.protogen.database.dataSource.getRepository(SavedVideo);
+    const groupRepo = this.protogen.database.dataSource.getRepository(SavedVideoGroup);
 
     //#region Playback management
     this.router.get("/status", async (req, res) => {
@@ -134,7 +136,8 @@ export class VideoPlayerRouter extends AbstractRouter {
           order: {
             sortingNumber: "ASC",
             id: "ASC",
-          }
+          },
+          relations: ["group"]
         });
         res.json(result);
       } catch (err) {
@@ -149,6 +152,7 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Save a video"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for details" }
+      #swagger.responses[400] = { description: "Group not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
 
       #swagger.parameters['body'] = {
@@ -160,7 +164,8 @@ export class VideoPlayerRouter extends AbstractRouter {
           url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
           mirrorVideo: false,
           isStream: false,
-          hideUrl: false
+          hideUrl: false,
+          groupId: null,
         }
       }
       */
@@ -181,6 +186,17 @@ export class VideoPlayerRouter extends AbstractRouter {
         savedVideo.isStream = data.isStream;
         savedVideo.hideUrl = data.hideUrl || false;
         savedVideo.flipVideo = data.flipVideo;
+
+        if (data.groupId == null) {
+          savedVideo.group = null;
+        } else {
+          const group = await groupRepo.findOne({
+            where: {
+              id: Equal(data.groupId),
+            }
+          });
+          savedVideo.group = group;
+        }
 
         const result = await savedVideoRepo.save(savedVideo);
 
@@ -265,6 +281,19 @@ export class VideoPlayerRouter extends AbstractRouter {
 
         if (data.flipVideo != undefined) {
           savedVideo.flipVideo = data.flipVideo;
+        }
+
+        if (data.groupId !== undefined) {
+          if (data.groupId === null) {
+            savedVideo.group = null;
+          } else {
+            const group = await groupRepo.findOne({
+              where: {
+                id: Equal(data.groupId),
+              }
+            });
+            savedVideo.group = group;
+          }
         }
 
         const result = await savedVideoRepo.save(savedVideo);
@@ -367,6 +396,152 @@ export class VideoPlayerRouter extends AbstractRouter {
     });
     //#endregion
 
+    //#region Groups
+    this.router.get("/groups", async (req, res) => {
+      /*
+      #swagger.path = '/video_player/groups'
+      #swagger.tags = ['Video Player'],
+      #swagger.description = "Get all video groups"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      */
+      try {
+        const result = await groupRepo.find({});
+        res.json(result);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.post("/groups", async (req, res) => {
+      /*
+      #swagger.path = '/video_player/groups'
+      #swagger.tags = ['Video Player'],
+      #swagger.description = "Greate a group"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Create/Modify a group',
+        schema: {
+          name: "Test"
+        }
+      }
+      */
+      try {
+        const parsed = AlterGroupModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        const group = new SavedVideoGroup();
+        group.name = data.name;
+
+        const result = await groupRepo.save(group);
+
+        res.json(result);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.put("/groups/:id", async (req, res) => {
+      /*
+      #swagger.path = '/video_player/groups/{id}'
+      #swagger.tags = ['Video Player'],
+      #swagger.description = "Edit a group"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[404] = { description: "Group not found" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Create/Modify a group',
+        schema: {
+          name: "Test"
+        }
+      }
+      */
+      try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+          res.status(400).send({ message: "Bad request: Id is not a valid number" });
+          return;
+        }
+
+        const parsed = AlterGroupModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        const group = await groupRepo.findOne({
+          where: {
+            id: Equal(id),
+          }
+        });
+
+        if (group == null) {
+          res.status(400).send({ message: "Group not found" });
+          return;
+        }
+
+        group.name = data.name;
+
+        const result = await groupRepo.save(group);
+
+        res.json(result);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.delete("/groups/:id", async (req, res) => {
+      /*
+      #swagger.path = '/video_player/groups/{id}'
+      #swagger.tags = ['Video Player'],
+      #swagger.description = "Delete a group"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[404] = { description: "Group not found" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      */
+      try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+          res.status(400).send({ message: "Bad request: Id is not a valid number" });
+          return;
+        }
+
+        const group = await groupRepo.findOne({
+          where: {
+            id: Equal(id),
+          }
+        });
+
+        if (group == null) {
+          res.status(400).send({ message: "Group not found" });
+          return;
+        }
+
+        await groupRepo.remove(group);
+
+        res.json({});
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+    //#endregion
+
+    //#region Cache
     this.router.delete("/cache", async (req, res) => {
       /*
       #swagger.path = '/video_player/cache'
@@ -399,6 +574,7 @@ export class VideoPlayerRouter extends AbstractRouter {
         throw error;
       }
     });
+    //#endregion
   }
 
   private get playbackManager() {
@@ -414,6 +590,7 @@ const SavedVideoModel = z.object({
   flipVideo: z.boolean(),
   isStream: z.boolean(),
   hideUrl: z.boolean().optional(),
+  groupId: z.number().int().safe().nullable(),
 });
 
 const UpdateSavedVideoModel = z.object({
@@ -424,6 +601,7 @@ const UpdateSavedVideoModel = z.object({
   flipVideo: z.boolean(),
   isStream: z.boolean().optional(),
   hideUrl: z.boolean().optional(),
+  groupId: z.number().int().safe().optional().nullable(),
 });
 
 const PlayVideoModel = z.object({
@@ -434,4 +612,8 @@ const PlayVideoModel = z.object({
 
 const StreamVideoModel = z.object({
   url: z.string().url().max(1024),
+});
+
+const AlterGroupModel = z.object({
+  name: z.string().min(1).max(255),
 });

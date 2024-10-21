@@ -6,6 +6,7 @@ import { RgbSceneEffect } from "./models/rgb/RgbSceneEffect.model";
 import { RgbSceneEffectProperty } from "./models/rgb/RgbSceneEffectProperty.model";
 import { KVDataStoreEntry } from "./models/data/KVDataStoreEntry.model";
 import { RgbEditorPreviewElement } from "./models/rgb/RgbEditorConfig.model";
+import { SavedVideoGroup } from "./models/video-player/SavedVideoGroup.model";
 
 export class Database {
   private _protogen;
@@ -26,6 +27,7 @@ export class Database {
       entities: [
         // ---------- Video manager ----------
         SavedVideo,
+        SavedVideoGroup,
 
         // ---------- RGB ----------
         StoredRgbScene,
