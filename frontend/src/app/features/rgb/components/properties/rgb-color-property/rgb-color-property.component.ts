@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RgbPropertySharedClass } from '../RgbPropertySharedClass';
 import { catchError } from 'rxjs';
+import { hexColorToNumber, numberToHexColor } from '../../../../../core/services/utils/Utils';
 
 @Component({
   selector: 'app-rgb-color-property',
@@ -30,15 +31,4 @@ export class RgbColorPropertyComponent extends RgbPropertySharedClass implements
       console.debug("Property updated");
     });
   }
-}
-
-function numberToHexColor(num: number): string {
-  num = Math.max(0, Math.min(0xFFFFFF, num));
-  let hex = num.toString(16).toUpperCase();
-  return "#" + hex.padStart(6, "0");
-}
-
-function hexColorToNumber(hex: string): number {
-  hex = hex.replace("#", "");
-  return parseInt(hex, 16);
 }

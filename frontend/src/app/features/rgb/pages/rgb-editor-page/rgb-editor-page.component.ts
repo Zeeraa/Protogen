@@ -1,17 +1,15 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RgbApiService, RgbEffectInfo, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError } from 'rxjs';
-import { SocketService } from '../../../../core/services/socket/socket.service';
-import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 
 @Component({
   selector: 'app-rgb-editor-page',
   templateUrl: './rgb-editor-page.component.html',
   styleUrl: './rgb-editor-page.component.scss'
 })
-export class RgbEditorPageComponent implements OnInit, OnDestroy {
+export class RgbEditorPageComponent implements OnInit {
   scene: RgbScene | null = null;
   sceneName: string = "";
   availableEffects: RgbEffectInfo[] = [];
@@ -41,7 +39,6 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private router: Router,
     private route: ActivatedRoute,
-    private socket: SocketService,
   ) { }
 
   get effects() {
@@ -135,10 +132,5 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
         });
       });
     });
-    this.socket.sendMessage(SocketMessageType.C2S_EnableRgbPreview, true);
-  }
-
-  ngOnDestroy(): void {
-    this.socket.sendMessage(SocketMessageType.C2S_EnableRgbPreview, false);
   }
 }
