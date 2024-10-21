@@ -429,7 +429,7 @@ export class RgbRouter extends AbstractRouter {
 
       #swagger.parameters['fullSave'] = {
         in: 'query',
-        description: 'True to do a full save of the object'
+        description: 'True to do a full save of the object',
         type: 'boolean',
         required: 'false'
       }
