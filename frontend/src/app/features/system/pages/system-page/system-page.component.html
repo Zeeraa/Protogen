@@ -30,6 +30,23 @@
     <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
       <div class="container-fluid">
         <div class="row mt-2">
+          <div class="col-12">
+            <h5>HUD</h5>
+          </div>
+
+          <div class="col-12 mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="enableHud" [(ngModel)]="hudEnabled">
+              <label class="form-check-label" for="enableHud">Enable HUD display</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
+      <div class="container-fluid">
+        <div class="row mt-2">
           <div class="row mt-2">
             <div class="col-12">
               <h5>Hardware</h5>
@@ -64,6 +81,14 @@
           </div>
 
           <div class="col-12 mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="showNetworkingData"
+                [(ngModel)]="showSensitiveNetworkingData" (click)="showNetworkDataChanged($event)">
+              <label class="form-check-label" for="showNetworkingData">Show sensitive data</label>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
             <span>
               Connectivity:
               @if(hasConnectivity) {
@@ -75,11 +100,22 @@
           </div>
 
           <div class="col-12 mt-2">
-            ISP: <span class="text-info">{{isp}}</span>
+            ISP:
+            @if(showSensitiveNetworkingData) {
+            <span class="text-info">{{isp}}</span>
+            } @else {
+            <span class="text-danger">[Hidden]</span>
+            }
           </div>
 
           <div class="col-12 mt-2">
-            IP: <span class="text-info">{{ip}}</span>
+            IP:
+            @if(showSensitiveNetworkingData) {
+            <span class="text-info">{{ip}}</span>
+            } @else {
+            <span class="text-danger">[Hidden]</span>
+            }
+
           </div>
         </div>
       </div>
