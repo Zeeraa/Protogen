@@ -111,14 +111,14 @@ def handle_input(input):
 print("LOG:Loading font")
 
 with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr:
-    now = utime.ticks_ms()
     print("LOG:Start main loop")
     while True:
+        now = utime.ticks_ms()
         user_input = non_blocking_input()
         
         if user_input:
             handle_input(user_input)
-        
+
         if next_boop_state_changed_allowed_at <= now:
             boop_state = bool(boop_pin.value() ^ PROTO_BOOP_SENSOR_INVERT)
             if boop_state is not last_boop_state:
