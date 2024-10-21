@@ -7,6 +7,7 @@ import { VideoDownloadJob } from "../../../remote-worker/RemoteWorker";
 import { readdirSync, statSync, unlinkSync } from "fs";
 import { extname, join } from "path";
 import { SavedVideoGroup } from "../../../database/models/video-player/SavedVideoGroup.model";
+import { cyan } from "colors";
 
 export class VideoPlayerRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -200,6 +201,8 @@ export class VideoPlayerRouter extends AbstractRouter {
 
         const result = await savedVideoRepo.save(savedVideo);
 
+        this.preProcessJob(result);
+
         res.json(result);
       } catch (err) {
         this.handleError(err, req, res);
@@ -297,6 +300,8 @@ export class VideoPlayerRouter extends AbstractRouter {
         }
 
         const result = await savedVideoRepo.save(savedVideo);
+
+        this.preProcessJob(result);
 
         res.json(result);
       } catch (err) {
@@ -580,6 +585,15 @@ export class VideoPlayerRouter extends AbstractRouter {
   private get playbackManager() {
     return this.protogen.videoPlaybackManager;
   }
+
+  private preProcessJob(video: SavedVideo) {
+    this.protogen.remoteWorker.createJob(video.url, video.mirrorVideo, video.flipVideo).then((job) => {
+      this.protogen.logger.info("VideoPlayer", "Pre-processing saved video. Job id: " + cyan(job.jobId));
+    }).catch(err => {
+      console.error(err);
+      this.protogen.logger.error("VideoPlayer", "Could not start video pre-processing job");
+    })
+  }
 }
 
 const SavedVideoModel = z.object({
@@ -596,8 +610,8 @@ const SavedVideoModel = z.object({
 const UpdateSavedVideoModel = z.object({
   sortingNumber: z.number().optional(),
   name: z.string().trim().min(1).max(255).optional(),
-  url: z.string().url().max(1024).optional(),
-  mirrorVideo: z.boolean().optional(),
+  url: z.string().url().max(1024),
+  mirrorVideo: z.boolean(),
   flipVideo: z.boolean(),
   isStream: z.boolean().optional(),
   hideUrl: z.boolean().optional(),
