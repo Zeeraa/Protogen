@@ -3,6 +3,7 @@ import { DatabaseConfiguration } from "./objects/DatabaseConfiguration";
 import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfiguration";
 import { LedMatrixConfiguration } from "./objects/LedMatrixConfiguration";
 import { MiscConfiguration } from "./objects/MiscConfiguration";
+import { RedisConfiguration } from "./objects/RedisConfiguration";
 import { RemoteWorkerConfiguration } from "./objects/RemoteWorkerConfiguration";
 import { RgbConfiguration } from "./objects/RgbConfiguration";
 import { SerialConfiguration } from "./objects/SerialConfiguration";
@@ -167,6 +168,24 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
+  //#region Redis
+  const redisHost = process.env["REDIS_HOST"];
+  const redisPort = parseInt(String(process.env["REDIS_PORT"]));
+
+  if (redisHost == null) {
+    throw new Error("Missing: REDIS_HOST");
+  }
+
+  if (isNaN(redisPort) || redisPort <= 0 || redisPort > 65535) {
+    throw new Error("Missing or invalid: REDIS_PORT");
+  }
+
+  const redis: RedisConfiguration = {
+    host: redisHost,
+    port: redisPort,
+  }
+  //#endregion
+
   const tempDirectory = process.env["TEMP_DIRECTORY"] || "./temp";
 
   return {
@@ -179,6 +198,7 @@ export function loadConfiguration(): Configuration {
     rgb: rgb,
     tempDirectory: tempDirectory,
     misc: misc,
+    redis: redis,
   }
 }
 
