@@ -13,6 +13,7 @@ PROTO_LED_COUNT = 24 * 2
 # ========== Boop sensor ==========
 PROTO_BOOP_SENSOR_PIN = 7
 PROTO_BOOP_SENSOR_INVERT = True # True if a the sensor pulls down on detection
+PROTO_BOOP_SENSOR_DEBOUNCE_TIME_MS = 300
 
 # ========== OLED ==========
 PROTO_OLED_SDA = 4
@@ -38,6 +39,8 @@ display.sleep(False)
 display_changed = True
 
 text_array = ["", "", "", "", "", ""] # Define the available line count here
+
+next_boop_state_changed_allowed_at = 0
 
 # Startup text
 text_array[0] = "Protogen V1.0"
@@ -106,8 +109,9 @@ def handle_input(input):
         print(f"ERR:{e}")
 
 print("LOG:Loading font")
-last_time = utime.ticks_ms()
+
 with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr:
+    now = utime.ticks_ms()
     print("LOG:Start main loop")
     while True:
         user_input = non_blocking_input()
@@ -115,12 +119,14 @@ with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr
         if user_input:
             handle_input(user_input)
         
-        boop_state = bool(boop_pin.value() ^ PROTO_BOOP_SENSOR_INVERT)
-        if boop_state is not last_boop_state:
-            last_boop_state = boop_state
-            machine.Pin.board.LED.value(boop_state)
-            print("BOOP:" + str(boop_state))
-        
+        if next_boop_state_changed_allowed_at <= now:
+            boop_state = bool(boop_pin.value() ^ PROTO_BOOP_SENSOR_INVERT)
+            if boop_state is not last_boop_state:
+                next_boop_state_changed_allowed_at = now + PROTO_BOOP_SENSOR_DEBOUNCE_TIME_MS
+                last_boop_state = boop_state
+                machine.Pin.board.LED.value(boop_state)
+                print("BOOP:" + str(boop_state))
+            
         if display_changed:
             display_changed = False
             display.fill(0)
