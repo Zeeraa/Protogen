@@ -5,11 +5,9 @@ import { VisorRenderer } from "./rendering/VisorRenderer";
 import { FaceRendererId, VisorFaceRenderer } from "./rendering/renderers/VisorFaceRenderLayer";
 import { BSODRenderer } from "./rendering/renderers/special/BSODRenderer";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
-import { boolean } from "zod";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { StaticPictureRenderer, URLImageSourceProvider } from "./rendering/renderers/StaticPictureRenderer";
-
-export const KV_ActiveRendererKey = "ActiveVisorRenderer";
+import { KV_ActiveRendererKey } from "../utils/KVDataStorageKeys";
 
 export class ProtogenVisor {
   private _protogen;

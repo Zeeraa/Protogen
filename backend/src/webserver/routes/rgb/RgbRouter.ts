@@ -5,10 +5,10 @@ import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { constructRgbEffect, RgbEffects } from "../../../rgb/effects/RgbEffects";
 import { RgbSceneEffectProperty } from "../../../database/models/rgb/RgbSceneEffectProperty.model";
 import { Equal } from "typeorm";
-import { KV_RbgPreviewWidth, KV_RgbPreviewFullSizeOnLargeViewports, KV_RgbPreviewHeigth } from "../../../rgb/RgbManager";
 import { RgbEditorPreviewElement } from "../../../database/models/rgb/RgbEditorConfig.model";
 import { RgbPreviewElementType } from "../../../database/models/rgb/enum/RgbPreviewElementType";
 import { uuidv7 } from "uuidv7";
+import { KV_RbgPreviewWidth, KV_RgbPreviewFullSizeOnLargeViewports, KV_RgbPreviewHeigth } from "../../../utils/KVDataStorageKeys";
 
 export class RgbRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
