@@ -4,6 +4,7 @@ import { catchError, Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { SocketService } from '../../../../core/services/socket/socket.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-visor-page',
@@ -59,6 +60,7 @@ export class VisorPageComponent implements OnInit, OnDestroy {
     private api: VisorApiService,
     private toastr: ToastrService,
     private socket: SocketService,
+    private title: Title,
   ) { }
 
   ngOnInit(): void {
@@ -83,6 +85,8 @@ export class VisorPageComponent implements OnInit, OnDestroy {
       }
     })
     this.socket.sendMessage(SocketMessageType.C2S_EnableVisorPreview, true);
+
+    this.title.setTitle("Visor - Protogen");
   }
 
   ngOnDestroy(): void {

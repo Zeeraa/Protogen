@@ -3,6 +3,7 @@ import { SystemApiService, SystemOverview } from '../../../../core/services/api/
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-system-page',
@@ -127,6 +128,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private api: SystemApiService,
     private modal: NgbModal,
+    private title: Title,
   ) { }
 
   ngOnInit(): void {
@@ -134,6 +136,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     this.updateInterval = setInterval(() => {
       this.update();
     }, 2000);
+    this.title.setTitle("System - Protogen");
   }
 
   ngOnDestroy(): void {

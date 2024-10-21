@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-rgb-dashboard-page',
@@ -14,6 +15,7 @@ export class RgbDashboardPageComponent implements OnInit {
   constructor(
     private toastr: ToastrService,
     private rgbApi: RgbApiService,
+    private title: Title,
   ) { }
 
   addBlank() {
@@ -46,5 +48,6 @@ export class RgbDashboardPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadEffects();
+    this.title.setTitle("RGB Light management - Protogen");
   }
 }
