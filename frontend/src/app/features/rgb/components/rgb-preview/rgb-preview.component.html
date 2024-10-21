@@ -1,1 +1,87 @@
-<canvas [width]="config.canvas.width" [height]="config.canvas.height" #rbgPreviewCanvas></canvas>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <h6>
+        RGB Preview
+        <span class="rgb-preview-setting text-info">
+          <i class="bi bi-gear-fill" (click)="setSettingsVisible(true)"></i>
+        </span>
+      </h6>
+    </div>
+  </div>
+
+  @if(socketUnavailable) {
+  <div class="row">
+    <div class="col-12 col-md-6">
+      <div class="alert alert-danger">
+        Websocket unavailable. Preview will not update
+      </div>
+    </div>
+  </div>
+  }
+
+  <div class="row">
+    <div class="col-12 " [class.col-md-6]="!fullOnLargeViewports">
+      <canvas class="w-100" [width]="cw" [height]="ch" #rbgPreviewCanvas></canvas>
+    </div>
+  </div>
+
+  @if (settingsVisible) {
+  <div class="row mb-4">
+    <div class="col-12">
+      <h6>Preview settings</h6>
+    </div>
+
+    <div class="col-12 col-sm-6">
+      <div class="mb-3">
+        <label for="rgbeditor_c_width" class="form-label">Width</label>
+        <input type="number" min="1" max="3000" class="form-control" id="rgbeditor_c_width" placeholder="Canvas width"
+          [(ngModel)]="config.canvas.width" (change)="this.applySettings()">
+      </div>
+    </div>
+    <div class="col-12 col-sm-6">
+      <div class="mb-3">
+        <label for="rgbeditor_c_height" class="form-label">Height</label>
+        <input type="number" min="1" max="3000" class="form-control" id="rgbeditor_c_height" placeholder="Canvas height"
+          [(ngModel)]="config.canvas.height" (change)="this.applySettings()">
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="mb-2">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="rgbeditor_fullSize"
+            (change)="applySettings()" [(ngModel)]="config.largeViewportFullSize">
+          <label class="form-check-label" for="rgbeditor_fullSize">Full size on large viewports</label>
+        </div>
+      </div>
+    </div>
+
+    @if(config.elements.length == 0) {
+    <div class="col-12">
+      <h6 class="text-danger">
+        No rgb elements defined. Add some to get led preview
+      </h6>
+    </div>
+    }
+
+    @for (element of config.elements; track $index) {
+    <app-rgb-preview-element-settings [element]="element" (changed)="this.applySettings()" />
+    }
+
+    <div class="col-12 mt-3">
+      <button class="mb-1 me-1 btn btn-danger" (click)="discardSettings()">
+        Discard changes
+      </button>
+
+      <button class="mb-1 me-1 btn btn-success" (click)="savePreviewSettings()">
+        Save
+      </button>
+
+      <button class="mb-1 me-1 btn btn-primary" (click)="addElement()">
+        Add element
+      </button>
+    </div>
+  </div>
+  }
+</div>

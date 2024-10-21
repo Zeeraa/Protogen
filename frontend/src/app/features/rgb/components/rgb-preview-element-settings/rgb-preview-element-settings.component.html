@@ -1,0 +1,67 @@
+<div class="card mb-2">
+  <div class="card-header">
+    RGB Preview element
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <div class="mb-3">
+          <label for="{{elementId}}_name" class="form-label">Element name</label>
+          <input type="text" class="form-control" [(ngModel)]="element.name" id="{{elementId}}_name" maxlength="128"
+            (change)="handleChange()">
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="mb-3">
+          <label for="{{elementId}}_type" class="form-label">Type</label>
+          <select class="form-select" [(ngModel)]="element.type" id="{{elementId}}_type" (change)="handleChange()">
+            @for (type of types; track $index) {
+            <option [value]="type">{{type}}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="mb-3">
+          <label for="{{elementId}}_x" class="form-label">X</label>
+          <input type="number" min="-100" max="100000" class="form-control" placeholder="X Position"
+            [(ngModel)]="element.x" id="{{elementId}}_x" (change)="handleChange()">
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="mb-3">
+          <label for="{{elementId}}_y" class="form-label">Y</label>
+          <input type="number" min="-100" max="100000" class="form-control" placeholder="Y Position"
+            [(ngModel)]="element.y" id="{{elementId}}_y" (change)="handleChange()">
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="mb-3">
+          <label for="{{elementId}}_start" class="form-label">Start index</label>
+          <input type="number" min="0" max="1024" class="form-control" placeholder="Start index"
+            [(ngModel)]="element.startIndex" id="{{elementId}}_start" (change)="handleChange()">
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="mb-3">
+          <label for="{{elementId}}_length" class="form-label">Length</label>
+          <input type="number" min="1" max="1024" class="form-control" placeholder="Length" [(ngModel)]="element.length"
+            id="{{elementId}}_length" (change)="handleChange()">
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-danger me-1 mb-1">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>

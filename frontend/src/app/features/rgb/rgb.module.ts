@@ -11,6 +11,7 @@ import { RgbIntPropertyComponent } from './components/properties/rgb-int-propert
 import { RgbColorPropertyComponent } from './components/properties/rgb-color-property/rgb-color-property.component';
 import { RgbBooleanPropertyComponent } from './components/properties/rgb-boolean-property/rgb-boolean-property.component';
 import { RgbPreviewComponent } from './components/rgb-preview/rgb-preview.component';
+import { RgbPreviewElementSettingsComponent } from './components/rgb-preview-element-settings/rgb-preview-element-settings.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { RgbPreviewComponent } from './components/rgb-preview/rgb-preview.compon
     RgbColorPropertyComponent,
     RgbBooleanPropertyComponent,
     RgbPreviewComponent,
+    RgbPreviewElementSettingsComponent,
   ],
   imports: [
     CommonModule,

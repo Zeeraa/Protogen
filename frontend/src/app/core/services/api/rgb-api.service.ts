@@ -69,6 +69,14 @@ export class RgbApiService extends ApiBaseService {
   getScenes(): Observable<RgbScene[]> {
     return this.http.get(this.apiBaseUrl + "/rgb/scenes").pipe(catchError(this.defaultErrorHandler)) as any as Observable<RgbScene[]>;
   }
+
+  getRgbPreviewConfig(): Observable<RgbPreviewConfiguration> {
+    return this.http.get(this.apiBaseUrl + "/rgb/preview/config").pipe(catchError(this.defaultErrorHandler)) as any as Observable<RgbPreviewConfiguration>;
+  }
+
+  setRgbPreviewConfig(config: RgbPreviewConfiguration): Observable<any> {
+    return this.http.put(this.apiBaseUrl + "/rgb/preview/config", config).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+  }
 }
 
 export interface RgbEffectInfo {
@@ -99,4 +107,30 @@ export interface RgbEffectProperty {
 
 export type PropertyKVData<T> = {
   [key: string]: T;
+}
+
+export interface RgbPreviewConfiguration {
+  canvas: RgbPreviewCanvas;
+  largeViewportFullSize: boolean;
+  elements: RgbPreviewElement[];
+}
+
+export interface RgbPreviewCanvas {
+  width: number;
+  height: number;
+}
+
+export interface RgbPreviewElement {
+  id: string;
+  name: string;
+  type: RgbPreviewElementType;
+  x: number;
+  y: number;
+  startIndex: number;
+  length: number;
+}
+
+export enum RgbPreviewElementType {
+  LedStrip = "LedStrip",
+  LedRing = "LedRing",
 }
