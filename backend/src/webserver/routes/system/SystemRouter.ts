@@ -29,7 +29,8 @@ export class SystemRouter extends AbstractRouter {
             hasConnectivity: this.protogen.netowrkManager.hasConnectivity,
             ip: this.protogen.netowrkManager.ip,
             isp: this.protogen.netowrkManager.isp,
-          }
+          },
+          hudEnabled: this.protogen.serial.enableHud,
         });
       } catch (err) {
         return this.handleError(err, req, res);

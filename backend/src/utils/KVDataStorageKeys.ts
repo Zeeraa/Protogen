@@ -10,3 +10,7 @@ export const KV_RgbPreviewFullSizeOnLargeViewports = "RgbPreviewUseCol12";
 //#region Visor
 export const KV_ActiveRendererKey = "ActiveVisorRenderer";
 //#endregion
+
+//#region 
+export const KV_EnableHUD = "EnableHUD";
+//#endregion

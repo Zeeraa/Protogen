@@ -4,11 +4,13 @@ import { ReadlineParser } from '@serialport/parser-readline';
 import { cyan, magenta } from "colors";
 import { compareStringArrays } from "../utils/Utils";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
+import { KV_EnableHUD } from "../utils/KVDataStorageKeys";
 
 export class SerialManager {
   private _protogen;
   private _port: SerialPort | null = null;
-  private _lastDisplayContent: string[] = []
+  private _lastDisplayContent: string[] = [];
+  private _enableHud = true;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
@@ -27,6 +29,25 @@ export class SerialManager {
     return this._protogen;
   }
 
+  public async init() {
+    await this.protogen.database.initMissingData(KV_EnableHUD, "true");
+    this._enableHud = await this.protogen.database.getData(KV_EnableHUD) == "true";
+  }
+
+  public get enableHud() {
+    return this._enableHud;
+  }
+
+  public set enableHud(enabled: boolean) {
+    this._enableHud = enabled;
+    if (!enabled) {
+      for (let i = 0; i < this._lastDisplayContent.length; i++) {
+        this._lastDisplayContent[i] = "";
+      }
+      this.write("TEXT:" + this._lastDisplayContent.join("|"));
+    }
+  }
+
   public write(data: string) {
     if (this._port != null) {
       if (this._port.isOpen) {
@@ -42,6 +63,10 @@ export class SerialManager {
   }
 
   public updateDisplay() {
+    if (!this.enableHud) {
+      return;
+    }
+
     let visorStatus = "Visor: " + cleanText(this.protogen.visor.activeRenderer?.name || "None");
     if (this.protogen.videoPlaybackManager.isPlaying) {
       visorStatus = "Visor: Video playing";

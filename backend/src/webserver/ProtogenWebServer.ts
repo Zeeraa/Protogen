@@ -15,6 +15,7 @@ import { Server, Socket } from 'socket.io';
 import { UserSocketSession } from "./socket/UserSocketSession";
 import { SocketMessageType } from "./socket/SocketMessageType";
 import { SocketMessage } from "./socket/SocketMessage";
+import { HudRouter } from "./routes/hud/HudRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -41,6 +42,7 @@ export class ProtogenWebServer {
     new VisorRouter(this).register();
     new SystemRouter(this).register();
     new RgbRouter(this).register();
+    new HudRouter(this).register();
 
     this.socket.on("connection", (socket: Socket) => {
       const session = new UserSocketSession(this.protogen, socket);
