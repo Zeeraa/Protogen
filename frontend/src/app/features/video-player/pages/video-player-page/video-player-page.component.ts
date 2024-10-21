@@ -6,6 +6,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup } from '@angular/forms';
 import { nullToUndefined, UrlPattern } from '../../../../core/services/utils/Utils';
 import { catchError } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-video-player-page',
@@ -183,6 +184,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     private api: VideoPlayerApiService,
     private volumeApi: AudioApiService,
     private modal: NgbModal,
+    private title: Title,
   ) { }
 
   ngOnInit(): void {
@@ -196,6 +198,8 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     this.volumeUpdateInterval = setInterval(() => {
       this.updateVolume();
     }, 5000);
+
+    this.title.setTitle("Video playback - Protogen");
   }
 
   ngOnDestroy(): void {

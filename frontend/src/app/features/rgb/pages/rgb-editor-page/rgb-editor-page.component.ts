@@ -3,6 +3,7 @@ import { RgbApiService, RgbEffectInfo, RgbScene } from '../../../../core/service
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-rgb-editor-page',
@@ -39,6 +40,7 @@ export class RgbEditorPageComponent implements OnInit {
     private toastr: ToastrService,
     private router: Router,
     private route: ActivatedRoute,
+    private title: Title,
   ) { }
 
   get effects() {
@@ -132,5 +134,7 @@ export class RgbEditorPageComponent implements OnInit {
         });
       });
     });
+
+    this.title.setTitle("RGB Editor - Protogen");
   }
 }

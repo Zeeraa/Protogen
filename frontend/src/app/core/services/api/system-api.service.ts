@@ -34,6 +34,7 @@ export interface SystemOverview {
   cpuUsage: number;
   ramUsage: number;
   network: Network;
+  hudEnabled: boolean;
 }
 
 export interface Network {

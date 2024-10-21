@@ -3,6 +3,9 @@ import { SystemApiService, SystemOverview } from '../../../../core/services/api/
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { Title } from '@angular/platform-browser';
+import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
+import { HudApiService } from '../../../../core/services/api/hud-api.service';
 
 @Component({
   selector: 'app-system-page',
@@ -14,6 +17,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   overview: SystemOverview | null = null;
   updateInterval: any = null;
   shutdownModalRef: null | NgbModalRef = null;
+  showSensitiveNetworkingData = false;
 
   get hasConnectivity() {
     return this.overview?.network.hasConnectivity || false;
@@ -24,6 +28,20 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       return this.overview?.network.ip;
     }
     return "Unknown";
+  }
+
+  get hudEnabled() {
+    return this.overview?.hudEnabled || true;
+  }
+
+  set hudEnabled(enabled: boolean) {
+    if (this.overview != null) {
+      this.overview.hudEnabled = enabled;
+    }
+    this.hudApi.setHudEnabled(enabled).pipe(catchError(err => {
+      this.toastr.error("Failed to toggle hud");
+      throw err;
+    })).subscribe();
   }
 
   get isp() {
@@ -123,10 +141,18 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  showNetworkDataChanged(event: Event) {
+    const element = event.target as HTMLInputElement
+    const checked = element.checked;
+    localStorage.setItem(LocalStorageKey_ShowSentitiveNetworkingInfo, checked ? "true" : "false");
+  }
+
   constructor(
     private toastr: ToastrService,
     private api: SystemApiService,
+    private hudApi: HudApiService,
     private modal: NgbModal,
+    private title: Title,
   ) { }
 
   ngOnInit(): void {
@@ -134,6 +160,9 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     this.updateInterval = setInterval(() => {
       this.update();
     }, 2000);
+    this.title.setTitle("System - Protogen");
+
+    this.showSensitiveNetworkingData = localStorage.getItem(LocalStorageKey_ShowSentitiveNetworkingInfo) == "true";
   }
 
   ngOnDestroy(): void {

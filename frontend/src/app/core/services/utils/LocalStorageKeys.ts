@@ -1,0 +1,1 @@
+export const LocalStorageKey_ShowSentitiveNetworkingInfo = "Protogen_ShowNetworkingSettings";
