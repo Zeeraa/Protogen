@@ -5,10 +5,102 @@ import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { constructRgbEffect, RgbEffects } from "../../../rgb/effects/RgbEffects";
 import { RgbSceneEffectProperty } from "../../../database/models/rgb/RgbSceneEffectProperty.model";
 import { Equal } from "typeorm";
+import { KV_RbgPreviewWidth, KV_RgbPreviewFullSizeOnLargeViewports, KV_RgbPreviewHeigth } from "../../../rgb/RgbManager";
+import { RgbEditorPreviewElement } from "../../../database/models/rgb/RgbEditorConfig.model";
+import { RgbPreviewElementType } from "../../../database/models/rgb/enum/RgbPreviewElementType";
+import { uuidv7 } from "uuidv7";
 
 export class RgbRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/rgb");
+
+    this.router.get("/preview/config", async (req, res) => {
+      /*
+      #swagger.path = '/rgb/preview/config'
+      #swagger.tags = ['RGB'],
+      #swagger.description = "Get the preview window configuration"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      try {
+        const repo = this.protogen.database.dataSource.getRepository(RgbEditorPreviewElement);
+
+        const w = parseInt(await this.protogen.database.getData(KV_RbgPreviewWidth) || "200");
+        const h = parseInt(await this.protogen.database.getData(KV_RgbPreviewHeigth) || "200");
+
+        const fullWidth = await this.protogen.database.getData(KV_RgbPreviewFullSizeOnLargeViewports) == "true";
+
+        const elements = await repo.find({
+          order: {
+            startIndex: "ASC",
+          }
+        });
+
+        const result: RgbPreviewConfiguration = {
+          canvas: {
+            width: w,
+            height: h,
+          },
+          largeViewportFullSize: fullWidth,
+          elements: elements,
+        }
+
+        res.json(result);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.put("/preview/config", async (req, res) => {
+      /*
+      #swagger.path = '/rgb/preview/config'
+      #swagger.tags = ['RGB'],
+      #swagger.description = "Save the configuration"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for details" }
+      */
+      try {
+        const parsed = RgbPreviewConfigModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        await this.protogen.database.dataSource.transaction(async (transaction) => {
+          const elementRepo = transaction.getRepository(RgbEditorPreviewElement);
+
+          const elements = await elementRepo.find({});
+
+          for (let i = 0; i < elements.length; i++) {
+            await elementRepo.delete(elements[i]);
+          }
+
+          await this.protogen.database.setData(KV_RbgPreviewWidth, String(data.canvas.width), transaction);
+          await this.protogen.database.setData(KV_RgbPreviewHeigth, String(data.canvas.height), transaction);
+          await this.protogen.database.setData(KV_RgbPreviewFullSizeOnLargeViewports, data.largeViewportFullSize ? "true" : "false", transaction);
+
+          for (let i = 0; i < data.elements.length; i++) {
+            const element = data.elements[i];
+
+            const dbElement = new RgbEditorPreviewElement();
+            dbElement.uuid = uuidv7();
+            dbElement.length = element.length;
+            dbElement.name = element.name;
+            dbElement.startIndex = element.startIndex;
+            dbElement.type = element.type;
+            dbElement.x = element.x;
+            dbElement.y = element.y;
+
+            await elementRepo.save(dbElement);
+          }
+        });
+
+        res.json({});
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
 
     this.router.get("/effects", async (req, res) => {
       /*
@@ -489,3 +581,30 @@ interface PropertyData {
   restrictions: any;
   metadata: any;
 }
+
+interface RgbPreviewConfiguration {
+  canvas: RgbPreviewCanvas;
+  largeViewportFullSize: boolean;
+  elements: RgbEditorPreviewElement[];
+}
+
+interface RgbPreviewCanvas {
+  width: number;
+  height: number;
+}
+
+const RgbPreviewConfigModel = z.object({
+  canvas: z.object({
+    width: z.number().safe().int().min(1).max(3000),
+    height: z.number().safe().int().min(1).max(3000),
+  }),
+  largeViewportFullSize: z.boolean(),
+  elements: z.array(z.object({
+    name: z.string().max(128),
+    type: z.nativeEnum(RgbPreviewElementType),
+    x: z.number().int().safe().max(100000).min(-100),
+    y: z.number().int().safe().max(100000).min(-100),
+    startIndex: z.number().int().safe().max(1024).nonnegative(),
+    length: z.number().int().safe().max(1024).nonnegative(),
+  }))
+});
