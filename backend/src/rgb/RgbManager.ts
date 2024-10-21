@@ -7,10 +7,12 @@ import { ProtoColors } from "../utils/ProtoColors";
 import { RgbSceneEffect } from "../database/models/rgb/RgbSceneEffect.model";
 import { RgbSceneEffectProperty } from "../database/models/rgb/RgbSceneEffectProperty.model";
 import { constructRgbEffect } from "./effects/RgbEffects";
-import { Socket } from "socket.io";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 
 export const KV_LastUsedRgbScene = "LastUsedRgbScene";
+export const KV_RbgPreviewWidth = "RbgPreviewWidth";
+export const KV_RgbPreviewHeigth = "RgbPreviewHeigth";
+export const KV_RgbPreviewFullSizeOnLargeViewports = "RgbPreviewUseCol12";
 
 export class RgbManager {
   private _protogen;
@@ -41,6 +43,12 @@ export class RgbManager {
 
   private get config() {
     return this.protogen.config.rgb;
+  }
+
+  public async init() {
+    this.protogen.database.initMissingData(KV_RbgPreviewWidth, "720");
+    this.protogen.database.initMissingData(KV_RgbPreviewHeigth, "400");
+    this.protogen.database.initMissingData(KV_RgbPreviewFullSizeOnLargeViewports, "false");
   }
 
   public get ledCount() {

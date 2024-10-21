@@ -56,6 +56,7 @@ export class Protogen {
     this._networkManager.runConnectivityCheck();
     await this.database.init();
     await this.webServer.init();
+    await this.rgb.init();
     await this.rgb.loadScenes();
     await this.rgb.applyLastScene();
     await this.visor.loadActiveRendererFromDatabase();
