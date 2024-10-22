@@ -6,6 +6,7 @@ import { RemoteWorkerConfiguration } from "./RemoteWorkerConfiguration";
 import { WebConfiguration } from "./WebConfiguration";
 import { RgbConfiguration } from "./RgbConfiguration";
 import { MiscConfiguration } from "./MiscConfiguration";
+import { RedisConfiguration } from "./RedisConfiguration";
 
 export interface Configuration {
   web: WebConfiguration;
@@ -17,4 +18,5 @@ export interface Configuration {
   rgb: RgbConfiguration;
   tempDirectory: string;
   misc: MiscConfiguration;
+  redis: RedisConfiguration;
 }

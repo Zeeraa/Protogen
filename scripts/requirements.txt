@@ -1,0 +1,4 @@
+sounddevice
+numpy
+redis
+scipy

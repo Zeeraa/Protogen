@@ -76,7 +76,7 @@ export class SerialManager {
 
     const additionalInfo: string[] = [];
 
-    if (!this.protogen.netowrkManager.hasConnectivity) {
+    if (!this.protogen.networkManager.hasConnectivity) {
       additionalInfo.push("Connectivity issues!");
     }
 
