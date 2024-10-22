@@ -8,7 +8,7 @@ import utime
 
 # ========== Config ==========
 PROTO_LED_PIN = 6
-PROTO_LED_COUNT = 24 * 2
+PROTO_LED_COUNT = 24 + 24 + 13 + 13
 
 # ========== Boop sensor ==========
 PROTO_BOOP_SENSOR_PIN = 7
