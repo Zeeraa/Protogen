@@ -3,6 +3,7 @@ export enum SocketMessageType {
   S2C_RgbPreview = "S2C_RgbPreview",
   S2C_VisorPreview = "S2C_VisorPreview",
   S2C_Ping = "S2C_Ping",
+  S2C_AudioData = "S2C_AudioData",
 
   // ===== C2S (Client to Server) =====
   C2S_EnableRgbPreview = "C2S_EnableRgbPreview",

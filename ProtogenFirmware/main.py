@@ -1,32 +1,30 @@
 import sys
-import select
 import machine
 import neopixel
 import sh1106
 import font
-import utime
 
 # ========== Config ==========
 PROTO_LED_PIN = 6
-PROTO_LED_COUNT = 24 * 2
+PROTO_LED_COUNT = 24 + 24 + 13 + 13
 
 # ========== Boop sensor ==========
 PROTO_BOOP_SENSOR_PIN = 7
-PROTO_BOOP_SENSOR_INVERT = True # True if a the sensor pulls down on detection
-PROTO_BOOP_SENSOR_DEBOUNCE_TIME_MS = 300
+PROTO_BOOP_SENSOR_INVERT = True  # True if the sensor pulls down on detection
 
 # ========== OLED ==========
 PROTO_OLED_SDA = 4
 PROTO_OLED_SCL = 5
-PROTO_OLED_WIDTH  = 128
+PROTO_OLED_WIDTH = 128
 PROTO_OLED_HEIGHT = 64
 
 # ========== Main ==========
 print("LOG:Init neopixel")
 np = neopixel.NeoPixel(machine.Pin(PROTO_LED_PIN), PROTO_LED_COUNT)
 for i in range(PROTO_LED_COUNT):
-    np[i] = (0, 0, 0) # type: ignore
+    np[i] = (0, 0, 0)  # type: ignore
 np.write()
+debug_clock_pin = machine.Pin(16, machine.Pin.OUT)
 
 print("LOG:Init boop sensor")
 last_boop_state = False
@@ -38,95 +36,67 @@ display = sh1106.SH1106_I2C(128, 64, display_i2c, machine.Pin(2), 0x3c)
 display.sleep(False)
 display_changed = True
 
-text_array = ["", "", "", "", "", ""] # Define the available line count here
-
-next_boop_state_changed_allowed_at = 0
+text_array = ["", "", "", "", "", ""]  # Define the available line count here
 
 # Startup text
 text_array[0] = "Protogen V1.0"
 text_array[1] = "Waiting for connection"
 
-machine.Pin.board.LED.value(0)
-
-buffer = ""
-def non_blocking_input():
-    global buffer
-    # Check if there's input waiting
-    if sys.stdin in select.select([sys.stdin], [], [], 0)[0]: # type: ignore
-        while True:
-            char = sys.stdin.read(1)  # Read one character at a time
-            if char == '\n':  # Check for the Enter key
-                input_str = buffer  # Capture the full input string
-                buffer = ""  # Reset the buffer for the next input
-                return input_str
-            else:
-                buffer += char  # Add the character to the buffer
-    return None
+machine.Pin.board.LED.value(1)
 
 def handle_input(input):
     global display_changed
     try:
         if input.startswith('RGB:'):
-            color_values = input[4:].strip()  # Get everything after 'RGB:'
-            # Split the string into a list of integers
-            rgb_list = list(map(int, color_values.split(',')))
-
-            # Validate the length of the list
-            if len(rgb_list) % 1 != 0:
-                print("Error: RGB values must be a valid list of integers.")
-                return  # Exit if the length is invalid
-
-            # Clear the NeoPixel buffer
-            for i in range(PROTO_LED_COUNT):
-                np[i] = (0, 0, 0)  # type: ignore # Set all pixels to off
-            
-            # Process color values
-            for i in range(len(rgb_list)):  # Process each integer color
+            rgb_list = list(map(int, input[4:].strip().split(',')))
+            for i in range(len(rgb_list)):
                 if i < PROTO_LED_COUNT:  # Ensure we do not exceed the LED count
                     color = rgb_list[i]
-                    r = (color >> 16) & 0xFF  # Extract red
-                    g = (color >> 8) & 0xFF   # Extract green
-                    b = color & 0xFF          # Extract blue
-                    
                     # Update NeoPixel with the received color
-                    np[i] = (r, g, b) # type: ignore
-
+                    np[i] = ((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)  # type: ignore
             np.write()  # Update the NeoPixels once after processing all colors
-            print("OK:RGB") 
         elif input == 'REBOOT':
             print("OK:RESET")
             machine.reset()
         elif input.startswith('TEXT:'):
             lines = input[5:].strip().split("|")
-            if(len(lines) > len(text_array)):
-                print("ERR:Input text exceeds the available lien count of " + str(len(text_array)))
+            if len(lines) > len(text_array):
+                print("ERR:Input text exceeds the available line count of " + str(len(text_array)))
             else:
                 for index, value in enumerate(lines):
                     text_array[index] = value
                     display_changed = True
-                print("OK:TEXT")
     except Exception as e:
         print(f"ERR:{e}")
 
-print("LOG:Loading font")
+# Function for blocking input until newline
+def blocking_input():
+    input_str = sys.stdin.readline().strip()  # This will block until a newline is received
+    return input_str
 
+# Function for handling boop sensor state
+def check_boop_sensor(timer):
+    global last_boop_state
+    boop_state = bool(boop_pin.value() ^ PROTO_BOOP_SENSOR_INVERT)
+    if boop_state != last_boop_state:
+        last_boop_state = boop_state
+        print("BOOP:" + str(boop_state))
+
+# Setup a timer for boop sensor checking every 100ms (adjust as needed)
+boop_timer = machine.Timer(-1)
+boop_timer.init(period=100, mode=machine.Timer.PERIODIC, callback=check_boop_sensor)
+
+print("LOG:Loading font")
 with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr:
     print("LOG:Start main loop")
     while True:
-        now = utime.ticks_ms()
-        user_input = non_blocking_input()
+        debug_clock_pin.value(not debug_clock_pin.value())
         
+        # Block until input is received
+        user_input = blocking_input()
         if user_input:
             handle_input(user_input)
 
-        if next_boop_state_changed_allowed_at <= now:
-            boop_state = bool(boop_pin.value() ^ PROTO_BOOP_SENSOR_INVERT)
-            if boop_state is not last_boop_state:
-                next_boop_state_changed_allowed_at = now + PROTO_BOOP_SENSOR_DEBOUNCE_TIME_MS
-                last_boop_state = boop_state
-                machine.Pin.board.LED.value(boop_state)
-                print("BOOP:" + str(boop_state))
-            
         if display_changed:
             display_changed = False
             display.fill(0)
@@ -134,5 +104,3 @@ with font.FontRenderer(PROTO_OLED_WIDTH, PROTO_OLED_HEIGHT, display.pixel) as fr
             for index, value in enumerate(text_array):
                 fr.text(value, 0, text_start + (12 * index), 255)
             display.show()
-
-
