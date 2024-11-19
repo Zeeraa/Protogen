@@ -8,6 +8,8 @@ import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { StaticPictureRenderer, URLImageSourceProvider } from "./rendering/renderers/StaticPictureRenderer";
 import { KV_ActiveRendererKey } from "../utils/KVDataStorageKeys";
+import { PixelFont } from "../utils/PixelFont";
+import sharp from "sharp";
 
 export class ProtogenVisor {
   private _protogen;
@@ -61,6 +63,75 @@ export class ProtogenVisor {
     });
   }
 
+  public async tryRenderTextFrame(text: string, color: string = "#FFFFFF") {
+    try {
+      await this.renderTextFrame(text, color);
+      return true;
+    } catch (err) {
+      console.error("ProtogenVisor::tryRenderTextFrame() failed.", err);
+    }
+    return false;
+  }
+
+  public async renderTextFrame(text: string, color: string = "#FFFFFF") {
+    const panelW = this.config.width / 2;
+    const tmpCanvas = createCanvas(panelW, this.config.height);
+    const tmpCtx = tmpCanvas.getContext('2d');
+
+    tmpCtx.fillStyle = "#000000";
+    tmpCtx.fillRect(0, 0, panelW, this.config.height);
+
+    text = text.toUpperCase();
+
+    let drawX = 0;
+    let drawY = 0;
+
+    for (let i = 0; i < text.length; i++) {
+      if (drawX > panelW) {
+        continue;
+      }
+
+      const char = text[i];
+      if (char === '\n') {
+        drawX = 0;
+        drawY += 7;
+      } else {
+        const font = PixelFont[String(char)];
+        if (font == undefined) {
+          continue;
+        }
+
+        for (let cY = 0; cY < font.length; cY++) {
+          for (let cX = 0; cX < font[cY].length; cX++) {
+            const val = font[cY][cX];
+            tmpCtx.fillStyle = val == 1 ? color : "#000000";
+            tmpCtx.fillRect(drawX + cX, drawY + cY, 1, 1);
+          }
+        }
+
+        const width = font[0].length;
+        drawX += width + 1;
+      }
+    }
+
+    const frameBuffer = tmpCanvas.toBuffer('image/png');
+    const frameMetadata = await sharp(frameBuffer).metadata();
+
+    const fullVisorFrameBuffer = await sharp({
+      create: {
+        width: panelW * 2,
+        height: this.config.height,
+        channels: frameMetadata.channels!,
+        background: { r: 0, g: 0, b: 0, alpha: 0 }
+      }
+    }).composite([
+      { input: frameBuffer, left: 0, top: 0 },
+      { input: frameBuffer, left: frameMetadata.width, top: 0 }
+    ]).png().toBuffer();
+
+    await this.protogen.flaschenTaschen.sendImageBuffer(fullVisorFrameBuffer, panelW * 2, this.config.height);
+  }
+
   private handleBoopState(boopState: boolean) {
     this._activeRenderer?.handleBoopState(boopState);
   }
@@ -97,7 +168,9 @@ export class ProtogenVisor {
         this.protogen.logger.error("Visor", "An error occured while calling init on renderer with id " + cyan(renderer.id) + " (" + cyan(renderer.name) + ")");
       }
     }
+  }
 
+  public beginMainLoop() {
     setInterval(() => {
       this.render();
     }, 1000 / 60)

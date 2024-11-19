@@ -1,6 +1,6 @@
 {
   "name": "protogen-backend",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Backend service for protogen project",
   "main": "dist/index.js",
   "scripts": {

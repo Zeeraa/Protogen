@@ -6,11 +6,16 @@ import { compareStringArrays } from "../utils/Utils";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { KV_EnableHUD } from "../utils/KVDataStorageKeys";
 
+const DebounceTime = 3;
+
 export class SerialManager {
   private _protogen;
   private _port: SerialPort | null = null;
   private _lastDisplayContent: string[] = [];
   private _enableHud = true;
+  private _boopSensorLastState = false; // What system thinks is active (debounced signal)
+  private _boopSensorReportedState = false; // Last reported by sensor
+  private _boopSensorDebounceTime = 0;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
@@ -19,6 +24,17 @@ export class SerialManager {
     setInterval(() => {
       this.updateDisplay();
     }, 1000 * 1);
+
+    setInterval(() => {
+      if (this._boopSensorDebounceTime > 0) {
+        this._boopSensorDebounceTime--;
+      } else if (this._boopSensorLastState != this._boopSensorReportedState) {
+        this._boopSensorDebounceTime = DebounceTime;
+        this._boopSensorReportedState == this._boopSensorLastState;
+        this.protogen.logger.info("Serial", "Boop state change to " + this._boopSensorReportedState);
+        this.protogen.eventEmitter.emit(ProtogenEvents.Booped, this._boopSensorReportedState);
+      }
+    }, 100);
   }
 
   protected get config() {
@@ -139,8 +155,7 @@ export class SerialManager {
       if (string.startsWith("BOOP:")) {
         console.debug("Raw boop state value: " + string.split(":")[1].toLowerCase().trim());
         const state = string.split(":")[1].toLowerCase().trim() == "true";
-        this.protogen.logger.info("Serial", "Boop state change to " + state);
-        this.protogen.eventEmitter.emit(ProtogenEvents.Booped, state);
+        this._boopSensorReportedState = state;
         return;
       }
 
