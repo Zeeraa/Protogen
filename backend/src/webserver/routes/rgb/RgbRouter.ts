@@ -436,7 +436,7 @@ export class RgbRouter extends AbstractRouter {
 
       #swagger.parameters['body'] = {
         in: 'body',
-        description: 'Set a propertys',
+        description: 'Set a property',
         schema: {
           value: "New value"
         }

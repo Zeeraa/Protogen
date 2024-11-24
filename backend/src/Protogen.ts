@@ -12,6 +12,10 @@ import { RgbManager } from "./rgb/RgbManager";
 import { NetworkManager } from "./network-manager/NetworkManager";
 import EventEmitter from "events";
 import { RedisManager } from "./redis/RedisManager";
+import { sleep } from "./utils/Utils";
+
+export const VersionNumber = "0.0.1";
+const BootMessageColor = "#00FF00";
 
 export class Protogen {
   private _config: Configuration;
@@ -45,7 +49,7 @@ export class Protogen {
     this._logger = new Logger();
     this._database = new Database(this);
     this._webServer = new ProtogenWebServer(this);
-    this._flaschenTaschen = new FlaschenTaschen(this.config.flaschenTaschen.host, this.config.flaschenTaschen.port);
+    this._flaschenTaschen = new FlaschenTaschen(this.config.flaschenTaschen);
     this._visor = new ProtogenVisor(this);
     this._remoteWorker = new ProtogenRemoteWorker(this);
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
@@ -56,14 +60,21 @@ export class Protogen {
   }
 
   public async init() {
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit database", BootMessageColor);
     this._networkManager.runConnectivityCheck();
     await this.database.init();
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit web server", BootMessageColor);
     await this.webServer.init();
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit RGB", BootMessageColor);
     await this.rgb.init();
     await this.rgb.loadScenes();
     await this.rgb.applyLastScene();
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit VISOR", BootMessageColor);
     await this.visor.loadActiveRendererFromDatabase();
     await this.visor.init();
+    await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + VersionNumber, BootMessageColor);
+    await sleep(1000); // Show ready message for 1000ms before starting visor render loop
+    this.visor.beginMainLoop();
     this.logger.info("Protogen", "Protogen::init() finished");
   }
 

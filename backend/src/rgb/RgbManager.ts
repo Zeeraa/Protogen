@@ -171,9 +171,10 @@ export class RgbManager {
     } else {
       dbScene = new StoredRgbScene();
       dbScene.id = scene.id;
-      dbScene.name = scene.name;
       dbScene.effects = [];
     }
+
+    dbScene.name = scene.name;
 
     // Remove any deleted effects
     dbScene.effects = dbScene.effects.filter(se => scene.effects.find(e => e.id == se.id) != null);

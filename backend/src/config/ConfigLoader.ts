@@ -60,12 +60,18 @@ export function loadConfiguration(): Configuration {
   //#endregion
 
   //#region Flaschen taschen
-  const ftHost = process.env["FT_HOST"]
+  const ftHost = process.env["FT_HOST"];
+  const ftConfig = process.env["FT_CONFIG_FILE"];
+  const ftCustomArgs = process.env["FT_CUSTOM_PARAMS"];
 
   const ftPort = parseInt(String(process.env["FT_PORT"]));
 
   if (isNaN(ftPort) || ftPort <= 0 || ftPort > 65535) {
     throw new Error("Missing or invalid: FT_PORT");
+  }
+
+  if (ftConfig == null) {
+    throw new Error("Missing: FT_CONFIG_FILE");
   }
 
   if (ftHost == null) {
@@ -75,6 +81,8 @@ export function loadConfiguration(): Configuration {
   const flaschenTaschen: FlaschenTaschenConfiguration = {
     host: ftHost,
     port: ftPort,
+    configFile: ftConfig,
+    customParams: process.env["FT_CUSTOM_PARAMS"] || null,
   }
   //#endregion
 

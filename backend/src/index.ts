@@ -18,6 +18,7 @@ try {
   console.log("Protogen::init()");
   protogen.init().catch(err => {
     console.error(red("An error occured while calling Protogen::init()"), err);
+    protogen.visor.tryRenderTextFrame("BOOT ERROR :(\nInit failed!\nCheck logs", "#FF0000");
   });
 } catch (err) {
   console.error(red("An error occured while starting"), err);
