@@ -134,6 +134,6 @@ export class SystemRouter extends AbstractRouter {
 }
 
 const FTSettingsSchema = z.object({
-  ledLimitRefresh: z.number().int().safe().min(1).max(200),
-  ledSlowdownGpio: z.number().int().safe().min(0).max(4),
+  ledLimitRefresh: z.coerce.number().int().safe().min(1).max(200),
+  ledSlowdownGpio: z.coerce.number().int().safe().min(0).max(4),
 });

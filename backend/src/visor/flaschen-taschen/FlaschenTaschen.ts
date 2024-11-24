@@ -7,7 +7,7 @@ import { execAsync } from '../../utils/SystemUtils';
 
 const DefaultFlaschenTaschenParameters = "--led-cols=64 --led-rows=32 --led-chain=2 --led-gpio-mapping=adafruit-hat";
 const DefaultLedSlowdown = 3;
-const DefaultRefreshRateLimit = 60;
+const DefaultRefreshRateLimit = 100;
 
 export class FlaschenTaschen {
   private _config;
