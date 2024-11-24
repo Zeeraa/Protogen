@@ -24,7 +24,15 @@ export class SystemApiService extends ApiBaseService {
   }
 
   restartFlaschenTaschen() {
-    return this.http.post(this.apiBaseUrl + "/system/restart-flaschen-taschen", {}).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+    return this.http.post(this.apiBaseUrl + "/system/flaschen-taschen/restart", {}).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+  }
+
+  getFlaschenTaschenSettings() {
+    return this.http.get(this.apiBaseUrl + "/system/flaschen-taschen/settings").pipe(catchError(this.defaultErrorHandler)) as any as Observable<FlaschenTaschenSettings>;
+  }
+
+  updateFlaschenTaschenSettings(settings: FlaschenTaschenSettings) {
+    return this.http.put(this.apiBaseUrl + "/system/flaschen-taschen/settings", settings).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
   }
 }
 
@@ -41,4 +49,9 @@ export interface Network {
   hasConnectivity: boolean;
   ip: string | null;
   isp: string | null;
+}
+
+export interface FlaschenTaschenSettings {
+  ledSlowdownGpio: number;
+  ledLimitRefresh: number;
 }

@@ -127,7 +127,6 @@
             } @else {
             <span class="text-danger">[Hidden]</span>
             }
-
           </div>
         </div>
       </div>
@@ -144,7 +143,30 @@
           </div>
 
           <div class="col-12 mt-2">
-            <div class="btn btn-warning" (click)="restartFlaschenTaschen()">Restart service</div>
+            Documentation can be found <a
+              href="https://github.com/hzeller/rpi-rgb-led-matrix?tab=readme-ov-file#lets-do-it"
+              target="_blank">here</a>
+          </div>
+
+          <div class="col-md-6 col-12 mt-2">
+            <div class="form-group">
+              <label for="ft_led-slowdown-gpio">Slowdown GPIO</label>
+              <input type="text" min="0" max="4" class="form-control" id="ft_led-slowdown-gpio"
+                placeholder="Slowdown GPIO" [(ngModel)]="flaschenTaschenSettings.ledSlowdownGpio">
+            </div>
+          </div>
+
+          <div class="col-md-6 col-12 mt-2">
+            <div class="form-group">
+              <label for="ft_led-limit-refresh">Limit refresh</label>
+              <input type="text" min="1" max="1000" class="form-control" id="ft_led-limit-refresh"
+                placeholder="Limit refresh" [(ngModel)]="flaschenTaschenSettings.ledLimitRefresh">
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <button class="btn btn-warning mb-1 me-1" (click)="restartFlaschenTaschen()">Restart service</button>
+            <button class="btn btn-warning mb-1 me-1" (click)="saveFlaschenTaschen()">Save and restart</button>
           </div>
         </div>
       </div>

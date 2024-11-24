@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
+import { FlaschenTaschenSettings, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -18,6 +18,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   updateInterval: any = null;
   shutdownModalRef: null | NgbModalRef = null;
   showSensitiveNetworkingData = false;
+  flaschenTaschenSettings: FlaschenTaschenSettings = { ledLimitRefresh: 100, ledSlowdownGpio: 3 }
 
   get hasConnectivity() {
     return this.overview?.network.hasConnectivity || false;
@@ -120,6 +121,17 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  saveFlaschenTaschen() {
+    this.api.updateFlaschenTaschenSettings(this.flaschenTaschenSettings)
+      .pipe(catchError(err => {
+        console.error(err);
+        this.toastr.error("Failed to update settings");
+        throw err;
+      })).subscribe(() => {
+        this.toastr.success("Settings updated");
+      });
+  }
+
   update() {
     this.api.getOverview().pipe(catchError(err => {
       this.toastr.error("Failed to get system overview");
@@ -163,6 +175,15 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     this.title.setTitle("System - Protogen");
 
     this.showSensitiveNetworkingData = localStorage.getItem(LocalStorageKey_ShowSentitiveNetworkingInfo) == "true";
+
+    this.api.getFlaschenTaschenSettings().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch flaschen taschen settings");
+        throw err;
+      })
+    ).subscribe(settings => {
+      this.flaschenTaschenSettings = settings;
+    })
   }
 
   ngOnDestroy(): void {
