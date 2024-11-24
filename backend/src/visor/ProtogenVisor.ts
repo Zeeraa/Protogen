@@ -8,7 +8,7 @@ import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { StaticPictureRenderer, URLImageSourceProvider } from "./rendering/renderers/StaticPictureRenderer";
 import { KV_ActiveRendererKey } from "../utils/KVDataStorageKeys";
-import { PixelFont } from "../utils/PixelFont";
+import { PixelFont } from "../font/PixelFont";
 import sharp from "sharp";
 
 export class ProtogenVisor {
