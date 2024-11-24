@@ -1,6 +1,8 @@
-import { getCPUUsage, getOSVersion, getRAMUsage, getTemperature, restartFlaschenTaschen, shutdown } from "../../../utils/SystemUtils";
+import { z } from "zod";
+import { getCPUUsage, getOSVersion, getRAMUsage, getTemperature, shutdown } from "../../../utils/SystemUtils";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
+import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
 
 export class SystemRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -53,16 +55,76 @@ export class SystemRouter extends AbstractRouter {
       }
     });
 
-    this.router.post("/restart-flaschen-taschen", async (req, res) => {
+    this.router.post("/flaschen-taschen/restart", async (req, res) => {
       /*
-      #swagger.path = '/system/restart-flaschen-taschen'
+      #swagger.path = '/system/flaschen-taschen/restart'
       #swagger.tags = ['System'],
       #swagger.description = "Restart the flaschen-taschen service"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
       */
       try {
-        await restartFlaschenTaschen();
+        await this.protogen.flaschenTaschen.restart();
+        res.json({});
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
+
+    this.router.get("/flaschen-taschen/settings", async (req, res) => {
+      /*
+      #swagger.path = '/system/flaschen-taschen/settings'
+      #swagger.tags = ['System'],
+      #swagger.description = "Get the flaschen taschen settings"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      try {
+        res.json(this.protogen.flaschenTaschen.settings);
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
+
+    this.router.put("/flaschen-taschen/settings", async (req, res) => {
+      /*
+      #swagger.path = '/system/flaschen-taschen/settings'
+      #swagger.tags = ['System'],
+      #swagger.description = "Update the flaschen taschen settings and restart the service"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response" }
+      #swagger.responses[500] = { description: "An error occured while executing command" }
+  
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Update flaschen taschen settings',
+        schema: {
+          ledLimitRefresh: "Max framerate",
+          ledSlowdownGpio: "GPIO slowdown value"
+        }
+      }
+      */
+      try {
+        const parsed = FTSettingsSchema.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        const config: FlaschenTaschenWriteConfigParams = {};
+
+        if (data.ledLimitRefresh) {
+          config.ledLimitRefresh = data.ledLimitRefresh;
+        }
+
+        if (data.ledSlowdownGpio) {
+          config.ledSlowdownGpio = data.ledSlowdownGpio;
+        }
+
+        this.protogen.flaschenTaschen.writeConfiguration(config);
+        await this.protogen.flaschenTaschen.restart();
+
         res.json({});
       } catch (err) {
         return this.handleError(err, req, res);
@@ -70,3 +132,8 @@ export class SystemRouter extends AbstractRouter {
     });
   }
 }
+
+const FTSettingsSchema = z.object({
+  ledLimitRefresh: z.number().int().safe().min(1).max(200),
+  ledSlowdownGpio: z.number().int().safe().min(0).max(4),
+});

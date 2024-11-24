@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from "fs";
 import swaggerUi from "swagger-ui-express";
 import { VideoPlayerRouter } from "./routes/video-player/VideoPlayerRouter";
 import { AudioRouter } from "./routes/volume/AudioRouter";
-import { VisorRouter } from "./routes/viror/VisorRouter";
+import { VisorRouter } from "./routes/visor/VisorRouter";
 import { SystemRouter } from "./routes/system/SystemRouter";
 import { RgbRouter } from "./routes/rgb/RgbRouter";
 import { createServer } from "http";

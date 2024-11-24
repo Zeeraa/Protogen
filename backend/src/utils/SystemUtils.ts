@@ -14,10 +14,6 @@ export async function killPID(pid: string) {
   await execAsync("kill -9 " + pid);
 }
 
-export async function restartFlaschenTaschen() {
-  await execAsync("sudo service flaschen-taschen restart");
-}
-
 // Function to get temperature (requires `vcgencmd` to be installed on your Pi)
 export const getTemperature = async (): Promise<number> => {
   try {

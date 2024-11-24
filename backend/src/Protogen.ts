@@ -49,7 +49,7 @@ export class Protogen {
     this._logger = new Logger();
     this._database = new Database(this);
     this._webServer = new ProtogenWebServer(this);
-    this._flaschenTaschen = new FlaschenTaschen(this.config.flaschenTaschen.host, this.config.flaschenTaschen.port);
+    this._flaschenTaschen = new FlaschenTaschen(this.config.flaschenTaschen);
     this._visor = new ProtogenVisor(this);
     this._remoteWorker = new ProtogenRemoteWorker(this);
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
