@@ -42,7 +42,10 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
     this.terminal.loadAddon(new WebLinksAddon());
     this.terminal.loadAddon(this.fitAddon);
 
-    this.system.getLogs().subscribe(data => {
+    this.system.getLogs().pipe(catchError(err => {
+      this.terminal.writeln(ConsoleColor.RED + "Failed to fetch logs. Check your connection and try again" + ConsoleColor.RESET);
+      throw err;
+    })).subscribe(data => {
       this.readSocketMessages = true;
       const entries = data.split("\n");
       entries.forEach(entry => {
@@ -52,10 +55,7 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
 
     this.handleSize();
 
-    this.socketSubscription = this.socketService.messageObservable.pipe(catchError(err => {
-      this.terminal.writeln(ConsoleColor.RED + "Failed to fetch logs. Check your connection and try again" + ConsoleColor.RESET);
-      throw err;
-    })).subscribe(data => {
+    this.socketSubscription = this.socketService.messageObservable.subscribe(data => {
       if (this.readSocketMessages) {
         if (data.type == "S2C_LogMessage") {
           this.appendLine(data.data.type + "," + data.data.content);
