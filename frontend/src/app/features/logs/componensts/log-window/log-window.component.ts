@@ -8,6 +8,7 @@ import { ConsoleColor } from '../../../../core/services/utils/ConsoleColors';
 import { catchError, Subscription } from 'rxjs';
 import { NavbarService } from '../../../../core/services/navbar.service';
 import { SocketService } from '../../../../core/services/socket/socket.service';
+import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 
 @Component({
   selector: 'app-log-window',
@@ -57,7 +58,7 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
 
     this.socketSubscription = this.socketService.messageObservable.subscribe(data => {
       if (this.readSocketMessages) {
-        if (data.type == "S2C_LogMessage") {
+        if (data.type == SocketMessageType.S2C_LogMessage) {
           this.appendLine(data.data.type + "," + data.data.content);
         }
       }
