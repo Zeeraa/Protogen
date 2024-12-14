@@ -1,0 +1,5 @@
+export enum SocketEventType {
+  CONNECTED = "CONNECTED",
+  DISCONNECTED = "DISCONNECTED",
+  CONNECT_ERROR = "CONNECT_ERROR",
+}

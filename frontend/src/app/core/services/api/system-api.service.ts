@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiBaseService } from '../api-base.service';
-import { catchError, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +39,16 @@ export class SystemApiService extends ApiBaseService {
     return this.http.get(this.apiBaseUrl + "/system/logs", {
       responseType: 'text',
     }).pipe(catchError(this.defaultErrorHandler)) as any as Observable<string>;
+  }
+
+  getSessionId(): Observable<string | null> {
+    return this.http.get<any>(this.apiBaseUrl + "/system/session-id").pipe(
+      map(response => String(response.sessionId)),
+      catchError(() => {
+        console.error('Request failed');
+        return of(null);
+      })
+    );
   }
 }
 
