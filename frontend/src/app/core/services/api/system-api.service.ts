@@ -34,6 +34,12 @@ export class SystemApiService extends ApiBaseService {
   updateFlaschenTaschenSettings(settings: FlaschenTaschenSettings) {
     return this.http.put(this.apiBaseUrl + "/system/flaschen-taschen/settings", settings).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
   }
+
+  getLogs(): Observable<string> {
+    return this.http.get(this.apiBaseUrl + "/system/logs", {
+      responseType: 'text',
+    }).pipe(catchError(this.defaultErrorHandler)) as any as Observable<string>;
+  }
 }
 
 export interface SystemOverview {

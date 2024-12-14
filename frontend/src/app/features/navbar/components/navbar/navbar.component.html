@@ -1,16 +1,18 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+<nav class="navbar navbar-expand-lg bg-body-tertiary" #protogen_navbar>
   <div class="container-fluid">
     <a class="navbar-brand" routerLink="/">Protogen</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
       aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup" (shown.bs.collapse)="onNavbarExpanded()"
+      (hidden.bs.collapse)="onNavbarCollapsed()">
       <div class="navbar-nav">
         <a class="nav-link" routerLink="/visor">Visor</a>
         <a class="nav-link" routerLink="/rgb">RGB</a>
         <a class="nav-link" routerLink="/video-player">Video Player</a>
         <a class="nav-link" routerLink="/system">System</a>
+        <a class="nav-link" routerLink="/logs">Logs</a>
       </div>
     </div>
   </div>

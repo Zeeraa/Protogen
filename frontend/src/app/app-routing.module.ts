@@ -6,31 +6,36 @@ import { VideoPlayerPageComponent } from './features/video-player/pages/video-pl
 import { SystemPageComponent } from './features/system/pages/system-page/system-page.component';
 import { RgbDashboardPageComponent } from './features/rgb/pages/rgb-dashboard-page/rgb-dashboard-page.component';
 import { RgbEditorPageComponent } from './features/rgb/pages/rgb-editor-page/rgb-editor-page.component';
+import { LogsPageComponent } from './features/logs/pages/logs-page/logs-page.component';
 
 export const routes: Routes = [
   {
     path: "",
-    component: DashboardPageComponent
+    component: DashboardPageComponent,
   },
   {
     path: "visor",
-    component: VisorPageComponent
+    component: VisorPageComponent,
   },
   {
     path: "video-player",
-    component: VideoPlayerPageComponent
+    component: VideoPlayerPageComponent,
   },
   {
     path: "system",
-    component: SystemPageComponent
+    component: SystemPageComponent,
   },
   {
     path: "rgb",
-    component: RgbDashboardPageComponent
+    component: RgbDashboardPageComponent,
   },
   {
     path: "rgb/editor/:id",
-    component: RgbEditorPageComponent
+    component: RgbEditorPageComponent,
+  },
+  {
+    path: "logs",
+    component: LogsPageComponent,
   }
 ];
 

@@ -1,7 +1,16 @@
 /* Importing Bootstrap SCSS file. */
-@import 'bootstrap/scss/bootstrap';
+@import "bootstrap/scss/bootstrap";
 
 // regular style toast
-@import 'ngx-toastr/toastr';
+@import "ngx-toastr/toastr";
 
 @import "bootstrap-icons/font/bootstrap-icons.scss";
+
+@import "@xterm/xterm/css/xterm.css";
+
+html,
+body,
+app-root {
+  min-height: 100vh;
+  overflow: auto;
+}

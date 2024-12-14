@@ -13,6 +13,7 @@ import { VisorModule } from './features/visor/visor.module';
 import { VideoPlayerModule } from './features/video-player/video-player.module';
 import { SystemModule } from './features/system/system.module';
 import { RgbModule } from './features/rgb/rgb.module';
+import { LogsModule } from './features/logs/logs.module';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { RgbModule } from './features/rgb/rgb.module';
     VideoPlayerModule,
     SystemModule,
     RgbModule,
+    LogsModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi())
