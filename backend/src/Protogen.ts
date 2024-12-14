@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, fstat, mkdirSync, rmSync } from "fs";
 import { Configuration } from "./config/objects/Configurations";
 import { Database } from "./database/Database";
 import { Logger } from "./logger/Logger";
@@ -35,6 +35,17 @@ export class Protogen {
   constructor(config: Configuration) {
     this._config = config;
 
+    this._eventEmitter = new EventEmitter();
+    this._logger = new Logger(this);
+
+    if (!existsSync(this.config.logDirectory)) {
+      mkdirSync(this.config.logDirectory);
+    }
+
+    if (existsSync(this.logger.sessionLogFile)) {
+      rmSync(this.logger.sessionLogFile);
+    }
+
     if (!existsSync(this.config.tempDirectory)) {
       mkdirSync(this.config.tempDirectory);
     }
@@ -44,12 +55,9 @@ export class Protogen {
       mkdirSync(videoTempDirectory);
     }
 
-    this._eventEmitter = new EventEmitter();
-
-    this._logger = new Logger();
     this._database = new Database(this);
     this._webServer = new ProtogenWebServer(this);
-    this._flaschenTaschen = new FlaschenTaschen(this.config.flaschenTaschen);
+    this._flaschenTaschen = new FlaschenTaschen(this);
     this._visor = new ProtogenVisor(this);
     this._remoteWorker = new ProtogenRemoteWorker(this);
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);

@@ -3,10 +3,25 @@ import { getCPUUsage, getOSVersion, getRAMUsage, getTemperature, shutdown } from
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
+import { existsSync, readFileSync } from "fs";
 
 export class SystemRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/system");
+
+    this.router.get("/logs", async (req, res) => {
+      try {
+        const file = this.protogen.logger.sessionLogFile;
+        if (existsSync(file)) {
+          const content = readFileSync(file).toString();
+          res.send(content);
+        } else {
+          res.send("");
+        }
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    })
 
     this.router.get("/overview", async (req, res) => {
       /*

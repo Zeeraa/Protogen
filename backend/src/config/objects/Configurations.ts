@@ -17,6 +17,7 @@ export interface Configuration {
   serial: SerialConfiguration;
   rgb: RgbConfiguration;
   tempDirectory: string;
+  logDirectory: string;
   misc: MiscConfiguration;
   redis: RedisConfiguration;
 }

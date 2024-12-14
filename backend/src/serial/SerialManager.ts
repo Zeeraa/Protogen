@@ -31,7 +31,7 @@ export class SerialManager {
       } else if (this._boopSensorLastState != this._boopSensorReportedState) {
         this._boopSensorDebounceTime = DebounceTime;
         this._boopSensorReportedState == this._boopSensorLastState;
-        this.protogen.logger.info("Serial", "Boop state change to " + this._boopSensorReportedState);
+        //this.protogen.logger.info("Serial", "Boop state change to " + this._boopSensorReportedState);
         this.protogen.eventEmitter.emit(ProtogenEvents.Booped, this._boopSensorReportedState);
       }
     }, 100);
@@ -55,6 +55,7 @@ export class SerialManager {
   }
 
   public set enableHud(enabled: boolean) {
+    this.protogen.logger.info("Serial", (enabled ? "Enabling" : "Disabling") + " HUD display");
     this._enableHud = enabled;
     if (!enabled) {
       for (let i = 0; i < this._lastDisplayContent.length; i++) {

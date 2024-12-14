@@ -46,6 +46,7 @@ export abstract class VisorRenderer {
   onActivate() { }
 
   public activate() {
+    this.protogen.logger.info("Visor", "Activating renderer " + cyan(this.name));
     return this.visor.activateRenderer(this.id);
   }
 

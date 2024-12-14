@@ -195,6 +195,7 @@ export function loadConfiguration(): Configuration {
   //#endregion
 
   const tempDirectory = process.env["TEMP_DIRECTORY"] || "./temp";
+  const logDirectory = process.env["LOG_DIRECTORY"] || "./logs";
 
   return {
     web: web,
@@ -205,6 +206,7 @@ export function loadConfiguration(): Configuration {
     serial: serialConfig,
     rgb: rgb,
     tempDirectory: tempDirectory,
+    logDirectory: logDirectory,
     misc: misc,
     redis: redis,
   }

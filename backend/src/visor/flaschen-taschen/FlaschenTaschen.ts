@@ -4,23 +4,24 @@ import { FlaschenTaschenConfiguration } from '../../config/objects/FlaschenTasch
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import yargsParser from 'yargs-parser';
 import { execAsync } from '../../utils/SystemUtils';
+import { Protogen } from '../../Protogen';
 
 const DefaultFlaschenTaschenParameters = "--led-cols=64 --led-rows=32 --led-chain=2 --led-gpio-mapping=adafruit-hat";
 const DefaultLedSlowdown = 3;
 const DefaultRefreshRateLimit = 100;
 
 export class FlaschenTaschen {
-  private _config;
   private _socket;
+  private _protogen;
 
   private _ledSlowdownGpio: number;
   private _ledLimitRefresh: number;
 
-  constructor(config: FlaschenTaschenConfiguration) {
-    this._config = config;
+  constructor(protogen: Protogen) {
+    this._protogen = protogen;
     this._socket = dgram.createSocket("udp4");
 
-    if (!existsSync(this._config.configFile)) {
+    if (!existsSync(this.config.configFile)) {
       this._ledSlowdownGpio = DefaultLedSlowdown;
       this._ledLimitRefresh = DefaultRefreshRateLimit;
       console.log("FT config file not found. Creating it...");
@@ -51,7 +52,11 @@ export class FlaschenTaschen {
   }
 
   private get config() {
-    return this._config;
+    return this._protogen.config.flaschenTaschen;
+  }
+
+  private get protogen() {
+    return this._protogen;
   }
 
   sendImageBuffer(imageBuffer: Buffer, width: number, height: number, xOffset = 0, yOffset = 0, zLayer = 0) {
@@ -89,10 +94,13 @@ export class FlaschenTaschen {
     params += " --led-slowdown-gpio=" + this._ledSlowdownGpio;
     params += " --led-limit-refresh=" + this._ledLimitRefresh;
 
+    this.protogen.logger.info("FlaschenTaschen", "Updating config file");
+
     writeFileSync(this.config.configFile, params);
   }
 
   public async restart() {
+    this.protogen.logger.info("FlaschenTaschen", "Restarting service");
     await execAsync("sudo service flaschen-taschen restart");
   }
 

@@ -22,3 +22,5 @@ swagger.json
 
 /temp
 .env
+
+/logs

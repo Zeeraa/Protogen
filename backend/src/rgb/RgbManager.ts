@@ -9,6 +9,7 @@ import { RgbSceneEffectProperty } from "../database/models/rgb/RgbSceneEffectPro
 import { constructRgbEffect } from "./effects/RgbEffects";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { KV_LastUsedRgbScene, KV_RbgPreviewWidth, KV_RgbPreviewFullSizeOnLargeViewports, KV_RgbPreviewHeigth } from "../utils/KVDataStorageKeys";
+import { cyan } from "colors";
 
 export class RgbManager {
   private _protogen;
@@ -100,6 +101,11 @@ export class RgbManager {
   }
 
   public setActiveScene(scene: RgbScene | null, updateDatabase = true) {
+    if (scene != null) {
+      this.protogen.logger.info("RGB", "Activating RGB scene " + cyan(scene.name));
+    } else {
+      this.protogen.logger.info("RGB", "Disabling rgb scene");
+    }
     this._activeScene = scene;
     if (updateDatabase) {
       this.saveLastUsedScene();
