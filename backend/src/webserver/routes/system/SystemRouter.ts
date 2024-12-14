@@ -10,6 +10,13 @@ export class SystemRouter extends AbstractRouter {
     super(webServer, "/system");
 
     this.router.get("/logs", async (req, res) => {
+      /*
+      #swagger.path = '/system/logs'
+      #swagger.tags = ['System'],
+      #swagger.description = "Get all logs"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An error occured while gathering information" }
+      */
       try {
         const file = this.protogen.logger.sessionLogFile;
         if (existsSync(file)) {
@@ -21,7 +28,17 @@ export class SystemRouter extends AbstractRouter {
       } catch (err) {
         this.handleError(err, req, res);
       }
-    })
+    });
+
+    this.router.get("/session-id", async (_, res) => {
+      /*
+      #swagger.path = '/system/session-id'
+      #swagger.tags = ['System'],
+      #swagger.description = "Get the session id"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      res.send({ sessionId: this.protogen.sessionId });
+    });
 
     this.router.get("/overview", async (req, res) => {
       /*

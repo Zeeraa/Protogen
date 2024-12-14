@@ -13,6 +13,7 @@ import { NetworkManager } from "./network-manager/NetworkManager";
 import EventEmitter from "events";
 import { RedisManager } from "./redis/RedisManager";
 import { sleep } from "./utils/Utils";
+import { uuidv7 } from "uuidv7";
 
 export const VersionNumber = "0.0.1";
 const BootMessageColor = "#00FF00";
@@ -31,8 +32,12 @@ export class Protogen {
   private _networkManager: NetworkManager;
   private _eventEmitter: EventEmitter;
   private _redis: RedisManager;
+  private _sessionId: string;
 
   constructor(config: Configuration) {
+    this._sessionId = uuidv7();
+    Object.freeze(this._sessionId);
+
     this._config = config;
 
     this._eventEmitter = new EventEmitter();
@@ -137,6 +142,10 @@ export class Protogen {
 
   public get redis() {
     return this._redis;
+  }
+
+  public get sessionId() {
+    return this._sessionId;
   }
   //#endregion
 }
