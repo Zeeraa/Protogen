@@ -85,6 +85,8 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit VISOR", BootMessageColor);
     await this.visor.loadActiveRendererFromDatabase();
     await this.visor.init();
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit serial\nconnection", BootMessageColor);
+    await this.serial.init();
     await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + VersionNumber, BootMessageColor);
     await sleep(1000); // Show ready message for 1000ms before starting visor render loop
     this.visor.beginMainLoop();

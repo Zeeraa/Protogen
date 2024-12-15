@@ -31,6 +31,9 @@ export class SerialManager {
       } else if (this._boopSensorLastState != this._boopSensorReportedState) {
         this._boopSensorDebounceTime = DebounceTime;
         this._boopSensorReportedState == this._boopSensorLastState;
+        if (this._boopSensorReportedState == true) {
+          this.protogen.logger.info("Serial", "Boop sensor triggered");
+        }
         //this.protogen.logger.info("Serial", "Boop state change to " + this._boopSensorReportedState);
         this.protogen.eventEmitter.emit(ProtogenEvents.Booped, this._boopSensorReportedState);
       }
@@ -47,7 +50,14 @@ export class SerialManager {
 
   public async init() {
     await this.protogen.database.initMissingData(KV_EnableHUD, "true");
-    this._enableHud = await this.protogen.database.getData(KV_EnableHUD) == "true";
+    this.enableHud = await this.protogen.database.getData(KV_EnableHUD) == "true";
+  }
+
+  public async setPersistentHUDState(state: boolean) {
+    this.enableHud = state;
+    const stateStr = String(state);
+    this.protogen.logger.info("Serial", "Saving persistent hud state as " + cyan(stateStr));
+    await this.protogen.database.setData(KV_EnableHUD, stateStr);
   }
 
   public get enableHud() {

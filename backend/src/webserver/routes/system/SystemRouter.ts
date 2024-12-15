@@ -40,6 +40,22 @@ export class SystemRouter extends AbstractRouter {
       res.send({ sessionId: this.protogen.sessionId });
     });
 
+    this.router.post("/stop", async (_, res) => {
+      /*
+      #swagger.path = '/system/stop'
+      #swagger.tags = ['System'],
+      #swagger.description = "Exits the service"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      setTimeout(() => {
+        process.exit(0);
+      }, 200);
+
+      res.status(200).send({
+        message: "Shutdown scheduled"
+      });
+    });
+
     this.router.get("/overview", async (req, res) => {
       /*
       #swagger.path = '/system/overview'

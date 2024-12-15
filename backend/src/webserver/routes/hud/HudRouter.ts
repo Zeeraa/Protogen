@@ -32,8 +32,7 @@ export class HudRouter extends AbstractRouter {
 
         const data = parsed.data;
 
-        this.protogen.serial.enableHud = data.enabled;
-        await this.protogen.database.setData(KV_EnableHUD, data.enabled ? "true" : "false");
+        await this.protogen.serial.setPersistentHUDState(data.enabled);
 
         res.json({
           enabled: data.enabled
