@@ -9,6 +9,7 @@ import { catchError, Subscription } from 'rxjs';
 import { NavbarService } from '../../../../core/services/navbar.service';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
+import { SocketEventType } from '../../../../core/services/socket/data/SocketEventType';
 
 @Component({
   selector: 'app-log-window',
@@ -20,8 +21,11 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
   private terminal!: Terminal;
   private fitAddon!: FitAddon;
   private navbarChangeSubscription: Subscription | null = null;
-  private socketSubscription: Subscription | null = null;
+  private socketMessageSubscription: Subscription | null = null;
+  private socketEventSubscription: Subscription | null = null;
   private readSocketMessages = false;
+  private sessionId: string | null = null;
+  private sessionCheckInterval: any = null;
 
   @ViewChild('terminal')
   private terminalDiv!: ElementRef<HTMLElement>;
@@ -43,6 +47,50 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
     this.terminal.loadAddon(new WebLinksAddon());
     this.terminal.loadAddon(this.fitAddon);
 
+    this.fetchLogs();
+
+    this.handleSize();
+
+    this.socketMessageSubscription = this.socketService.messageObservable.subscribe(data => {
+      if (this.readSocketMessages) {
+        if (data.type == SocketMessageType.S2C_LogMessage) {
+          this.appendLine(data.data.type + "," + data.data.content);
+        }
+      }
+    });
+
+    this.socketEventSubscription = this.socketService.eventObservable.subscribe(event => {
+      switch (event) {
+        case SocketEventType.CONNECTED:
+          this.terminal.writeln(ConsoleColor.PURPLE + "WEB UI: " + ConsoleColor.GREEN + "Socket connected" + ConsoleColor.RESET);
+          break;
+
+        //case SocketEventType.CONNECT_ERROR:
+        //  this.terminal.writeln(ConsoleColor.PURPLE + "WEB UI: " + ConsoleColor.YELLOW + "Socket got an connection error" + ConsoleColor.RESET);
+        //  break;
+
+        case SocketEventType.DISCONNECTED:
+          this.terminal.writeln(ConsoleColor.PURPLE + "WEB UI: " + ConsoleColor.RED + "Socket disconnected" + ConsoleColor.RESET);
+          break;
+
+        default:
+          break;
+      }
+    });
+
+    this.navbarChangeSubscription = this.navbarService.onChangeObservable.subscribe(_ => {
+      this.handleSize();
+    });
+
+    this.sessionCheckInterval = setInterval(() => {
+      this.checkSession();
+    }, 1000 * 5);
+
+    this.checkSession();
+  }
+
+  private fetchLogs() {
+    this.readSocketMessages = false;
     this.system.getLogs().pipe(catchError(err => {
       this.terminal.writeln(ConsoleColor.RED + "Failed to fetch logs. Check your connection and try again" + ConsoleColor.RESET);
       throw err;
@@ -53,19 +101,25 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
         this.appendLine(entry);
       });
     });
+  }
 
-    this.handleSize();
-
-    this.socketSubscription = this.socketService.messageObservable.subscribe(data => {
-      if (this.readSocketMessages) {
-        if (data.type == SocketMessageType.S2C_LogMessage) {
-          this.appendLine(data.data.type + "," + data.data.content);
-        }
+  private checkSession() {
+    this.system.getSessionId().subscribe(sessionId => {
+      if (sessionId == null) {
+        return;
       }
-    });
 
-    this.navbarChangeSubscription = this.navbarService.onChangeObservable.subscribe(_ => {
-      this.handleSize();
+      if (this.sessionId == null) {
+        this.sessionId = sessionId;
+        return;
+      }
+
+      if (this.sessionId != sessionId) {
+        this.sessionId = sessionId;
+        this.terminal.clear();
+        this.terminal.writeln(ConsoleColor.CYAN + "Session id changed. Fetching new logs...");
+        this.fetchLogs();
+      }
     });
   }
 
@@ -92,7 +146,12 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.socketSubscription?.unsubscribe();
+    if (this.sessionCheckInterval != null) {
+      clearInterval(this.sessionCheckInterval);
+    }
+
+    this.socketMessageSubscription?.unsubscribe();
+    this.socketEventSubscription?.unsubscribe();
     this.navbarChangeSubscription?.unsubscribe();
     this.terminal.dispose();
   }

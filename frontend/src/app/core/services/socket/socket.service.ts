@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { SocketMessage } from './data/SocketMessage';
 import { SocketMessageType } from './data/SocketMessageType';
 import { Subject } from 'rxjs';
+import { SocketEventType } from './data/SocketEventType';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ export class SocketService {
   private _connected = false;
   private _disconnectedTimer = 15;
   private _messageSubject = new Subject<SocketMessage>();
+  private _eventSubject = new Subject<SocketEventType>();
 
   constructor() { }
 
@@ -46,15 +48,18 @@ export class SocketService {
       console.log('Socket connected');
       this._disconnectedTimer = 15
       this._connected = true;
+      this._eventSubject.next(SocketEventType.CONNECTED);
     });
 
     this._socket.on('connect_error', (error) => {
       console.error('Socket connection error:', error);
+      this._eventSubject.next(SocketEventType.CONNECT_ERROR);
     });
 
     this._socket.on('disconnect', (reason) => {
       console.warn('Socket disconnected:', reason);
       this._connected = false;
+      this._eventSubject.next(SocketEventType.DISCONNECTED);
     });
 
     this._socket.on('message', (msg: SocketMessage) => {
@@ -64,6 +69,10 @@ export class SocketService {
 
   get messageObservable() {
     return this._messageSubject.asObservable();
+  }
+
+  get eventObservable() {
+    return this._eventSubject.asObservable();
   }
 
   disconnect() {
