@@ -7,6 +7,7 @@ import { SystemPageComponent } from './features/system/pages/system-page/system-
 import { RgbDashboardPageComponent } from './features/rgb/pages/rgb-dashboard-page/rgb-dashboard-page.component';
 import { RgbEditorPageComponent } from './features/rgb/pages/rgb-editor-page/rgb-editor-page.component';
 import { LogsPageComponent } from './features/logs/pages/logs-page/logs-page.component';
+import { VisorImageFaceEditorComponent } from './features/visor/pages/visor-image-face-editor/visor-image-face-editor.component';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,10 @@ export const routes: Routes = [
   {
     path: "visor",
     component: VisorPageComponent,
+  },
+  {
+    path: "visor/image/:id",
+    component: VisorImageFaceEditorComponent,
   },
   {
     path: "video-player",

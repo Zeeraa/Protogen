@@ -1,0 +1,80 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>Visor image editor</h1>
+    </div>
+  </div>
+
+  @if(notFound) {
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-danger" role="alert">
+        Renderer with id {{id}} not found or of invalid type
+      </div>
+    </div>
+  </div>
+  }
+
+  <div class="row mt-2">
+    <div class="d-flex justify-content-center">
+      <div class="d-block">
+        <h5 class="text-center">Visor Preview</h5>
+        <app-visor-live-preview />
+      </div>
+    </div>
+    <hr class="mt-1">
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <p>The live preview above shows the current image on the visor. Make sure that this renderer is active before
+        editing if you want to see live preview</p>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <form [formGroup]="form">
+      <div class="mb-3">
+        <label for="renderer_image_name" class="form-label">Name</label>
+        <input class="form-control" id="renderer_image_name" type="text" formControlName="name"
+          placeholder="Scene name">
+      </div>
+
+      <div class="mb-3">
+        <label for="renderer_image_file" class="form-label">Upload new file</label>
+        <input class="form-control" type="file" placeholder="Select new file" (change)="onFileSelected($event)"
+          #filePicker>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror image on visor">
+          <input class="form-check-input" type="checkbox" role="switch" id="renderer_image_mirror"
+            formControlName="mirrorImage">
+          <label class="form-check-label" for="renderer_image_mirror">Mirror image</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror image on visor">
+          <input class="form-check-input" type="checkbox" role="switch" id="renderer_image_rflip"
+            formControlName="flipRightSide">
+          <label class="form-check-label" for="renderer_image_rflip">Flip right side</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror image on visor">
+          <input class="form-check-input" type="checkbox" role="switch" id="renderer_image_lflip"
+            formControlName="flipLeftSide">
+          <label class="form-check-label" for="renderer_image_lflip">Flip left side</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <a type="button" class="mt-1 me-1 btn btn-secondary" routerLink="/visor">Back to visor</a>
+        <button type="button" class="mt-1 me-1 btn btn-danger" (click)="deleteRenderer()">Delete</button>
+        <button type="button" class="mt-1 me-1 btn btn-success" (click)="save()">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

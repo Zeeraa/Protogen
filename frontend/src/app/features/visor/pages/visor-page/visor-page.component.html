@@ -19,30 +19,37 @@
     <div class="d-flex justify-content-center">
       <div class="d-block">
         <h5 class="text-center">Visor Preview</h5>
-        <img [src]="previewImage" alt="Visor preview" class="visor-preview">
+        <app-visor-live-preview />
       </div>
     </div>
     <hr class="mt-1">
   </div>
 
   <div class="row mt-2">
-    <div class="row">
-      <div class="col-12">
-        <h5>Renderers</h5>
-      </div>
+    <div class="col-12">
+      <h5>Renderers</h5>
+    </div>
 
-      <div class="col-12">
-        <span>
-          Active renderer:
-          <span class="text-info">{{rendererName}}</span>
-        </span>
-      </div>
+    <div class="col-12">
+      <span>
+        Active renderer:
+        <span class="text-info">{{rendererName}}</span>
+      </span>
+    </div>
 
-      @for (renderer of renderers; track $index) {
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-        <app-renderer-card [renderer]="renderer" />
-      </div>
-      }
+    @for (renderer of renderers; track $index) {
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+      <app-renderer-card [renderer]="renderer" />
+    </div>
+    }
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <hr>
+    </div>
+    <div class="col-12">
+      <button class="btn btn-primary btn-sm" (click)="createNewImageRenderer()">Create image</button>
     </div>
   </div>
 </div>
