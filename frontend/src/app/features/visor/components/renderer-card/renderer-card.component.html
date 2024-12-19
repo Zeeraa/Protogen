@@ -1,7 +1,13 @@
 <div class="card w-100">
+  @if(hasPreview) {
+  <img [src]="previewSrc" class="card-img-top" [alt]="renderer.name">
+  }
   <div class="card-body">
     <h5 class="card-title">{{renderer.name}}</h5>
 
-    <button class="btn btn-success mt-1" (click)="activate()">Activate</button>
+    <button class="btn btn-success mt-1 me-1" (click)="activate()">Activate</button>
+    @if(isCustomisableImageType) {
+    <a class="btn btn-primary mt-1 me-1" routerLink="/visor/image/{{renderer.id}}">Edit</a>
+    }
   </div>
 </div>
