@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
-import { KV_EnableHUD } from "../../../utils/KVDataStorageKeys";
 
 export class HudRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {

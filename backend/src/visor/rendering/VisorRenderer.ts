@@ -1,11 +1,12 @@
 import { CanvasRenderingContext2D } from "canvas";
 import { ProtogenVisor } from "../ProtogenVisor";
 import { cyan } from "colors";
+import { RendererType } from "./RendererType";
 
 export abstract class VisorRenderer {
   private _visor;
   private _id: string;
-  private _name: string;
+  protected _name: string;
   private _initCalled = false;
 
   constructor(visor: ProtogenVisor, id: string, name: string) {
@@ -55,4 +56,10 @@ export abstract class VisorRenderer {
   public abstract onRender(ctx: CanvasRenderingContext2D, width: number, height: number): void;
 
   public handleBoopState(boopState: boolean) { }
+
+  public abstract getPreviewImage(): string | null;
+
+  public abstract get metadata(): any;
+
+  public abstract get type(): RendererType;
 }

@@ -2,6 +2,7 @@ import { CanvasRenderingContext2D, Image, loadImage } from "canvas";
 import { ProtogenVisor } from "../../ProtogenVisor";
 import { VisorRenderer } from "../VisorRenderer";
 import axios from "axios";
+import { RendererType } from "../RendererType";
 
 export const FaceRendererId = "PROTO_FACE";
 
@@ -28,5 +29,17 @@ export class VisorFaceRenderer extends VisorRenderer {
     } else {
       ctx.drawImage(this._image, 0, 0, width, height);
     }
+  }
+
+  public getPreviewImage(): string | null {
+    return null;
+  }
+
+  public get metadata(): any {
+    return {};
+  }
+
+  public get type(): RendererType {
+    return RendererType.Face;
   }
 }

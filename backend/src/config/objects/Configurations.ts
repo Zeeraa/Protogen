@@ -16,7 +16,7 @@ export interface Configuration {
   remoteWorker: RemoteWorkerConfiguration;
   serial: SerialConfiguration;
   rgb: RgbConfiguration;
-  tempDirectory: string;
+  dataDirectory: string;
   logDirectory: string;
   misc: MiscConfiguration;
   redis: RedisConfiguration;

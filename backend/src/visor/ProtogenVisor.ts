@@ -1,15 +1,19 @@
 import { createCanvas } from "canvas";
-import { Protogen } from "../Protogen";
-import { cyan } from "colors";
+import { BootMessageColor, Protogen } from "../Protogen";
+import { cyan, yellow } from "colors";
 import { VisorRenderer } from "./rendering/VisorRenderer";
 import { FaceRendererId, VisorFaceRenderer } from "./rendering/renderers/VisorFaceRenderLayer";
 import { BSODRenderer } from "./rendering/renderers/special/BSODRenderer";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
-import { StaticPictureRenderer, URLImageSourceProvider } from "./rendering/renderers/StaticPictureRenderer";
 import { KV_ActiveRendererKey } from "../utils/KVDataStorageKeys";
 import { PixelFont } from "../font/PixelFont";
 import sharp from "sharp";
+import { CustomImageRenderer } from "./rendering/renderers/customimage/CustomImageRenderer";
+import { URLImageSourceProvider } from "./image/URLImageSourceProvider";
+import { StaticPictureRenderer } from "./rendering/renderers/StaticPictureRenderer";
+import { CustomFace } from "../database/models/visor/CustomFace.model";
+import { existsSync } from "fs";
 
 export class ProtogenVisor {
   private _protogen;
@@ -49,6 +53,13 @@ export class ProtogenVisor {
     setInterval(() => {
       this.sendVisorPreview();
     }, this.protogen.config.misc.visorPreviewInterval);
+  }
+
+  public get scale() {
+    return {
+      width: this.config.width,
+      height: this.config.height
+    }
   }
 
   public sendVisorPreview() {
@@ -159,15 +170,35 @@ export class ProtogenVisor {
     }
     this._initCalled = true;
 
+    const customFacesRepo = this.protogen.database.dataSource.getRepository(CustomFace);
+    const customFaces = await customFacesRepo.find();
+    customFaces.forEach(face => {
+      let imageFull = face.image == null ? null : this.protogen.imageDirectory + "/" + face.image.substring(0, 2) + "/" + face.image;
+      if (imageFull != null) {
+        if (!existsSync(imageFull)) {
+          this.protogen.logger.warn("Visor", "Cant find image " + cyan(imageFull) + " for renderer " + cyan(face.uuid) + " with name " + cyan(face.name) + ". Setting image to " + yellow("null"));
+          imageFull = null;
+        }
+      }
+      const renderer = new CustomImageRenderer(this, face.uuid, face.name, imageFull, face.mirrorImage, face.flipRightSide, face.flipLeftSide);
+      this.protogen.logger.info("Visor", "Adding custom renderer " + cyan(face.uuid) + " with name " + cyan(face.name));
+      this._availableRenderers.push(renderer);
+    })
+
     for (let i = 0; i < this.availableRenderers.length; i++) {
       const renderer = this.availableRenderers[i];
       try {
+        await this.tryRenderTextFrame("BOOTING...\nLoad face\n" + (i + 1) + " / " + this.availableRenderers.length, BootMessageColor);
         await renderer.init();
       } catch (err) {
         console.error(err);
         this.protogen.logger.error("Visor", "An error occured while calling init on renderer with id " + cyan(renderer.id) + " (" + cyan(renderer.name) + ")");
       }
     }
+  }
+
+  public removeRenderer(id: string) {
+    this._availableRenderers = this.availableRenderers.filter(r => r.id != id);
   }
 
   public beginMainLoop() {

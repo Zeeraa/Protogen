@@ -1,11 +1,13 @@
-import { CanvasRenderingContext2D, Image, loadImage } from "canvas";
+import { CanvasRenderingContext2D, createCanvas, Image } from "canvas";
 import { ProtogenVisor } from "../../ProtogenVisor";
 import { VisorRenderer } from "../VisorRenderer";
-import axios from "axios";
+import { SourceProvider } from "../../image/SourceProvider";
+import { RendererType } from "../RendererType";
 
 export class StaticPictureRenderer extends VisorRenderer {
   private _image: Image | null;
   private _source;
+  private _preview: string | null = null;
 
   constructor(visor: ProtogenVisor, id: string, name: string, imageSource: SourceProvider) {
     super(visor, id, name)
@@ -15,6 +17,7 @@ export class StaticPictureRenderer extends VisorRenderer {
 
   public async onInit() {
     this.image = await this._source.provideImage();
+    this.generatePreview();
   }
 
   public onRender(ctx: CanvasRenderingContext2D, width: number, height: number) {
@@ -26,6 +29,16 @@ export class StaticPictureRenderer extends VisorRenderer {
     }
   }
 
+  private generatePreview() {
+    const scale = this.protogen.visor.scale;
+    const canvas = createCanvas(scale.width, scale.height);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.onRender(ctx, scale.width, scale.height);
+    this._preview = canvas.toDataURL();
+  }
+
   public get image(): Image | null {
     return this._image;
   }
@@ -33,48 +46,16 @@ export class StaticPictureRenderer extends VisorRenderer {
   protected set image(image: Image) {
     this._image = image;
   }
-}
 
-abstract class SourceProvider {
-  abstract provideImage(): Promise<Image>;
-}
-
-export class URLImageSourceProvider extends SourceProvider {
-  private _url;
-
-  constructor(url: string) {
-    super();
-    this._url = url;
+  public getPreviewImage(): string | null {
+    return this._preview;
   }
 
-  async provideImage() {
-    const response = await axios.get(this._url, { responseType: 'arraybuffer' });
-    return await loadImage(response.data);
-  }
-}
-
-export class FileImageSourceProvider extends SourceProvider {
-  private _path;
-
-  constructor(path: string) {
-    super();
-    this._path = path;
+  public get metadata(): any {
+    return {};
   }
 
-  async provideImage() {
-    return await loadImage(this._path);
-  }
-}
-
-export class ExistingImageSourceProvider extends SourceProvider {
-  private _image;
-
-  constructor(image: Image) {
-    super();
-    this._image = image;
-  }
-
-  async provideImage() {
-    return this._image;
+  public get type(): RendererType {
+    return RendererType.StaticImage;
   }
 }

@@ -1,4 +1,4 @@
-import { existsSync, fstat, mkdirSync, rmSync } from "fs";
+import { existsSync, mkdirSync, rmSync } from "fs";
 import { Configuration } from "./config/objects/Configurations";
 import { Database } from "./database/Database";
 import { Logger } from "./logger/Logger";
@@ -16,7 +16,7 @@ import { sleep } from "./utils/Utils";
 import { uuidv7 } from "uuidv7";
 
 export const VersionNumber = "0.0.1";
-const BootMessageColor = "#00FF00";
+export const BootMessageColor = "#00FF00";
 
 export class Protogen {
   private _config: Configuration;
@@ -33,6 +33,8 @@ export class Protogen {
   private _eventEmitter: EventEmitter;
   private _redis: RedisManager;
   private _sessionId: string;
+  private _imageDirectory: string;
+  private _tempDirectory: string;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -51,14 +53,36 @@ export class Protogen {
       rmSync(this.logger.sessionLogFile);
     }
 
-    if (!existsSync(this.config.tempDirectory)) {
-      mkdirSync(this.config.tempDirectory);
+    if (!existsSync(this.config.dataDirectory)) {
+      mkdirSync(this.config.dataDirectory);
     }
 
-    const videoTempDirectory = this.config.tempDirectory + "/videos";
+    if (!existsSync(this.config.dataDirectory)) {
+      mkdirSync(this.config.dataDirectory);
+    }
+
+    const animationCacheDirectory = this.config.dataDirectory + "/animcache";
+    if (!existsSync(animationCacheDirectory)) {
+      mkdirSync(animationCacheDirectory);
+    }
+
+    const videoTempDirectory = this.config.dataDirectory + "/videos";
     if (!existsSync(videoTempDirectory)) {
       mkdirSync(videoTempDirectory);
     }
+
+    this._imageDirectory = this.config.dataDirectory + "/images";
+    Object.freeze(this._imageDirectory);
+    if (!existsSync(this.imageDirectory)) {
+      mkdirSync(this.imageDirectory);
+    }
+
+    this._tempDirectory = this.config.dataDirectory + "/temp";
+    Object.freeze(this._tempDirectory);
+    if (!existsSync(this.tempDirectory)) {
+      mkdirSync(this.tempDirectory);
+    }
+
 
     this._database = new Database(this);
     this._webServer = new ProtogenWebServer(this);
@@ -148,6 +172,14 @@ export class Protogen {
 
   public get sessionId() {
     return this._sessionId;
+  }
+
+  public get imageDirectory() {
+    return this._imageDirectory;
+  }
+
+  public get tempDirectory() {
+    return this._tempDirectory;
   }
   //#endregion
 }

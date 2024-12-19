@@ -24,3 +24,4 @@ swagger.json
 .env
 
 /logs
+/data
