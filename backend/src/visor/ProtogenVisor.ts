@@ -14,6 +14,7 @@ import { URLImageSourceProvider } from "./image/URLImageSourceProvider";
 import { StaticPictureRenderer } from "./rendering/renderers/StaticPictureRenderer";
 import { CustomFace } from "../database/models/visor/CustomFace.model";
 import { existsSync } from "fs";
+import { FileImageSourceProvider } from "./image/FileImageSourceProvider";
 
 export class ProtogenVisor {
   private _protogen;
@@ -45,7 +46,7 @@ export class ProtogenVisor {
     this._faceRenderer = new VisorFaceRenderer(this);
     this._availableRenderers.push(this._faceRenderer);
     this._availableRenderers.push(new BSODRenderer(this));
-    this._availableRenderers.push(new StaticPictureRenderer(this, "ProtoBlank", "Blank", new URLImageSourceProvider("https://ieatcrayons4aliving.xyz/cdn/proto_face_blank.png")));
+    this._availableRenderers.push(new StaticPictureRenderer(this, "ProtoBlank", "Blank", new FileImageSourceProvider("assets/blank.png")));
 
     // Default to the face renderer
     this.activateRenderer(FaceRendererId, false);

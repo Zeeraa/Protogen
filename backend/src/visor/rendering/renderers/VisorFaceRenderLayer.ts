@@ -3,6 +3,7 @@ import { ProtogenVisor } from "../../ProtogenVisor";
 import { VisorRenderer } from "../VisorRenderer";
 import axios from "axios";
 import { RendererType } from "../RendererType";
+import { FileImageSourceProvider } from "../../image/FileImageSourceProvider";
 
 export const FaceRendererId = "PROTO_FACE";
 
@@ -15,8 +16,8 @@ export class VisorFaceRenderer extends VisorRenderer {
 
   public async onInit() {
     try {
-      const response = await axios.get("https://ieatcrayons4aliving.xyz/cdn/proto_face.png", { responseType: 'arraybuffer' });
-      this._image = await loadImage(response.data);
+      const provider = new FileImageSourceProvider("assets/proto_face.png");
+      this._image = await provider.provideImage();
     } catch (err) {
       console.error(err);
     }
