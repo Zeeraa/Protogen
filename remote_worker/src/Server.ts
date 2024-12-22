@@ -14,11 +14,14 @@ import { cyan, green, red, yellow } from "colors";
 import { existsSync, mkdirSync, readFileSync } from "fs";
 import { VideoDownloaderRouter } from "./routes/video_downloader/VideoDownloaderRouter";
 import { VideoDownloadManager } from "./video_downloader/VideoDownloaderManager";
+import { GifProcessor } from "./gif_processor/GifProcessor";
+import { GifProcessorRouter } from "./routes/gif_processor/GifProcessorRouter";
 
 export class Server {
   private _configuration;
   private _express: Express;
   private _videoDownloadManager: VideoDownloadManager;
+  private _gifProcessor: GifProcessor;
   private _dataDirectory: string;
 
   constructor(config: Configuration) {
@@ -30,6 +33,7 @@ export class Server {
     }
 
     this._videoDownloadManager = new VideoDownloadManager(this);
+    this._gifProcessor = new GifProcessor(this);
 
     //#region Express and middleware
     this._express = express();
@@ -85,6 +89,7 @@ export class Server {
 
     //#region Register endpoints
     new VideoDownloaderRouter(this).register();
+    new GifProcessorRouter(this).register();
     //#endregion
 
     await this.startExpress();
@@ -136,6 +141,10 @@ export class Server {
 
   get videoDownloadManager() {
     return this._videoDownloadManager;
+  }
+
+  get gifProcessor() {
+    return this._gifProcessor;
   }
   //#endregion
 }
