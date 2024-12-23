@@ -11,7 +11,7 @@ const doc = {
   },
   servers: [
     {
-      url: 'http://localhost:8123',
+      url: '/',
       description: 'Local development server'
     },
   ],
@@ -34,6 +34,7 @@ const doc = {
 const outputFile = '../swagger.json';
 const endpointFiles = [
   './src/routes/video_downloader/VideoDownloaderRouter.ts',
+  './src/routes/gif_processor/GifProcessorRouter.ts',
 ];
 
 swaggerAutogen({ openapi: '3.0.0' })(outputFile, endpointFiles, doc);
