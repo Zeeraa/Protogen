@@ -15,13 +15,17 @@ export class FilesApiService extends ApiBaseService {
     super(http, toastr);
   }
 
-  uploadImage(file: File): Observable<ImageUploadResponse> {
+  uploadImage(file: File, options: UploadFileOptions = {}): Observable<ImageUploadResponse> {
     const formData = new FormData();
     formData.append("file", file);
-    return this.http.post(this.apiBaseUrl + "/images", formData) as Observable<ImageUploadResponse>;
+    return this.http.post(this.apiBaseUrl + "/images" + (options.remoteGifProcessing == true ? "?externalGifProcessing=true" : ""), formData) as Observable<ImageUploadResponse>;
   }
 }
 
 export interface ImageUploadResponse {
   resource: string;
+}
+
+export interface UploadFileOptions {
+  remoteGifProcessing?: boolean;
 }

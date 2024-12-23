@@ -48,11 +48,13 @@ export class VisorImageFaceEditorComponent implements OnInit {
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
     if (file) {
-      this.fileApi.uploadImage(file).pipe(catchError((err) => {
+      this.toastr.info("Uploading and processing file. This might take some time...");
+      this.fileApi.uploadImage(file, { remoteGifProcessing: true }).pipe(catchError((err) => {
         this.toastr.error("Failed to upload file");
         this.filePicker.nativeElement.value = null;
         throw err;
       })).subscribe((result) => {
+        this.toastr.success("Image upploaded successfully");
         this.image = result.resource;
       })
     }
