@@ -1,7 +1,6 @@
-import { CanvasRenderingContext2D, Image, loadImage } from "canvas";
+import { CanvasRenderingContext2D, Image } from "canvas";
 import { ProtogenVisor } from "../../ProtogenVisor";
 import { VisorRenderer } from "../VisorRenderer";
-import axios from "axios";
 import { RendererType } from "../RendererType";
 import { FileImageSourceProvider } from "../../image/FileImageSourceProvider";
 

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { AbstractRenderableImage, DrawMode, Type } from "./AbstractRenderableImage";
 import { CanvasRenderingContext2D, Image } from "canvas";
 import sharp from "sharp";
@@ -30,7 +30,10 @@ export class AnimatedRenderableImage extends AbstractRenderableImage {
     digest.update(buffer);
     const hash = digest.digest('hex');
 
-    const cacheFile = this.protogen.config.dataDirectory + "/animcache/" + hash + ".json";
+    const dimStr = maxScale.width + "x" + maxScale.height;
+
+    const folder = this.protogen.config.dataDirectory + "/animcache/" + hash.substring(0, 2);
+    const cacheFile = folder + "/" + hash + "_" + dimStr + ".json";
     if (!existsSync(cacheFile)) {
       this._loading = true;
       const cache: AnimationCacheEntry[] = [];
@@ -113,6 +116,9 @@ export class AnimatedRenderableImage extends AbstractRenderableImage {
         frameTimer += delay;
       }
 
+      if (!existsSync(folder)) {
+        mkdirSync(folder);
+      }
       writeFileSync(cacheFile, JSON.stringify(cache));
 
       this._loading = false;
@@ -181,7 +187,7 @@ interface AnimationFrame {
   startAt: number;
 }
 
-interface AnimationCacheEntry {
+export interface AnimationCacheEntry {
   image: string;
   invertedImage: string;
   delay: number;

@@ -1,6 +1,7 @@
 import axios, { isAxiosError } from "axios";
 import { Protogen } from "../Protogen";
-import { createWriteStream } from "fs";
+import { createReadStream, createWriteStream } from "fs";
+import { AnimationCacheEntry } from "../visor/rendering/renderers/customimage/implementations/AnimatedRenderableImage";
 
 export class ProtogenRemoteWorker {
   private _protogen;
@@ -17,6 +18,24 @@ export class ProtogenRemoteWorker {
     }
 
     return headers;
+  }
+
+  public async processGifAsync(file: string, width: number, height: number): Promise<AnimationCacheEntry[]> {
+    const stream = createReadStream(file);
+    const FormData = require('form-data');
+
+    const form = new FormData();
+    form.append('file', stream);
+
+    const response = await axios.post(this.config.url + "/gif_processor/submit?width=" + width + "&height=" + height, form, {
+      timeout: 1000 * 60 * 1,
+      headers: {
+        ...this.headers,
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    return response.data as AnimationCacheEntry[];
   }
 
   public async createJob(url: string, mirror: boolean, flip: boolean): Promise<VideoDownloadJob> {
