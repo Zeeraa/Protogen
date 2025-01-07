@@ -129,6 +129,13 @@
     </div>
     }
   </div>
+
+  <div class="row mt-2">
+    <div class="col">
+      <button class="btn btn-danger" title="Clear cached video files forcing redownload on next playback"
+        (click)="clearCache()">Clear cache</button>
+    </div>
+  </div>
 </div>
 
 <ng-template #addVideoModal let-modal>

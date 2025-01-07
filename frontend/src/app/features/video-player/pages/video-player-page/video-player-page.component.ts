@@ -148,6 +148,15 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  clearCache() {
+    this.api.clearCache().pipe(catchError(err => {
+      this.toastr.error("Failed to clear cache");
+      throw err;
+    })).subscribe(() => {
+      this.toastr.success("Cache cleared");
+    });
+  }
+
   get isDownloading() {
     return this.lastStatus?.hasDownloadJob === true;
   }
