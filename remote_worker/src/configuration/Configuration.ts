@@ -45,6 +45,8 @@ export async function loadConfiguration(): Promise<Configuration> {
     }
   }
 
+  const cookiesPath = process.env["COOKIES_PATH"] || "./cookies/cookies.txt";
+
   const webConfig: WebConfig = {
     port: port,
     sslKeyPath: sslKey,
@@ -56,12 +58,14 @@ export async function loadConfiguration(): Promise<Configuration> {
   return {
     web: webConfig,
     apiKey: apiKey,
+    cookiesPath: cookiesPath,
   }
 }
 
 export interface Configuration {
   web: WebConfig;
   apiKey: string | null;
+  cookiesPath: string;
 }
 
 export interface WebConfig {
