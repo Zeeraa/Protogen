@@ -5,7 +5,7 @@ import { DataSource, Equal, In, IsNull, Not } from "typeorm";
 import { VideoDownloaderJob } from "./VideoDownloaderJob";
 import { VideoDownloaderJobStatus } from "../enum/VideoDownloaderJobStatus";
 import { cyan, green, red } from "colors";
-import youtubeDl from "youtube-dl-exec";
+import youtubeDl, { Flags } from "youtube-dl-exec";
 import { VideoDownloadJobDTO } from "../dto/comment/VideoDownloadJob";
 import { uuidv7 } from "uuidv7";
 import { sleep } from "../utils/Sleep";
@@ -22,8 +22,11 @@ export class VideoDownloadManager {
   private _ffmpegCommand: string;
   private _ffmpegPreset: string;
   private _videoFileExtension: string;
+  private _server;
 
   constructor(server: Server) {
+    this._server = server;
+
     this._dataDirectory = server.dataDirectory + "/video_downloader";
     this._storageFolder = this._dataDirectory + "/storage";
     this._tempFolder = this._dataDirectory + "/temp";
@@ -119,12 +122,23 @@ export class VideoDownloadManager {
     console.log("Processing video download job " + cyan(job.jobId));
     const repo = this._dataSource.getRepository(VideoDownloaderJob);
     try {
+      const extras: Flags = {}
+
+      if (existsSync(this.server.configuration.cookiesPath)) {
+        extras.cookies = this.server.configuration.cookiesPath;
+      }
+
       job.status = VideoDownloaderJobStatus.DOWNLOADING;
       await repo.save(job);
-      await youtubeDl(job.videoUrl, {
-        noWarnings: true,
+
+      const payload = await youtubeDl(job.videoUrl, {
         output: this._tempFolder + "/" + job.jobId,
-      });
+        quiet: false,
+        ...extras,
+      }, { shell: true });
+
+      console.log(payload);
+
       await sleep(100);
       const downloadedFileName = readdirSync(this._tempFolder).find(name => name.startsWith(job.jobId));
       if (downloadedFileName == null) {
@@ -208,6 +222,10 @@ export class VideoDownloadManager {
       await repo.save(job);
       throw err;
     }
+  }
+
+  private get server() {
+    return this._server;
   }
 
   private escapeDoubleQuotes(str: string) {

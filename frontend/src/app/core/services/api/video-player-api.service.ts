@@ -76,6 +76,10 @@ export class VideoPlayerApiService extends ApiBaseService {
   deleteGroup(id: number): Observable<any> {
     return this.http.delete(this.apiBaseUrl + "/video_player/groups/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
   }
+
+  clearCache(): Observable<any> {
+    return this.http.delete(this.apiBaseUrl + "/video_player/cache").pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+  }
 }
 
 interface AlterGroupModel {
