@@ -19,7 +19,7 @@ import { HudRouter } from "./routes/hud/HudRouter";
 import { ImageRouter } from "./routes/images/ImageRouter";
 import { UserRouter } from "./routes/user/UserRouter";
 import { AuthRouter } from "./routes/auth/AuthRouter";
-import { AuthMiddleware } from "./middleware/AuthMiddleware";
+import { AuthData, AuthMiddleware } from "./middleware/AuthMiddleware";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -54,7 +54,28 @@ export class ProtogenWebServer {
     new UserRouter(this).register();
     new AuthRouter(this).register({ noAuth: true });
 
-    this.socket.on("connection", (socket: Socket) => {
+    this.socket.on("connection", async (socket: Socket) => {
+      const token = String(socket.handshake.headers.authorization);
+      let auth: AuthData | null = null;
+
+      if (token.startsWith("Bearer ")) {
+        const jwt = token.split("Bearer ")[1];
+        const user = await this.protogen.userManager.validateJWTToken(jwt);
+
+        if (user != null) {
+          auth = {
+            isSuperUser: user.superUser,
+            user: user,
+          }
+        }
+      }
+
+      if (auth == null) {
+        this.protogen.logger.info("WebServer", "Invalid token. Disconnecting socket.");
+        socket.disconnect(true);
+        return;
+      }
+
       const session = new UserSocketSession(this.protogen, socket);
       this._sessions.push(session);
       this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
