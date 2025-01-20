@@ -7,13 +7,15 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { DashboardModule } from './features/dashboard/dashboard.module';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NavbarModule } from './features/navbar/navbar.module';
 import { VisorModule } from './features/visor/visor.module';
 import { VideoPlayerModule } from './features/video-player/video-player.module';
 import { SystemModule } from './features/system/system.module';
 import { RgbModule } from './features/rgb/rgb.module';
 import { LogsModule } from './features/logs/logs.module';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -32,9 +34,16 @@ import { LogsModule } from './features/logs/logs.module';
     SystemModule,
     RgbModule,
     LogsModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [
-    provideHttpClient(withInterceptorsFromDi())
+    provideHttpClient(withInterceptorsFromDi()),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    }
   ],
   bootstrap: [AppComponent]
 })

@@ -24,6 +24,9 @@ export function nullToUndefined<T>(input: T | null): T | undefined {
   return input;
 }
 
+export function typeAssert<T>(input: any): T {
+  return input as T;
+}
 
 export function undefinedToNull<T>(input: T | null | undefined): T | null {
   if (input == undefined) {
