@@ -8,6 +8,7 @@ import { KVDataStoreEntry } from "./models/data/KVDataStoreEntry.model";
 import { RgbEditorPreviewElement } from "./models/rgb/RgbEditorConfig.model";
 import { SavedVideoGroup } from "./models/video-player/SavedVideoGroup.model";
 import { CustomFace } from "./models/visor/CustomFace.model";
+import { User } from "./models/user/User.model";
 
 export class Database {
   private _protogen;
@@ -41,6 +42,9 @@ export class Database {
 
         // ---------- Visor ----------
         CustomFace,
+
+        // ---------- Users ----------
+        User,
       ]
     });
   }

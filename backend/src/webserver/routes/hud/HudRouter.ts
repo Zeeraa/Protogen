@@ -21,6 +21,11 @@ export class HudRouter extends AbstractRouter {
           enabled: true
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = HudStatusModel.safeParse(req.body);

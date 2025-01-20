@@ -17,6 +17,9 @@ import { SocketMessageType } from "./socket/SocketMessageType";
 import { SocketMessage } from "./socket/SocketMessage";
 import { HudRouter } from "./routes/hud/HudRouter";
 import { ImageRouter } from "./routes/images/ImageRouter";
+import { UserRouter } from "./routes/user/UserRouter";
+import { AuthRouter } from "./routes/auth/AuthRouter";
+import { AuthMiddleware } from "./middleware/AuthMiddleware";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -24,6 +27,7 @@ export class ProtogenWebServer {
   private _http;
   private _socket;
   private _sessions: UserSocketSession[];
+  private _authMiddleware;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
@@ -35,6 +39,8 @@ export class ProtogenWebServer {
       path: "/protogen-websocket.io",
     });
 
+    this._authMiddleware = AuthMiddleware(this);
+
     this.express.use(cors())
     this.express.use(bodyParser.json());
 
@@ -44,7 +50,9 @@ export class ProtogenWebServer {
     new SystemRouter(this).register();
     new RgbRouter(this).register();
     new HudRouter(this).register();
-    new ImageRouter(this).register();
+    new ImageRouter(this).register({ noAuth: true });
+    new UserRouter(this).register();
+    new AuthRouter(this).register({ noAuth: true });
 
     this.socket.on("connection", (socket: Socket) => {
       const session = new UserSocketSession(this.protogen, socket);
@@ -104,6 +112,10 @@ export class ProtogenWebServer {
 
   public get socket() {
     return this._socket;
+  }
+
+  public get authMiddleware() {
+    return this._authMiddleware;
   }
 
   public broadcastMessage(type: SocketMessageType, data: any) {
