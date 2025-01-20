@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { LocalStorageKey_AuthToken } from './utils/LocalStorageKeys';
 import { jwtDecode } from 'jwt-decode';
 import { AuthApiService } from './api/auth-api.service';
-import { catchError } from 'rxjs';
+import { catchError, Subject } from 'rxjs';
 import { typeAssert } from './utils/Utils';
 
 @Injectable({
@@ -13,6 +13,11 @@ export class AuthService {
   private _loginNeeded = false;
   private _authDetails: ProtogenJWTPayload | null = null;
   private _token: string | null = null;
+  private _tokenRefreshedSubject = new Subject<string>();
+
+  get tokenRefreshedObservable() {
+    return this._tokenRefreshedSubject.asObservable();
+  }
 
   get loggedIn() {
     return this._loggedIn;
@@ -36,7 +41,6 @@ export class AuthService {
       this.parseToken(newToken);
       localStorage.setItem(LocalStorageKey_AuthToken, newToken);
     }
-
   }
 
   public parseToken(token: string) {
@@ -80,6 +84,7 @@ export class AuthService {
           if (newToken != null) {
             this.token = newToken;
             this._loggedIn = true;
+            this._tokenRefreshedSubject.next(newToken);
             return resolve();
           }
         } else {
@@ -116,7 +121,27 @@ export class AuthService {
 
   constructor(
     private authApi: AuthApiService,
-  ) { }
+  ) {
+    setInterval(async () => {
+      if (this.loggedIn) {
+        try {
+          const newToken = await this.tryRefreshToken();
+          if (newToken == null) {
+            console.log("Token seems to have expired. Showing login page");
+            this._loggedIn = false;
+            this._loginNeeded = true;
+          } else {
+            console.log("Token refreshed");
+            this.token = newToken;
+            this._tokenRefreshedSubject.next(this.token);
+          }
+        } catch (err) {
+          console.error("Failed to refresh token");
+          console.error(err);
+        }
+      }
+    }, 1000 * 60 * 10);
+  }
 }
 
 export interface ProtogenJWTPayload {

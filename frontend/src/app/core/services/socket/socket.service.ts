@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { SocketMessage } from './data/SocketMessage';
 import { SocketMessageType } from './data/SocketMessageType';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { SocketEventType } from './data/SocketEventType';
+import { AuthService } from '../auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,9 @@ export class SocketService {
   private _messageSubject = new Subject<SocketMessage>();
   private _eventSubject = new Subject<SocketEventType>();
 
-  constructor() { }
+  constructor(
+    private auth: AuthService,
+  ) { }
 
   init() {
     this.connect();
@@ -29,7 +32,13 @@ export class SocketService {
           console.warn("No ping received for a while. Marking socket as dead for now");
         }
       }
-    }, 1000)
+    }, 1000);
+  }
+
+  private get socketHeaders() {
+    return {
+      Authorization: "Bearer " + String(this.auth.token),
+    }
   }
 
   connect() {
@@ -41,7 +50,8 @@ export class SocketService {
     console.log("Starting new socket connection");
     this._socket = io({
       reconnection: true,
-      path: "/protogen-websocket.io"
+      path: "/protogen-websocket.io",
+      extraHeaders: this.socketHeaders,
     });
 
     this._socket.on('connect', () => {
@@ -64,6 +74,12 @@ export class SocketService {
 
     this._socket.on('message', (msg: SocketMessage) => {
       this.handleReceivedData(msg);
+    });
+
+    this._socket.on('reconnect_attempt', () => {
+      if (this._socket != null) {
+        this._socket.io.opts.extraHeaders = this.socketHeaders;
+      }
     });
   }
 
