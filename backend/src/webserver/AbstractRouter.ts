@@ -30,14 +30,25 @@ export abstract class AbstractRouter {
     return this.webServer.protogen;
   }
 
-  public register() {
+  public register(options: RegisterOptions = {}) {
     if (this._registerCalled) {
       console.warn(yellow("Attempted to call register twice in endpoint " + this.path));
       return;
     }
+
+    const handlers: any[] = [];
+
+    if (options.noAuth !== true) {
+      handlers.push(this.authMiddleware);
+    }
+
     this._registerCalled = true;
     this.protogen.logger.info("Router", "Registering endpoint " + cyan(this.path));
-    this.webServer.express.use(this.path, this.router);
+    this.webServer.express.use(this.path, handlers, this.router);
+  }
+
+  public get authMiddleware() {
+    return this.webServer.authMiddleware;
   }
 
   protected handleError(err: any, req: Request, res: Response) {
@@ -53,4 +64,8 @@ export abstract class AbstractRouter {
       });
     }
   }
+}
+
+interface RegisterOptions {
+  noAuth?: boolean;
 }

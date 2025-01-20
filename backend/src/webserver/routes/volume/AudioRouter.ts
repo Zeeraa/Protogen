@@ -14,6 +14,11 @@ export class AudioRouter extends AbstractRouter {
       #swagger.description = "Get the volume"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "Failed to get volume" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const volume = await getVolume();
@@ -41,6 +46,11 @@ export class AudioRouter extends AbstractRouter {
           volume: 50
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = SetVolumeDTO.safeParse(req.body);

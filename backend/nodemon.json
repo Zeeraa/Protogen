@@ -5,5 +5,5 @@
     "swagger.json"
   ],
   "ext": ".ts",
-  "exec": "ts-node ./src/index.ts"
+  "exec": "ts-node --transpileOnly ./src/index.ts"
 }

@@ -43,7 +43,21 @@ const doc = {
   servers: [server],
   components: {
   },
-  tags: []
+  tags: [],
+  securityDefinitions: {
+    tokenAuth: {
+      type: 'apiKey',
+      in: 'header',
+      name: 'Authorization',
+      description: 'Token auth used by web ui'
+    },
+    apiKeyAuth: {
+      type: 'apiKey',
+      in: 'header',
+      name: 'X-api-key',
+      description: 'Api key for using api in scripts'
+    }
+  }
 };
 
 const outputFile = '../../swagger.json';

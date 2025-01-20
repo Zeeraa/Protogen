@@ -16,6 +16,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Get all logs"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const file = this.protogen.logger.sessionLogFile;
@@ -36,6 +41,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Get the session id"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       res.send({ sessionId: this.protogen.sessionId });
     });
@@ -46,6 +56,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Exits the service"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       setTimeout(() => {
         process.exit(0);
@@ -63,6 +78,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Get system overview"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const cpuTemperature = await getTemperature();
@@ -94,6 +114,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Shutdown the system"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         await shutdown();
@@ -110,6 +135,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Restart the flaschen-taschen service"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         await this.protogen.flaschenTaschen.restart();
@@ -125,6 +155,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Get the flaschen taschen settings"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         res.json(this.protogen.flaschenTaschen.settings);
@@ -150,6 +185,11 @@ export class SystemRouter extends AbstractRouter {
           ledSlowdownGpio: "GPIO slowdown value"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = FTSettingsSchema.safeParse(req.body);
