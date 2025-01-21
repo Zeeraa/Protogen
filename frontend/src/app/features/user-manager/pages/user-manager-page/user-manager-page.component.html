@@ -1,0 +1,73 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>User manager</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th class="t-fit">Is admin</th>
+            <th class="t-fit"></th>
+            @if(isAdmin) {
+            <th class="t-fit"></th>
+            }
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (user of users; track $index) {
+          <tr>
+            <td>
+              {{user.username}}
+              @if(user.id == userId) {
+              <span class="badge bg-info"
+                title="This is the user you are logged in as. Deleting it might not be a good idea :3">You</span>
+              }
+            </td>
+            <td>
+              @if(user.superUser) {
+              <span class="badge bg-success">Yes</span>
+              } @else {
+              <span class="badge bg-danger">No</span>
+              }
+            </td>
+            <td>
+              <button class="btn btn-primary btn-text-nowrap" [disabled]="user.id != userId && !isAdmin"
+                (click)="showPasswordChange(user)">
+                Change password
+              </button>
+            </td>
+
+            @if(isAdmin) {
+            <th class="t-fit">
+              <button class="btn btn-danger" (click)="showDeletePrompt(user)">Delete</button>
+            </th>
+            }
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<ng-template #deleteUserPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Delete user</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>
+      Please confirm that you want to delete the user <span class="text-info">{{deleteUserName}}</span>
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeleteUser()">Delete</button>
+  </div>
+</ng-template>
