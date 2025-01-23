@@ -95,7 +95,7 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
     let oldPassword = "";
     if (this.isChangingOwnPassword) {
       oldPassword = this.changePasswordForm.get("oldPassword")?.value || "";
-      console.log(oldPassword);
+
       if (oldPassword.trim().length == 0) {
         didWarn = true;
         this.toastr.error("Old password needed to change your password");
