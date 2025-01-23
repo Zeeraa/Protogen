@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuthApiService, ProtogenUser } from '../../../../core/services/api/auth-api.service';
-import { catchError } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { FormControl, FormGroup } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-user-manager-page',
@@ -17,6 +19,20 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
 
   private deleteUserPrompt: NgbModalRef | null = null;
   @ViewChild("deleteUserPrompt") private deleteUserPromptTemplate!: TemplateRef<any>;
+
+  private newUserPrompt: NgbModalRef | null = null;
+  @ViewChild("newUserPrompt") private newUserPromptTemplate!: TemplateRef<any>;
+  newUserForm = new FormGroup({
+    username: new FormControl<string>(""),
+    password: new FormControl<string>(""),
+    confirmPassword: new FormControl<string>(""),
+    admin: new FormControl<boolean>(false),
+  });
+  usernameTaken = false;
+  usernameEmpty = false;
+  passwordEmpty = false;
+  passwordsNotMatching = false;
+  lockInputs = false;
 
   constructor(
     private auth: AuthService,
@@ -45,6 +61,83 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
     this.deleteUserPrompt = this.modal.open(this.deleteUserPromptTemplate);
   }
 
+  showNewUserPrompt() {
+    this.usernameEmpty = false;
+    this.usernameTaken = false;
+    this.passwordsNotMatching = false;
+    this.passwordEmpty = false;
+    this.lockInputs = false;
+
+    this.newUserForm.get("username")?.setValue("");
+    this.newUserForm.get("password")?.setValue("");
+    this.newUserForm.get("confirmPassword")?.setValue("");
+    this.newUserForm.get("admin")?.setValue(false);
+
+    this.newUserPrompt = this.modal.open(this.newUserPromptTemplate);
+  }
+
+  confirmCreateUser() {
+    this.usernameEmpty = false;
+    this.usernameTaken = false;
+    this.passwordEmpty = false;
+    this.passwordsNotMatching = false;
+    let didWarn = false;
+
+    const username = this.newUserForm.get("username")?.value || "";
+    if (username.trim().length == 0) {
+      didWarn = true;
+      this.toastr.error("Username can not be empty");
+      this.usernameEmpty = true;
+    }
+
+    const password = this.newUserForm.get("password")?.value || "";
+    if (password.trim().length == 0) {
+      if (!didWarn) {
+        this.toastr.error("Password can not be empty");
+        didWarn = true;
+      }
+      this.passwordEmpty = true;
+    }
+
+    if (didWarn) {
+      return;
+    }
+
+    const confirmPassword = this.newUserForm.get("confirmPassword")?.value || "";
+    if (password != confirmPassword) {
+      this.toastr.error("Passwords not matching");
+      this.passwordsNotMatching = true;
+      return;
+    }
+
+    const superUser = this.newUserForm.get("admin")?.value == true;
+
+    this.lockInputs = true;
+    this.authApi.createUser({ username, password, superUser }).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.lockInputs = false;
+
+        if (err.status == 409) {
+          this.toastr.error("Username already taken");
+          this.usernameTaken = true;
+          return of(null);
+        }
+
+        this.toastr.error("Failed to create user");
+        throw err;
+      })
+    ).subscribe(user => {
+      this.lockInputs = false;
+
+      if (user == null) {
+        return;
+      }
+      this.users.push(user);
+      this.newUserPrompt?.close();
+      this.loadUserList();
+    })
+  }
+
   confirmDeleteUser() {
     this.authApi.deleteUser(this.userId).subscribe(() => {
       this.users = this.users.filter(u => u.id != this.deleteUserId);
@@ -59,6 +152,7 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.deleteUserPrompt?.close();
+    this.newUserPrompt?.close();
   }
 
   get isAdmin() {

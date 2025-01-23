@@ -51,6 +51,19 @@
           </tr>
           }
         </tbody>
+
+        <tbody>
+          <tr>
+            @if(isAdmin) {
+            <td colspan="3"></td>
+            } @else {
+            <td colspan="2"></td>
+            }
+            <td class="t-fit">
+              <button class="btn btn-primary w-100" (click)="showNewUserPrompt()">Add</button>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -69,5 +82,65 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
     <button type="button" class="btn btn-danger" (click)="confirmDeleteUser()">Delete</button>
+  </div>
+</ng-template>
+
+<ng-template #newUserPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Add user</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newUserForm">
+      <div class="mb-2">
+        <label for="newUserName" class="form-label">Username</label>
+        <input type="text" name="username" id="newUserName" class="form-control" formControlName="username"
+          placeholder="Username" [class.is-invalid]="usernameTaken || usernameEmpty"
+          aria-describedby="newUserUsernameProblem">
+        <div id="newUserUsernameProblem" class="invalid-feedback">
+          @if(usernameEmpty) {
+          Username can not be empty
+          } @else if(usernameTaken) {
+          Username already taken
+          }
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <label for="newUserPassword" class="form-label">Password</label>
+        <input type="password" name="username" id="newUserPassword" class="form-control" formControlName="password"
+          placeholder="Password" [class.is-invalid]="passwordEmpty || passwordsNotMatching"
+          aria-describedby="newUserPasswordProblem">
+        <div id="newUserPasswordProblem" class="invalid-feedback">
+          @if(passwordEmpty) {
+          Password can not be empty
+          } @else if(passwordsNotMatching){
+          Passwords not matching
+          }
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <label for="newUserPassword2ElectricBoogaloo" class="form-label">Confirm password</label>
+        <input type="password" name="username" id="newUserPassword2ElectricBoogaloo" class="form-control"
+          formControlName="confirmPassword" placeholder="Confirm password" [class.is-invalid]="passwordsNotMatching"
+          aria-describedby="newUserPasswordConfirmProblem">
+        <div id="newUserPasswordConfirmProblem" class="invalid-feedback">
+          Passwords not matching
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="newUserAdmin" formControlName="admin">
+          <label class="form-check-label" for="newUserAdmin"
+            title="Admin accounts can create new users and manage sensitive information">Admin account</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="confirmCreateUser()">Add user</button>
   </div>
 </ng-template>

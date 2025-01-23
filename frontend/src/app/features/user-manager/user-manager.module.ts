@@ -1,10 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserManagerPageComponent } from './pages/user-manager-page/user-manager-page.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
-
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -12,9 +10,12 @@ import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
   ],
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
+    FormsModule,
     NgbModalModule,
+  ],
+  exports: [
+    UserManagerPageComponent
   ]
 })
 export class UserManagerModule { }

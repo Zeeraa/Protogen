@@ -16,6 +16,7 @@ import { RgbModule } from './features/rgb/rgb.module';
 import { LogsModule } from './features/logs/logs.module';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { UserManagerModule } from './features/user-manager/user-manager.module';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     LogsModule,
     FormsModule,
     ReactiveFormsModule,
+    UserManagerModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),

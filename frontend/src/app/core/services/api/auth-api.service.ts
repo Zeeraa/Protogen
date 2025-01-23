@@ -44,6 +44,16 @@ export class AuthApiService extends ApiBaseService {
   deleteUser(userId: number): Observable<any> {
     return this.http.delete(this.apiBaseUrl + "/users/" + userId).pipe(catchError(this.defaultErrorHandler)) as any;
   }
+
+  createUser(data: CreateNewUserData): Observable<ProtogenUser> {
+    return this.http.post(this.apiBaseUrl + "/users", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<ProtogenUser>;
+  }
+}
+
+export interface CreateNewUserData {
+  username: string;
+  password: string;
+  superUser: boolean;
 }
 
 export interface ProtogenUser {
