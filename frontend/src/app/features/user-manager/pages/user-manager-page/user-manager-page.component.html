@@ -85,6 +85,68 @@
   </div>
 </ng-template>
 
+<ng-template #changePasswordPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Change password</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <h4>
+      @if(isChangingOwnPassword) {
+      Changing your own password
+      } @else {
+      Changing password of user <span class="text-info">{{passwordChangeUserName}}</span>
+      }
+    </h4>
+    <form [formGroup]="changePasswordForm">
+      @if(isChangingOwnPassword) {
+      <div class="mb-2">
+        <label for="oldUserPassword" class="form-label">Old password</label>
+        <input type="password" name="username" id="oldUserPassword" class="form-control" formControlName="oldPassword"
+          placeholder="Password" [class.is-invalid]="oldPasswordMissing || oldPasswordWrong"
+          aria-describedby="oldUserPasswordProblem" autocomplete="current-password">
+        <div id="oldUserPasswordProblem" class="invalid-feedback">
+          @if(oldPasswordMissing) {
+          Old password needed to change password
+          } @else if(oldPasswordWrong){
+          Wrong old password
+          }
+        </div>
+      </div>
+      }
+
+      <div class="mb-2">
+        <label for="changePasswordNewPassword" class="form-label">New password</label>
+        <input type="password" name="username" id="changePasswordNewPassword" class="form-control"
+          formControlName="newPassword" placeholder="Password"
+          [class.is-invalid]="passwordEmpty || passwordsNotMatching" aria-describedby="changePasswordNewPasswordProblem"
+          autocomplete="new-password">
+        <div id="changePasswordNewPasswordProblem" class="invalid-feedback">
+          @if(passwordEmpty) {
+          Password can not be empty
+          } @else if(passwordsNotMatching){
+          Passwords not matching
+          }
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <label for="changePasswordConfirmPassword" class="form-label">Confirm password</label>
+        <input type="password" name="username" id="changePasswordConfirmPassword" class="form-control"
+          formControlName="confirmNewPassword" placeholder="Confirm password" [class.is-invalid]="passwordsNotMatching"
+          aria-describedby="changePasswordConfirmPasswordProblem" autocomplete="on">
+        <div id="changePasswordConfirmPasswordProblem" class="invalid-feedback">
+          Passwords not matching
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="confirmChangePassword()">Change password</button>
+  </div>
+</ng-template>
+
 <ng-template #newUserPrompt let-modal>
   <div class="modal-header">
     <h4 class="modal-title" id="create-group-modal-title">Add user</h4>
@@ -96,7 +158,7 @@
         <label for="newUserName" class="form-label">Username</label>
         <input type="text" name="username" id="newUserName" class="form-control" formControlName="username"
           placeholder="Username" [class.is-invalid]="usernameTaken || usernameEmpty"
-          aria-describedby="newUserUsernameProblem">
+          aria-describedby="newUserUsernameProblem" maxlength="32">
         <div id="newUserUsernameProblem" class="invalid-feedback">
           @if(usernameEmpty) {
           Username can not be empty

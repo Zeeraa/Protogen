@@ -48,6 +48,15 @@ export class AuthApiService extends ApiBaseService {
   createUser(data: CreateNewUserData): Observable<ProtogenUser> {
     return this.http.post(this.apiBaseUrl + "/users", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<ProtogenUser>;
   }
+
+  changePassword(userId: number, data: ChangePasswordData): Observable<ProtogenUser> {
+    return this.http.put(this.apiBaseUrl + "/users/" + userId + "/password", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<ProtogenUser>;
+  }
+}
+
+export interface ChangePasswordData {
+  oldPassword: string;
+  password: string;
 }
 
 export interface CreateNewUserData {
