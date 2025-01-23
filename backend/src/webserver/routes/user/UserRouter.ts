@@ -120,6 +120,16 @@ export class UserRouter extends AbstractRouter {
           return;
         }
 
+        // Require old password when changing own password
+        if ((req.auth.user?.id || -1) == user.id) {
+          const oldPasswordOk = await this.protogen.userManager.validatePasswordHash(user.password, data.oldPassword);
+
+          if (!oldPasswordOk) {
+            res.status(403).send({ message: "Old password is incorrect" });
+            return;
+          }
+        }
+
         const changedUser = await this.protogen.userManager.changePassword(user.id, data.password);
 
         delete (changedUser as any).password;
@@ -183,5 +193,6 @@ const CreateUserModel = z.object({
 });
 
 const ChangePasswordModel = z.object({
+  oldPassword: z.string(),
   password: z.string().min(1),
 });
