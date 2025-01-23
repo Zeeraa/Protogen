@@ -34,6 +34,18 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
   passwordsNotMatching = false;
   lockInputs = false;
 
+  private changePasswordPrompt: NgbModalRef | null = null;
+  @ViewChild("changePasswordPrompt") private changePasswordPromptTemplate!: TemplateRef<any>;
+  changePasswordForm = new FormGroup({
+    oldPassword: new FormControl<string>(""),
+    newPassword: new FormControl<string>(""),
+    confirmNewPassword: new FormControl<string>(""),
+  });
+  passwordChangeUserId = -1;
+  passwordChangeUserName = "MissingNo";
+  oldPasswordMissing = false;
+  oldPasswordWrong = false;
+
   constructor(
     private auth: AuthService,
     private authApi: AuthApiService,
@@ -50,8 +62,92 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
     })
   }
 
-  showPasswordChange(user: ProtogenUser) {
+  get isChangingOwnPassword() {
+    return this.passwordChangeUserId == (this.auth.authDetails?.userId || -420);
+  }
 
+  showPasswordChange(user: ProtogenUser) {
+    this.passwordChangeUserName = user.username;
+    this.passwordChangeUserId = user.id;
+
+    this.oldPasswordMissing = false;
+    this.oldPasswordWrong = false;
+    this.passwordEmpty = false;
+    this.passwordsNotMatching = false;
+    this.lockInputs = false;
+
+    this.changePasswordForm.get("oldPassword")?.setValue("");
+    this.changePasswordForm.get("newPassword")?.setValue("");
+    this.changePasswordForm.get("confirmNewPassword")?.setValue("");
+
+    this.changePasswordPrompt = this.modal.open(this.changePasswordPromptTemplate);
+  }
+
+  confirmChangePassword() {
+    this.oldPasswordWrong = false;
+    this.oldPasswordMissing = false;
+    this.passwordEmpty = false;
+    this.passwordsNotMatching = false;
+    this.lockInputs = false;
+
+    let didWarn = false;
+
+    let oldPassword = "";
+    if (this.isChangingOwnPassword) {
+      oldPassword = this.changePasswordForm.get("oldPassword")?.value || "";
+      console.log(oldPassword);
+      if (oldPassword.trim().length == 0) {
+        didWarn = true;
+        this.toastr.error("Old password needed to change your password");
+        this.oldPasswordMissing = true;
+      }
+    }
+
+    const password = this.changePasswordForm.get("newPassword")?.value || "";
+    if (password.trim().length == 0) {
+      if (!didWarn) {
+        this.toastr.error("Password can not be empty");
+        didWarn = true;
+      }
+      this.passwordEmpty = true;
+    }
+
+    if (didWarn) {
+      return;
+    }
+
+    const confirmPassword = this.changePasswordForm.get("confirmNewPassword")?.value || "";
+    if (password != confirmPassword) {
+      this.toastr.error("Passwords not matching");
+      this.passwordsNotMatching = true;
+      return;
+    }
+
+    this.authApi.changePassword(this.passwordChangeUserId, { oldPassword, password }).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.lockInputs = false;
+
+        if (err.status == 403) {
+          this.toastr.error("Old password incorrect");
+          this.oldPasswordWrong = true;
+          return of(null);
+        }
+
+        this.toastr.error("Failed to change password");
+        throw err;
+      })
+    ).subscribe(user => {
+      if (user == null) {
+        return;
+      }
+      if (this.isChangingOwnPassword) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 5000);
+      }
+      this.toastr.success("Password changed");
+      this.changePasswordPrompt?.close();
+    })
   }
 
   showDeletePrompt(user: ProtogenUser) {
@@ -135,7 +231,7 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
       this.users.push(user);
       this.newUserPrompt?.close();
       this.loadUserList();
-    })
+    });
   }
 
   confirmDeleteUser() {
@@ -153,6 +249,7 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.deleteUserPrompt?.close();
     this.newUserPrompt?.close();
+    this.changePasswordPrompt?.close();
   }
 
   get isAdmin() {
