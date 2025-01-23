@@ -14,9 +14,14 @@ export class AuthService {
   private _authDetails: ProtogenJWTPayload | null = null;
   private _token: string | null = null;
   private _tokenRefreshedSubject = new Subject<string>();
+  private _tokenChangedSubject = new Subject<string>();
 
   get tokenRefreshedObservable() {
     return this._tokenRefreshedSubject.asObservable();
+  }
+
+  get tokenChangedObservable() {
+    return this._tokenChangedSubject.asObservable();
   }
 
   get loggedIn() {
@@ -40,16 +45,20 @@ export class AuthService {
     if (newToken != null) {
       this.parseToken(newToken);
       localStorage.setItem(LocalStorageKey_AuthToken, newToken);
+      this._tokenChangedSubject.next(newToken);
     }
   }
 
   public parseToken(token: string) {
-    const decoded = jwtDecode(token);
+    const decoded = typeAssert<ProtogenJWTPayload>(jwtDecode(token));
     this._authDetails = {
-      isSuperUser: typeAssert<ProtogenJWTPayload>(decoded).isSuperUser,
-      passwordChangeDate: typeAssert<ProtogenJWTPayload>(decoded).passwordChangeDate,
-      userId: typeAssert<ProtogenJWTPayload>(decoded).userId,
-      username: typeAssert<ProtogenJWTPayload>(decoded).username,
+      isSuperUser: decoded.isSuperUser,
+      passwordChangeDate: decoded.passwordChangeDate,
+      userId: decoded.userId,
+      username: decoded.username,
+      iat: decoded.iat,
+      exp: decoded.exp,
+
     }
     console.log(decoded);
   }
@@ -149,4 +158,6 @@ export interface ProtogenJWTPayload {
   passwordChangeDate: string;
   isSuperUser: boolean;
   username: string;
+  iat: number;
+  exp: number;
 }
