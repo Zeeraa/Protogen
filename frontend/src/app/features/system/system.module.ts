@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SystemPageComponent } from './pages/system-page/system-page.component';
 import { NgbProgressbarModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -12,6 +13,7 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     NgbProgressbarModule,
     FormsModule,
+    RouterLink,
   ]
 })
 export class SystemModule { }
