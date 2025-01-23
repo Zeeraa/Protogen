@@ -20,6 +20,7 @@ import { ImageRouter } from "./routes/images/ImageRouter";
 import { UserRouter } from "./routes/user/UserRouter";
 import { AuthRouter } from "./routes/auth/AuthRouter";
 import { AuthData, AuthMiddleware } from "./middleware/AuthMiddleware";
+import { DiscoveryRouter } from "./routes/discovery/DiscoveryRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -53,6 +54,7 @@ export class ProtogenWebServer {
     new ImageRouter(this).register({ noAuth: true });
     new UserRouter(this).register();
     new AuthRouter(this).register({ noAuth: true });
+    new DiscoveryRouter(this).register({ noAuth: true });
 
     this.socket.on("connection", async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
