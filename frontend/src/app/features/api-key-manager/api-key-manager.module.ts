@@ -1,23 +1,21 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserManagerPageComponent } from './pages/user-manager-page/user-manager-page.component';
-import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { ApiKeyManagerPageComponent } from './pages/api-key-manager-page/api-key-manager-page.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
-    UserManagerPageComponent
+    ApiKeyManagerPageComponent
   ],
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     FormsModule,
-    NgbModalModule,
+    ReactiveFormsModule,
     RouterModule,
   ],
   exports: [
-    UserManagerPageComponent
+    ApiKeyManagerPageComponent
   ]
 })
-export class UserManagerModule { }
+export class ApiKeyManagerModule { }

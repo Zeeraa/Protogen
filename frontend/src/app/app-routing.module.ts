@@ -9,6 +9,7 @@ import { RgbEditorPageComponent } from './features/rgb/pages/rgb-editor-page/rgb
 import { LogsPageComponent } from './features/logs/pages/logs-page/logs-page.component';
 import { VisorImageFaceEditorComponent } from './features/visor/pages/visor-image-face-editor/visor-image-face-editor.component';
 import { UserManagerPageComponent } from './features/user-manager/pages/user-manager-page/user-manager-page.component';
+import { ApiKeyManagerPageComponent } from './features/api-key-manager/pages/api-key-manager-page/api-key-manager-page.component';
 
 export const routes: Routes = [
   {
@@ -46,6 +47,10 @@ export const routes: Routes = [
   {
     path: "users",
     component: UserManagerPageComponent,
+  },
+  {
+    path: "keys",
+    component: ApiKeyManagerPageComponent,
   }
 ];
 
