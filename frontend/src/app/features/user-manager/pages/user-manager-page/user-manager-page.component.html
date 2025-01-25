@@ -86,8 +86,9 @@
     </p>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="confirmDeleteUser()">Delete</button>
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeleteUser()" [disabled]="lockInputs">Delete</button>
   </div>
 </ng-template>
 
@@ -110,7 +111,7 @@
         <label for="oldUserPassword" class="form-label">Old password</label>
         <input type="password" name="username" id="oldUserPassword" class="form-control" formControlName="oldPassword"
           placeholder="Password" [class.is-invalid]="oldPasswordMissing || oldPasswordWrong"
-          aria-describedby="oldUserPasswordProblem" autocomplete="current-password">
+          aria-describedby="oldUserPasswordProblem" autocomplete="current-password" [disabled]="lockInputs">
         <div id="oldUserPasswordProblem" class="invalid-feedback">
           @if(oldPasswordMissing) {
           Old password needed to change password
@@ -126,7 +127,7 @@
         <input type="password" name="username" id="changePasswordNewPassword" class="form-control"
           formControlName="newPassword" placeholder="Password"
           [class.is-invalid]="passwordEmpty || passwordsNotMatching" aria-describedby="changePasswordNewPasswordProblem"
-          autocomplete="new-password">
+          autocomplete="new-password" [disabled]="lockInputs">
         <div id="changePasswordNewPasswordProblem" class="invalid-feedback">
           @if(passwordEmpty) {
           Password can not be empty
@@ -140,7 +141,7 @@
         <label for="changePasswordConfirmPassword" class="form-label">Confirm password</label>
         <input type="password" name="username" id="changePasswordConfirmPassword" class="form-control"
           formControlName="confirmNewPassword" placeholder="Confirm password" [class.is-invalid]="passwordsNotMatching"
-          aria-describedby="changePasswordConfirmPasswordProblem" autocomplete="on">
+          aria-describedby="changePasswordConfirmPasswordProblem" autocomplete="on" [disabled]="lockInputs">
         <div id="changePasswordConfirmPasswordProblem" class="invalid-feedback">
           Passwords not matching
         </div>
@@ -148,8 +149,10 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="confirmChangePassword()">Change password</button>
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="confirmChangePassword()" [disabled]="lockInputs">Change
+      password</button>
   </div>
 </ng-template>
 
@@ -164,7 +167,7 @@
         <label for="newUserName" class="form-label">Username</label>
         <input type="text" name="username" id="newUserName" class="form-control" formControlName="username"
           placeholder="Username" [class.is-invalid]="usernameTaken || usernameEmpty"
-          aria-describedby="newUserUsernameProblem" maxlength="32">
+          aria-describedby="newUserUsernameProblem" maxlength="32" [disabled]="lockInputs">
         <div id="newUserUsernameProblem" class="invalid-feedback">
           @if(usernameEmpty) {
           Username can not be empty
@@ -178,7 +181,7 @@
         <label for="newUserPassword" class="form-label">Password</label>
         <input type="password" name="username" id="newUserPassword" class="form-control" formControlName="password"
           placeholder="Password" [class.is-invalid]="passwordEmpty || passwordsNotMatching"
-          aria-describedby="newUserPasswordProblem">
+          aria-describedby="newUserPasswordProblem" [disabled]="lockInputs">
         <div id="newUserPasswordProblem" class="invalid-feedback">
           @if(passwordEmpty) {
           Password can not be empty
@@ -192,7 +195,7 @@
         <label for="newUserPassword2ElectricBoogaloo" class="form-label">Confirm password</label>
         <input type="password" name="username" id="newUserPassword2ElectricBoogaloo" class="form-control"
           formControlName="confirmPassword" placeholder="Confirm password" [class.is-invalid]="passwordsNotMatching"
-          aria-describedby="newUserPasswordConfirmProblem">
+          aria-describedby="newUserPasswordConfirmProblem" [disabled]="lockInputs">
         <div id="newUserPasswordConfirmProblem" class="invalid-feedback">
           Passwords not matching
         </div>
@@ -200,7 +203,8 @@
 
       <div class="mb-2">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="newUserAdmin" formControlName="admin">
+          <input class="form-check-input" type="checkbox" role="switch" id="newUserAdmin" formControlName="admin"
+            [disabled]="lockInputs">
           <label class="form-check-label" for="newUserAdmin"
             title="Admin accounts can create new users and manage sensitive information">Admin account</label>
         </div>
@@ -208,7 +212,9 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="confirmCreateUser()">Add user</button>
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="confirmCreateUser()" [disabled]="lockInputs">Add
+      user</button>
   </div>
 </ng-template>
