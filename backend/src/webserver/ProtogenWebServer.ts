@@ -19,8 +19,9 @@ import { HudRouter } from "./routes/hud/HudRouter";
 import { ImageRouter } from "./routes/images/ImageRouter";
 import { UserRouter } from "./routes/user/UserRouter";
 import { AuthRouter } from "./routes/auth/AuthRouter";
-import { AuthData, AuthMiddleware } from "./middleware/AuthMiddleware";
+import { AuthData, AuthMiddleware, AuthType } from "./middleware/AuthMiddleware";
 import { DiscoveryRouter } from "./routes/discovery/DiscoveryRouter";
+import { ApiKeyRouter } from "./routes/apikeys/ApiKeyRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -55,6 +56,7 @@ export class ProtogenWebServer {
     new UserRouter(this).register();
     new AuthRouter(this).register({ noAuth: true });
     new DiscoveryRouter(this).register({ noAuth: true });
+    new ApiKeyRouter(this).register();
 
     this.socket.on("connection", async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
@@ -66,6 +68,7 @@ export class ProtogenWebServer {
 
         if (user != null) {
           auth = {
+            type: AuthType.Token,
             isSuperUser: user.superUser,
             user: user,
           }
