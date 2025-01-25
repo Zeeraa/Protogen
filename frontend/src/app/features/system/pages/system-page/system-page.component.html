@@ -184,6 +184,12 @@
 
           <div class="col-12 mt-2">
             <a class="btn btn-primary mb-1 me-1" routerLink="/users">User manager</a>
+            @if(isSuperUser) {
+            <a class="btn btn-primary mb-1 me-1" routerLink="/keys">API key manager</a>
+            } @else {
+            <button class="btn btn-primary mb-1 me-1" disabled>API key manager</button>
+            }
+
           </div>
         </div>
       </div>

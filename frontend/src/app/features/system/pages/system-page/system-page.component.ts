@@ -6,6 +6,7 @@ import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
 import { HudApiService } from '../../../../core/services/api/hud-api.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-system-page',
@@ -159,12 +160,17 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     localStorage.setItem(LocalStorageKey_ShowSentitiveNetworkingInfo, checked ? "true" : "false");
   }
 
+  get isSuperUser() {
+    return this.auth.authDetails?.isSuperUser || false;
+  }
+
   constructor(
     private toastr: ToastrService,
     private api: SystemApiService,
     private hudApi: HudApiService,
     private modal: NgbModal,
     private title: Title,
+    private auth: AuthService,
   ) { }
 
   ngOnInit(): void {

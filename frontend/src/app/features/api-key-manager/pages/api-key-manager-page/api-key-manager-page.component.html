@@ -1,0 +1,64 @@
+<form [formGroup]="newApiKeyForm"></form>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>API key manager</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Name</th>
+            <th class="t-fit">Admin</th>
+            <th class="t-fit"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (key of apiKeys; track $index) {
+          <tr>
+            <td>
+              <input type="text" readonly [value]="key.apiKey">
+            </td>
+
+            <td>
+              <input type="text" readonly [value]="key.name">
+            </td>
+            <td>
+              @if(key.superUser) {
+              <span class="badge bg-success">Yes</span>
+              } @else {
+              <span class="badge bg-danger">No</span>
+              }
+            </td>
+
+            <th class="t-fit">
+              <button class="btn btn-danger" (click)="openDeleteKeyPrompt(key)">Delete</button>
+            </th>
+          </tr>
+          }
+        </tbody>
+
+        <tbody>
+          <tr>
+            <td colspan="3"></td>
+            <td class="t-fit">
+              <button class="btn btn-primary w-100" (click)="openKeyCreatorPrompt()">Add</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 mt-1">
+      <a routerLink="/system" class="btn btn-primary">Back to system</a>
+    </div>
+  </div>
+</div>

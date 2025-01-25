@@ -17,6 +17,7 @@ import { LogsModule } from './features/logs/logs.module';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserManagerModule } from './features/user-manager/user-manager.module';
+import { ApiKeyManagerModule } from './features/api-key-manager/api-key-manager.module';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { UserManagerModule } from './features/user-manager/user-manager.module';
     FormsModule,
     ReactiveFormsModule,
     UserManagerModule,
+    ApiKeyManagerModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
