@@ -15,6 +15,7 @@ import { RedisManager } from "./redis/RedisManager";
 import { sleep } from "./utils/Utils";
 import { uuidv7 } from "uuidv7";
 import { UserManager } from "./user-manager/UserManager";
+import { ApiKeyManager } from "./apikeys/ApiKeyManager";
 
 export const VersionNumber = "0.0.1";
 export const BootMessageColor = "#00FF00";
@@ -34,6 +35,7 @@ export class Protogen {
   private _eventEmitter: EventEmitter;
   private _redis: RedisManager;
   private _userManager: UserManager;
+  private _apiKeyManager: ApiKeyManager;
   private _sessionId: string;
   private _imageDirectory: string;
   private _tempDirectory: string;
@@ -87,6 +89,7 @@ export class Protogen {
 
     this._database = new Database(this);
     this._userManager = new UserManager(this);
+    this._apiKeyManager = new ApiKeyManager(this);
     this._webServer = new ProtogenWebServer(this);
     this._flaschenTaschen = new FlaschenTaschen(this);
     this._visor = new ProtogenVisor(this);
@@ -104,6 +107,7 @@ export class Protogen {
     await this.database.init();
     await this.visor.tryRenderTextFrame("BOOTING...\nInit auth", BootMessageColor);
     await this.userManager.init();
+    await this.apiKeyManager.load();
     await this.visor.tryRenderTextFrame("BOOTING...\nInit web server", BootMessageColor);
     await this.webServer.init();
     await this.visor.tryRenderTextFrame("BOOTING...\nInit RGB", BootMessageColor);
@@ -188,6 +192,10 @@ export class Protogen {
 
   public get userManager() {
     return this._userManager;
+  }
+
+  public get apiKeyManager() {
+    return this._apiKeyManager;
   }
   //#endregion
 }

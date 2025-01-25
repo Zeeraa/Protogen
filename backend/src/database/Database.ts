@@ -9,6 +9,7 @@ import { RgbEditorPreviewElement } from "./models/rgb/RgbEditorConfig.model";
 import { SavedVideoGroup } from "./models/video-player/SavedVideoGroup.model";
 import { CustomFace } from "./models/visor/CustomFace.model";
 import { User } from "./models/user/User.model";
+import { ApiKey } from "./models/apikeys/ApiKey.model";
 
 export class Database {
   private _protogen;
@@ -43,8 +44,9 @@ export class Database {
         // ---------- Visor ----------
         CustomFace,
 
-        // ---------- Users ----------
+        // ---------- Users / Api keys ----------
         User,
+        ApiKey,
       ]
     });
   }
