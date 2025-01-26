@@ -254,7 +254,7 @@ export class SystemRouter extends AbstractRouter {
 
         const data = parsed.data;
 
-        await this.protogen.database.setData(KV_EnableSwagger, String(data));
+        await this.protogen.database.setData(KV_EnableSwagger, String(data.enabled));
 
         res.json({});
       } catch (err) {
