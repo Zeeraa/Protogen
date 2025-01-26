@@ -28,7 +28,14 @@
                     (keydown.enter)="tryLogin()">
                 </div>
               </form>
+
+              <div class="mt-2 mb-2">
+                <strong>Unauthorized Access Prohibited</strong>
+                <p>This system is restricted to authorized users only. By logging in, you confirm that you are the owner
+                  of this system or have explicit authorization from the owner to access it.</p>
+              </div>
             </div>
+
             <div class="modal-footer">
               <button type="button" class="btn btn-primary" (click)="tryLogin()"
                 [disabled]="loginDisabled">Login</button>
