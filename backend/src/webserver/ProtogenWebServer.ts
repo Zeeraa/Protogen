@@ -23,6 +23,7 @@ import { AuthData, AuthMiddleware, AuthType } from "./middleware/AuthMiddleware"
 import { DiscoveryRouter } from "./routes/discovery/DiscoveryRouter";
 import { ApiKeyRouter } from "./routes/apikeys/ApiKeyRouter";
 import { RemoteRouter } from "./routes/remote/RemoteRouter";
+import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -88,15 +89,6 @@ export class ProtogenWebServer {
       this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
     });
 
-
-    if (existsSync("./swagger.json")) {
-      this.protogen.logger.info("WebServer", "Reading swagger.json");
-      const swagger = JSON.parse(readFileSync("./swagger.json").toString());
-      this.express.use("/", swaggerUi.serve, swaggerUi.setup(swagger));
-    } else {
-      this.protogen.logger.warn("WebServer", yellow("Could not find swagger.json. No api documentation will be available"));
-    }
-
     setInterval(() => {
       this.broadcastMessage(SocketMessageType.S2C_Ping, {});
     }, 5000);
@@ -109,8 +101,20 @@ export class ProtogenWebServer {
   }
 
   public init() {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       try {
+        const swaggerEnabled = (await this.protogen.database.getData(KV_EnableSwagger)) == "true";
+        this.protogen.logger.info("WebServer", "Swagger " + (swaggerEnabled ? "enabled" : "disabled"));
+        if (swaggerEnabled) {
+          if (existsSync("./swagger.json")) {
+            this.protogen.logger.info("WebServer", "Reading swagger.json");
+            const swagger = JSON.parse(readFileSync("./swagger.json").toString());
+            this.express.use("/", swaggerUi.serve, swaggerUi.setup(swagger));
+          } else {
+            this.protogen.logger.warn("WebServer", yellow("Could not find swagger.json. No api documentation will be available"));
+          }
+        }
+
         this._http.listen(this.config.port, () => {
           this.protogen.logger.info("WebServer", "Listening on port " + cyan(String(this.config.port)));
         });
