@@ -54,8 +54,6 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   }
 
   get swaggerEnabled(): boolean {
-    console.log(this.overview);
-    console.log(this.overview?.swaggerEnabled || false);
     return this.overview?.swaggerEnabled || false;
   }
 
