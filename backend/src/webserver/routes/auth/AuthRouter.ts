@@ -41,11 +41,13 @@ export class AuthRouter extends AbstractRouter {
         const user = await this.protogen.userManager.getUserByName(data.username);
 
         if (user == null) {
+          this.protogen.logger.info("Auth", "Authentication failed for remote " + req.ip);
           res.status(401).json(AuthFailResponse);
           return;
         }
 
         if (!await this.protogen.userManager.validatePasswordHash(user.password, data.password)) {
+          this.protogen.logger.info("Auth", "Authentication failed for remote " + req.ip);
           res.status(401).json(AuthFailResponse);
           return;
         }
