@@ -22,6 +22,7 @@ import { AuthRouter } from "./routes/auth/AuthRouter";
 import { AuthData, AuthMiddleware, AuthType } from "./middleware/AuthMiddleware";
 import { DiscoveryRouter } from "./routes/discovery/DiscoveryRouter";
 import { ApiKeyRouter } from "./routes/apikeys/ApiKeyRouter";
+import { RemoteRouter } from "./routes/remote/RemoteRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -57,6 +58,7 @@ export class ProtogenWebServer {
     new AuthRouter(this).register({ noAuth: true });
     new DiscoveryRouter(this).register({ noAuth: true });
     new ApiKeyRouter(this).register();
+    new RemoteRouter(this).register();
 
     this.socket.on("connection", async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);

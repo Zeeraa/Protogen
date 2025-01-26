@@ -12,7 +12,7 @@ export class HudRouter extends AbstractRouter {
       #swagger.tags = ['HUD'],
       #swagger.description = "Enable/Disable hud"
       #swagger.responses[200] = { description: "Ok" }
-      #swagger.responses[400] = { description: "Bad request. See console for more info" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
 
       #swagger.parameters['body'] = {
         in: 'body',

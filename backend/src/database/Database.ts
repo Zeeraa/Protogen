@@ -10,6 +10,8 @@ import { SavedVideoGroup } from "./models/video-player/SavedVideoGroup.model";
 import { CustomFace } from "./models/visor/CustomFace.model";
 import { User } from "./models/user/User.model";
 import { ApiKey } from "./models/apikeys/ApiKey.model";
+import { RemoteProfile } from "./models/remote/RemoteProfile.model";
+import { RemoteAction } from "./models/remote/RemoteAction.model";
 
 export class Database {
   private _protogen;
@@ -47,6 +49,10 @@ export class Database {
         // ---------- Users / Api keys ----------
         User,
         ApiKey,
+
+        // ---------- Remote ----------
+        RemoteProfile,
+        RemoteAction,
       ]
     });
   }
