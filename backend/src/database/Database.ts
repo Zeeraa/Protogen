@@ -12,6 +12,7 @@ import { User } from "./models/user/User.model";
 import { ApiKey } from "./models/apikeys/ApiKey.model";
 import { RemoteProfile } from "./models/remote/RemoteProfile.model";
 import { RemoteAction } from "./models/remote/RemoteAction.model";
+import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 
 export class Database {
   private _protogen;
@@ -72,6 +73,7 @@ export class Database {
   public async init() {
     this.protogen.logger.info("Database", "Initializing");
     await this._dataSource.initialize();
+    await this.initMissingData(KV_EnableSwagger, "false");
     this.protogen.logger.info("Database", "Init complete");
   }
 
