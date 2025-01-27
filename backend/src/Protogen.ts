@@ -11,7 +11,6 @@ import { SerialManager } from "./serial/SerialManager";
 import { RgbManager } from "./rgb/RgbManager";
 import { NetworkManager } from "./network-manager/NetworkManager";
 import EventEmitter from "events";
-import { RedisManager } from "./redis/RedisManager";
 import { sleep } from "./utils/Utils";
 import { uuidv7 } from "uuidv7";
 import { UserManager } from "./user-manager/UserManager";
@@ -33,7 +32,6 @@ export class Protogen {
   private _rgb: RgbManager;
   private _networkManager: NetworkManager;
   private _eventEmitter: EventEmitter;
-  private _redis: RedisManager;
   private _userManager: UserManager;
   private _apiKeyManager: ApiKeyManager;
   private _sessionId: string;
@@ -98,7 +96,6 @@ export class Protogen {
     this._serial = new SerialManager(this);
     this._rgb = new RgbManager(this);
     this._networkManager = new NetworkManager(this);
-    this._redis = new RedisManager(this);
   }
 
   public async init() {
@@ -172,10 +169,6 @@ export class Protogen {
 
   public get eventEmitter() {
     return this._eventEmitter;
-  }
-
-  public get redis() {
-    return this._redis;
   }
 
   public get sessionId() {
