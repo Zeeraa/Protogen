@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-user-manager-page',
@@ -51,6 +52,7 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
     private authApi: AuthApiService,
     private toastr: ToastrService,
     private modal: NgbModal,
+    private title: Title,
   ) { }
 
   loadUserList() {
@@ -251,6 +253,7 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("User manager - Protogen");
     this.loadUserList();
   }
 
