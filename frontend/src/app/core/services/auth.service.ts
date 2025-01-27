@@ -40,6 +40,12 @@ export class AuthService {
     return this._token;
   }
 
+  logout() {
+    this._token = null;
+    localStorage.removeItem(LocalStorageKey_AuthToken);
+    window.location.reload();
+  }
+
   private set token(newToken: string | null) {
     this._token = newToken;
     if (newToken != null) {
