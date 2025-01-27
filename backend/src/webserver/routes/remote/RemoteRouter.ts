@@ -213,6 +213,60 @@ export class RemoteRouter extends AbstractRouter {
         this.handleError(err, req, res);
       }
     });
+
+    this.router.delete("/profiles/:id", async (req, res) => {
+      /*
+      #swagger.path = '/remote/profiles/{id}'
+      #swagger.tags = ['Remote'],
+      #swagger.description = "Delete a profile"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[404] = { description: "Profile not found" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const id = parseInt(req.params.id);
+
+        if (isNaN(id)) {
+          res.status(400).send({ message: "Invalid id provided" });
+          return;
+        }
+
+        const parsed = AlterProfileModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const data = parsed.data;
+
+        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+
+        const profile = await repo.findOne({
+          where: {
+            id: Equal(id),
+          },
+          relations: {
+            actions: true,
+          },
+        });
+
+        if (profile == null) {
+          res.status(404).send({ message: "Profile not found" });
+          return;
+        }
+
+        await repo.delete(profile.id);
+
+        res.json({});
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
   }
 }
 
