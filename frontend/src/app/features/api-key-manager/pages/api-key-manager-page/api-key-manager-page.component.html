@@ -88,8 +88,9 @@
       <div class="mb-2">
         <label for="apiKeyName" class="form-label" title="The name is used to identify api keys">Api key name</label>
         <input type="text" name="name" id="apiKeyName" class="form-control" formControlName="name"
-          placeholder="Api key name" [class.is-invalid]="nameEmpty || nameTaken" [disabled]="lockInputs">
-        <div id="oldUserPasswordProblem" class="invalid-feedback">
+          placeholder="Api key name" [class.is-invalid]="nameEmpty || nameTaken" [disabled]="lockInputs"
+          aria-labelledby="newKeyProblem">
+        <div id="newKeyProblem" class="invalid-feedback">
           @if(nameEmpty) {
           Name can not be empty
           } @else if(nameTaken){

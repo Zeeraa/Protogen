@@ -15,7 +15,7 @@ export class RemoteApiService extends ApiBaseService {
   }
 
   alterProfile(id: number, data: AlterProfileDTO): Observable<RemoteProfile> {
-    return this.http.post(this.apiBaseUrl + "/remote/profiles/" + id, data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile>;
+    return this.http.put(this.apiBaseUrl + "/remote/profiles/" + id, data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile>;
   }
 
   deleteProfile(id: number): Observable<any> {

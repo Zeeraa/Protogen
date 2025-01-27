@@ -1,10 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { RemoteApiService, RemoteProfile } from '../../../../core/services/api/remote-api.service';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { VisorApiService, VisorRenderer } from '../../../../core/services/api/visor-api.service';
 import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { SavedVideo, VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
+import { FormControl, FormGroup } from '@angular/forms';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-remote-settings-page',
@@ -19,12 +22,22 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     visorRenderers: [],
   }
 
+  private newProfilePrompt: NgbModalRef | null = null;
+  @ViewChild("newProfilePrompt") private newProfilePromptTemplate!: TemplateRef<any>;
+  newProfileForm = new FormGroup({
+    name: new FormControl<string>(""),
+  });
+  nameEmpty = false;
+  nameTaken = false;
+  lockInputs = false;
+
   constructor(
     private remoteApi: RemoteApiService,
     private toastr: ToastrService,
     private videoApi: VideoPlayerApiService,
     private visorApi: VisorApiService,
     private rgbApi: RgbApiService,
+    private modal: NgbModal,
   ) { }
 
   loadData() {
@@ -59,12 +72,58 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  openProfileCreationModal() {
+    this.newProfileForm.get("name")?.setValue("");
+    this.nameEmpty = false;
+    this.nameTaken = false;
+    this.lockInputs = false;
+    this.newProfilePrompt?.close();
+    this.newProfilePrompt = this.modal.open(this.newProfilePromptTemplate);
+  }
+
+  profileDeleted(profile: RemoteProfile) {
+    this.profiles = this.profiles.filter(p => p.id != profile.id);
+  }
+
+  confirmCreateProfile() {
+    const name = this.newProfileForm.get("name")?.value || "";
+    if (name.trim().length == 0) {
+      this.nameEmpty = true;
+      this.toastr.error("Name can not be empty");
+      return;
+    }
+
+    this.lockInputs = true;
+    this.remoteApi.createProfile({ actions: [], name, clickToActivate: false }).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.lockInputs = false;
+
+        if (err.status == 409) {
+          this.toastr.error("Name already in use by other profile");
+          this.nameTaken = true;
+          return of(null);
+        }
+
+        this.toastr.error("Failed to create profile");
+        throw err;
+      })
+    ).subscribe(profile => {
+      if (profile == null) {
+        return;
+      }
+      this.lockInputs = false;
+      this.newProfilePrompt?.close();
+      this.toastr.success("Profile created");
+      this.profiles.push(profile);
+    });
+  }
+
   ngOnInit(): void {
     this.loadData();
   }
 
   ngOnDestroy(): void {
-
+    this.newProfilePrompt?.close();
   }
 }
 
