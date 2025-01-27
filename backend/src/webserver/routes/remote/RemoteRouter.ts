@@ -237,13 +237,6 @@ export class RemoteRouter extends AbstractRouter {
           return;
         }
 
-        const parsed = AlterProfileModel.safeParse(req.body);
-        if (!parsed.success) {
-          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
-          return;
-        }
-        const data = parsed.data;
-
         const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
 
         const profile = await repo.findOne({
