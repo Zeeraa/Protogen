@@ -63,6 +63,10 @@ export class ProtogenVisor {
     }
   }
 
+  public get initCalled() {
+    return this._initCalled;
+  }
+
   public sendVisorPreview() {
     let base64: string | undefined; // Do not set until we know a client is trying to view the visor
     this.protogen.webServer.socketSessions.filter(s => s.enableVisorPreview).forEach(socket => {

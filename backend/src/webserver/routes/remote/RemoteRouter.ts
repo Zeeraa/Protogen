@@ -1,11 +1,11 @@
-import { throws } from "assert";
 import { RemoteProfile } from "../../../database/models/remote/RemoteProfile.model";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { z } from "zod";
-import { RemoteControlActionType } from "../../../database/models/remote/RemoteControlActionType";
 import { Equal, Not } from "typeorm";
 import { RemoteAction } from "../../../database/models/remote/RemoteAction.model";
+import { RemoteControlActionType } from "../../../database/models/remote/RemoteControlActionType";
+import { RemoteControlInputType } from "../../../database/models/remote/RemoteControlInputType";
 
 export class RemoteRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -85,17 +85,19 @@ export class RemoteRouter extends AbstractRouter {
 
           actionObj.action = action.action;
           actionObj.actionType = action.actionType;
+          actionObj.inputType = action.inputType;
 
           profile.actions.push(actionObj);
         });
 
         // Fill unspecified actions with null values
-        Object.values(RemoteControlActionType).forEach(type => {
-          if (profile.actions.find(a => a.actionType == type) == null) {
+        Object.values(RemoteControlInputType).forEach(type => {
+          if (profile.actions.find(a => a.inputType == type) == null) {
             const actionObj = new RemoteAction();
 
             actionObj.action = null;
-            actionObj.actionType = type;
+            actionObj.actionType = RemoteControlActionType.NONE;
+            actionObj.inputType = type;
 
             profile.actions.push(actionObj);
           }
@@ -186,17 +188,19 @@ export class RemoteRouter extends AbstractRouter {
 
           actionObj.action = action.action;
           actionObj.actionType = action.actionType;
+          actionObj.inputType = action.inputType;
 
           profile.actions.push(actionObj);
         });
 
         // Fill unspecified actions with null values
-        Object.values(RemoteControlActionType).forEach(type => {
-          if (profile.actions.find(a => a.actionType == type) == null) {
+        Object.values(RemoteControlInputType).forEach(type => {
+          if (profile.actions.find(a => a.inputType == type) == null) {
             const actionObj = new RemoteAction();
 
             actionObj.action = null;
-            actionObj.actionType = type;
+            actionObj.actionType = RemoteControlActionType.NONE;
+            actionObj.inputType = type;
 
             profile.actions.push(actionObj);
           }
@@ -214,8 +218,9 @@ export class RemoteRouter extends AbstractRouter {
 
 const AlterProfileActions = z.object({
   id: z.number().int().safe().positive().optional(),
-  action: z.string().max(512).nullable(),
   actionType: z.nativeEnum(RemoteControlActionType),
+  action: z.string().max(512).nullable(),
+  inputType: z.nativeEnum(RemoteControlInputType),
 });
 
 const AlterProfileModel = z.object({
