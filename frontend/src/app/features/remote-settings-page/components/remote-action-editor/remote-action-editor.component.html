@@ -1,11 +1,12 @@
 <div class="row">
   <div class="col">
     <label for="inputType_{{componentId}}" class="form-label">Input</label>
-    <input type="text" id="inputType_{{componentId}}" [value]="inputTypeString" readonly class="form-control">
+    <input type="text" id="inputType_{{componentId}}" [value]="inputTypeString" readonly class="form-control"
+      [disabled]="disabled">
   </div>
   <div class="col">
     <label for="action_{{componentId}}" class="form-label">Action</label>
-    <select class="form-select" id="action_{{componentId}}" [(ngModel)]="action.actionType">
+    <select class="form-select" id="action_{{componentId}}" [(ngModel)]="action.actionType" [disabled]="disabled">
       @for (action of actionList; track $index) {
       <option [value]="action">{{translateActionName(action)}}</option>
       }
@@ -15,12 +16,25 @@
   <div class="col">
     @if(actionTypeAsString == "PLAY_VIDEO") {
     <label for="video_{{componentId}}" class="form-label">Video</label>
-    <select class="form-select" id="video_{{componentId}}" [value]="action.action">
+    <select class="form-select" id="video_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
       @for (video of actionDataSet.savedVideos; track $index) {
       <option value="{{video.id}}">{{video.name}}</option>
       }
     </select>
-    {{action.action}}
+    } @else if(actionTypeAsString == "ACTIVATE_VISOR_RENDERER") {
+    <label for="renderer_{{componentId}}" class="form-label">Renderer</label>
+    <select class="form-select" id="renderer_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+      @for (renderer of actionDataSet.visorRenderers; track $index) {
+      <option value="{{renderer.id}}">{{renderer.name}}</option>
+      }
+    </select>
+    } @else if(actionTypeAsString == "ACTIVATE_RGB_SCENE") {
+    <label for="rgb_{{componentId}}" class="form-label">RGB Scene</label>
+    <select class="form-select" id="rgb_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+      @for (rgbScene of actionDataSet.rgbScenes; track $index) {
+      <option value="{{rgbScene.id}}">{{rgbScene.name}}</option>
+      }
+    </select>
     } @else if(actionTypeAsString != "NONE") {
     <span class="text-danger">Unknown action type</span>
     }

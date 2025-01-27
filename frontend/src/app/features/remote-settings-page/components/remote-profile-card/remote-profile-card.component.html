@@ -31,7 +31,7 @@
           @for (action of profile.actions; track $index) {
           <div class="col-12 mb-2 mt-2">
             <app-remote-action-editor [action]="action" [profile]="profile" [actionDataSet]="actionDataSet"
-              [actionDataSet]="actionDataSet" />
+              [actionDataSet]="actionDataSet" [disabled]="!editEnabled" />
           </div>
           }
         </div>
@@ -40,8 +40,8 @@
 
     <div class="card-footer text-end">
       @if(editEnabled) {
-      <button class="btn btn-danger me-1 mb-1">Delete</button>
-      <button class="btn btn-secondary me-1 mb-1">Undo</button>
+      <button class="btn btn-danger me-1 mb-1" (click)="deleteProfile()">Delete</button>
+      <button class="btn btn-secondary me-1 mb-1" (click)="undoEdit()">Undo</button>
       <button class="btn btn-primary me-1 mb-1">Save</button>
       } @else {
       <button class="btn btn-primary me-1 mb-1" (click)="enableEdit()">Edit</button>

@@ -9,6 +9,31 @@ export class RemoteApiService extends ApiBaseService {
   getProfiles(): Observable<RemoteProfile[]> {
     return this.http.get(this.apiBaseUrl + "/remote/profiles").pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile[]>;
   }
+
+  createProfile(data: AlterProfileDTO): Observable<RemoteProfile> {
+    return this.http.post(this.apiBaseUrl + "/remote/profiles", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile>;
+  }
+
+  alterProfile(id: number, data: AlterProfileDTO): Observable<RemoteProfile> {
+    return this.http.post(this.apiBaseUrl + "/remote/profiles/" + id, data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile>;
+  }
+
+  deleteProfile(id: number): Observable<any> {
+    return this.http.delete(this.apiBaseUrl + "/remote/profiles/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+  }
+}
+
+export interface AlterProfileActions {
+  id: number | undefined;
+  actionType: RemoteControlActionType;
+  action: string | null;
+  inputType: RemoteControlInputType;
+}
+
+export interface AlterProfileDTO {
+  name: string;
+  clickToActivate: boolean;
+  actions: AlterProfileActions[];
 }
 
 export interface RemoteProfile {
