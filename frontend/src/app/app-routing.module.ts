@@ -10,6 +10,7 @@ import { LogsPageComponent } from './features/logs/pages/logs-page/logs-page.com
 import { VisorImageFaceEditorComponent } from './features/visor/pages/visor-image-face-editor/visor-image-face-editor.component';
 import { UserManagerPageComponent } from './features/user-manager/pages/user-manager-page/user-manager-page.component';
 import { ApiKeyManagerPageComponent } from './features/api-key-manager/pages/api-key-manager-page/api-key-manager-page.component';
+import { RemoteSettingsPageComponent } from './features/remote-settings-page/pages/remote-settings-page/remote-settings-page.component';
 
 export const routes: Routes = [
   {
@@ -51,6 +52,10 @@ export const routes: Routes = [
   {
     path: "keys",
     component: ApiKeyManagerPageComponent,
+  },
+  {
+    path: "remote",
+    component: RemoteSettingsPageComponent,
   }
 ];
 

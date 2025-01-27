@@ -6,6 +6,7 @@ import { catchError, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ClipboardService } from 'ngx-clipboard'
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-api-key-manager-page',
@@ -44,6 +45,7 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
     private api: ApiKeyApi,
     private modal: NgbModal,
     private clipboard: ClipboardService,
+    private title: Title,
   ) { }
 
   fetchData() {
@@ -64,6 +66,7 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("Api key manager - Protogen");
     this.fetchData();
   }
 
@@ -141,7 +144,7 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
         this.toastr.error("Failed to delete key");
         throw err;
       })
-    ).subscribe(key => {
+    ).subscribe(() => {
       this.lockInputs = false;
 
       this.toastr.success("Api key deleted");
