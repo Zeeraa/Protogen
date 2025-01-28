@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h4>Remote preview</h4>
+    </div>
+
+    <div class="col-12 mt-2">
+      <div>
+        <canvas [width]="width" [height]="height" #remotePreviewCanvas></canvas>
+      </div>
+
+      @if(showStateText) {
+      <div>
+        X: <span class="text-info">{{joystickState.x}}</span><br>
+        Y: <span class="text-info">{{joystickState.y}}</span><br>
+        Pressed:
+        @if(joystickState.pressed) {
+        <span class="text-success">Yes</span>
+        } @else {
+        <span class="text-danger">No</span>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</div>

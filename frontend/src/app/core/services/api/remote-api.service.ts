@@ -41,6 +41,7 @@ export interface RemoteProfile {
   name: string;
   clickToActivate: boolean;
   actions: RemoteAction[];
+  lastSaveDate: string;
 }
 
 export interface RemoteAction {
@@ -50,12 +51,12 @@ export interface RemoteAction {
   action: any;
 }
 
-
 export enum RemoteControlInputType {
   JOYSTICK_UP = "JOYSTICK_UP",
   JOYSTICK_DOWN = "JOYSTICK_DOWN",
   JOYSTICK_LEFT = "JOYSTICK_LEFT",
   JOYSTICK_RIGHT = "JOYSTICK_RIGHT",
+  JOYSTICK_CENTER = "JOYSTICK_CENTER",
   JOYSTICK_BUTTON = "JOYSTICK_BUTTON",
   BUTTON_1 = "BUTTON_1",
 }
@@ -81,6 +82,9 @@ export function translateRemoteInputType(type: RemoteControlInputType) {
 
     case RemoteControlInputType.JOYSTICK_RIGHT:
       return "Joystick Right";
+
+    case RemoteControlInputType.JOYSTICK_CENTER:
+      return "Joystick Center";
 
     case RemoteControlInputType.JOYSTICK_BUTTON:
       return "Joystick Press";

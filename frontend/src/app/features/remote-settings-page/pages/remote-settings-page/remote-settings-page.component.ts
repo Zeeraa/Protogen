@@ -8,6 +8,7 @@ import { SavedVideo, VideoPlayerApiService } from '../../../../core/services/api
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-remote-settings-page',
@@ -38,6 +39,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     private visorApi: VisorApiService,
     private rgbApi: RgbApiService,
     private modal: NgbModal,
+    private title: Title,
   ) { }
 
   loadData() {
@@ -120,6 +122,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadData();
+    this.title.setTitle("Remote - Protogen");
   }
 
   ngOnDestroy(): void {

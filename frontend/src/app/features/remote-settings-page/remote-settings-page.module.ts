@@ -4,12 +4,14 @@ import { RemoteSettingsPageComponent } from './pages/remote-settings-page/remote
 import { RemoteProfileCardComponent } from './components/remote-profile-card/remote-profile-card.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RemoteActionEditorComponent } from './components/remote-action-editor/remote-action-editor.component';
+import { JoystickEditorComponent } from './components/joystick-editor/joystick-editor.component';
 
 @NgModule({
   declarations: [
     RemoteSettingsPageComponent,
     RemoteProfileCardComponent,
-    RemoteActionEditorComponent
+    RemoteActionEditorComponent,
+    JoystickEditorComponent
   ],
   imports: [
     CommonModule,
