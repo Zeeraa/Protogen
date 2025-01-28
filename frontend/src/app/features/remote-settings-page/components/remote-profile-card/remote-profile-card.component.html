@@ -1,0 +1,95 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">{{profile.name}}</h5>
+
+    <div class="card-text mt-3">
+      <div class="container">
+        @if(editEnabled) {
+        <div class="row mb-2">
+          <div class="col">
+            <label for="profileName_{{componentId}}" class="form-label">Profile name</label>
+            <input type="text" class="form-control" id="profileName_{{componentId}}" maxlength="16"
+              placeholder="Profile name" [(ngModel)]="profile.name" [disabled]="lockInputs"
+              [class.is-invalid]="nameEmpty || nameTaken" [attr.aria-labelledby]="invalidNameLabel">
+
+            <div [id]="invalidNameLabel" class="invalid-feedback">
+              @if(nameEmpty) {
+              Name can not be empty
+              } @else if(nameTaken){
+              Name already in use by other key
+              }
+            </div>
+          </div>
+        </div>
+        }
+
+        <div class="row mb-2">
+          <div class="col">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" [disabled]="!editEnabled"
+                id="clickToActivate_{{componentId}}" [(ngModel)]="profile.clickToActivate">
+              <label class="form-check-label" for="clickToActivate_{{componentId}}"
+                title="If enabled the user needs to click the joystick to activate the action">
+                Click to activate
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          @for (action of profile.actions; track $index) {
+          @if(!profile.clickToActivate || stringify(action.inputType) != "JOYSTICK_BUTTON") {
+          <div class="col-12 mb-2 mt-2">
+            <app-remote-action-editor [action]="action" [profile]="profile" [actionDataSet]="actionDataSet"
+              [actionDataSet]="actionDataSet" [disabled]="!editEnabled" />
+          </div>
+          }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer text-end">
+    @if(editEnabled) {
+    <button class="btn btn-danger me-1 mb-1" (click)="deleteProfile()">Delete</button>
+    <button class="btn btn-secondary me-1 mb-1" (click)="undoEdit()">Undo</button>
+    <button class="btn btn-primary me-1 mb-1" [disabled]="lockInputs" (click)="save()">Save</button>
+    } @else {
+    <button class="btn btn-primary me-1 mb-1" (click)="enableEdit()">Edit</button>
+    }
+  </div>
+</div>
+
+<ng-template #deleteProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Delete profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>Please confirm that you want to delete the profile <span class="text-info">{{profile.name}}</span></p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="lockInputs">Delete
+      profile</button>
+  </div>
+</ng-template>
+
+<ng-template #undoChangesPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Undo changes</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>Please confirm that you want to discard changes made to profile <span class="text-info">{{profile.name}}</span>
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmUndoEdit()" [disabled]="lockInputs">Discard
+      changes</button>
+  </div>
+</ng-template>

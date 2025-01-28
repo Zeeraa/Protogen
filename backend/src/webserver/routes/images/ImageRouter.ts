@@ -6,15 +6,19 @@ import sharp from "sharp";
 import { createHash } from "crypto";
 import { red } from "colors";
 import axios from "axios";
+import { Request, Response } from "express";
 
 export class ImageRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/images");
 
-    this.router.post("/", fileUpload({
-      useTempFiles: true,
-      tempFileDir: this.protogen.tempDirectory,
-    }), async (req, res) => {
+    this.router.post("/", [
+      this.authMiddleware,
+      fileUpload({
+        useTempFiles: true,
+        tempFileDir: this.protogen.tempDirectory,
+      })
+    ], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/images'
       #swagger.tags = ['Images'],
@@ -27,6 +31,11 @@ export class ImageRouter extends AbstractRouter {
         type: 'boolean',
         required: false   
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         if (!req.files?.file) {

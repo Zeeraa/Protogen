@@ -19,6 +19,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Get the visor service status"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const activeRenderer = this.protogen.visor.activeRenderer == null ? null : rendererToInfo(this.protogen.visor.activeRenderer);
@@ -40,6 +45,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Get the last rendered frame of the visor"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const fameBuffer = this.protogen.visor.lastFrame;
@@ -57,6 +67,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Get all renderers"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const renderers = this.protogen.visor.availableRenderers.map(r => rendererToInfo(r));
@@ -73,6 +88,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.description = "Get renderer by id"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Renderer not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const renderer = this.protogen.visor.availableRenderers.find(r => r.id == req.params.id);
@@ -94,6 +114,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.description = "Activate a renderer by its id"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Renderer not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const renderer = this.protogen.visor.availableRenderers.find(r => r.id == req.params.id);
@@ -118,6 +143,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request: see response for details" }
       #swagger.responses[404] = { description: "Renderer not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const id = req.params.id;
@@ -182,6 +212,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request: see response for details" }
       #swagger.responses[404] = { description: "Renderer not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const id = req.params.id;
@@ -219,6 +254,11 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Create empty custom image renderer"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const repo = await this.protogen.database.dataSource.getRepository(CustomFace);

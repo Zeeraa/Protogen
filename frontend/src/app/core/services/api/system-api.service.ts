@@ -50,6 +50,10 @@ export class SystemApiService extends ApiBaseService {
       })
     );
   }
+
+  setSwaggerEnabled(enabled: boolean): Observable<any> {
+    return this.http.put(this.apiBaseUrl + "/system/swagger", { enabled }).pipe(catchError(this.defaultErrorHandler));
+  }
 }
 
 export interface SystemOverview {
@@ -59,6 +63,7 @@ export interface SystemOverview {
   ramUsage: number;
   network: Network;
   hudEnabled: boolean;
+  swaggerEnabled: boolean;
 }
 
 export interface Network {

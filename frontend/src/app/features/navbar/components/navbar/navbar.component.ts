@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { NavbarService } from '../../../../core/services/navbar.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -43,6 +44,9 @@ export class NavbarComponent implements AfterViewInit {
     }
   }
 
+  logout() {
+    this.auth.logout();
+  }
 
   ngAfterViewInit(): void {
     this.navbarService.setup(this.navbarElement.nativeElement);
@@ -50,5 +54,6 @@ export class NavbarComponent implements AfterViewInit {
 
   constructor(
     private navbarService: NavbarService,
+    private auth: AuthService,
   ) { }
 }

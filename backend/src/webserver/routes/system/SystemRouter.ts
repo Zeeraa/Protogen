@@ -4,6 +4,7 @@ import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
 import { existsSync, readFileSync } from "fs";
+import { KV_EnableSwagger } from "../../../utils/KVDataStorageKeys";
 
 export class SystemRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -16,6 +17,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Get all logs"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const file = this.protogen.logger.sessionLogFile;
@@ -36,6 +42,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Get the session id"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       res.send({ sessionId: this.protogen.sessionId });
     });
@@ -46,6 +57,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Exits the service"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       setTimeout(() => {
         process.exit(0);
@@ -63,12 +79,19 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Get system overview"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const cpuTemperature = await getTemperature();
         const osVersion = await getOSVersion();
         const cpuUsage = await getCPUUsage();
         const ramUsage = await getRAMUsage();
+
+        const swaggerEnabled = (await this.protogen.database.getData(KV_EnableSwagger)) == "true";
 
         res.json({
           cpuTemperature: cpuTemperature,
@@ -81,6 +104,7 @@ export class SystemRouter extends AbstractRouter {
             isp: this.protogen.networkManager.isp,
           },
           hudEnabled: this.protogen.serial.enableHud,
+          swaggerEnabled: swaggerEnabled,
         });
       } catch (err) {
         return this.handleError(err, req, res);
@@ -94,6 +118,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Shutdown the system"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         await shutdown();
@@ -110,6 +139,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Restart the flaschen-taschen service"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         await this.protogen.flaschenTaschen.restart();
@@ -125,6 +159,11 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Get the flaschen taschen settings"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         res.json(this.protogen.flaschenTaschen.settings);
@@ -150,6 +189,11 @@ export class SystemRouter extends AbstractRouter {
           ledSlowdownGpio: "GPIO slowdown value"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = FTSettingsSchema.safeParse(req.body);
@@ -178,10 +222,53 @@ export class SystemRouter extends AbstractRouter {
         return this.handleError(err, req, res);
       }
     });
+
+    this.router.put("/swagger", async (req, res) => {
+      /*
+      #swagger.path = '/system/swagger'
+      #swagger.tags = ['System'],
+      #swagger.description = "Alter swagger settings"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response" }
+      #swagger.responses[500] = { description: "An error occured while executing command" }
+  
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Enable/Disable swagger',
+        schema: {
+          enabled: true
+        }
+      }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = SwaggerSettingsSchema.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        await this.protogen.database.setData(KV_EnableSwagger, String(data.enabled));
+
+        res.json({});
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
   }
 }
 
 const FTSettingsSchema = z.object({
   ledLimitRefresh: z.coerce.number().int().safe().min(1).max(1000),
   ledSlowdownGpio: z.coerce.number().int().safe().min(0).max(4),
+});
+
+const SwaggerSettingsSchema = z.object({
+  enabled: z.boolean(),
 });

@@ -17,6 +17,13 @@ import { SocketMessageType } from "./socket/SocketMessageType";
 import { SocketMessage } from "./socket/SocketMessage";
 import { HudRouter } from "./routes/hud/HudRouter";
 import { ImageRouter } from "./routes/images/ImageRouter";
+import { UserRouter } from "./routes/user/UserRouter";
+import { AuthRouter } from "./routes/auth/AuthRouter";
+import { AuthData, AuthMiddleware, AuthType } from "./middleware/AuthMiddleware";
+import { DiscoveryRouter } from "./routes/discovery/DiscoveryRouter";
+import { ApiKeyRouter } from "./routes/apikeys/ApiKeyRouter";
+import { RemoteRouter } from "./routes/remote/RemoteRouter";
+import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -24,6 +31,7 @@ export class ProtogenWebServer {
   private _http;
   private _socket;
   private _sessions: UserSocketSession[];
+  private _authMiddleware;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
@@ -35,6 +43,8 @@ export class ProtogenWebServer {
       path: "/protogen-websocket.io",
     });
 
+    this._authMiddleware = AuthMiddleware(this);
+
     this.express.use(cors())
     this.express.use(bodyParser.json());
 
@@ -44,22 +54,40 @@ export class ProtogenWebServer {
     new SystemRouter(this).register();
     new RgbRouter(this).register();
     new HudRouter(this).register();
-    new ImageRouter(this).register();
+    new ImageRouter(this).register({ noAuth: true });
+    new UserRouter(this).register();
+    new AuthRouter(this).register({ noAuth: true });
+    new DiscoveryRouter(this).register({ noAuth: true });
+    new ApiKeyRouter(this).register();
+    new RemoteRouter(this).register();
 
-    this.socket.on("connection", (socket: Socket) => {
+    this.socket.on("connection", async (socket: Socket) => {
+      const token = String(socket.handshake.headers.authorization);
+      let auth: AuthData | null = null;
+
+      if (token.startsWith("Bearer ")) {
+        const jwt = token.split("Bearer ")[1];
+        const user = await this.protogen.userManager.validateJWTToken(jwt);
+
+        if (user != null) {
+          auth = {
+            type: AuthType.Token,
+            isSuperUser: user.superUser,
+            user: user,
+          }
+        }
+      }
+
+      if (auth == null) {
+        this.protogen.logger.info("WebServer", "Invalid token. Disconnecting socket.");
+        socket.disconnect(true);
+        return;
+      }
+
       const session = new UserSocketSession(this.protogen, socket);
       this._sessions.push(session);
       this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
     });
-
-
-    if (existsSync("./swagger.json")) {
-      this.protogen.logger.info("WebServer", "Reading swagger.json");
-      const swagger = JSON.parse(readFileSync("./swagger.json").toString());
-      this.express.use("/", swaggerUi.serve, swaggerUi.setup(swagger));
-    } else {
-      this.protogen.logger.warn("WebServer", yellow("Could not find swagger.json. No api documentation will be available"));
-    }
 
     setInterval(() => {
       this.broadcastMessage(SocketMessageType.S2C_Ping, {});
@@ -73,8 +101,20 @@ export class ProtogenWebServer {
   }
 
   public init() {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       try {
+        const swaggerEnabled = (await this.protogen.database.getData(KV_EnableSwagger)) == "true";
+        this.protogen.logger.info("WebServer", "Swagger " + (swaggerEnabled ? "enabled" : "disabled"));
+        if (swaggerEnabled) {
+          if (existsSync("./swagger.json")) {
+            this.protogen.logger.info("WebServer", "Reading swagger.json");
+            const swagger = JSON.parse(readFileSync("./swagger.json").toString());
+            this.express.use("/", swaggerUi.serve, swaggerUi.setup(swagger));
+          } else {
+            this.protogen.logger.warn("WebServer", yellow("Could not find swagger.json. No api documentation will be available"));
+          }
+        }
+
         this._http.listen(this.config.port, () => {
           this.protogen.logger.info("WebServer", "Listening on port " + cyan(String(this.config.port)));
         });
@@ -104,6 +144,10 @@ export class ProtogenWebServer {
 
   public get socket() {
     return this._socket;
+  }
+
+  public get authMiddleware() {
+    return this._authMiddleware;
   }
 
   public broadcastMessage(type: SocketMessageType, data: any) {

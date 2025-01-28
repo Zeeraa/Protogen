@@ -11,8 +11,32 @@
         <a class="nav-link" routerLink="/visor">Visor</a>
         <a class="nav-link" routerLink="/rgb">RGB</a>
         <a class="nav-link" routerLink="/video-player">Video Player</a>
-        <a class="nav-link" routerLink="/system">System</a>
-        <a class="nav-link" routerLink="/logs">Logs</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            System
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" routerLink="/system">Settings</a>
+            </li>
+
+            <li>
+              <a class="dropdown-item" routerLink="/logs">Logs</a>
+            </li>
+
+            <li>
+              <a class="dropdown-item" routerLink="/remote">Remote</a>
+            </li>
+
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <a class="dropdown-item text-danger" (click)="logout()">Logout</a>
+            </li>
+          </ul>
+        </li>
       </div>
     </div>
   </div>

@@ -8,6 +8,11 @@ import { KVDataStoreEntry } from "./models/data/KVDataStoreEntry.model";
 import { RgbEditorPreviewElement } from "./models/rgb/RgbEditorConfig.model";
 import { SavedVideoGroup } from "./models/video-player/SavedVideoGroup.model";
 import { CustomFace } from "./models/visor/CustomFace.model";
+import { User } from "./models/user/User.model";
+import { ApiKey } from "./models/apikeys/ApiKey.model";
+import { RemoteProfile } from "./models/remote/RemoteProfile.model";
+import { RemoteAction } from "./models/remote/RemoteAction.model";
+import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 
 export class Database {
   private _protogen;
@@ -41,6 +46,14 @@ export class Database {
 
         // ---------- Visor ----------
         CustomFace,
+
+        // ---------- Users / Api keys ----------
+        User,
+        ApiKey,
+
+        // ---------- Remote ----------
+        RemoteProfile,
+        RemoteAction,
       ]
     });
   }
@@ -60,6 +73,7 @@ export class Database {
   public async init() {
     this.protogen.logger.info("Database", "Initializing");
     await this._dataSource.initialize();
+    await this.initMissingData(KV_EnableSwagger, "false");
     this.protogen.logger.info("Database", "Init complete");
   }
 

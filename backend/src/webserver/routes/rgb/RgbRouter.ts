@@ -20,6 +20,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Get the preview window configuration"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const repo = this.protogen.database.dataSource.getRepository(RgbEditorPreviewElement);
@@ -57,6 +62,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Save the configuration"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for details" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = RgbPreviewConfigModel.safeParse(req.body);
@@ -108,6 +118,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Get a list of all effects"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         res.json(RgbEffects.map(e => {
@@ -127,6 +142,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Get all RGB scenes"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const scenes = this.protogen.rgb.scenes;
@@ -142,6 +162,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Clears the active scene"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         this.protogen.rgb.setActiveScene(null);
@@ -165,6 +190,11 @@ export class RgbRouter extends AbstractRouter {
           name: "Scene name"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = CreateNewSceneModel.safeParse(req.body);
@@ -198,6 +228,11 @@ export class RgbRouter extends AbstractRouter {
           name: "Scene name"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = UpdateSceneModel.safeParse(req.body);
@@ -230,6 +265,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Delete a scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
@@ -254,6 +294,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Get scene by id"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
@@ -275,6 +320,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Activates a scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
@@ -307,6 +357,11 @@ export class RgbRouter extends AbstractRouter {
           displayName: "Effect display name"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = AddEffectModel.safeParse(req.body);
@@ -354,6 +409,11 @@ export class RgbRouter extends AbstractRouter {
           displayName: "Effect display name"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = UpdateEffectModel.safeParse(req.body);
@@ -393,6 +453,11 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Remove an effect"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene or effect not found" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
@@ -441,6 +506,11 @@ export class RgbRouter extends AbstractRouter {
           value: "New value"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
 
       */
       try {

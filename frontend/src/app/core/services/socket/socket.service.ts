@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { SocketMessage } from './data/SocketMessage';
 import { SocketMessageType } from './data/SocketMessageType';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { SocketEventType } from './data/SocketEventType';
+import { AuthService } from '../auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,11 +15,23 @@ export class SocketService {
   private _disconnectedTimer = 15;
   private _messageSubject = new Subject<SocketMessage>();
   private _eventSubject = new Subject<SocketEventType>();
+  private _initCalled = false;
 
-  constructor() { }
+  constructor(
+    private auth: AuthService,
+  ) { }
 
   init() {
-    this.connect();
+    if (this.initCalled) {
+      return;
+    }
+    this._initCalled = true;
+
+    if (this.auth.loggedIn) {
+      this.connect();
+    } else {
+      console.log("Waiting with socket connection since we are not logged in");
+    }
 
     setInterval(() => {
       if (this._connected) {
@@ -29,19 +42,39 @@ export class SocketService {
           console.warn("No ping received for a while. Marking socket as dead for now");
         }
       }
-    }, 1000)
+    }, 1000);
+
+    this.auth.tokenChangedObservable.subscribe(token => {
+      if (!this.connected) {
+        console.log("Trying to connect to socket since we are in a disconnected state and token changed");
+        this.connect();
+      }
+    });
+  }
+
+  get initCalled() {
+    return this._initCalled;
+  }
+
+  private get socketHeaders() {
+    return {
+      Authorization: "Bearer " + String(this.auth.token),
+    }
   }
 
   connect() {
     console.log("SocketService::connect()");
     if (this._socket != null) {
+      this._connected = false;
       console.debug("Existing socket variable found");
       this.disconnect();
     }
+
     console.log("Starting new socket connection");
     this._socket = io({
       reconnection: true,
-      path: "/protogen-websocket.io"
+      path: "/protogen-websocket.io",
+      extraHeaders: this.socketHeaders,
     });
 
     this._socket.on('connect', () => {
@@ -64,6 +97,12 @@ export class SocketService {
 
     this._socket.on('message', (msg: SocketMessage) => {
       this.handleReceivedData(msg);
+    });
+
+    this._socket.on('reconnect_attempt', () => {
+      if (this._socket != null) {
+        this._socket.io.opts.extraHeaders = this.socketHeaders;
+      }
     });
   }
 

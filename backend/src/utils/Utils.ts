@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export function sleep(milliseconds: number) {
   return new Promise<void>(resolve => {
     setTimeout(() => {
@@ -28,4 +30,12 @@ export function compareStringArrays(arr1: string[], arr2: string[]): boolean {
   }
 
   return true;
+}
+
+export function typeAssert<T>(input: any): T {
+  return input as T;
+}
+
+export function generateSecretKey(keyLength: number = 64) {
+  return crypto.randomBytes(keyLength).toString('hex');
 }

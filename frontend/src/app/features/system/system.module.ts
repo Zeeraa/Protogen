@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SystemPageComponent } from './pages/system-page/system-page.component';
 import { NgbProgressbarModule } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -12,6 +13,8 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     NgbProgressbarModule,
     FormsModule,
+    ReactiveFormsModule,
+    RouterLink,
   ]
 })
 export class SystemModule { }

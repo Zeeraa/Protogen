@@ -1,0 +1,134 @@
+<form [formGroup]="newApiKeyForm"></form>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>API key manager</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Name</th>
+            <th class="t-fit">Admin</th>
+            <th class="t-fit"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (key of apiKeys; track $index) {
+          <tr>
+            <td>
+              <div class="input-group">
+                <input type="text" class="form-control" readonly [value]="getKeyText(key.apiKey)">
+                <button class="btn btn-primary" (click)="copyText(key.apiKey)"
+                  title="Copy the api key to the clipboard">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </td>
+
+            <td>
+              <input type="text" class="form-control" readonly [value]="key.name">
+            </td>
+            <td>
+              @if(key.superUser) {
+              <span class="badge bg-success">Yes</span>
+              } @else {
+              <span class="badge bg-danger">No</span>
+              }
+            </td>
+
+            <th class="t-fit">
+              <button class="btn btn-danger" (click)="openDeleteKeyPrompt(key)">Delete</button>
+            </th>
+          </tr>
+          }
+        </tbody>
+
+        <tbody>
+          <tr>
+            <td colspan="3"></td>
+            <td class="t-fit">
+              <button class="btn btn-primary w-100" (click)="openKeyCreatorPrompt()">Add</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="showAllKeys" [(ngModel)]="showKeys">
+        <label class="form-check-label" for="showAllKeys" title="Show all api keys">Show keys</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12 mt-1">
+      <a routerLink="/system" class="btn btn-primary">Back to system</a>
+    </div>
+  </div>
+</div>
+
+<ng-template #createKeyPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Create api key</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newApiKeyForm">
+      <div class="mb-2">
+        <label for="apiKeyName" class="form-label" title="The name is used to identify api keys">Api key name</label>
+        <input type="text" name="name" id="apiKeyName" class="form-control" formControlName="name"
+          placeholder="Api key name" [class.is-invalid]="nameEmpty || nameTaken" [disabled]="lockInputs"
+          aria-labelledby="newKeyProblem">
+        <div id="newKeyProblem" class="invalid-feedback">
+          @if(nameEmpty) {
+          Name can not be empty
+          } @else if(nameTaken){
+          Name already in use by other key
+          }
+        </div>
+      </div>
+
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="apiKeySuperUser" formControlName="superUser"
+          [disabled]="lockInputs">
+        <label class="form-check-label" for="apiKeySuperUser" title="Give key full access to system">Super user</label>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="confirmCreateKey()" [disabled]="lockInputs">Create
+      key</button>
+  </div>
+</ng-template>
+
+<ng-template #deleteKeyPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Delete api key</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>
+      Please confirm that you want to delete the api key named <span class="text-info">{{deleteKeyName}}</span>.<br>
+      Deleting a key thats in use will result in the system using that key to stop working
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeleteKey()" [disabled]="lockInputs">Delete
+      key</button>
+  </div>
+</ng-template>

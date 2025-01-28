@@ -11,9 +11,10 @@ import { SerialManager } from "./serial/SerialManager";
 import { RgbManager } from "./rgb/RgbManager";
 import { NetworkManager } from "./network-manager/NetworkManager";
 import EventEmitter from "events";
-import { RedisManager } from "./redis/RedisManager";
 import { sleep } from "./utils/Utils";
 import { uuidv7 } from "uuidv7";
+import { UserManager } from "./user-manager/UserManager";
+import { ApiKeyManager } from "./apikeys/ApiKeyManager";
 
 export const VersionNumber = "0.0.1";
 export const BootMessageColor = "#00FF00";
@@ -31,7 +32,8 @@ export class Protogen {
   private _rgb: RgbManager;
   private _networkManager: NetworkManager;
   private _eventEmitter: EventEmitter;
-  private _redis: RedisManager;
+  private _userManager: UserManager;
+  private _apiKeyManager: ApiKeyManager;
   private _sessionId: string;
   private _imageDirectory: string;
   private _tempDirectory: string;
@@ -83,8 +85,9 @@ export class Protogen {
       mkdirSync(this.tempDirectory);
     }
 
-
     this._database = new Database(this);
+    this._userManager = new UserManager(this);
+    this._apiKeyManager = new ApiKeyManager(this);
     this._webServer = new ProtogenWebServer(this);
     this._flaschenTaschen = new FlaschenTaschen(this);
     this._visor = new ProtogenVisor(this);
@@ -93,13 +96,15 @@ export class Protogen {
     this._serial = new SerialManager(this);
     this._rgb = new RgbManager(this);
     this._networkManager = new NetworkManager(this);
-    this._redis = new RedisManager(this);
   }
 
   public async init() {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit database", BootMessageColor);
     this._networkManager.runConnectivityCheck();
     await this.database.init();
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit auth", BootMessageColor);
+    await this.userManager.init();
+    await this.apiKeyManager.load();
     await this.visor.tryRenderTextFrame("BOOTING...\nInit web server", BootMessageColor);
     await this.webServer.init();
     await this.visor.tryRenderTextFrame("BOOTING...\nInit RGB", BootMessageColor);
@@ -166,10 +171,6 @@ export class Protogen {
     return this._eventEmitter;
   }
 
-  public get redis() {
-    return this._redis;
-  }
-
   public get sessionId() {
     return this._sessionId;
   }
@@ -180,6 +181,14 @@ export class Protogen {
 
   public get tempDirectory() {
     return this._tempDirectory;
+  }
+
+  public get userManager() {
+    return this._userManager;
+  }
+
+  public get apiKeyManager() {
+    return this._apiKeyManager;
   }
   //#endregion
 }

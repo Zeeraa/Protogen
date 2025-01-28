@@ -6,6 +6,8 @@ import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
 import { HudApiService } from '../../../../core/services/api/hud-api.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-system-page',
@@ -24,6 +26,12 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     return this.overview?.network.hasConnectivity || false;
   }
 
+  get swaggerUrl() {
+    const apiBase = this.api.apiBaseUrl;
+
+    return apiBase + (apiBase.endsWith("/") ? "" : "/");
+  }
+
   get ip() {
     if (this.overview?.network.ip != null) {
       return this.overview?.network.ip;
@@ -32,7 +40,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   }
 
   get hudEnabled() {
-    return this.overview?.hudEnabled || true;
+    return this.overview?.hudEnabled || false;
   }
 
   set hudEnabled(enabled: boolean) {
@@ -43,6 +51,19 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       this.toastr.error("Failed to toggle hud");
       throw err;
     })).subscribe();
+  }
+
+  get swaggerEnabled(): boolean {
+    return this.overview?.swaggerEnabled || false;
+  }
+
+  set swaggerEnabled(enabled: boolean) {
+    this.api.setSwaggerEnabled(enabled).pipe(catchError(err => {
+      this.toastr.error("Failed to " + (enabled ? "enable" : "disable") + " swagger");
+      throw err;
+    })).subscribe(() => {
+      this.toastr.success("Swagger " + (enabled ? "enabled" : "disabled") + ". The system needs to be restarted before changes take effect");
+    });
   }
 
   get isp() {
@@ -159,12 +180,17 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     localStorage.setItem(LocalStorageKey_ShowSentitiveNetworkingInfo, checked ? "true" : "false");
   }
 
+  get isSuperUser() {
+    return this.auth.authDetails?.isSuperUser || false;
+  }
+
   constructor(
     private toastr: ToastrService,
     private api: SystemApiService,
     private hudApi: HudApiService,
     private modal: NgbModal,
     private title: Title,
+    private auth: AuthService,
   ) { }
 
   ngOnInit(): void {

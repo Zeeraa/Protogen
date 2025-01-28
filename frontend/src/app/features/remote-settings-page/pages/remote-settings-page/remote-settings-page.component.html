@@ -1,0 +1,66 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>Remote settings</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <app-joystick-editor [showStateText]="true" [framerate]="20" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <h4>Profiles</h4>
+    </div>
+  </div>
+
+  <div class="row">
+    @for (profile of profiles; track $index) {
+    <div class="col-12 col-sm-12 col-md-6 mt-2">
+      <app-remote-profile-card [profile]="profile" [actionDataSet]="actionDataSet"
+        (onDeleted)="profileDeleted($event)" />
+    </div>
+    }
+  </div>
+
+  <div class="row mt-2">
+    <div class="col">
+      <button class="btn btn-primary" (click)="openProfileCreationModal()">Create new profile</button>
+    </div>
+  </div>
+</div>
+
+<ng-template #newProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Create profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newProfileForm">
+      <div class="mb-2">
+        <label for="newProfileName" class="form-label">Profile name</label>
+        <input type="text" name="name" id="newProfileName" class="form-control" formControlName="name"
+          placeholder="Profile name" maxlength="16" [class.is-invalid]="nameEmpty || nameTaken" [disabled]="lockInputs"
+          aria-labelledby="newProfileNameError">
+
+
+        <div id="newProfileNameError" class="invalid-feedback">
+          @if(nameEmpty) {
+          Name can not be empty
+          } @else if(nameTaken){
+          Name already in use by other key
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="confirmCreateProfile()" [disabled]="lockInputs">Create
+      profile</button>
+  </div>
+</ng-template>

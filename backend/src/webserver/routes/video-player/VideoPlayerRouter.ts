@@ -8,6 +8,7 @@ import { readdirSync, statSync, unlinkSync } from "fs";
 import { extname, join } from "path";
 import { SavedVideoGroup } from "../../../database/models/video-player/SavedVideoGroup.model";
 import { cyan } from "colors";
+import { typeAssert } from "../../../utils/Utils";
 
 export class VideoPlayerRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -23,6 +24,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.tags = ['Video Player'],
       #swagger.description = "Get the status of the video playback manager"
       #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         res.json({
@@ -52,6 +58,11 @@ export class VideoPlayerRouter extends AbstractRouter {
           mirrorVideo: false,
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = PlayVideoModel.safeParse(req.body);
@@ -86,6 +97,11 @@ export class VideoPlayerRouter extends AbstractRouter {
           url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = StreamVideoModel.safeParse(req.body);
@@ -111,6 +127,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Stop the active video playback"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         let result = this.playbackManager.kill();
@@ -131,6 +152,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Get all saved videos"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const result = await savedVideoRepo.find({
@@ -169,6 +195,11 @@ export class VideoPlayerRouter extends AbstractRouter {
           groupId: null,
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = SavedVideoModel.safeParse(req.body);
@@ -231,6 +262,11 @@ export class VideoPlayerRouter extends AbstractRouter {
           hideUrl: false
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const id = parseInt(req.params.id);
@@ -327,6 +363,11 @@ export class VideoPlayerRouter extends AbstractRouter {
           mirrorVideo: false,
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const id = parseInt(req.params.id);
@@ -363,6 +404,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for details" }
       #swagger.responses[404] = { description: "Video not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const id = parseInt(req.params.id);
@@ -409,6 +455,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Get all video groups"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const result = await groupRepo.find({});
@@ -434,6 +485,11 @@ export class VideoPlayerRouter extends AbstractRouter {
           name: "Test"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const parsed = AlterGroupModel.safeParse(req.body);
@@ -472,6 +528,11 @@ export class VideoPlayerRouter extends AbstractRouter {
           name: "Test"
         }
       }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const id = parseInt(req.params.id);
@@ -518,6 +579,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[404] = { description: "Group not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const id = parseInt(req.params.id);
@@ -554,6 +620,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Clear downloaded video cache"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "Failed to delete files" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
       */
       try {
         const directory = this.protogen.videoPlaybackManager.videoDirectory;
@@ -576,6 +647,7 @@ export class VideoPlayerRouter extends AbstractRouter {
         });
       } catch (error) {
         console.error('Error while deleting mp4 files:', error);
+        this.protogen.logger.error("VideoRouter", "Failed to delete mp4 files. " + typeAssert<any>(error).message);
         throw error;
       }
     });
