@@ -3,7 +3,7 @@ import { ApiKey } from "../database/models/apikeys/ApiKey.model";
 import { Protogen } from "../Protogen";
 import { uuidv7 } from "uuidv7";
 
-export const ApiKeyHeader = "X-API-Key";
+export const ApiKeyHeader = "x-api-key";
 
 export class ApiKeyManager {
   private _protogen;

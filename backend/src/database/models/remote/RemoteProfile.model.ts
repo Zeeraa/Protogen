@@ -27,4 +27,10 @@ export class RemoteProfile {
 
   @OneToMany(() => RemoteAction, a => a.profile, { cascade: true })
   actions: RemoteAction[];
+
+  @Column({
+    name: "last_save_date",
+    type: "datetime"
+  })
+  lastSaveDate: Date;
 }

@@ -11,6 +11,34 @@ export class RemoteRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/remote");
 
+    this.router.get("/profiles/last-change", async (req, res) => {
+      /*
+      #swagger.path = '/remote/profiles/last-change'
+      #swagger.tags = ['Remote'],
+      #swagger.description = "Get the data when profiles where edited"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+        const profiles = await repo.find({
+          select: {
+            id: true,
+            lastSaveDate: true,
+          },
+        });
+
+        res.json(profiles);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/profiles", async (req, res) => {
       /*
       #swagger.path = '/remote/profiles'
@@ -78,6 +106,7 @@ export class RemoteRouter extends AbstractRouter {
         profile.name = data.name.trim();
         profile.actions = [];
         profile.clickToActivate = data.clickToActivate;
+        profile.lastSaveDate = new Date();
 
         // Add / update actions
         data.actions.forEach(action => {
@@ -174,6 +203,7 @@ export class RemoteRouter extends AbstractRouter {
         profile.name = data.name;
         profile.clickToActivate = data.clickToActivate;
         profile.actions = [];
+        profile.lastSaveDate = new Date();
 
         // Add / update actions
         data.actions.forEach(action => {
