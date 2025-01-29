@@ -3,7 +3,7 @@ import os
 import requests
 import asyncio
 import socketio
-import time
+import aiohttp
 
 from dotenv import load_dotenv
 from gpiozero import Button, MCP3008
@@ -17,6 +17,7 @@ class Remote:
     self.api_key = api_key
     self.use_direct_connection = use_direct_connection
     self.websocket = None
+    self.active_profile_id = -1
     
     # Joystick ADC and button
     self.joystick_x = MCP3008(0)
@@ -29,7 +30,7 @@ class Remote:
     self.button_right = Button(6, pull_up=True)
   
   #region Profile data loading
-  def check_profiles(self):
+  async def check_profiles(self):
     print("CHECK PROFILES")
   #endregion
   
@@ -44,7 +45,7 @@ class Remote:
         print("Found direct connection url " + optimal_url)
         self.api_url = optimal_url
     
-    self.check_profiles()
+    await self.check_profiles()
     
     self.websocket = socketio.AsyncClient(reconnection=True, reconnection_attempts=0)
     self.websocket.on("connect", self.on_connect)
@@ -147,9 +148,10 @@ class Remote:
         "button_a": self.button_a.is_pressed,
         "button_left": self.button_left.is_pressed,
         "button_right": self.button_right.is_pressed,
+        "active_profile_id": self.active_profile_id,
       }
       if self.websocket.connected:
-        self.websocket.emit("message", {"type": "E2S_RemoteState", "data": sensor_readings})
+        await self.websocket.emit("message", {"type": "E2S_RemoteState", "data": sensor_readings})
       await asyncio.sleep(0.25)
   #endregion
   
@@ -158,7 +160,7 @@ class Remote:
     while True:
       # Since first run is on start we wait before the next one
       await asyncio.sleep(5)
-      self.check_profiles()
+      await self.check_profiles()
   #endregion
     
 # ---------- Init code ----------
