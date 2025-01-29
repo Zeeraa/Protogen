@@ -2,3 +2,6 @@ gpiozero
 requests
 python-dotenv
 lgpio
+python-socketio
+websocket-client
+aiohttp
