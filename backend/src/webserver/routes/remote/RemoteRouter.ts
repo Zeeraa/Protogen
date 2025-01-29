@@ -11,6 +11,34 @@ export class RemoteRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/remote");
 
+    this.router.get("/config", async (req, res) => {
+      /*
+      #swagger.path = '/remote/config'
+      #swagger.tags = ['Remote'],
+      #swagger.description = "Get remote profiles and settings"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+        const profiles = await repo.find();
+
+        res.json({
+          profiles: profiles,
+          invertX: this.protogen.remoteManager.invertX,
+          invertY: this.protogen.remoteManager.invertY,
+          flipAxis: this.protogen.remoteManager.flipAxis,
+        });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/profiles/last-change", async (req, res) => {
       /*
       #swagger.path = '/remote/profiles/last-change'
