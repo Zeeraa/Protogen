@@ -76,6 +76,17 @@ export class ProtogenWebServer {
             user: user,
           }
         }
+      } else if (token.startsWith("Key ")) {
+        const keyString = token.split("Key ")[1];
+        const apiKey = this.protogen.apiKeyManager.keys.find(k => k.apiKey == keyString);
+
+        if (apiKey != null) {
+          auth = {
+            type: AuthType.ApiKey,
+            isSuperUser: apiKey.superUser,
+            user: null,
+          }
+        }
       }
 
       if (auth == null) {

@@ -74,6 +74,8 @@ export class UserSocketSession {
 
     const type = message.type;
 
+    console.log(message);
+
     if (type == SocketMessageType.C2S_EnableRgbPreview) {
       const enable = message.data === true;
       //if (this._enableRgbPreview != enable) {
