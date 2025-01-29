@@ -12,4 +12,7 @@ export enum SocketMessageType {
   C2S_EnableVisorPreview = "C2S_EnableVisorPreview",
   C2S_Ping = "C2S_Ping",
   C2S_EnableRemotePreview = "C2S_EnableRemotePreview",
+
+  // ===== E2S (External to Server) =====
+  E2S_RemoteState = "E2S_RemoteState",
 }
