@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { AlterProfileActions, RemoteApiService, RemoteProfile } from '../../../../core/services/api/remote-api.service';
 import { uuidv7 } from 'uuidv7';
 import { RemoteActionDataSet } from '../../pages/remote-settings-page/remote-settings-page.component';
@@ -15,8 +15,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class RemoteProfileCardComponent implements OnDestroy {
   @Input({ required: true }) profile!: RemoteProfile;
   @Input({ required: true }) actionDataSet!: RemoteActionDataSet;
+  @Input() isActive = false;
   @Output() onDeleted = new EventEmitter<RemoteProfile>();
   editEnabled = false;
+
   private _componentId = uuidv7();
 
   private deleteProfilePrompt: NgbModalRef | null = null;
@@ -37,7 +39,6 @@ export class RemoteProfileCardComponent implements OnDestroy {
     return this._componentId;
   }
 
-  //TODO: confirm
   deleteProfile() {
     this.lockInputs = false;
     this.deleteProfilePrompt?.close();

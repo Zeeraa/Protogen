@@ -29,6 +29,21 @@ class Profile:
     self.name = name
     self.click_to_activate = click_to_activate
     self.actions = actions
+    
+  async def handle_action(self, remote, input_type):
+    action = next((a for a in self.actions if a.input_type == input_type), None)
+    
+    if action is not None:
+      async with aiohttp.ClientSession() as session:
+        data = {
+          "type": action.action_type,
+          "action": action.action,
+        }
+        async with session.post(remote.api_url + "/api/remote/perform-action", headers={"x-api-key": remote.api_key}, json=data) as response:
+          if response.status != 200:
+            print("Received non 200 response: " + str(response.status))
+          else:
+            print("Sent command: " + action.action_type)
 
 # ---------- Remote class ----------
 class Remote:
@@ -67,6 +82,7 @@ class Remote:
     # Start input listeners
     self.button_right.when_pressed = self.next_profile
     self.button_left.when_pressed = self.previous_profile
+    self.button_a.when_pressed = self.handle_a_button
     
     self.draw_text("Starting...")
 
@@ -82,9 +98,13 @@ class Remote:
   #region Profile data loading
   async def sync_settings(self):
     async with aiohttp.ClientSession() as session:
-      async with session.get(self.api_url + "/api/remote/config/full", headers={"x-api-key": api_key}) as response:
+      async with session.get(self.api_url + "/api/remote/config/full", headers={"x-api-key": self.api_key}) as response:
         if response.status == 200:
           data = await response.json()
+          
+          self.invert_x = data.get("invertX")
+          self.invert_y = data.get("invertY")
+          self.flip_axis = data.get("flipAxis")
           
           profiles = []
           for profile in data["profiles"]:
@@ -179,7 +199,9 @@ class Remote:
       await self.sync_settings()
     elif data.get("type") == "S2E_RemoteConfigChange":
       settings = data.get("data")
-      print(settings)
+      self.invert_x = settings.get("invertX")
+      self.invert_y = settings.get("invertY")
+      self.flip_axis = settings.get("flipAxis")
   
   async def connect_to_socket(self):
     backoff = 1  # Initial wait time in seconds
@@ -294,6 +316,14 @@ class Remote:
     if self.active_profile_index < 0:
       self.active_profile_index = len(self.profiles) - 1
     self.update_display()
+  
+  def handle_a_button(self):
+    asyncio.run(self.send_input_to_profile("BUTTON_1"))
+  
+  async def send_input_to_profile(self, input_type):
+    profile = self.get_active_profile()
+    if profile is not None:
+      await profile.handle_action(self, input_type)
   #endregion
   
   #region Get profiles
@@ -303,6 +333,11 @@ class Remote:
       await asyncio.sleep(60 * 60 * 1) # Every minute
       await self.sync_settings()
   #endregion
+  
+  def get_active_profile(self):
+    if (len(self.profiles) - 1) >= self.active_profile_index and self.active_profile_index >= 0:
+      return self.profiles[self.active_profile_index]
+    return None
     
 # ---------- Init code ----------
 if __name__ == "__main__":

@@ -35,6 +35,8 @@
       <option value="{{rgbScene.id}}">{{rgbScene.name}}</option>
       }
     </select>
+    } @else if(actionTypeAsString == "DISABLE_RGB" ||actionTypeAsString == "STOP_VIDEO") {
+    <!-- No parameters -->
     } @else if(actionTypeAsString != "NONE") {
     <span class="text-danger">Unknown action type</span>
     }

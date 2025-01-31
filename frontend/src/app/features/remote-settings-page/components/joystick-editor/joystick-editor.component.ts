@@ -3,8 +3,9 @@ import { SocketService } from '../../../../core/services/socket/socket.service';
 import { ToastrService } from 'ngx-toastr';
 import { RemoteApiService } from '../../../../core/services/api/remote-api.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
-import { Subscription } from 'rxjs';
+import { catchError, Subscription } from 'rxjs';
 import { typeAssert } from '../../../../core/services/utils/Utils';
+import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
 
 @Component({
   selector: 'app-joystick-editor',
@@ -15,15 +16,7 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
   private drawInterval: any;
   private socketSubscribeInterval: any;
   private socketSubscription: Subscription | null = null;
-  joystickState: RemoteState = {
-    activeProfileId: -1,
-    buttonA: false,
-    buttonLeft: false,
-    buttonRight: false,
-    joystickPressed: false,
-    joystickX: 0.5,
-    joystickY: 0.5,
-  }
+  joystickState: RemoteState = blankRemoteState();
 
   width = 200;
   height = 200;
@@ -95,6 +88,30 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
     this.ctx.fill();
   }
 
+  onInvertXToggle(event: Event) {
+    const invertX = (event.target as HTMLInputElement).checked == true;
+    this.remoteApi.alterConfig({ invertX }).pipe(catchError(err => {
+      this.toastr.error("Failed to save config");
+      throw err;
+    })).subscribe();
+  }
+
+  onInvertYToggle(event: Event) {
+    const invertY = (event.target as HTMLInputElement).checked == true;
+    this.remoteApi.alterConfig({ invertY }).pipe(catchError(err => {
+      this.toastr.error("Failed to save config");
+      throw err;
+    })).subscribe();
+  }
+
+  onInvertAxisToggle(event: Event) {
+    const flipAxis = (event.target as HTMLInputElement).checked == true;
+    this.remoteApi.alterConfig({ flipAxis }).pipe(catchError(err => {
+      this.toastr.error("Failed to save config");
+      throw err;
+    })).subscribe();
+  }
+
   ngAfterViewInit(): void {
     const canvasEl = this.canvas.nativeElement;
     this.ctx = canvasEl.getContext('2d')!;
@@ -125,14 +142,4 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
 
     this.socketSubscription?.unsubscribe();
   }
-}
-
-export interface RemoteState {
-  joystickX: number;
-  joystickY: number;
-  joystickPressed: boolean;
-  buttonLeft: boolean;
-  buttonRight: boolean;
-  buttonA: boolean;
-  activeProfileId: number;
 }
