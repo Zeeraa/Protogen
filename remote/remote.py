@@ -86,6 +86,10 @@ class Remote:
         if response.status == 200:
           data = await response.json()
           
+          self.invert_x = data.get("invertX")
+          self.invert_y = data.get("invertY")
+          self.flip_axis = data.get("flipAxis")
+          
           profiles = []
           for profile in data["profiles"]:
             actions = []
