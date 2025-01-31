@@ -179,7 +179,9 @@ class Remote:
       await self.sync_settings()
     elif data.get("type") == "S2E_RemoteConfigChange":
       settings = data.get("data")
-      print(settings)
+      self.invert_x = settings.get("invertX")
+      self.invert_y = settings.get("invertY")
+      self.flip_axis = settings.get("flipAxis")
   
   async def connect_to_socket(self):
     backoff = 1  # Initial wait time in seconds
