@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { RemoteApiService } from '../../../../core/services/api/remote-api.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { Subscription } from 'rxjs';
+import { typeAssert } from '../../../../core/services/utils/Utils';
 
 @Component({
   selector: 'app-joystick-editor',
@@ -14,10 +15,14 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
   private drawInterval: any;
   private socketSubscribeInterval: any;
   private socketSubscription: Subscription | null = null;
-  joystickState: JoystickState = {
-    x: 0.5,
-    y: 0.5,
-    pressed: false,
+  joystickState: RemoteState = {
+    activeProfileId: -1,
+    buttonA: false,
+    buttonLeft: false,
+    buttonRight: false,
+    joystickPressed: false,
+    joystickX: 0.5,
+    joystickY: 0.5,
   }
 
   width = 200;
@@ -57,20 +62,36 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
     this.ctx.lineTo(this.width / 2, this.height);
     this.ctx.stroke();
 
-    // Cirlce
+    // Large Circle
     const radius = Math.min(this.width, this.height) / 2;
     this.ctx.beginPath();
     this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
     this.ctx.stroke();
 
     // Joystick position
-    const dotRadius = 20;
-    const posX = this.joystickState.x * this.width;
-    const posY = this.joystickState.y * this.height;
+    const dotRadius = 20; // Dot size
+    const maxDistance = radius; // Keep the dot's center inside the circle
 
+    // Convert joystick input (0 to 1) to canvas space
+    let posX = this.joystickState.joystickX * this.width;
+    let posY = this.joystickState.joystickY * this.height;
+
+    // Calculate vector from center to joystick position
+    let deltaX = posX - centerX;
+    let deltaY = posY - centerY;
+    let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    // Constrain dot center inside the big circle
+    if (distance > maxDistance) {
+      let angle = Math.atan2(deltaY, deltaX);
+      posX = centerX + Math.cos(angle) * maxDistance;
+      posY = centerY + Math.sin(angle) * maxDistance;
+    }
+
+    // Draw the joystick dot
     this.ctx.beginPath();
     this.ctx.arc(posX, posY, dotRadius, 0, Math.PI * 2);
-    this.ctx.fillStyle = this.joystickState.pressed ? "#00FF00" : "#0000FF";
+    this.ctx.fillStyle = this.joystickState.joystickPressed ? "#00FF00" : "#0000FF";
     this.ctx.fill();
   }
 
@@ -91,12 +112,7 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
 
     this.socketSubscription = this.socket.messageObservable.subscribe((msg) => {
       if (msg.type == SocketMessageType.S2C_RemoteState) {
-        const state = msg.data as JoystickState;
-        this.joystickState = {
-          x: state.x,
-          y: state.y,
-          pressed: state.pressed,
-        }
+        this.joystickState = typeAssert<RemoteState>(msg.data)
       }
     });
   }
@@ -111,8 +127,12 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
   }
 }
 
-export interface JoystickState {
-  x: number;
-  y: number;
-  pressed: boolean;
+export interface RemoteState {
+  joystickX: number;
+  joystickY: number;
+  joystickPressed: boolean;
+  buttonLeft: boolean;
+  buttonRight: boolean;
+  buttonA: boolean;
+  activeProfileId: number;
 }

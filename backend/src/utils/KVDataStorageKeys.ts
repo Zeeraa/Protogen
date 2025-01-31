@@ -15,3 +15,9 @@ export const KV_ActiveRendererKey = "ActiveVisorRenderer";
 export const KV_EnableHUD = "EnableHUD";
 export const KV_EnableSwagger = "EnableSwagger";
 //#endregion
+
+//#region Remote
+export const KV_RemoteInvertX = "Remote_InvertX";
+export const KV_RemoteInvertY = "Remote_InvertY";
+export const KV_RemoteFlipAxis = "Remote_FlipAxis";
+//#endregion

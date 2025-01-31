@@ -11,10 +11,10 @@
 
       @if(showStateText) {
       <div>
-        X: <span class="text-info">{{joystickState.x}}</span><br>
-        Y: <span class="text-info">{{joystickState.y}}</span><br>
+        X: <span class="text-info">{{joystickState.joystickX}}</span><br>
+        Y: <span class="text-info">{{joystickState.joystickY}}</span><br>
         Pressed:
-        @if(joystickState.pressed) {
+        @if(joystickState.joystickPressed) {
         <span class="text-success">Yes</span>
         } @else {
         <span class="text-danger">No</span>

@@ -15,6 +15,7 @@ import { sleep } from "./utils/Utils";
 import { uuidv7 } from "uuidv7";
 import { UserManager } from "./user-manager/UserManager";
 import { ApiKeyManager } from "./apikeys/ApiKeyManager";
+import { RemoteManager } from "./remote/RemoteManager";
 
 export const VersionNumber = "0.0.1";
 export const BootMessageColor = "#00FF00";
@@ -34,6 +35,7 @@ export class Protogen {
   private _eventEmitter: EventEmitter;
   private _userManager: UserManager;
   private _apiKeyManager: ApiKeyManager;
+  private _remoteManager: RemoteManager;
   private _sessionId: string;
   private _imageDirectory: string;
   private _tempDirectory: string;
@@ -96,26 +98,35 @@ export class Protogen {
     this._serial = new SerialManager(this);
     this._rgb = new RgbManager(this);
     this._networkManager = new NetworkManager(this);
+    this._remoteManager = new RemoteManager(this);
   }
 
   public async init() {
+    this.networkManager.runConnectivityCheck();
+
     await this.visor.tryRenderTextFrame("BOOTING...\nInit database", BootMessageColor);
-    this._networkManager.runConnectivityCheck();
     await this.database.init();
+    await this.remoteManager.loadConfig();
+
     await this.visor.tryRenderTextFrame("BOOTING...\nInit auth", BootMessageColor);
     await this.userManager.init();
     await this.apiKeyManager.load();
+
     await this.visor.tryRenderTextFrame("BOOTING...\nInit web server", BootMessageColor);
     await this.webServer.init();
+
     await this.visor.tryRenderTextFrame("BOOTING...\nInit RGB", BootMessageColor);
     await this.rgb.init();
     await this.rgb.loadScenes();
     await this.rgb.applyLastScene();
+
     await this.visor.tryRenderTextFrame("BOOTING...\nInit VISOR", BootMessageColor);
     await this.visor.loadActiveRendererFromDatabase();
     await this.visor.init();
+
     await this.visor.tryRenderTextFrame("BOOTING...\nInit serial\nconnection", BootMessageColor);
     await this.serial.init();
+
     await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + VersionNumber, BootMessageColor);
     await sleep(1000); // Show ready message for 1000ms before starting visor render loop
     this.visor.beginMainLoop();
@@ -189,6 +200,10 @@ export class Protogen {
 
   public get apiKeyManager() {
     return this._apiKeyManager;
+  }
+
+  get remoteManager() {
+    return this._remoteManager;
   }
   //#endregion
 }
