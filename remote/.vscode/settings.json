@@ -1,0 +1,4 @@
+{
+    // Disabled since it uses too much ram during development on my pi zero 2
+    "python.languageServer": "None"
+}

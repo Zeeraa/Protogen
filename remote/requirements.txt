@@ -5,3 +5,5 @@ lgpio
 python-socketio
 websocket-client
 aiohttp
+luma.oled
+Pillow

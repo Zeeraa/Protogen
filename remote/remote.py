@@ -1,14 +1,34 @@
-import sys
+import re
 import os
 import requests
 import asyncio
 import socketio
 import aiohttp
+import time
 
-from dotenv import load_dotenv
 from gpiozero import Button, MCP3008
+from dotenv import load_dotenv
+from luma.core.interface.serial import i2c
+from luma.oled.device import ssd1306
+from luma.core.render import canvas
+from PIL import ImageFont, ImageDraw
 
+FONT_SIZE = 16
+FONT_PATH = "Tamzen8x16b.ttf"
 SOCKETIO_PATH = "/protogen-websocket.io"
+
+class Action:
+  def __init__(self, input_type, action_type, action):
+    self.input_type = input_type
+    self.action_type = action_type
+    self.action = action
+
+class Profile:
+  def __init__(self, id, name, click_to_activate, actions):
+    self.id = id
+    self.name = name
+    self.click_to_activate = click_to_activate
+    self.actions = actions
 
 # ---------- Remote class ----------
 class Remote:
@@ -17,57 +37,149 @@ class Remote:
     self.api_key = api_key
     self.use_direct_connection = use_direct_connection
     self.websocket = None
-    self.active_profile_id = -1
     
     # Joystick ADC and button
     self.joystick_x = MCP3008(0)
     self.joystick_y = MCP3008(1)
-    self.joystick_button = Button(13)
+    self.joystick_button = Button(16, bounce_time=0.05)
     
     # Other buttons
-    self.button_a = Button(5, pull_up=True)
-    self.button_left = Button(4, pull_up=True)
-    self.button_right = Button(6, pull_up=True)
+    self.button_a = Button(23, pull_up=True, bounce_time=0.05)
+    self.button_left = Button(24, pull_up=True, bounce_time=0.05)
+    self.button_right = Button(25, pull_up=True, bounce_time=0.05)
+    
+    self.invert_x = False
+    self.invert_y = False
+    self.flip_axis = False
+    
+    self.connected = False
+    self.active_profile_index = 0
+    self.profiles = []
+    
+    if not os.path.exists(FONT_PATH):
+      print("Error: Configured font not found!")
+      self.font = ImageFont.load_default()
+    else:
+      self.font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
+    self.serial = i2c(port=1, address=0x3C)  # Default I2C address for SSD1306
+    self.display = ssd1306(self.serial)
+    
+    # Start input listeners
+    self.button_right.when_pressed = self.next_profile
+    self.button_left.when_pressed = self.previous_profile
+    
+    self.draw_text("Starting...")
+
+  def draw_text(self, text):
+    with canvas(self.display) as draw:
+      draw.rectangle((0, 0, self.display.width, self.display.height), outline=0, fill=0)
+      
+      y_offset = 0
+      for line in text.split('\n'):
+        draw.text((0, y_offset), line, font=self.font, fill=255)
+        y_offset += FONT_SIZE + 2
   
   #region Profile data loading
-  async def check_profiles(self):
-    print("CHECK PROFILES")
+  async def sync_settings(self):
+    async with aiohttp.ClientSession() as session:
+      async with session.get(self.api_url + "/api/remote/config/full", headers={"x-api-key": api_key}) as response:
+        if response.status == 200:
+          data = await response.json()
+          
+          profiles = []
+          for profile in data["profiles"]:
+            actions = []
+            for action in profile["actions"]:
+              actions.append(Action(action["inputType"], action["actionType"], action["action"]))
+            profiles.append(Profile(profile["id"], profile["name"], profile["clickToActivate"], actions))
+          
+          # Make sure we are not above the max index
+          profile_count = len(profiles)
+          if profile_count == 0:
+            self.active_profile_index = 0
+          elif self.active_profile_index >= profile_count:
+            self.active_profile_index = profile_count - 1
+          
+          self.profiles = profiles
+          self.update_display()
+          
+        else:
+          print(f"Error while fetching config: {response.status}")
+          return None
   #endregion
   
   #region Start function
   async def start(self):
     if self.use_direct_connection:
+      self.draw_text("Scan server")
       print("Direct conection enabled. Trying to find optimal interface for communication")
       optimal_url = self.find_optimal_url()
       if optimal_url is None:
         print("Could not find direct connection")
+        self.draw_text("No direct\nconnection")
+        time.sleep(2)
       else:
         print("Found direct connection url " + optimal_url)
         self.api_url = optimal_url
+        self.draw_text("Found server\n" + re.sub(r'^https?://', '', optimal_url))
+        time.sleep(2)
     
-    await self.check_profiles()
+    self.draw_text("Fetch config")
+    await self.sync_settings()
     
+    self.draw_text("WS Connect...")
     self.websocket = socketio.AsyncClient(reconnection=True, reconnection_attempts=0)
     self.websocket.on("connect", self.on_connect)
     self.websocket.on("connect_error", self.on_connect_error)
     self.websocket.on("disconnect", self.on_disconnect)
+    self.websocket.on("message", self.on_message)
     
     sensor_task = asyncio.create_task(self.read_sensors_and_send())
-    profile_update_task = asyncio.create_task(self.check_profiles_loop())
+    sync_settings_task = asyncio.create_task(self.sync_settings_loop())
     socket_connection_task = asyncio.create_task(self.connect_to_socket())
     
-    await asyncio.gather(sensor_task, profile_update_task, socket_connection_task)
+    await asyncio.gather(sensor_task, sync_settings_task, socket_connection_task)
   #endregion
+  
+  def update_display(self):
+    if not self.connected:
+      self.draw_text("Disconnected")
+    else:
+      header = "P["
+      profile_name = "No Profile :("
+      
+      profile_count = len(self.profiles)
+      
+      if profile_count == 0:
+        header += "0/0" 
+      else:
+        header += str(self.active_profile_index + 1) + "/" + str(profile_count)
+        active_profile = self.profiles[self.active_profile_index]
+        profile_name = active_profile.name
+        
+      header += "]"
+      self.draw_text(header + "\n" + profile_name)
   
   #region Websocket
   def on_connect(self):
+    self.connected = True
     print("Connected to the websocket!")
+    self.update_display()
 
   def on_connect_error(self, data):
     print("Socket connection failed:", data)
 
   def on_disconnect(self):
+    self.connected = False
     print("Socket disconnected. Attempting to reconnect...")
+    self.update_display()
+  
+  async def on_message(self, data):
+    if data.get("type") == "S2E_RemoteProfileChange":
+      await self.sync_settings()
+    elif data.get("type") == "S2E_RemoteConfigChange":
+      settings = data.get("data")
+      print(settings)
   
   async def connect_to_socket(self):
     backoff = 1  # Initial wait time in seconds
@@ -138,29 +250,58 @@ class Remote:
     return None
   #endregion
   
-  #region Sensor readings for socket
+  #region Sensor readings
   async def read_sensors_and_send(self):
     while True:
+      x = self.joystick_x.value
+      y = self.joystick_y.value
+      
+      if self.flip_axis:
+        x, y = y, x
+      
+      if self.invert_x:
+        x = 1 - x
+        
+      if self.invert_y:
+        y = 1 - y
+      
+      active_profile_id = -1
+      if len(self.profiles) > 0:
+        active = self.profiles[self.active_profile_index]
+        active_profile_id = active.id
+      
       sensor_readings = {
-        "joystick_x": self.joystick_x.value,
-        "joystick_y": self.joystick_y.value,
+        "joystick_x": x,
+        "joystick_y": y,
         "joystick_pressed": self.joystick_button.is_pressed,
         "button_a": self.button_a.is_pressed,
         "button_left": self.button_left.is_pressed,
         "button_right": self.button_right.is_pressed,
-        "active_profile_id": self.active_profile_id,
+        "active_profile_id": active_profile_id,
       }
       if self.websocket.connected:
         await self.websocket.emit("message", {"type": "E2S_RemoteState", "data": sensor_readings})
-      await asyncio.sleep(0.25)
+      await asyncio.sleep(1.0 / 8.0) # 8 times per second
+  
+  def next_profile(self):
+    self.active_profile_index += 1
+    if self.active_profile_index >= len(self.profiles):
+      self.active_profile_index = 0
+    self.update_display()
+    
+  def previous_profile(self):
+    self.active_profile_index -= 1
+    if self.active_profile_index < 0:
+      self.active_profile_index = len(self.profiles) - 1
+    self.update_display()
   #endregion
   
   #region Get profiles
-  async def check_profiles_loop(self):
+  async def sync_settings_loop(self):
     while True:
       # Since first run is on start we wait before the next one
-      await asyncio.sleep(5)
-      await self.check_profiles()
+      await asyncio.sleep(60 * 60 * 1) # Every minute
+      await self.sync_settings()
   #endregion
     
 # ---------- Init code ----------
