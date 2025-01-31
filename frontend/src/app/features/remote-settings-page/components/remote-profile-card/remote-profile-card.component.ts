@@ -39,7 +39,6 @@ export class RemoteProfileCardComponent implements OnDestroy {
     return this._componentId;
   }
 
-  //TODO: confirm
   deleteProfile() {
     this.lockInputs = false;
     this.deleteProfilePrompt?.close();
