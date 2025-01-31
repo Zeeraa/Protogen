@@ -15,4 +15,8 @@ export enum SocketMessageType {
 
   // ===== E2S (External to Server) =====
   E2S_RemoteState = "E2S_RemoteState",
+
+  // ===== E2S (Server to External) =====
+  S2E_RemoteConfigChange = "S2E_RemoteConfigChange",
+  S2E_RemoteProfileChange = "S2E_RemoteProfileChange",
 }

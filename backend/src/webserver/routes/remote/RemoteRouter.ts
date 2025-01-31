@@ -6,6 +6,7 @@ import { Equal, Not } from "typeorm";
 import { RemoteAction } from "../../../database/models/remote/RemoteAction.model";
 import { RemoteControlActionType } from "../../../database/models/remote/RemoteControlActionType";
 import { RemoteControlInputType } from "../../../database/models/remote/RemoteControlInputType";
+import { SocketMessageType } from "../../socket/SocketMessageType";
 
 export class RemoteRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -14,6 +15,25 @@ export class RemoteRouter extends AbstractRouter {
     this.router.get("/config", async (req, res) => {
       /*
       #swagger.path = '/remote/config'
+      #swagger.tags = ['Remote'],
+      #swagger.description = "Get remote settings"
+      #swagger.responses[200] = { description: "Ok" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      res.json({
+        invertX: this.protogen.remoteManager.invertX,
+        invertY: this.protogen.remoteManager.invertY,
+        flipAxis: this.protogen.remoteManager.flipAxis,
+      });
+    });
+
+    this.router.get("/config/full", async (req, res) => {
+      /*
+      #swagger.path = '/remote/config/full'
       #swagger.tags = ['Remote'],
       #swagger.description = "Get remote profiles and settings"
       #swagger.responses[200] = { description: "Ok" }
@@ -24,16 +44,65 @@ export class RemoteRouter extends AbstractRouter {
         {"tokenAuth": []}
       ]
       */
-      try {
-        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
-        const profiles = await repo.find();
+      const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+      const profiles = await repo.find({
+        relations: {
+          actions: true,
+        },
+      });
 
-        res.json({
-          profiles: profiles,
+      res.json({
+        profiles: profiles,
+        invertX: this.protogen.remoteManager.invertX,
+        invertY: this.protogen.remoteManager.invertY,
+        flipAxis: this.protogen.remoteManager.flipAxis,
+      });
+    });
+
+    this.router.put("/config", async (req, res) => {
+      /*
+      #swagger.path = '/remote/config'
+      #swagger.tags = ['Remote'],
+      #swagger.description = "Update remote settings"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = AlterSettingsDTO.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const data = parsed.data;
+
+        if (data.invertX) {
+          this.protogen.remoteManager.invertX = data.invertX;
+        }
+
+        if (data.invertY) {
+          this.protogen.remoteManager.invertY = data.invertY;
+        }
+
+        if (data.flipAxis) {
+          this.protogen.remoteManager.flipAxis = data.flipAxis;
+        }
+
+        await this.protogen.remoteManager.saveConfig();
+
+        const config = {
           invertX: this.protogen.remoteManager.invertX,
           invertY: this.protogen.remoteManager.invertY,
           flipAxis: this.protogen.remoteManager.flipAxis,
-        });
+        }
+
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteConfigChange, config)
+        res.json(config);
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -161,6 +230,9 @@ export class RemoteRouter extends AbstractRouter {
         })
 
         const result = await repo.save(profile);
+
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteProfileChange, { id: result.id });
+
         res.json(result);
       } catch (err) {
         this.handleError(err, req, res);
@@ -266,6 +338,8 @@ export class RemoteRouter extends AbstractRouter {
 
         const result = await repo.save(profile);
 
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteProfileChange, { id: result.id });
+
         res.json(result);
       } catch (err) {
         this.handleError(err, req, res);
@@ -332,4 +406,10 @@ const AlterProfileModel = z.object({
   name: z.string().trim().min(1).max(16),
   actions: z.array(AlterProfileActions),
   clickToActivate: z.boolean(),
+})
+
+const AlterSettingsDTO = z.object({
+  invertX: z.boolean().optional(),
+  invertY: z.boolean().optional(),
+  flipAxis: z.boolean().optional(),
 })
