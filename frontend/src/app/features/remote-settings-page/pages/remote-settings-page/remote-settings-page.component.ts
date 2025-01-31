@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { RemoteApiService, RemoteProfile } from '../../../../core/services/api/remote-api.service';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, forkJoin, of, Subscription } from 'rxjs';
 import { VisorApiService, VisorRenderer } from '../../../../core/services/api/visor-api.service';
 import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { SavedVideo, VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
@@ -9,6 +9,10 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
+import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
+import { SocketService } from '../../../../core/services/socket/socket.service';
+import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
+import { typeAssert } from '../../../../core/services/utils/Utils';
 
 @Component({
   selector: 'app-remote-settings-page',
@@ -22,6 +26,9 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     savedVideos: [],
     visorRenderers: [],
   }
+
+  remoteState: RemoteState = blankRemoteState();
+  private socketSubscription: Subscription | null = null;
 
   private newProfilePrompt: NgbModalRef | null = null;
   @ViewChild("newProfilePrompt") private newProfilePromptTemplate!: TemplateRef<any>;
@@ -40,6 +47,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     private rgbApi: RgbApiService,
     private modal: NgbModal,
     private title: Title,
+    private socket: SocketService,
   ) { }
 
   loadData() {
@@ -123,10 +131,17 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadData();
     this.title.setTitle("Remote - Protogen");
+
+    this.socketSubscription = this.socket.messageObservable.subscribe((msg) => {
+      if (msg.type == SocketMessageType.S2C_RemoteState) {
+        this.remoteState = typeAssert<RemoteState>(msg.data);
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.newProfilePrompt?.close();
+    this.socketSubscription?.unsubscribe();
   }
 }
 

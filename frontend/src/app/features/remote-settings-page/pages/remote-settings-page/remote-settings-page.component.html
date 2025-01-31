@@ -20,8 +20,8 @@
   <div class="row">
     @for (profile of profiles; track $index) {
     <div class="col-12 col-sm-12 col-md-6 mt-2">
-      <app-remote-profile-card [profile]="profile" [actionDataSet]="actionDataSet"
-        (onDeleted)="profileDeleted($event)" />
+      <app-remote-profile-card [profile]="profile" [actionDataSet]="actionDataSet" (onDeleted)="profileDeleted($event)"
+        [isActive]="remoteState.activeProfileId == profile.id" />
     </div>
     }
   </div>

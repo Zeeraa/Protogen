@@ -21,6 +21,20 @@ export class RemoteApiService extends ApiBaseService {
   deleteProfile(id: number): Observable<any> {
     return this.http.delete(this.apiBaseUrl + "/remote/profiles/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
   }
+
+  alterConfig(data: AlterConfigDTO): Observable<RemoteConfig> {
+    return this.http.put(this.apiBaseUrl + "/remote/config", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteConfig>;
+  }
+}
+
+export interface AlterConfigDTO {
+  invertX?: boolean,
+  invertY?: boolean,
+  flipAxis?: boolean,
+}
+
+export interface RemoteConfig {
+
 }
 
 export interface AlterProfileActions {
@@ -67,6 +81,8 @@ export enum RemoteControlActionType {
   ACTIVATE_RGB_SCENE = "ACTIVATE_RGB_SCENE",
   PLAY_VIDEO = "PLAY_VIDEO",
   FACE_EXPRESSION = "FACE_EXPRESSION",
+  DISABLE_RGB = "DISABLE_RGB",
+  STOP_VIDEO = "STOP_VIDEO",
 }
 
 export function translateRemoteInputType(type: RemoteControlInputType) {
@@ -113,6 +129,12 @@ export function translateRemoteActionType(type: RemoteControlActionType) {
 
     case RemoteControlActionType.PLAY_VIDEO:
       return "Play video";
+
+    case RemoteControlActionType.DISABLE_RGB:
+      return "Disable RGB";
+
+    case RemoteControlActionType.STOP_VIDEO:
+      return "Stop video";
 
     default:
       return "Unknown";
