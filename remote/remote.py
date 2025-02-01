@@ -83,6 +83,7 @@ class Remote:
     self.button_right.when_pressed = self.next_profile
     self.button_left.when_pressed = self.previous_profile
     self.button_a.when_pressed = self.handle_a_button
+    self.joystick_button.when_pressed = self.handle_joystick_press
     
     self.draw_text("Starting...")
 
@@ -196,8 +197,10 @@ class Remote:
   
   async def on_message(self, data):
     if data.get("type") == "S2E_RemoteProfileChange":
+      print("Server send message indicating change in profiles")
       await self.sync_settings()
     elif data.get("type") == "S2E_RemoteConfigChange":
+      print("New settings received from server")
       settings = data.get("data")
       self.invert_x = settings.get("invertX")
       self.invert_y = settings.get("invertY")
@@ -320,9 +323,17 @@ class Remote:
   def handle_a_button(self):
     asyncio.run(self.send_input_to_profile("BUTTON_1"))
   
+  def handle_joystick_press(self):
+    asyncio.run(self.send_input_to_profile("JOYSTICK_BUTTON"))
+  
   async def send_input_to_profile(self, input_type):
     profile = self.get_active_profile()
     if profile is not None:
+      # Skip JOYSTICK_BUTTON command if click_to_activate is on
+      if input_type == "JOYSTICK_BUTTON":
+        if profile.click_to_activate:
+          return
+      # Send to server
       await profile.handle_action(self, input_type)
   #endregion
   
