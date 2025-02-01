@@ -5,6 +5,7 @@ import { Protogen } from "../Protogen";
 import { KV_RemoteFlipAxis, KV_RemoteInvertX, KV_RemoteInvertY } from "../utils/KVDataStorageKeys";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { RemoteState } from "./RemoteState";
+import { RemoteAction } from "../database/models/remote/RemoteAction.model";
 
 export class RemoteManager {
   private _protogen;
@@ -46,13 +47,13 @@ export class RemoteManager {
     await this.protogen.database.setData(KV_RemoteFlipAxis, String(this.flipAxis));
   }
 
-  public async performAction(type: RemoteControlActionType, action: string | null) {
+  public async performAction(type: RemoteControlActionType, action: string | null): Promise<boolean> {
     //#region Start video playback
     if (type == RemoteControlActionType.PLAY_VIDEO) {
       const id = parseInt(action || "");
       if (isNaN(id)) {
         this.protogen.logger.error("Remote", "Invalid id passed");
-        return;
+        return false;
       }
 
       const repo = this.protogen.database.dataSource.getRepository(SavedVideo);
@@ -65,7 +66,7 @@ export class RemoteManager {
 
       if (video == null) {
         this.protogen.logger.error("Remote", "Failed to play saved video since id was not found in database");
-        return;
+        return false;
       }
 
       if (video.isStream) {
@@ -83,6 +84,27 @@ export class RemoteManager {
       this.protogen.videoPlaybackManager.kill();
     }
     //#endregion
+
+    //#region Activate RGB scene
+    if (type == RemoteControlActionType.ACTIVATE_RGB_SCENE) {
+      const scene = this.protogen.rgb.scenes.find(s => s.id == action);
+      if (scene == null) {
+        return false;
+      }
+
+      this.protogen.rgb.setActiveScene(scene);
+
+      return true;
+    }
+    //#region 
+
+    //#region Disable RGB
+    if (type == RemoteControlActionType.DISABLE_RGB) {
+      this.protogen.rgb.setActiveScene(null);
+      return true;
+    }
+    //#endregion
+
     return false;
   }
 
