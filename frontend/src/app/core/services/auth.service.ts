@@ -64,9 +64,8 @@ export class AuthService {
       username: decoded.username,
       iat: decoded.iat,
       exp: decoded.exp,
-
     }
-    console.log(decoded);
+    //console.log(decoded);
   }
 
   public tryRefreshToken(): Promise<string | null> {
