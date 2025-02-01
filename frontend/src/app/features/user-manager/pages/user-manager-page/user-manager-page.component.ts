@@ -238,7 +238,7 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
 
   confirmDeleteUser() {
     this.lockInputs = true;
-    this.authApi.deleteUser(this.userId).pipe(
+    this.authApi.deleteUser(this.deleteUserId).pipe(
       catchError(err => {
         this.lockInputs = false;
         this.toastr.error("Failed to delete user");
