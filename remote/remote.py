@@ -5,6 +5,7 @@ import asyncio
 import socketio
 import aiohttp
 import time
+import math
 
 from gpiozero import Button, MCP3008
 from dotenv import load_dotenv
@@ -32,6 +33,10 @@ class Profile:
     
   async def handle_action(self, remote, input_type):
     action = next((a for a in self.actions if a.input_type == input_type), None)
+    
+    # No need to send action to server if type is NONE
+    if action.action_type == "NONE":
+      return
     
     if action is not None:
       async with aiohttp.ClientSession() as session:
@@ -66,6 +71,7 @@ class Remote:
     self.invert_x = False
     self.invert_y = False
     self.flip_axis = False
+    self.trigger_distance = 0.4
     
     self.connected = False
     self.active_profile_index = 0
@@ -308,6 +314,36 @@ class Remote:
         await self.websocket.emit("message", {"type": "E2S_RemoteState", "data": sensor_readings})
       await asyncio.sleep(1.0 / 8.0) # 8 times per second
   
+  def get_joystick_distance(self):
+    # Value
+    x1 = self.joystick_x.value
+    y1 = self.joystick_y.value
+    
+    # Center
+    x2 = 0.5
+    y2 = 0.5
+    
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+  
+  def get_joystick_zone(self):
+    dist = self.get_joystick_distance()
+    if dist > self.trigger_distance:
+      x = self.joystick_x.value
+      y = self.joystick_y.value
+      
+      center = 0.5
+      
+      dx = x - center
+      dy = y - center
+      
+      if abs(dx) > abs(dy):
+        return "JOYSTICK_RIGHT" if dx > 0 else "JOYSTICK_LEFT"
+      else:
+        return "JOYSTICK_DOWN" if dy > 0 else "JOYSTICK_UP"
+    else:
+      return "JOYSTICK_CENTER"
+    print(dist)
+  
   def next_profile(self):
     self.active_profile_index += 1
     if self.active_profile_index >= len(self.profiles):
@@ -324,15 +360,18 @@ class Remote:
     asyncio.run(self.send_input_to_profile("BUTTON_1"))
   
   def handle_joystick_press(self):
-    asyncio.run(self.send_input_to_profile("JOYSTICK_BUTTON"))
+    profile = self.get_active_profile()
+    if profile is not None:
+      if profile.click_to_activate:
+        asyncio.run(self.send_input_to_profile("JOYSTICK_BUTTON"))
+      else:
+        input_type = self.get_joystick_zone()
+        #print(input_type)
+        asyncio.run(self.send_input_to_profile(input_type))
   
   async def send_input_to_profile(self, input_type):
     profile = self.get_active_profile()
     if profile is not None:
-      # Skip JOYSTICK_BUTTON command if click_to_activate is on
-      if input_type == "JOYSTICK_BUTTON":
-        if profile.click_to_activate:
-          return
       # Send to server
       await profile.handle_action(self, input_type)
   #endregion
