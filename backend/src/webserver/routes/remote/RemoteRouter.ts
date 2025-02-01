@@ -81,15 +81,15 @@ export class RemoteRouter extends AbstractRouter {
         }
         const data = parsed.data;
 
-        if (data.invertX) {
+        if (data.invertX !== undefined) {
           this.protogen.remoteManager.invertX = data.invertX;
         }
 
-        if (data.invertY) {
+        if (data.invertY !== undefined) {
           this.protogen.remoteManager.invertY = data.invertY;
         }
 
-        if (data.flipAxis) {
+        if (data.flipAxis !== undefined) {
           this.protogen.remoteManager.flipAxis = data.flipAxis;
         }
 
@@ -392,8 +392,44 @@ export class RemoteRouter extends AbstractRouter {
         this.handleError(err, req, res);
       }
     });
+
+    this.router.post("/perform-action", async (req, res) => {
+      /*
+      #swagger.path = '/remote/perform-action'
+      #swagger.tags = ['Remote'],
+      #swagger.description = "Performs and action based on input"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[409] = { description: "There is already another profile with this name" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = PerformActionDTO.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const data = parsed.data;
+
+        const status = await this.protogen.remoteManager.performAction(data.type, data.action);
+
+        res.json({ status });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
   }
 }
+
+const PerformActionDTO = z.object({
+  type: z.nativeEnum(RemoteControlActionType),
+  action: z.string().max(512).nullable(),
+});
 
 const AlterProfileActions = z.object({
   id: z.number().int().safe().positive().optional(),
