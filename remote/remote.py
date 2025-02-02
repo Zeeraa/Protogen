@@ -310,45 +310,46 @@ class Remote:
   #region Sensor readings
   async def read_sensors_and_send(self):
     while True:
-      x = self.joystick_x.value
-      y = self.joystick_y.value
-      
-      if self.flip_axis:
-        x, y = y, x
-      
-      if self.invert_x:
-        x = 1 - x
-        
-      if self.invert_y:
-        y = 1 - y
-      
-      send_event_on_change = False
-      active_profile_id = -1
-      if len(self.profiles) > 0:
-        active_profile = self.profiles[self.active_profile_index]
-        active_profile_id = active_profile.id
-        
-        if not active_profile.click_to_activate:
-          send_event_on_change = True
-      
-      joystick_state = self.get_joystick_zone()
-      if self.last_state != joystick_state:
-        if self.last_state is not None:
-          if send_event_on_change:
-            asyncio.create_task(self.send_input_to_profile(joystick_state))
-        self.last_state = joystick_state
-      
-      sensor_readings = {
-        "joystick_x": x,
-        "joystick_y": y,
-        "joystick_pressed": self.joystick_button.is_pressed,
-        "joystick_state": joystick_state,
-        "button_a": self.button_a.is_pressed,
-        "button_left": self.button_left.is_pressed,
-        "button_right": self.button_right.is_pressed,
-        "active_profile_id": active_profile_id,
-      }
       if self.websocket.connected:
+        x = self.joystick_x.value
+        y = self.joystick_y.value
+        
+        if self.flip_axis:
+          x, y = y, x
+        
+        if self.invert_x:
+          x = 1 - x
+          
+        if self.invert_y:
+          y = 1 - y
+        
+        send_event_on_change = False
+        active_profile_id = -1
+        if len(self.profiles) > 0:
+          active_profile = self.profiles[self.active_profile_index]
+          active_profile_id = active_profile.id
+          
+          if not active_profile.click_to_activate:
+            send_event_on_change = True
+        
+        joystick_state = self.get_joystick_zone()
+        if self.last_state != joystick_state:
+          if self.last_state is not None:
+            if send_event_on_change:
+              asyncio.create_task(self.send_input_to_profile(joystick_state))
+          self.last_state = joystick_state
+        
+        sensor_readings = {
+          "joystick_x": x,
+          "joystick_y": y,
+          "joystick_pressed": self.joystick_button.is_pressed,
+          "joystick_state": joystick_state,
+          "button_a": self.button_a.is_pressed,
+          "button_left": self.button_left.is_pressed,
+          "button_right": self.button_right.is_pressed,
+          "active_profile_id": active_profile_id,
+        }
+        
         await self.websocket.emit("message", {"type": "E2S_RemoteState", "data": sensor_readings})
       await asyncio.sleep(1.0 / 8.0) # 8 times per second
   
@@ -395,23 +396,26 @@ class Remote:
     self.update_display()
   
   def handle_a_button(self):
-    asyncio.run(self.send_input_to_profile("BUTTON_1"))
+    if self.websocket.connected:
+      asyncio.run(self.send_input_to_profile("BUTTON_1"))
   
   def handle_joystick_press(self):
-    profile = self.get_active_profile()
-    if profile is not None:
-      if profile.click_to_activate:
-        input_type = self.get_joystick_zone()
-        #print(input_type)
-        asyncio.run(self.send_input_to_profile(input_type))
-      else:
-        asyncio.run(self.send_input_to_profile("JOYSTICK_BUTTON"))
+    if self.websocket.connected:
+      profile = self.get_active_profile()
+      if profile is not None:
+        if profile.click_to_activate:
+          input_type = self.get_joystick_zone()
+          #print(input_type)
+          asyncio.run(self.send_input_to_profile(input_type))
+        else:
+          asyncio.run(self.send_input_to_profile("JOYSTICK_BUTTON"))
   
   async def send_input_to_profile(self, input_type):
-    profile = self.get_active_profile()
-    if profile is not None:
-      # Send to server
-      await profile.handle_action(self, input_type)
+    if self.websocket.connected:
+      profile = self.get_active_profile()
+      if profile is not None:
+        # Send to server
+        await profile.handle_action(self, input_type)
   #endregion
   
   #region Get profiles
