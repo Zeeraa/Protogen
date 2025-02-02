@@ -1,0 +1,15 @@
+[Unit]
+Description=Remote Python Script
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/protogen/remote
+ExecStart=/home/pi/protogen/remote/venv/bin/python /home/pi/protogen/remote/remote.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

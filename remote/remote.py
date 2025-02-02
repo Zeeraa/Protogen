@@ -8,7 +8,7 @@ import time
 import math
 import uuid
 
-from gpiozero import Button, MCP3008
+from gpiozero import Button, MCP3008, LED
 from dotenv import load_dotenv
 from luma.core.interface.serial import i2c
 from luma.oled.device import ssd1306
@@ -81,6 +81,13 @@ class Remote:
     self.button_a = Button(23, pull_up=True, bounce_time=0.05)
     self.button_left = Button(24, pull_up=True, bounce_time=0.05)
     self.button_right = Button(25, pull_up=True, bounce_time=0.05)
+    
+    # LEDs
+    self.led_red = LED(5)
+    self.led_green = LED(6)
+    
+    self.led_red.on()
+    self.led_green.off()
     
     self.invert_x = False
     self.invert_y = False
@@ -185,8 +192,12 @@ class Remote:
   
   def update_display(self):
     if not self.connected:
+      self.led_red.on()
+      self.led_green.off()
       self.draw_text("Disconnected")
     else:
+      self.led_red.off()
+      self.led_green.on()
       header = "P["
       profile_name = "No Profile :("
       
