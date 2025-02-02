@@ -9,6 +9,8 @@ import { RemoteControlInputType } from "../../../database/models/remote/RemoteCo
 import { SocketMessageType } from "../../socket/SocketMessageType";
 
 export class RemoteRouter extends AbstractRouter {
+  private sequenceIdMap: SequenceIdMap = {};
+
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/remote");
 
@@ -416,9 +418,18 @@ export class RemoteRouter extends AbstractRouter {
         }
         const data = parsed.data;
 
+        if (data.sequenceId != null) {
+          const last = this.sequenceIdMap[data.sessionId] || -1;
+          if (data.sequenceId < last) {
+            res.json({ status: false, sequenceFail: true });
+            return;
+          }
+          this.sequenceIdMap[data.sessionId] = data.sequenceId;
+        }
+
         const status = await this.protogen.remoteManager.performAction(data.type, data.action);
 
-        res.json({ status });
+        res.json({ status, sequenceFail: false });
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -426,9 +437,15 @@ export class RemoteRouter extends AbstractRouter {
   }
 }
 
+type SequenceIdMap = {
+  [key: string]: number;
+}
+
 const PerformActionDTO = z.object({
   type: z.nativeEnum(RemoteControlActionType),
   action: z.string().max(512).nullable(),
+  sessionId: z.string().uuid(),
+  sequenceId: z.number().int().safe().optional(),
 });
 
 const AlterProfileActions = z.object({
