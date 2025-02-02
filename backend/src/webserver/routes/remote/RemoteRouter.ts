@@ -425,7 +425,6 @@ export class RemoteRouter extends AbstractRouter {
             return;
           }
           this.sequenceIdMap[data.sessionId] = data.sequenceId;
-          console.log("seq " + this.sequenceIdMap[data.sessionId]);
         }
 
         const status = await this.protogen.remoteManager.performAction(data.type, data.action);
