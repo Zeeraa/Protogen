@@ -308,20 +308,26 @@ class Remote:
   #endregion
   
   #region Sensor readings
+  def get_joystick_readings(self):
+    x = self.joystick_x.value
+    y = self.joystick_y.value
+    
+    if self.flip_axis:
+      x, y = y, x
+    
+    if self.invert_x:
+      x = 1 - x
+      
+    if self.invert_y:
+      y = 1 - y
+    
+    return x, y
+  
+  
   async def read_sensors_and_send(self):
     while True:
       if self.websocket.connected:
-        x = self.joystick_x.value
-        y = self.joystick_y.value
-        
-        if self.flip_axis:
-          x, y = y, x
-        
-        if self.invert_x:
-          x = 1 - x
-          
-        if self.invert_y:
-          y = 1 - y
+        x, y = self.get_joystick_readings()
         
         send_event_on_change = False
         active_profile_id = -1
@@ -355,8 +361,7 @@ class Remote:
   
   def get_joystick_distance(self):
     # Value
-    x1 = self.joystick_x.value
-    y1 = self.joystick_y.value
+    x1, y1 = self.get_joystick_readings()
     
     # Center
     x2 = 0.5
@@ -367,8 +372,7 @@ class Remote:
   def get_joystick_zone(self):
     dist = self.get_joystick_distance()
     if dist > self.trigger_distance:
-      x = self.joystick_x.value
-      y = self.joystick_y.value
+      x, y = self.get_joystick_readings()
       
       center = 0.5
       
