@@ -5,7 +5,6 @@ import { Protogen } from "../Protogen";
 import { KV_RemoteFlipAxis, KV_RemoteInvertX, KV_RemoteInvertY } from "../utils/KVDataStorageKeys";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { RemoteState } from "./RemoteState";
-import { RemoteAction } from "../database/models/remote/RemoteAction.model";
 
 export class RemoteManager {
   private _protogen;
