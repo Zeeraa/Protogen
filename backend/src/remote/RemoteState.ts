@@ -1,4 +1,7 @@
+import { RemoteControlInputType } from "../database/models/remote/RemoteControlInputType";
+
 export interface RemoteState {
+  state: RemoteControlInputType;
   joystickX: number;
   joystickY: number;
   joystickPressed: boolean;
@@ -10,6 +13,7 @@ export interface RemoteState {
 
 export function constructRemoteStateFromSensorData(data: any): RemoteState {
   return {
+    state: data.joystick_state,
     joystickX: data.joystick_x,
     joystickY: data.joystick_y,
     joystickPressed: data.joystick_pressed,
