@@ -6,8 +6,9 @@ import socketio
 import aiohttp
 import time
 import math
+import uuid
 
-from gpiozero import Button, MCP3008
+from gpiozero import Button, MCP3008, LED
 from dotenv import load_dotenv
 from luma.core.interface.serial import i2c
 from luma.oled.device import ssd1306
@@ -43,7 +44,16 @@ class Profile:
         data = {
           "type": action.action_type,
           "action": action.action,
+          "sessionId": str(remote.remote_session_id),
         }
+        
+        if not self.click_to_activate:
+          use_sequence = input_type in {"JOYSTICK_RIGHT", "JOYSTICK_LEFT", "JOYSTICK_DOWN", "JOYSTICK_UP", "JOYSTICK_CENTER"}
+          
+          if use_sequence:
+            data["sequenceId"] = remote.command_sequence_id
+            remote.command_sequence_id += 1
+        
         async with session.post(remote.api_url + "/api/remote/perform-action", headers={"x-api-key": remote.api_key}, json=data) as response:
           if response.status != 200:
             print("Received non 200 response: " + str(response.status))
@@ -53,6 +63,10 @@ class Profile:
 # ---------- Remote class ----------
 class Remote:
   def __init__(self, api_url, api_key, use_direct_connection):
+    self.remote_session_id = uuid.uuid4()
+    self.command_sequence_id = 1
+    print("Session ID: " + str(self.remote_session_id))
+    
     self.api_url = api_url
     self.api_key = api_key
     self.use_direct_connection = use_direct_connection
@@ -68,10 +82,18 @@ class Remote:
     self.button_left = Button(24, pull_up=True, bounce_time=0.05)
     self.button_right = Button(25, pull_up=True, bounce_time=0.05)
     
+    # LEDs
+    self.led_red = LED(5)
+    self.led_green = LED(6)
+    
+    self.led_red.on()
+    self.led_green.off()
+    
     self.invert_x = False
     self.invert_y = False
     self.flip_axis = False
     self.trigger_distance = 0.4
+    self.last_state = None
     
     self.connected = False
     self.active_profile_index = 0
@@ -170,8 +192,12 @@ class Remote:
   
   def update_display(self):
     if not self.connected:
+      self.led_red.on()
+      self.led_green.off()
       self.draw_text("Disconnected")
     else:
+      self.led_red.off()
+      self.led_green.on()
       header = "P["
       profile_name = "No Profile :("
       
@@ -296,15 +322,27 @@ class Remote:
       if self.invert_y:
         y = 1 - y
       
+      send_event_on_change = False
       active_profile_id = -1
       if len(self.profiles) > 0:
-        active = self.profiles[self.active_profile_index]
-        active_profile_id = active.id
+        active_profile = self.profiles[self.active_profile_index]
+        active_profile_id = active_profile.id
+        
+        if not active_profile.click_to_activate:
+          send_event_on_change = True
+      
+      joystick_state = self.get_joystick_zone()
+      if self.last_state != joystick_state:
+        if self.last_state is not None:
+          if send_event_on_change:
+            asyncio.create_task(self.send_input_to_profile(joystick_state))
+        self.last_state = joystick_state
       
       sensor_readings = {
         "joystick_x": x,
         "joystick_y": y,
         "joystick_pressed": self.joystick_button.is_pressed,
+        "joystick_state": joystick_state,
         "button_a": self.button_a.is_pressed,
         "button_left": self.button_left.is_pressed,
         "button_right": self.button_right.is_pressed,
@@ -363,11 +401,11 @@ class Remote:
     profile = self.get_active_profile()
     if profile is not None:
       if profile.click_to_activate:
-        asyncio.run(self.send_input_to_profile("JOYSTICK_BUTTON"))
-      else:
         input_type = self.get_joystick_zone()
         #print(input_type)
         asyncio.run(self.send_input_to_profile(input_type))
+      else:
+        asyncio.run(self.send_input_to_profile("JOYSTICK_BUTTON"))
   
   async def send_input_to_profile(self, input_type):
     profile = self.get_active_profile()
@@ -380,7 +418,7 @@ class Remote:
   async def sync_settings_loop(self):
     while True:
       # Since first run is on start we wait before the next one
-      await asyncio.sleep(60 * 60 * 1) # Every minute
+      await asyncio.sleep(60 * 60 * 10) # Every 10 minutes
       await self.sync_settings()
   #endregion
   
