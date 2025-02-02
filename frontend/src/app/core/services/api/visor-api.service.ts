@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiBaseService } from '../api-base.service';
 import { catchError, Observable, of } from 'rxjs';
+import { typeAssert } from '../utils/Utils';
 
 @Injectable({
   providedIn: 'root'
@@ -16,31 +17,31 @@ export class VisorApiService extends ApiBaseService {
   }
 
   getStatus(): Observable<VisorStatus> {
-    return this.http.get(this.apiBaseUrl + "/visor/status").pipe(catchError(this.defaultErrorHandler)) as any as Observable<VisorStatus>;
+    return typeAssert<Observable<VisorStatus>>(this.http.get(this.apiBaseUrl + "/visor/status").pipe(catchError(this.defaultErrorHandler)));
   }
 
   getRenderers(): Observable<VisorRenderer[]> {
-    return this.http.get(this.apiBaseUrl + "/visor/renderers").pipe(catchError(this.defaultErrorHandler)) as any as Observable<VisorRenderer[]>;
+    return typeAssert<Observable<VisorRenderer[]>>(this.http.get(this.apiBaseUrl + "/visor/renderers").pipe(catchError(this.defaultErrorHandler)));
   }
 
   activateRenderer(id: string): Observable<VisorRenderer> {
-    return this.http.post(this.apiBaseUrl + "/visor/renderers/" + id + "/activate", {}).pipe(catchError(this.defaultErrorHandler)) as any as Observable<VisorRenderer>;
+    return typeAssert<Observable<VisorRenderer>>(this.http.post(this.apiBaseUrl + "/visor/renderers/" + id + "/activate", {}).pipe(catchError(this.defaultErrorHandler)));
   }
 
   saveCustomisableImageVisor(id: string, data: SaveCustomisableImageRendererPayload) {
-    return this.http.put(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<CustomFaceData>;
+    return typeAssert<Observable<CustomFaceData>>(this.http.put(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data", data).pipe(catchError(this.defaultErrorHandler)));
   }
 
   deleteCustomisableImageVisor(id: string) {
-    return this.http.delete(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data").pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+    return typeAssert<Observable<any>>(this.http.delete(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data").pipe(catchError(this.defaultErrorHandler)));
   }
 
   createBlankImageRenderer() {
-    return this.http.post(this.apiBaseUrl + "/visor/renderers/new-image-renderer", {}).pipe(catchError(this.defaultErrorHandler)) as any as Observable<CreateImageRendererResult>;
+    return typeAssert<Observable<CreateImageRendererResult>>(this.http.post(this.apiBaseUrl + "/visor/renderers/new-image-renderer", {}).pipe(catchError(this.defaultErrorHandler)));
   }
 
   getRenderer(id: string): Observable<VisorRenderer | null> {
-    return this.http.get(this.apiBaseUrl + "/visor/renderers/" + id).pipe(
+    return typeAssert<Observable<VisorRenderer | null>>(this.http.get(this.apiBaseUrl + "/visor/renderers/" + id).pipe(
       catchError((err: HttpErrorResponse) => {
         if (err.status === 404) {
           return of(null);
@@ -48,7 +49,7 @@ export class VisorApiService extends ApiBaseService {
         throw err;
       }),
       catchError(this.defaultErrorHandler)
-    ) as any as Observable<VisorRenderer | null>;
+    ));
   }
 
   getPreviewBase64() {

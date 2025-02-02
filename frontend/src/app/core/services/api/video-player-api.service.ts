@@ -3,6 +3,7 @@ import { ApiBaseService } from '../api-base.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, Observable } from 'rxjs';
+import { typeAssert } from '../utils/Utils';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class VideoPlayerApiService extends ApiBaseService {
       flipVideo: flip,
     }
 
-    return this.http.post(this.apiBaseUrl + "/video_player/play", payload).pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoDownloadJob>;
+    return typeAssert<Observable<VideoDownloadJob>>(this.http.post(this.apiBaseUrl + "/video_player/play", payload).pipe(catchError(this.defaultErrorHandler)));
   }
 
   streamVideo(url: string): Observable<any> {
@@ -30,55 +31,55 @@ export class VideoPlayerApiService extends ApiBaseService {
       url: url,
     }
 
-    return this.http.post(this.apiBaseUrl + "/video_player/stream", payload).pipe(catchError(this.defaultErrorHandler));
+    return typeAssert<Observable<any>>(this.http.post(this.apiBaseUrl + "/video_player/stream", payload).pipe(catchError(this.defaultErrorHandler)));
   }
 
   stopPlayback(): Observable<any> {
-    return this.http.post(this.apiBaseUrl + "/video_player/stop", {}).pipe(catchError(this.defaultErrorHandler));
+    return typeAssert<Observable<any>>(this.http.post(this.apiBaseUrl + "/video_player/stop", {}).pipe(catchError(this.defaultErrorHandler)));
   }
 
   getStatus(): Observable<VideoPlayerStatus> {
-    return this.http.get(this.apiBaseUrl + "/video_player/status").pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoPlayerStatus>;
+    return typeAssert<Observable<VideoPlayerStatus>>(this.http.get(this.apiBaseUrl + "/video_player/status").pipe(catchError(this.defaultErrorHandler)));
   }
 
   getSavedVideos(): Observable<SavedVideo[]> {
-    return this.http.get(this.apiBaseUrl + "/video_player/saved").pipe(catchError(this.defaultErrorHandler)) as any as Observable<SavedVideo[]>;
+    return typeAssert<Observable<SavedVideo[]>>(this.http.get(this.apiBaseUrl + "/video_player/saved").pipe(catchError(this.defaultErrorHandler)));
   }
 
   saveVideo(data: SaveVideoPayload): Observable<SavedVideo[]> {
-    return this.http.post(this.apiBaseUrl + "/video_player/saved", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<SavedVideo[]>;
+    return typeAssert<Observable<SavedVideo[]>>(this.http.post(this.apiBaseUrl + "/video_player/saved", data).pipe(catchError(this.defaultErrorHandler)));
   }
 
   editSavedVideo(id: number, data: SaveVideoPayload): Observable<SavedVideo[]> {
-    return this.http.put(this.apiBaseUrl + "/video_player/saved/" + id, data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<SavedVideo[]>;
+    return typeAssert<Observable<SavedVideo[]>>(this.http.put(this.apiBaseUrl + "/video_player/saved/" + id, data).pipe(catchError(this.defaultErrorHandler)));
   }
 
   playSavedVideo(id: number): Observable<SavedVideo> {
-    return this.http.post(this.apiBaseUrl + "/video_player/saved/" + id + "/play", {}).pipe(catchError(this.defaultErrorHandler)) as any as Observable<SavedVideo>;
+    return typeAssert<Observable<SavedVideo>>(this.http.post(this.apiBaseUrl + "/video_player/saved/" + id + "/play", {}).pipe(catchError(this.defaultErrorHandler)));
   }
 
   deleteSavedVideo(id: number): Observable<PlaySavedVideoResponse> {
-    return this.http.delete(this.apiBaseUrl + "/video_player/saved/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<PlaySavedVideoResponse>;
+    return typeAssert<Observable<PlaySavedVideoResponse>>(this.http.delete(this.apiBaseUrl + "/video_player/saved/" + id).pipe(catchError(this.defaultErrorHandler)));
   }
 
   getGroups(): Observable<VideoGroup[]> {
-    return this.http.get(this.apiBaseUrl + "/video_player/groups").pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoGroup[]>;
+    return typeAssert<Observable<VideoGroup[]>>(this.http.get(this.apiBaseUrl + "/video_player/groups").pipe(catchError(this.defaultErrorHandler)));
   }
 
   createGroup(group: AlterGroupModel): Observable<VideoGroup> {
-    return this.http.post(this.apiBaseUrl + "/video_player/groups", group).pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoGroup>;
+    return typeAssert<Observable<VideoGroup>>(this.http.post(this.apiBaseUrl + "/video_player/groups", group).pipe(catchError(this.defaultErrorHandler)));
   }
 
   editGroup(id: number, group: AlterGroupModel): Observable<VideoGroup> {
-    return this.http.put(this.apiBaseUrl + "/video_player/groups/" + id, group).pipe(catchError(this.defaultErrorHandler)) as any as Observable<VideoGroup>;
+    return typeAssert<Observable<VideoGroup>>(this.http.put(this.apiBaseUrl + "/video_player/groups/" + id, group).pipe(catchError(this.defaultErrorHandler)));
   }
 
   deleteGroup(id: number): Observable<any> {
-    return this.http.delete(this.apiBaseUrl + "/video_player/groups/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+    return typeAssert<Observable<any>>(this.http.delete(this.apiBaseUrl + "/video_player/groups/" + id).pipe(catchError(this.defaultErrorHandler)));
   }
 
   clearCache(): Observable<any> {
-    return this.http.delete(this.apiBaseUrl + "/video_player/cache").pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+    return typeAssert<Observable<any>>(this.http.delete(this.apiBaseUrl + "/video_player/cache").pipe(catchError(this.defaultErrorHandler)));
   }
 }
 

@@ -1,29 +1,30 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { catchError, Observable } from 'rxjs';
+import { typeAssert } from '../utils/Utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RemoteApiService extends ApiBaseService {
   getProfiles(): Observable<RemoteProfile[]> {
-    return this.http.get(this.apiBaseUrl + "/remote/profiles").pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile[]>;
+    return typeAssert<Observable<RemoteProfile[]>>(this.http.get(this.apiBaseUrl + "/remote/profiles").pipe(catchError(this.defaultErrorHandler)));
   }
 
   createProfile(data: AlterProfileDTO): Observable<RemoteProfile> {
-    return this.http.post(this.apiBaseUrl + "/remote/profiles", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile>;
+    return typeAssert<Observable<RemoteProfile>>(this.http.post(this.apiBaseUrl + "/remote/profiles", data).pipe(catchError(this.defaultErrorHandler)));
   }
 
   alterProfile(id: number, data: AlterProfileDTO): Observable<RemoteProfile> {
-    return this.http.put(this.apiBaseUrl + "/remote/profiles/" + id, data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteProfile>;
+    return typeAssert<Observable<RemoteProfile>>(this.http.put(this.apiBaseUrl + "/remote/profiles/" + id, data).pipe(catchError(this.defaultErrorHandler)));
   }
 
   deleteProfile(id: number): Observable<any> {
-    return this.http.delete(this.apiBaseUrl + "/remote/profiles/" + id).pipe(catchError(this.defaultErrorHandler)) as any as Observable<any>;
+    return typeAssert<Observable<any>>(this.http.delete(this.apiBaseUrl + "/remote/profiles/" + id).pipe(catchError(this.defaultErrorHandler)));
   }
 
   alterConfig(data: AlterConfigDTO): Observable<RemoteConfig> {
-    return this.http.put(this.apiBaseUrl + "/remote/config", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<RemoteConfig>;
+    return typeAssert<Observable<RemoteConfig>>(this.http.put(this.apiBaseUrl + "/remote/config", data).pipe(catchError(this.defaultErrorHandler)));
   }
 }
 

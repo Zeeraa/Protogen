@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, map, Observable, of } from 'rxjs';
+import { typeAssert } from '../utils/Utils';
 
 @Injectable({
   providedIn: 'root'
@@ -38,19 +39,19 @@ export class AuthApiService extends ApiBaseService {
   }
 
   getUsers(): Observable<ProtogenUser[]> {
-    return this.http.get(this.apiBaseUrl + "/users").pipe(catchError(this.defaultErrorHandler)) as any as Observable<ProtogenUser[]>;
+    return typeAssert<Observable<ProtogenUser[]>>(this.http.get(this.apiBaseUrl + "/users").pipe(catchError(this.defaultErrorHandler)));
   }
 
   deleteUser(userId: number): Observable<any> {
-    return this.http.delete(this.apiBaseUrl + "/users/" + userId).pipe(catchError(this.defaultErrorHandler)) as any;
+    return this.http.delete(this.apiBaseUrl + "/users/" + userId).pipe(catchError(this.defaultErrorHandler))
   }
 
   createUser(data: CreateNewUserData): Observable<ProtogenUser> {
-    return this.http.post(this.apiBaseUrl + "/users", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<ProtogenUser>;
+    return typeAssert<Observable<ProtogenUser>>(this.http.post(this.apiBaseUrl + "/users", data).pipe(catchError(this.defaultErrorHandler)));
   }
 
   changePassword(userId: number, data: ChangePasswordData): Observable<ProtogenUser> {
-    return this.http.put(this.apiBaseUrl + "/users/" + userId + "/password", data).pipe(catchError(this.defaultErrorHandler)) as any as Observable<ProtogenUser>;
+    return typeAssert<Observable<ProtogenUser>>(this.http.put(this.apiBaseUrl + "/users/" + userId + "/password", data).pipe(catchError(this.defaultErrorHandler)));
   }
 }
 
