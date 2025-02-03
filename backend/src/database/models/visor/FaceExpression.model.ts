@@ -24,4 +24,25 @@ export class FaceExpressionData {
     nullable: true,
   })
   image: string;
+
+  @Column({
+    type: "boolean",
+    name: "mirror_image",
+    default: false,
+  })
+  mirrorImage: boolean;
+
+  @Column({
+    name: "flip_right_side",
+    type: "boolean",
+    default: false,
+  })
+  flipRightSide: boolean;
+
+  @Column({
+    name: "flip_left_side",
+    type: "boolean",
+    default: false,
+  })
+  flipLeftSide: boolean;
 }

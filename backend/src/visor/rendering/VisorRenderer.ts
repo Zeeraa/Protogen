@@ -15,11 +15,11 @@ export abstract class VisorRenderer {
     this._name = name;
   }
 
-  protected get visor() {
+  public get visor() {
     return this._visor;
   }
 
-  protected get protogen() {
+  public get protogen() {
     return this.visor.protogen;
   }
 

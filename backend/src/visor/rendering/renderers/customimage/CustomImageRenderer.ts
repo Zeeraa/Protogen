@@ -1,9 +1,9 @@
 import { CanvasRenderingContext2D, createCanvas } from "canvas";
 import { VisorRenderer } from "../../VisorRenderer";
 import { ProtogenVisor } from "../../../ProtogenVisor";
-import { AbstractRenderableImage, DrawMode, Type } from "./implementations/AbstractRenderableImage";
-import { StaticRenderableImage } from "./implementations/StaticRenderableImage";
-import { AnimatedRenderableImage } from "./implementations/AnimatedRenderableImage";
+import { AbstractRenderableImage, DrawMode, Type } from "../../images/AbstractRenderableImage";
+import { StaticRenderableImage } from "../../images/StaticRenderableImage";
+import { AnimatedRenderableImage } from "../../images/AnimatedRenderableImage";
 import { RendererType } from "../../RendererType";
 
 export class CustomImageRenderer extends VisorRenderer {
@@ -74,7 +74,7 @@ export class CustomImageRenderer extends VisorRenderer {
     const scale = this.protogen.visor.scale;
     const canvas = createCanvas(scale.width, scale.height);
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     this.onRender(ctx, scale.width, scale.height);
     this._preview = canvas.toDataURL();

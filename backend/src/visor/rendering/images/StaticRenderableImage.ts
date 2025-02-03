@@ -2,9 +2,9 @@ import { existsSync } from "fs";
 import { AbstractRenderableImage, DrawMode, Type } from "./AbstractRenderableImage";
 import { Image } from "canvas";
 import { cyan } from "colors";
-import { flipCanvasImage } from "../../../../../utils/ImageUtils";
+import { flipCanvasImage } from "../../../utils/ImageUtils";
 import { CanvasRenderingContext2D } from "canvas";
-import { FileImageSourceProvider } from "../../../../image/FileImageSourceProvider";
+import { FileImageSourceProvider } from "../../image/FileImageSourceProvider";
 
 export class StaticRenderableImage extends AbstractRenderableImage {
   private _image: Image | null = null;

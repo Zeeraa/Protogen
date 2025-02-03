@@ -1,7 +1,7 @@
 import axios, { isAxiosError } from "axios";
 import { Protogen } from "../Protogen";
 import { createReadStream, createWriteStream } from "fs";
-import { AnimationCacheEntry } from "../visor/rendering/renderers/customimage/implementations/AnimatedRenderableImage";
+import { AnimationCacheEntry } from "../visor/rendering/images/AnimatedRenderableImage";
 
 export class ProtogenRemoteWorker {
   private _protogen;

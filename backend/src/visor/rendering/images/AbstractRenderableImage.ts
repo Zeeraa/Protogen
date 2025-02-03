@@ -1,4 +1,4 @@
-import { Protogen } from "../../../../../Protogen";
+import { Protogen } from "../../../Protogen";
 import { CanvasRenderingContext2D } from "canvas";
 
 export abstract class AbstractRenderableImage {

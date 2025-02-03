@@ -13,7 +13,12 @@ export class FaceRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       */
       try {
-        const expressions = this.protogen.visor.faceRenderer.expressions.map(e => e.data);
+        const expressions = this.protogen.visor.faceRenderer.expressions.map(e => {
+          return {
+            data: e.data,
+            preview: e.preview,
+          }
+        });
         res.json(expressions);
       } catch (err) {
         this.handleError(err, req, res);
