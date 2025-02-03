@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { VisorImageFaceEditorComponent } from './pages/visor-image-face-editor/visor-image-face-editor.component';
 import { VisorLivePreviewComponent } from './components/visor-live-preview/visor-live-preview.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ProtogenFaceEditorComponent } from './pages/protogen-face-editor/protogen-face-editor.component';
 
 
 
@@ -14,7 +15,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     VisorPageComponent,
     RendererCardComponent,
     VisorImageFaceEditorComponent,
-    VisorLivePreviewComponent
+    VisorLivePreviewComponent,
+    ProtogenFaceEditorComponent
   ],
   imports: [
     CommonModule,

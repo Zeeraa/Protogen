@@ -9,5 +9,9 @@
     @if(isCustomisableImageType) {
     <a class="btn btn-primary mt-1 me-1" routerLink="/visor/image/{{renderer.id}}">Edit</a>
     }
+
+    @if(isFace) {
+    <a class="btn btn-primary mt-1 me-1" routerLink="/visor/face">Settings</a>
+    }
   </div>
 </div>

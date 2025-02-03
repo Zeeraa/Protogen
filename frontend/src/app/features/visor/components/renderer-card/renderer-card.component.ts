@@ -22,6 +22,10 @@ export class RendererCardComponent {
     return this.renderer.preview != null;
   }
 
+  get isFace() {
+    return this.renderer.type == VisorRendererType.Face;
+  }
+
   get previewSrc() {
     if (this.renderer.preview != null) {
       if (this.renderer.preview.startsWith("data:image/png")) {
