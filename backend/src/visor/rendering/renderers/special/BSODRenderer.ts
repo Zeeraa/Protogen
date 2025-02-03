@@ -1,7 +1,7 @@
 import { FileImageSourceProvider } from "../../../image/FileImageSourceProvider";
 import { ProtogenVisor } from "../../../ProtogenVisor";
 import { StaticPictureRenderer } from "../StaticPictureRenderer";
-import { FaceRendererId } from "../VisorFaceRenderLayer";
+import { FaceRendererId } from "./face/VisorFaceRender";
 
 export const BSODRendererId = "PROTO_BSOD";
 

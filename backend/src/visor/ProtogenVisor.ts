@@ -2,7 +2,7 @@ import { createCanvas } from "canvas";
 import { BootMessageColor, Protogen } from "../Protogen";
 import { cyan, yellow } from "colors";
 import { VisorRenderer } from "./rendering/VisorRenderer";
-import { FaceRendererId, VisorFaceRenderer } from "./rendering/renderers/VisorFaceRenderLayer";
+import { FaceRendererId, VisorFaceRenderer } from "./rendering/renderers/special/face/VisorFaceRender";
 import { BSODRenderer } from "./rendering/renderers/special/BSODRenderer";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
