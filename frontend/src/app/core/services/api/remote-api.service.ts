@@ -26,16 +26,22 @@ export class RemoteApiService extends ApiBaseService {
   alterConfig(data: AlterConfigDTO): Observable<RemoteConfig> {
     return typeAssert<Observable<RemoteConfig>>(this.http.put(this.apiBaseUrl + "/remote/config", data).pipe(catchError(this.defaultErrorHandler)));
   }
+
+  getConfig(): Observable<RemoteConfig> {
+    return typeAssert<Observable<RemoteConfig>>(this.http.get(this.apiBaseUrl + "/remote/config").pipe(catchError(this.defaultErrorHandler)));
+  }
 }
 
 export interface AlterConfigDTO {
-  invertX?: boolean,
-  invertY?: boolean,
-  flipAxis?: boolean,
+  invertX?: boolean;
+  invertY?: boolean;
+  flipAxis?: boolean;
 }
 
 export interface RemoteConfig {
-
+  invertX: boolean;
+  invertY: boolean;
+  flipAxis: boolean;
 }
 
 export interface AlterProfileActions {

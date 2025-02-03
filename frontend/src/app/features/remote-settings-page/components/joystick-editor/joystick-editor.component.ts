@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { ToastrService } from 'ngx-toastr';
-import { RemoteApiService } from '../../../../core/services/api/remote-api.service';
+import { RemoteApiService, RemoteControlInputType } from '../../../../core/services/api/remote-api.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
 import { typeAssert } from '../../../../core/services/utils/Utils';
@@ -20,6 +20,10 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
 
   width = 200;
   height = 200;
+
+  invertX = false;
+  invertY = false;
+  invertAxis = false;
 
   @Input() showStateText = false;
   @Input() framerate = 20;
@@ -86,6 +90,28 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
     this.ctx.arc(posX, posY, dotRadius, 0, Math.PI * 2);
     this.ctx.fillStyle = this.joystickState.joystickPressed ? "#00FF00" : "#0000FF";
     this.ctx.fill();
+
+    // Draw zone
+    const zoneIndicatorRadius = 5;
+    const zoneIndicatorOffset = 20;
+
+    let zoneX = this.width / 2;
+    let zoneY = this.height / 2;
+
+    if (this.joystickState.state == RemoteControlInputType.JOYSTICK_UP) {
+      zoneY = zoneIndicatorOffset;
+    } else if (this.joystickState.state == RemoteControlInputType.JOYSTICK_DOWN) {
+      zoneY = this.height - zoneIndicatorOffset;
+    } else if (this.joystickState.state == RemoteControlInputType.JOYSTICK_LEFT) {
+      zoneX = zoneIndicatorOffset;
+    } else if (this.joystickState.state == RemoteControlInputType.JOYSTICK_RIGHT) {
+      zoneX = this.width - zoneIndicatorOffset;
+    }
+
+    this.ctx.beginPath();
+    this.ctx.arc(zoneX, zoneY, zoneIndicatorRadius, 0, Math.PI * 2);
+    this.ctx.fillStyle = "#FF0000";
+    this.ctx.fill();
   }
 
   onInvertXToggle(event: Event) {
@@ -132,6 +158,15 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
         this.joystickState = typeAssert<RemoteState>(msg.data)
       }
     });
+
+    this.remoteApi.getConfig().pipe(catchError(err => {
+      this.toastr.error("Failed to read remote config");
+      throw err;
+    })).subscribe(config => {
+      this.invertX = config.invertX;
+      this.invertY = config.invertY;
+      this.invertAxis = config.flipAxis;
+    })
   }
 
   ngOnDestroy(): void {

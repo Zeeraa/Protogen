@@ -1,5 +1,8 @@
+import { RemoteControlInputType } from "../../../core/services/api/remote-api.service";
+
 export function blankRemoteState() {
   return {
+    state: RemoteControlInputType.JOYSTICK_CENTER,
     activeProfileId: -1,
     buttonA: false,
     buttonLeft: false,
@@ -11,6 +14,7 @@ export function blankRemoteState() {
 }
 
 export interface RemoteState {
+  state: RemoteControlInputType;
   joystickX: number;
   joystickY: number;
   joystickPressed: boolean;

@@ -26,19 +26,19 @@
     <div class="col-12 mt-2">
       <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" id="remote_invertX"
-          (change)="onInvertXToggle($event)">
+          (change)="onInvertXToggle($event)" [(ngModel)]="invertX">
         <label class="form-check-label" for="remote_invertX">Invert X</label>
       </div>
 
       <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" id="remote_invertY"
-          (change)="onInvertYToggle($event)">
+          (change)="onInvertYToggle($event)" [(ngModel)]="invertY">
         <label class="form-check-label" for="remote_invertY">Invert Y</label>
       </div>
 
       <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" id="remote_invertAxis"
-          (change)="onInvertAxisToggle($event)">
+          (change)="onInvertAxisToggle($event)" [(ngModel)]="invertAxis">
         <label class="form-check-label" for="remote_invertAxis">Swap X and Y</label>
       </div>
     </div>
