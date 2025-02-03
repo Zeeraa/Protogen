@@ -106,6 +106,18 @@ export class RemoteManager {
     }
     //#endregion
 
+    //#region Visor renderer
+    if (type == RemoteControlActionType.ACTIVATE_VISOR_RENDERER) {
+      const renderer = this.protogen.visor.availableRenderers.find(r => r.id == action);
+      if (renderer == null) {
+        return false;
+      }
+
+      this.protogen.visor.activateRenderer(renderer.id, true);
+      return true;
+    }
+    //#endregion
+
     return false;
   }
 
