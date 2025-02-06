@@ -1,4 +1,0 @@
-sounddevice
-numpy
-redis
-scipy
