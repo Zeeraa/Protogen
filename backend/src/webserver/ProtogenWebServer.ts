@@ -25,6 +25,7 @@ import { ApiKeyRouter } from "./routes/apikeys/ApiKeyRouter";
 import { RemoteRouter } from "./routes/remote/RemoteRouter";
 import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 import { FaceRouter } from "./routes/face/FaceRouter";
+import { AssetsRouter } from "./routes/assets/AssetsRouter";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -62,6 +63,7 @@ export class ProtogenWebServer {
     new ApiKeyRouter(this).register();
     new RemoteRouter(this).register();
     new FaceRouter(this).register();
+    new AssetsRouter(this).register({ noAuth: true });
 
     this.socket.on("connection", async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);

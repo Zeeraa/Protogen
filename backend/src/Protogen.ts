@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, rmSync } from "fs";
 import { Configuration } from "./config/objects/Configurations";
 import { Database } from "./database/Database";
 import { Logger } from "./logger/Logger";
@@ -16,6 +16,8 @@ import { uuidv7 } from "uuidv7";
 import { UserManager } from "./user-manager/UserManager";
 import { ApiKeyManager } from "./apikeys/ApiKeyManager";
 import { RemoteManager } from "./remote/RemoteManager";
+import { BuiltInAsset, BuiltInAssetSchema } from "./assets/BuiltInAsset";
+import { z } from "zod";
 
 export const VersionNumber = "0.0.1";
 export const BootMessageColor = "#00FF00";
@@ -39,6 +41,7 @@ export class Protogen {
   private _sessionId: string;
   private _imageDirectory: string;
   private _tempDirectory: string;
+  private _builtInAssets: BuiltInAsset[] = [];
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -86,6 +89,27 @@ export class Protogen {
     if (!existsSync(this.tempDirectory)) {
       mkdirSync(this.tempDirectory);
     }
+
+    this.logger.info("Protogen", "Reading built-in assets");
+
+    const raw = JSON.parse(readFileSync("assets/AssetManifest.json").toString());
+    const parsedAssets = z.array(BuiltInAssetSchema).safeParse(raw);
+
+    if (!parsedAssets.success) {
+      this.logger.error("Protogen", "Failed to read built in assets file at assets/AssetManifest.json");
+      console.warn("Issues: ", parsedAssets.error.issues);
+      throw new Error("Problem in data structure in assets/AssetManifest.json. See console for more details");
+    }
+
+    parsedAssets.data.forEach((asset: BuiltInAsset) => {
+      if (!existsSync(asset.path)) {
+        throw new Error("Could not find file for asset " + asset.name + " at path " + asset.path);
+      }
+      this._builtInAssets.push(asset);
+    });
+
+    Object.freeze(this._builtInAssets);
+
 
     this._database = new Database(this);
     this._userManager = new UserManager(this);
@@ -204,6 +228,10 @@ export class Protogen {
 
   get remoteManager() {
     return this._remoteManager;
+  }
+
+  get builtInAssets() {
+    return this._builtInAssets;
   }
   //#endregion
 }

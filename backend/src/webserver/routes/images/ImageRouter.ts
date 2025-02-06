@@ -145,7 +145,7 @@ export class ImageRouter extends AbstractRouter {
         } else if (existsSync(pathNoExt + ".gif")) {
           res.sendFile(pathNoExt + ".gif");
         } else {
-          res.status(404).send({ message: "Faile not found" });
+          res.status(404).send({ message: "File not found" });
         }
       } catch (err) {
         this.handleError(err, req, res);

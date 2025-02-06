@@ -2,7 +2,8 @@
   "watch": [
     "src",
     ".env",
-    "swagger.json"
+    "swagger.json",
+    "assets/AssetManifest.json"
   ],
   "ext": ".ts",
   "exec": "ts-node --transpileOnly ./src/index.ts"

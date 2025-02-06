@@ -7,7 +7,7 @@ export const BSODRendererId = "PROTO_BSOD";
 
 export class BSODRenderer extends StaticPictureRenderer {
   constructor(visor: ProtogenVisor) {
-    super(visor, BSODRendererId, "Bluescreen Of Death", new FileImageSourceProvider("./assets/bsod.png"));
+    super(visor, BSODRendererId, "Bluescreen Of Death", new FileImageSourceProvider("./assets/builtin/bsod.png"));
   }
 
   public handleBoopState(boopState: boolean): void {

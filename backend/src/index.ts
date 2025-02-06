@@ -5,7 +5,6 @@ import { loadConfiguration } from "./config/ConfigLoader";
 import { Protogen } from "./Protogen";
 import { red, yellow } from "colors";
 import { readFileSync } from 'fs';
-import sharp from 'sharp';
 
 try {
   dotenv.config();

@@ -6,13 +6,14 @@ import { FileImageSourceProvider } from "../../../../image/FileImageSourceProvid
 import { FaceExpression } from "./FaceExpression";
 import { FaceExpressionData } from "../../../../../database/models/visor/FaceExpression.model";
 import { cyan } from "colors";
-import { KV_ActiveFaceExpressionKey } from "../../../../../utils/KVDataStorageKeys";
+import { KF_DefaultExpression } from "../../../../../utils/KVDataStorageKeys";
 
 export const FaceRendererId = "PROTOGEN_FACE";
 
 export class VisorFaceRenderer extends VisorRenderer {
   private _expressions: FaceExpression[];
   private _activeExpression: FaceExpression | null;
+  private _defaultExpression: string | null;
 
   constructor(visor: ProtogenVisor) {
     super(visor, FaceRendererId, "Protogen Face");
@@ -24,27 +25,32 @@ export class VisorFaceRenderer extends VisorRenderer {
     return this._expressions;
   }
 
-  setActiveExpression(expression: FaceExpression | null, saveToDatabase = true) {
+  setActiveExpression(expression: FaceExpression | null) {
     this._activeExpression = expression;
-    if (saveToDatabase) {
-      this.saveActiveExpression();
-    }
-  }
-
-  async saveActiveExpression() {
-    try {
-      const value = this.activeExpression == null ? null : this.activeExpression.data.uuid;
-      await this.protogen.database.setData(KV_ActiveFaceExpressionKey, value);
-      return true;
-    } catch (err) {
-      this.protogen.logger.error("VisorFaceRenderer", "Failed to save active expression id to database");
-      console.error(err);
-    }
-    return false;
   }
 
   get activeExpression() {
     return this._activeExpression;
+  }
+
+  get defaultExpression() {
+    return this._defaultExpression;
+  }
+
+  set defaultExpression(value: string | null) {
+    this._defaultExpression = value;
+    this.protogen.database.setData(KF_DefaultExpression, value).then().catch(err => {
+      this.protogen.logger.error("VisorFaceRenderer", "Failed to save default expression");
+      console.error(err);
+    });
+  }
+
+  activateDefaultExpression() {
+    this._activeExpression = null;
+    const defaultExpression = this.expressions.find(e => e.data.uuid == this.defaultExpression);
+    if (defaultExpression != null) {
+      this.setActiveExpression(defaultExpression);
+    }
   }
 
   public async onInit() {
@@ -63,15 +69,8 @@ export class VisorFaceRenderer extends VisorRenderer {
       this.expressions.push(expression);
     }
 
-    const activeExpressionId = await this.protogen.database.getData(KV_ActiveFaceExpressionKey);
-    if (activeExpressionId != null) {
-      const activeExpression = this.expressions.find(e => e.data.uuid == activeExpressionId);
-      if (activeExpression == null) {
-        this.protogen.logger.error("VisorFaceRenderer", "Could not find last used expression with id " + cyan(activeExpressionId));
-      } else {
-        this.setActiveExpression(activeExpression, false);
-      }
-    }
+    this._defaultExpression = await this.protogen.database.getData(KF_DefaultExpression);
+    this.activateDefaultExpression();
   }
 
   public onRender(ctx: CanvasRenderingContext2D, width: number, height: number) {
@@ -93,5 +92,9 @@ export class VisorFaceRenderer extends VisorRenderer {
 
   public get type(): RendererType {
     return RendererType.Face;
+  }
+
+  onActivate(): void {
+    this.activateDefaultExpression();
   }
 }
