@@ -314,7 +314,6 @@ export class ProtogenVisor {
     try {
       const value = this._activeRenderer == null ? null : this._activeRenderer.id;
       await this.protogen.database.setData(KV_ActiveRendererKey, value);
-      console.debug("saveActiveRenderer() OK");
       return true;
     } catch (err) {
       this.protogen.logger.error("Visor", "Failed to set active renderer");
