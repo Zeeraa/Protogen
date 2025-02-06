@@ -93,7 +93,8 @@
           </div>
 
           <div class="col-12 mt-2">
-            <div class="form-check form-switch">
+            <div class="form-check form-switch"
+              title="Enabling this will show potentially sensitive information like the name of your ISP and your public ip address">
               <input class="form-check-input" type="checkbox" role="switch" id="showNetworkingData"
                 [(ngModel)]="showSensitiveNetworkingData" (click)="showNetworkDataChanged($event)">
               <label class="form-check-label" for="showNetworkingData">Show sensitive data</label>
