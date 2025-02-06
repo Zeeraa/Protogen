@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, Observable } from 'rxjs';
-import { typeAssert } from '../utils/Utils';
+import { catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,67 +15,67 @@ export class RgbApiService extends ApiBaseService {
     super(http, toastr);
   }
 
-  getEffects(): Observable<RgbEffectInfo[]> {
-    return typeAssert<Observable<RgbEffectInfo[]>>(this.http.get(this.apiBaseUrl + "/rgb/effects").pipe(catchError(this.defaultErrorHandler)));
+  getEffects() {
+    return this.http.get<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/effects").pipe(catchError(this.defaultErrorHandler));
   }
 
-  removeEffect(sceneId: string, effectId: string): Observable<any> {
-    return typeAssert<Observable<any>>(this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId).pipe(catchError(this.defaultErrorHandler)));
+  removeEffect(sceneId: string, effectId: string) {
+    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId).pipe(catchError(this.defaultErrorHandler));
   }
 
-  addEffect(sceneId: string, effect: string, displayName: string): Observable<RgbEffectInfo[]> {
-    return typeAssert<Observable<RgbEffectInfo[]>>(this.http.post(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect", {
+  addEffect(sceneId: string, effect: string, displayName: string) {
+    return this.http.post<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect", {
       effect: effect,
       displayName: displayName,
-    }).pipe(catchError(this.defaultErrorHandler)));
+    }).pipe(catchError(this.defaultErrorHandler));
   }
 
   setEffectProperty(sceneId: string, effectId: string, propertyName: string, value: string, fullSave = false) {
-    return typeAssert<Observable<RgbEffectInfo[]>>(this.http.put(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId + "/property/" + propertyName + "?fullSave=" + (fullSave ? "true" : "false"), {
+    return this.http.put<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId + "/property/" + propertyName + "?fullSave=" + (fullSave ? "true" : "false"), {
       value: value,
-    }).pipe(catchError(this.defaultErrorHandler)));
+    }).pipe(catchError(this.defaultErrorHandler));
   }
 
   updateEffect(sceneId: string, effectId: string, data: { displayName: string; }) {
-    return typeAssert<Observable<any>>(this.http.put(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId, data).pipe(catchError(this.defaultErrorHandler)));
+    return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId, data).pipe(catchError(this.defaultErrorHandler));
   }
 
-  activateScene(id: string): Observable<RgbScene> {
-    return typeAssert<Observable<RgbScene>>(this.http.post(this.apiBaseUrl + "/rgb/scenes/" + id + "/activate", {}).pipe(catchError(this.defaultErrorHandler)));
+  activateScene(id: string) {
+    return this.http.post<RgbScene>(this.apiBaseUrl + "/rgb/scenes/" + id + "/activate", {}).pipe(catchError(this.defaultErrorHandler));
   }
 
-  deleteScene(id: string): Observable<any> {
-    return typeAssert<Observable<any>>(this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + id).pipe(catchError(this.defaultErrorHandler)));
+  deleteScene(id: string) {
+    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + id).pipe(catchError(this.defaultErrorHandler));
   }
 
-  deactivate(): Observable<any> {
-    return typeAssert<Observable<any>>(this.http.delete(this.apiBaseUrl + "/rgb/scenes/active").pipe(catchError(this.defaultErrorHandler)));
+  deactivate() {
+    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/active").pipe(catchError(this.defaultErrorHandler));
   }
 
   saveSceneData(id: string, data: { name: string; }) {
-    return typeAssert<Observable<any>>(this.http.put(this.apiBaseUrl + "/rgb/scenes/" + id, data).pipe(catchError(this.defaultErrorHandler)));
+    return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + id, data).pipe(catchError(this.defaultErrorHandler));
   }
 
-  createNewScene(name: string): Observable<RgbScene> {
-    return typeAssert<Observable<RgbScene>>(this.http.post(this.apiBaseUrl + "/rgb/scenes/new", {
+  createNewScene(name: string) {
+    return this.http.post<RgbScene>(this.apiBaseUrl + "/rgb/scenes/new", {
       name: name,
-    }).pipe(catchError(this.defaultErrorHandler)));
+    }).pipe(catchError(this.defaultErrorHandler));
   }
 
-  getScene(id: string): Observable<RgbScene> {
-    return typeAssert<Observable<RgbScene>>(this.http.get(this.apiBaseUrl + "/rgb/scenes/" + id).pipe(catchError(this.defaultErrorHandler)));
+  getScene(id: string) {
+    return this.http.get<RgbScene>(this.apiBaseUrl + "/rgb/scenes/" + id).pipe(catchError(this.defaultErrorHandler));
   }
 
-  getScenes(): Observable<RgbScene[]> {
-    return typeAssert<Observable<RgbScene[]>>(this.http.get(this.apiBaseUrl + "/rgb/scenes").pipe(catchError(this.defaultErrorHandler)));
+  getScenes() {
+    return this.http.get<RgbScene[]>(this.apiBaseUrl + "/rgb/scenes").pipe(catchError(this.defaultErrorHandler));
   }
 
-  getRgbPreviewConfig(): Observable<RgbPreviewConfiguration> {
-    return typeAssert<Observable<RgbPreviewConfiguration>>(this.http.get(this.apiBaseUrl + "/rgb/preview/config").pipe(catchError(this.defaultErrorHandler)));
+  getRgbPreviewConfig() {
+    return this.http.get<RgbPreviewConfiguration>(this.apiBaseUrl + "/rgb/preview/config").pipe(catchError(this.defaultErrorHandler));
   }
 
-  setRgbPreviewConfig(config: RgbPreviewConfiguration): Observable<any> {
-    return typeAssert<Observable<any>>(this.http.put(this.apiBaseUrl + "/rgb/preview/config", config).pipe(catchError(this.defaultErrorHandler)));
+  setRgbPreviewConfig(config: RgbPreviewConfiguration) {
+    return this.http.put(this.apiBaseUrl + "/rgb/preview/config", config).pipe(catchError(this.defaultErrorHandler));
   }
 }
 

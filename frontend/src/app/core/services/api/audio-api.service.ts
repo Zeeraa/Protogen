@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, Observable } from 'rxjs';
-import { typeAssert } from '../utils/Utils';
+import { catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +15,7 @@ export class AudioApiService extends ApiBaseService {
     super(http, toastr);
   }
 
-  setVolume(volume: number): Observable<any> {
+  setVolume(volume: number) {
     const payload = {
       volume: volume
     }
@@ -24,8 +23,8 @@ export class AudioApiService extends ApiBaseService {
     return this.http.post(this.apiBaseUrl + "/audio/volume", payload).pipe(catchError(this.defaultErrorHandler));
   }
 
-  getVolume(): Observable<VolumeResponse> {
-    return typeAssert<Observable<VolumeResponse>>(this.http.get(this.apiBaseUrl + "/audio/volume").pipe(catchError(this.defaultErrorHandler)));
+  getVolume() {
+    return this.http.get<VolumeResponse>(this.apiBaseUrl + "/audio/volume").pipe(catchError(this.defaultErrorHandler));
   }
 }
 

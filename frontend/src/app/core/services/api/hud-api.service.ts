@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, Observable } from 'rxjs';
+import { catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class HudApiService extends ApiBaseService {
     super(http, toastr);
   }
 
-  setHudEnabled(enabled: boolean): Observable<any> {
+  setHudEnabled(enabled: boolean) {
     const payload = {
       enabled: enabled
     }

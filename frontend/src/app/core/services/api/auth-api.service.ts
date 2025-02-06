@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { catchError, map, Observable, of } from 'rxjs';
-import { typeAssert } from '../utils/Utils';
+import { catchError, map, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthApiService extends ApiBaseService {
-  login(username: string, password: string): Observable<string | null> {
-    return this.http.post(this.apiBaseUrl + "/auth/authenticate", { username, password }).pipe(
+  login(username: string, password: string) {
+    return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/authenticate", { username, password }).pipe(
       map((response: any) => {
         return response.token as string;
       }),
@@ -23,8 +22,8 @@ export class AuthApiService extends ApiBaseService {
     );
   }
 
-  refreshToken(): Observable<string | null> {
-    return this.http.post(this.apiBaseUrl + "/auth/refresh-token", {}).pipe(
+  refreshToken() {
+    return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/refresh-token", {}).pipe(
       map((response: any) => {
         return response.token as string;
       }),
@@ -38,21 +37,25 @@ export class AuthApiService extends ApiBaseService {
     );
   }
 
-  getUsers(): Observable<ProtogenUser[]> {
-    return typeAssert<Observable<ProtogenUser[]>>(this.http.get(this.apiBaseUrl + "/users").pipe(catchError(this.defaultErrorHandler)));
+  getUsers() {
+    return this.http.get<ProtogenUser[]>(this.apiBaseUrl + "/users").pipe(catchError(this.defaultErrorHandler));
   }
 
-  deleteUser(userId: number): Observable<any> {
+  deleteUser(userId: number) {
     return this.http.delete(this.apiBaseUrl + "/users/" + userId).pipe(catchError(this.defaultErrorHandler))
   }
 
-  createUser(data: CreateNewUserData): Observable<ProtogenUser> {
-    return typeAssert<Observable<ProtogenUser>>(this.http.post(this.apiBaseUrl + "/users", data).pipe(catchError(this.defaultErrorHandler)));
+  createUser(data: CreateNewUserData) {
+    return this.http.post<ProtogenUser>(this.apiBaseUrl + "/users", data).pipe(catchError(this.defaultErrorHandler));
   }
 
-  changePassword(userId: number, data: ChangePasswordData): Observable<ProtogenUser> {
-    return typeAssert<Observable<ProtogenUser>>(this.http.put(this.apiBaseUrl + "/users/" + userId + "/password", data).pipe(catchError(this.defaultErrorHandler)));
+  changePassword(userId: number, data: ChangePasswordData) {
+    return this.http.put<ProtogenUser>(this.apiBaseUrl + "/users/" + userId + "/password", data).pipe(catchError(this.defaultErrorHandler));
   }
+}
+
+interface ITokenResponse {
+  token: string;
 }
 
 export interface ChangePasswordData {
