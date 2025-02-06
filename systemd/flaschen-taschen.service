@@ -1,0 +1,16 @@
+[Unit]
+Description=Flaschen-Taschen Server
+After=network.target
+
+[Service]
+Type=simple
+
+ExecStart=/home/pi/protogen/ft_launcher/ft_launcher.sh --ft-bin /home/pi/flaschen-taschen/server/ft-server --config /home/pi/ft_config.txt
+WorkingDirectory=/home/pi
+
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target
