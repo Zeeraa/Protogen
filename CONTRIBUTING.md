@@ -34,10 +34,12 @@ The maintainers reserve the right to remove or deny any contributed artwork or l
 
 By contributing, you agree that your contributions will be licensed under the same terms as this repository.
 
-## Usage of AI-Generated Code
+## Usage of AI-Generated Material
 
 AI-generated code is allowed, but if you contribute AI-generated code, please ensure that:
 - It follows our code style.
 - You fully understand what the code does.
 
 AI tools like Copilot and ChatGPT can be valuable for speeding up development, but relying on them entirely may result in inefficient, unsafe, or unmaintainable code.
+
+We do not allow AI generated images.
