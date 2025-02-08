@@ -10,7 +10,7 @@ insert_final_newline = true
 insert_final_newline = false
 trim_trailing_whitespace = false
 
-[*.{js,json,ts,mts,yml,yaml}]
+[*.{js,json,ts,mts,mjs,yml,yaml}]
 indent_size = 2
 indent_style = space
 

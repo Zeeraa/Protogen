@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { validateConfNumberOrThrow, validatePort } from "./validators/ConfigValidators";
+import { validatePort } from "./validators/ConfigValidators";
 
 export async function loadConfiguration(): Promise<Configuration> {
   //#region Web server port and cert

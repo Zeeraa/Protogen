@@ -6,9 +6,11 @@
     "start": "node dist/index.js",
     "build": "npm run swagger && tsc",
     "dev": "nodemon",
-    "swagger": "ts-node src/Swagger.ts"
+    "swagger": "ts-node src/Swagger.ts",
+    "lint": "eslint ."
   },
   "devDependencies": {
+    "@eslint/js": "^9.20.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/express-fileupload": "^1.5.1",
@@ -17,9 +19,11 @@
     "@types/omggif": "^1.0.5",
     "@types/pngjs": "^6.0.5",
     "@types/swagger-ui-express": "^4.1.6",
+    "eslint": "^9.20.0",
     "nodemon": "^3.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.23.0"
   },
   "dependencies": {
     "axios": "^1.7.2",

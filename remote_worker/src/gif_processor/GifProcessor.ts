@@ -1,7 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { Server } from "../Server";
 import { createHash } from "crypto";
-import { Image } from "canvas";
 import { GifReader } from "omggif";
 import { PNG } from "pngjs";
 import sharp from "sharp";
@@ -46,7 +45,6 @@ export class GifProcessor {
       return JSON.parse(text) as AnimationCacheEntry[];
     } else {
       console.log("Generating data for gif " + cyan(hash) + " with dim " + cyan(maxWidth + "x" + maxHeight));
-      let totalLength = 0;
       const cache: AnimationCacheEntry[] = [];
 
       const reader = new GifReader(dataBuffer);
@@ -64,8 +62,6 @@ export class GifProcessor {
 
         const info = reader.frameInfo(i);
         const delay = info.delay * 10; // convert to ms
-
-        totalLength += delay;
 
         // Combine the partial frame with the previous full frame
         for (let j = 0; j < currentFrame.length; j += 4) {

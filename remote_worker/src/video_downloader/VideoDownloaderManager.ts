@@ -122,7 +122,7 @@ export class VideoDownloadManager {
     console.log("Processing video download job " + cyan(job.jobId));
     const repo = this._dataSource.getRepository(VideoDownloaderJob);
     try {
-      const extras: Flags = {}
+      const extras: Flags = Object.create({});
 
       if (existsSync(this.server.configuration.cookiesPath)) {
         extras.cookies = this.server.configuration.cookiesPath;

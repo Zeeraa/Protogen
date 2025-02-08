@@ -83,7 +83,7 @@ export class RouterBase {
       errorString = String(err.stack);
     }
 
-    let extras: any = {};
+    const extras: any = Object.create(null);
     if (this._showStacktraceInResponse) {
       extras["stacktrace"] = errorString;
     }

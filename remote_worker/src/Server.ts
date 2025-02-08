@@ -68,6 +68,8 @@ export class Server {
       // Register swagger last so that it does not overwrite our endpoints
       //#region Swagger
       if (existsSync("./swagger.json")) { // Path is relative to where the npm command runns from here
+        //TODO: replace with readFileSync
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const swaggerOutput = require("../swagger.json"); // But relative to the Server.ts file here
         this._express.use("/", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
       } else {
