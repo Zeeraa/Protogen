@@ -1,6 +1,7 @@
 import { existsSync } from "fs";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
+import { resolve } from "path";
 
 export class AssetsRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -34,12 +35,14 @@ export class AssetsRouter extends AbstractRouter {
           return;
         }
 
-        if (!existsSync(asset.path)) {
+        const fullPath = resolve(asset.path);
+
+        if (!existsSync(fullPath)) {
           res.status(404).send({ message: "Failed to find file on disk" });
           return;
         }
 
-        res.sendFile(asset.path);
+        res.sendFile(fullPath);
       } catch (err) {
         this.handleError(err, req, res);
       }
