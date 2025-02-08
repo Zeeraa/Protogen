@@ -24,6 +24,25 @@ export class VisorFaceRenderer extends VisorRenderer {
     return this._expressions;
   }
 
+  removeRenderer(uuid: string) {
+    const index = this.expressions.findIndex(e => e.data.uuid == uuid);
+    if (index != -1) {
+      this.expressions.splice(index, 1);
+    }
+
+    if (this.defaultExpression == uuid) {
+      this.defaultExpression = null;
+    }
+
+    if (this.activeExpression?.data.uuid == uuid) {
+      if (this.defaultExpression != null) {
+        this.activateDefaultExpression();
+      } else {
+        this.setActiveExpression(null);
+      }
+    }
+  }
+
   setActiveExpression(expression: FaceExpression | null) {
     this._activeExpression = expression;
   }

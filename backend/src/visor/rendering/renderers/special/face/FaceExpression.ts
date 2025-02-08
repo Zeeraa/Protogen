@@ -17,6 +17,11 @@ export class FaceExpression {
     this._renderableImage = null;
   }
 
+  public async saveDataChanges() {
+    const repo = this.faceRenderer.protogen.database.dataSource.getRepository(FaceExpressionData);
+    this._data = await repo.save(this.data);
+  }
+
   get renderableImage() {
     return this._renderableImage;
   }
@@ -54,7 +59,7 @@ export class FaceExpression {
     }
   }
 
-  private generatePreview() {
+  public generatePreview() {
     const scale = this.faceRenderer.protogen.visor.scale;
     const canvas = createCanvas(scale.width, scale.height);
     const ctx = canvas.getContext('2d');
