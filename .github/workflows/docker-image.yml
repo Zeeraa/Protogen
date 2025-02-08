@@ -1,0 +1,19 @@
+name: Build Docker images
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build the Docker image
+        working-directory: remote_worker
+        run: docker build . --file Dockerfile --tag protogen-remote-worker:$(date +%s)
