@@ -1,6 +1,5 @@
 import * as dgram from 'dgram';
 import sharp from 'sharp';
-import { FlaschenTaschenConfiguration } from '../../config/objects/FlaschenTaschenConfiguration';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import yargsParser from 'yargs-parser';
 import { execAsync } from '../../utils/SystemUtils';
@@ -120,4 +119,4 @@ export interface FlaschenTaschenWriteConfigParams {
 export interface FlaschenTaschenActiveSettings {
   ledSlowdownGpio: number;
   ledLimitRefresh: number;
-} 
+}

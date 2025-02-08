@@ -6,7 +6,7 @@ import swaggerAutogen from 'swagger-autogen';
 consoleStamp(console);
 
 function listTsFiles(dir: string): string[] {
-  let results: string[] = [];
+  const results: string[] = [];
 
   const listFiles = (directory: string) => {
     const files = readdirSync(directory);

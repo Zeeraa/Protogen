@@ -5,7 +5,6 @@ import fileUpload from "express-fileupload";
 import sharp from "sharp";
 import { createHash } from "crypto";
 import { red } from "colors";
-import axios from "axios";
 import { Request, Response } from "express";
 
 export class ImageRouter extends AbstractRouter {
@@ -29,9 +28,9 @@ export class ImageRouter extends AbstractRouter {
         in: 'query',
         description: 'Use external worker to process gifs for less load on the integrated cpu',
         type: 'boolean',
-        required: false   
+        required: false
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}

@@ -55,6 +55,7 @@ export abstract class VisorRenderer {
 
   public abstract onRender(ctx: CanvasRenderingContext2D, width: number, height: number): void;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public handleBoopState(boopState: boolean) { }
 
   public abstract getPreviewImage(): string | null;

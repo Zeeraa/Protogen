@@ -30,7 +30,7 @@ export class SerialManager {
         this._boopSensorDebounceTime--;
       } else if (this._boopSensorLastState != this._boopSensorReportedState) {
         this._boopSensorDebounceTime = DebounceTime;
-        this._boopSensorReportedState == this._boopSensorLastState;
+        this._boopSensorReportedState = this._boopSensorLastState;
         if (this._boopSensorReportedState == true) {
           this.protogen.logger.info("Serial", "Boop sensor triggered");
         }

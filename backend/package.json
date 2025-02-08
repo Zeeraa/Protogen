@@ -7,10 +7,12 @@
     "start": "node dist/index.js",
     "build": "npm run swagger && tsc",
     "dev": "nodemon",
-    "swagger": "ts-node ./src/swagger/Swagger.ts"
+    "swagger": "ts-node ./src/swagger/Swagger.ts",
+    "lint": "eslint ."
   },
   "author": "Zeeraa",
   "devDependencies": {
+    "@eslint/js": "^9.20.0",
     "@types/body-parser": "^1.19.5",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
@@ -21,9 +23,11 @@
     "@types/pngjs": "^6.0.5",
     "@types/swagger-ui-express": "^4.1.6",
     "@types/yargs-parser": "^21.0.3",
+    "eslint": "^9.20.0",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.23.0"
   },
   "dependencies": {
     "argon2": "^0.41.1",

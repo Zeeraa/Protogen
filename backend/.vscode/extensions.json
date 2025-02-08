@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "drKnoxy.eslint-disable-snippets",
+    "editorconfig.editorconfig",
+  ]
+}

@@ -24,7 +24,7 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.tags = ['Video Player'],
       #swagger.description = "Get the status of the video playback manager"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -58,7 +58,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           mirrorVideo: false,
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -97,7 +97,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -127,14 +127,14 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Stop the active video playback"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
       ]
       */
       try {
-        let result = this.playbackManager.kill();
+        const result = this.playbackManager.kill();
         res.json({
           didStop: result,
         });
@@ -152,7 +152,7 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Get all saved videos"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -195,7 +195,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           groupId: null,
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -262,7 +262,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           hideUrl: false
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -363,7 +363,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           mirrorVideo: false,
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -404,7 +404,7 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for details" }
       #swagger.responses[404] = { description: "Video not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -455,7 +455,7 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Get all video groups"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -485,7 +485,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           name: "Test"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -528,7 +528,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           name: "Test"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -579,7 +579,7 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[404] = { description: "Group not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -620,7 +620,7 @@ export class VideoPlayerRouter extends AbstractRouter {
       #swagger.description = "Clear downloaded video cache"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "Failed to delete files" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}

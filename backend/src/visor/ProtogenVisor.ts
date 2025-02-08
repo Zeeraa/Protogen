@@ -10,7 +10,6 @@ import { KV_ActiveRendererKey } from "../utils/KVDataStorageKeys";
 import { PixelFont } from "../font/PixelFont";
 import sharp from "sharp";
 import { CustomImageRenderer } from "./rendering/renderers/customimage/CustomImageRenderer";
-import { URLImageSourceProvider } from "./image/URLImageSourceProvider";
 import { StaticPictureRenderer } from "./rendering/renderers/StaticPictureRenderer";
 import { CustomFace } from "../database/models/visor/CustomFace.model";
 import { existsSync } from "fs";
@@ -20,7 +19,7 @@ export class ProtogenVisor {
   private _protogen;
   private _canvas;
   private _ctx;
-  private _renderLocks: String[];
+  private _renderLocks: string[];
   private _activeRenderer: VisorRenderer | null;
   private _availableRenderers: VisorRenderer[];
   private _lastFrame: Buffer;

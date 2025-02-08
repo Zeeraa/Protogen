@@ -45,4 +45,11 @@ export class FaceExpressionData {
     default: false,
   })
   flipLeftSide: boolean;
+
+  @Column({
+    name: "replace_colors",
+    type: "boolean",
+    default: false,
+  })
+  replaceColors: boolean;
 }
