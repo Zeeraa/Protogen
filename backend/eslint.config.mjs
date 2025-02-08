@@ -23,6 +23,7 @@ export default tseslint.config(
       "no-eval": "error", // Eval is evil
       "no-async-promise-executor": "off", // Cope
       "no-empty": ["error", { "allowEmptyCatch": true }], // Allow empty catch blocks
+      "@typescript-eslint/adjacent-overload-signatures": "warn", // Warn if there are adjacent overload signatures
     }
   }
 );
