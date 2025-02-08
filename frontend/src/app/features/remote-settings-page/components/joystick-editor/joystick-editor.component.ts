@@ -74,13 +74,13 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
     let posY = this.joystickState.joystickY * this.height;
 
     // Calculate vector from center to joystick position
-    let deltaX = posX - centerX;
-    let deltaY = posY - centerY;
-    let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const deltaX = posX - centerX;
+    const deltaY = posY - centerY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     // Constrain dot center inside the big circle
     if (distance > maxDistance) {
-      let angle = Math.atan2(deltaY, deltaX);
+      const angle = Math.atan2(deltaY, deltaX);
       posX = centerX + Math.cos(angle) * maxDistance;
       posY = centerY + Math.sin(angle) * maxDistance;
     }

@@ -12,9 +12,9 @@ import { Title } from '@angular/platform-browser';
 })
 export class RgbEditorPageComponent implements OnInit {
   scene: RgbScene | null = null;
-  sceneName: string = "";
+  sceneName = "";
   availableEffects: RgbEffectInfo[] = [];
-  selectedEffectToAdd: string = "";
+  selectedEffectToAdd = "";
 
   addEffect() {
     if (this.selectedEffectToAdd.trim().length == 0) {
@@ -68,7 +68,7 @@ export class RgbEditorPageComponent implements OnInit {
     }).pipe(catchError(err => {
       this.toastr.error("Failed to save changes");
       throw err;
-    })).subscribe(() => { });
+    })).subscribe();
   }
 
   deleteScene() {

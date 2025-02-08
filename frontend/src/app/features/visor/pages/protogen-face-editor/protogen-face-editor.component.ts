@@ -62,7 +62,7 @@ export class ProtogenFaceEditorComponent implements OnInit {
   }
 
   addNewExpression() {
-
+    console.log("not implemented");
   }
 
 }

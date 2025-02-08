@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { SocketMessage } from './data/SocketMessage';
 import { SocketMessageType } from './data/SocketMessageType';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { SocketEventType } from './data/SocketEventType';
 import { AuthService } from '../auth.service';
 
@@ -44,7 +44,7 @@ export class SocketService {
       }
     }, 1000);
 
-    this.auth.tokenChangedObservable.subscribe(token => {
+    this.auth.tokenChangedObservable.subscribe(_token => {
       if (!this.connected) {
         console.log("Trying to connect to socket since we are in a disconnected state and token changed");
         this.connect();

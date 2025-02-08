@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-useless-escape
 export const UrlPattern = /(?:https?):\/\/(\w+:?\w*)?(\S+)(:\d+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
 
 export function extractYouTubeVideoId(url: string): string | null {
@@ -37,7 +38,7 @@ export function undefinedToNull<T>(input: T | null | undefined): T | null {
 
 export function numberToHexColor(num: number): string {
   num = Math.max(0, Math.min(0xFFFFFF, num));
-  let hex = num.toString(16).toUpperCase();
+  const hex = num.toString(16).toUpperCase();
   return "#" + hex.padStart(6, "0");
 }
 

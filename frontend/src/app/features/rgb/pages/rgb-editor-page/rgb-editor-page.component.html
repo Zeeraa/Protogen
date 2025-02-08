@@ -47,7 +47,7 @@
     @for (effect of effects; track $index) {
     <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
       <app-rgb-effect-card [effectList]="availableEffects" [scene]="scene!" [effect]="effect"
-        (onMajorChange)="refresh()" />
+        (majorChange)="refresh()" />
     </div>
     }
   </div>

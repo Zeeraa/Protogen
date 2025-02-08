@@ -36,14 +36,14 @@ export class AuthService {
     return this._authDetails;
   }
 
-  get token() {
-    return this._token;
-  }
-
   logout() {
     this._token = null;
     localStorage.removeItem(LocalStorageKey_AuthToken);
     window.location.reload();
+  }
+
+  get token() {
+    return this._token;
   }
 
   private set token(newToken: string | null) {

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { RemoteAction, RemoteControlActionType, RemoteControlInputType, RemoteProfile, translateRemoteActionType, translateRemoteInputType } from '../../../../core/services/api/remote-api.service';
+import { RemoteAction, RemoteControlActionType, RemoteProfile, translateRemoteActionType, translateRemoteInputType } from '../../../../core/services/api/remote-api.service';
 import { uuidv7 } from 'uuidv7';
 import { RemoteActionDataSet } from '../../pages/remote-settings-page/remote-settings-page.component';
 

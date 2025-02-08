@@ -18,7 +18,7 @@ export class VisorImageFaceEditorComponent implements OnInit {
 
   renderer: VisorRenderer | null = null;
   isLoading = false;
-  id: string = "";
+  id = "";
 
   image: string | null = null;
   form = new FormGroup({

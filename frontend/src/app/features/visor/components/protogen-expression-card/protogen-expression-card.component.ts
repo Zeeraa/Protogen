@@ -15,10 +15,10 @@ export class ProtogenExpressionCardComponent {
   }
 
   activate() {
-
+    console.log("not implemented");
   }
 
   edit() {
-
+    console.log("not implemented");
   }
 }

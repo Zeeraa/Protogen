@@ -12,7 +12,7 @@ export class RgbEffectCardComponent {
   @Input({ required: true }) effectList!: RgbEffectInfo[];
   @Input({ required: true }) scene!: RgbScene;
   @Input({ required: true }) effect!: RgbEffect;
-  @Output() onMajorChange = new EventEmitter<void>();
+  @Output() majorChange = new EventEmitter<void>();
 
   get description() {
     const effect = this.effectList.find(e => e.name == this.effect.name);
@@ -30,7 +30,7 @@ export class RgbEffectCardComponent {
     }).pipe(catchError(err => {
       this.toastr.error("Failed to update effect name");
       throw err;
-    })).subscribe(() => { });
+    })).subscribe();
   }
 
   remove() {
@@ -38,7 +38,7 @@ export class RgbEffectCardComponent {
       this.toastr.error("Failed to remove effect");
       throw err;
     })).subscribe(() => {
-      this.onMajorChange.emit();
+      this.majorChange.emit();
     });
   }
 

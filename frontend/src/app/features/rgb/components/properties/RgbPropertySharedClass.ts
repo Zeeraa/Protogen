@@ -3,6 +3,7 @@ import { RgbApiService, RgbEffect, RgbEffectProperty, RgbScene } from "../../../
 import { ToastrService } from "ngx-toastr";
 
 @Component({ template: '' })
+// eslint-disable-next-line @angular-eslint/component-class-suffix
 export abstract class RgbPropertySharedClass {
   @Input({ required: true }) scene!: RgbScene;
   @Input({ required: true }) effect!: RgbEffect;

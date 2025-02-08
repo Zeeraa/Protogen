@@ -105,9 +105,7 @@ export interface RgbEffectProperty {
   value: any;
 }
 
-export type PropertyKVData<T> = {
-  [key: string]: T;
-}
+export type PropertyKVData<T> = Record<string, T>;
 
 export interface RgbPreviewConfiguration {
   canvas: RgbPreviewCanvas;
