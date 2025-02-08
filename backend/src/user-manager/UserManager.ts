@@ -5,7 +5,7 @@ import * as argon2 from "argon2";
 import { generateSecretKey, typeAssert } from "../utils/Utils";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { format } from "date-fns";
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 const ERR_NO_KEY = "JWT Key has not yet been configured";
 
@@ -138,7 +138,7 @@ export class UserManager {
     let payload: ProtogenJWTPayload;
     try {
       payload = typeAssert<ProtogenJWTPayload>(jwt.verify(token, this._key));
-    } catch (err) {
+    } catch (_err) {
       console.log("JWT verify failed");
       return null;
     }

@@ -81,7 +81,7 @@ export function loadConfiguration(): Configuration {
     host: ftHost,
     port: ftPort,
     configFile: ftConfig,
-    customParams: process.env["FT_CUSTOM_PARAMS"] || null,
+    customParams: ftCustomArgs || null,
   }
   //#endregion
 

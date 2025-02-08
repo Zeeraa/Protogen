@@ -83,9 +83,7 @@ export class RgbManager {
         this.protogen.logger.info("RGB", "No value for last used scene");
       }
       return true;
-    } catch (err) {
-
-    }
+    } catch (_err) { }
     return false;
   }
 

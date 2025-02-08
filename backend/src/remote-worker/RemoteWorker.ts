@@ -22,7 +22,8 @@ export class ProtogenRemoteWorker {
 
   public async processGifAsync(file: string, width: number, height: number): Promise<AnimationCacheEntry[]> {
     const stream = createReadStream(file);
-    const FormData = require('form-data');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const FormData = require('form-data'); // require needed here
 
     const form = new FormData();
     form.append('file', stream);

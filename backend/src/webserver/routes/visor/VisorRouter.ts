@@ -267,8 +267,6 @@ export class VisorRouter extends AbstractRouter {
         face.name = "New image";
         const result = await repo.save(face);
 
-        this.protogen.visor.activeRenderer
-
         const renderer = new CustomImageRenderer(this.protogen.visor, face.uuid, face.name, null, face.mirrorImage, face.flipRightSide, face.flipLeftSide);
         this.protogen.logger.info("Visor", "Adding blank image renderer " + cyan(face.uuid));
         this.protogen.visor.availableRenderers.push(renderer);

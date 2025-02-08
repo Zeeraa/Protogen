@@ -1,8 +1,7 @@
-import { CanvasRenderingContext2D, Image } from "canvas";
+import { CanvasRenderingContext2D } from "canvas";
 import { ProtogenVisor } from "../../../../ProtogenVisor";
 import { VisorRenderer } from "../../../VisorRenderer";
 import { RendererType } from "../../../RendererType";
-import { FileImageSourceProvider } from "../../../../image/FileImageSourceProvider";
 import { FaceExpression } from "./FaceExpression";
 import { FaceExpressionData } from "../../../../../database/models/visor/FaceExpression.model";
 import { cyan } from "colors";

@@ -36,7 +36,7 @@ export class NetworkManager {
       } else {
         throw Error("Failed to extract ip value");
       }
-    } catch (err) {
+    } catch (_err) {
       if (this._hasConnectivity) {
         this._hasConnectivity = false;
         this.protogen.logger.info("NetworkManager", "Network connectivity changed to: Unreachable");

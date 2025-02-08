@@ -74,7 +74,7 @@ export class FaceRouter extends AbstractRouter {
           return;
         }
 
-        const data = parsed.data;
+        //const data = parsed.data;
 
 
       } catch (err) {

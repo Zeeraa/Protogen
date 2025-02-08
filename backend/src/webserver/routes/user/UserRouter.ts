@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
-import { typeAssert } from "../../../utils/Utils";
 
 export class UserRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -14,7 +13,7 @@ export class UserRouter extends AbstractRouter {
       #swagger.description = "Get all users"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -42,7 +41,7 @@ export class UserRouter extends AbstractRouter {
       #swagger.responses[403] = { description: "Missing permissions to create new user" }
       #swagger.responses[403] = { description: "Username is already taken" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -86,7 +85,7 @@ export class UserRouter extends AbstractRouter {
       #swagger.responses[403] = { description: "Missing required permissions to alter other users password" }
       #swagger.responses[404] = { description: "User not found" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -150,7 +149,7 @@ export class UserRouter extends AbstractRouter {
       #swagger.responses[403] = { description: "Missing permissions to create new user" }
       #swagger.responses[404] = { description: "User not found" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
