@@ -1,0 +1,16 @@
+name: Greetings
+
+on: [pull_request_target, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: "🎉 Welcome to the project! Thank you for opening your first issue. We appreciate your contribution and will review it as soon as possible. In the meantime, check out our [contributing guidelines](https://github.com/Zeeraa/Protogen/CONTRIBUTING.md) and join the discussion!"
+        pr-message: "🚀 Thank you for your first pull request! Your contribution helps make this project better. A maintainer will review your changes soon. If you haven't already, please ensure you've followed the [contributing guidelines](https://github.com/Zeeraa/Protogen/YOUR_REPO/CONTRIBUTING.md). Keep up the great work! 🎯"
