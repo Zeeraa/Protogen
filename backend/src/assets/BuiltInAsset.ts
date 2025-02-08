@@ -27,6 +27,7 @@ export const BuiltInAssetSchema = z.object({
   name: z.string().min(1).regex(/^[a-z0-9_]+$/, {
     message: "String must be lowercase, alphanumeric, and can include underscores only.",
   }),
+  group: z.string().min(1),
   display_name: z.string(),
   type: z.nativeEnum(BuiltInAssetType),
   path: z.string(),

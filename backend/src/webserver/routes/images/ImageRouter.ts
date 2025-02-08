@@ -6,6 +6,7 @@ import sharp from "sharp";
 import { createHash } from "crypto";
 import { red } from "colors";
 import { Request, Response } from "express";
+import { resolve } from "path";
 
 export class ImageRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -130,14 +131,19 @@ export class ImageRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See console for more info" }
       */
       try {
-        const hash = req.params.hash;
+        let hash = req.params.hash;
         if (hash.length == 0) {
           res.status(400).send({ message: "Invalid hash length" });
           return;
         }
+
+        if (hash.endsWith(".png") || hash.endsWith(".gif")) {
+          hash = hash.split(".")[0];
+        }
+
         const prefix = hash.substring(0, 2)
 
-        const pathNoExt = this.protogen.imageDirectory + "/" + prefix + "/" + hash;
+        const pathNoExt = resolve(this.protogen.imageDirectory + "/" + prefix + "/" + hash);
 
         if (existsSync(pathNoExt + ".png")) {
           res.sendFile(pathNoExt + ".png");
