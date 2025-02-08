@@ -1,0 +1,19 @@
+<div class="card w-100">
+  <img [src]="previewB64" class="card-img-top" alt="Expression">
+  <div class="card-body">
+    <h5 class="card-title">
+      {{expression.data.name}}
+      @if(isDefault) {
+      <span class="badge bg-primary"
+        title="This is the expression that will activate when the protogen face renderer is activated">Default</span>
+      }
+    </h5>
+
+    <div class="card-body">
+
+    </div>
+
+    <button class="btn btn-success mt-1 me-1" (click)="activate()">Activate</button>
+    <button class="btn btn-primary mt-1 me-1" (click)="edit()">Edit</button>
+  </div>
+</div>

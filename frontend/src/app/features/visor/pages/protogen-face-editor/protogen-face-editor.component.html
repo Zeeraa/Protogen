@@ -18,6 +18,58 @@
   </div>
 
   <div class="row mt-2">
+    <div class="col-12">
+      <h4>Expressions</h4>
+    </div>
+
+    <div class="col-auto mt-2 mb-2">
+      <div title="Select the expression that will activate when the protogen face renderer is activated">
+        <label for="face_default_expression" class="form-label">Default expression</label>
+        <select class="form-select" id="face_default_expression" aria-describedby="face_default_expression_info"
+          [(ngModel)]="defaultExpression">
+          <option value="">None</option>
+          @for (expression of faceExpressions; track $index) {
+          <option value="{{expression.data.uuid}}">
+            {{expression.data.name}}
+          </option>
+          }
+        </select>
+        <div class="form-text" id="face_default_expression_info">Select expression to activate when face renderer is
+          activated</div>
+      </div>
+    </div>
+
+    <!-- Spacing -->
     <div class="col-12"></div>
+
+    @for (expression of faceExpressions; track $index) {
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 mt-2">
+      <app-protogen-expression-card [expression]="expression" [isDefault]="isDefault(expression)" />
+    </div>
+    }
+
+    <div class="col-12 mt-2">
+      <button class="btn btn-primary" (click)="openNewExpressionModal()">Add new expression</button>
+    </div>
   </div>
 </div>
+
+<ng-template #newExpressionPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Add expression</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newExpressionForm">
+      <div class="mb-2">
+        <label for="newExpressionName">Name</label>
+        <input type="text" placeholder="Name" class="form-control" id="newExpressionName" formControlName="name">
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="addNewExpression()" [disabled]="lockInputs">Save</button>
+  </div>
+</ng-template>

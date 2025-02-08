@@ -7,8 +7,7 @@ import { VisorImageFaceEditorComponent } from './pages/visor-image-face-editor/v
 import { VisorLivePreviewComponent } from './components/visor-live-preview/visor-live-preview.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProtogenFaceEditorComponent } from './pages/protogen-face-editor/protogen-face-editor.component';
-
-
+import { ProtogenExpressionCardComponent } from './components/protogen-expression-card/protogen-expression-card.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +15,8 @@ import { ProtogenFaceEditorComponent } from './pages/protogen-face-editor/protog
     RendererCardComponent,
     VisorImageFaceEditorComponent,
     VisorLivePreviewComponent,
-    ProtogenFaceEditorComponent
+    ProtogenFaceEditorComponent,
+    ProtogenExpressionCardComponent
   ],
   imports: [
     CommonModule,
