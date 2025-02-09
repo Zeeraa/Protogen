@@ -6,6 +6,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AssetsApiService, BuiltInAsset } from '../../../../core/services/api/assets-api.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-protogen-face-editor',
@@ -36,6 +37,7 @@ export class ProtogenFaceEditorComponent implements OnInit {
     private toastr: ToastrService,
     private modal: NgbModal,
     private assetsApi: AssetsApiService,
+    private title: Title,
   ) { }
 
   isDefault(expression: FaceExpression) {
@@ -71,6 +73,8 @@ export class ProtogenFaceEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("Face editor - Protogen");
+
     this.assetsApi.getAssets().pipe(catchError(err => {
       this.toastr.error("Failed to load built-in assets");
       throw err;
