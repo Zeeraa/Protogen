@@ -9,7 +9,8 @@ export const KV_RgbPreviewFullSizeOnLargeViewports = "RgbPreviewUseCol12";
 
 //#region Visor
 export const KV_ActiveRendererKey = "ActiveVisorRenderer";
-export const KF_DefaultExpression = "DefaultExpression";
+export const KV_DefaultExpression = "DefaultExpression";
+export const KV_ActiveVisorColorEffect = "ActiveVisorColorEffect";
 //#endregion
 
 //#region System

@@ -1,13 +1,13 @@
 import { RgbEffectColorProperty } from "../../../../../../../rgb/effects/properties/variants/RgbEffectColorProperty";
 import { ProtoColors } from "../../../../../../../utils/ProtoColors";
 import { decodeRGB } from "../../../../../../../utils/Utils";
-import { AbstractColorMod } from "../AbstractColorMod";
+import { AbstractVisorColorEffect } from "../AbstractVisorColorEffect";
 
-export class StaticColorMod extends AbstractColorMod {
+export class StaticVisorColorEffect extends AbstractVisorColorEffect {
   private _propColor;
 
-  constructor(id: string, name: string) {
-    super(id, name);
+  constructor(id: string, name: string, displayName: string) {
+    super(id, name, displayName);
     this._propColor = new RgbEffectColorProperty("Color", ProtoColors.white);
     this.addProperty(this._propColor);
   }

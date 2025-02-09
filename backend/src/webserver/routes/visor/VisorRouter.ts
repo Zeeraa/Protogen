@@ -19,7 +19,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Get the visor service status"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -45,7 +45,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Get the last rendered frame of the visor"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -67,7 +67,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Get all renderers"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -88,7 +88,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.description = "Get renderer by id"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Renderer not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -114,7 +114,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.description = "Activate a renderer by its id"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Renderer not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -143,7 +143,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request: see response for details" }
       #swagger.responses[404] = { description: "Renderer not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -212,7 +212,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request: see response for details" }
       #swagger.responses[404] = { description: "Renderer not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -254,7 +254,7 @@ export class VisorRouter extends AbstractRouter {
       #swagger.tags = ['Visor'],
       #swagger.description = "Create empty custom image renderer"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}

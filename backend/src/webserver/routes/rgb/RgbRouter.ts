@@ -20,7 +20,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Get the preview window configuration"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -62,7 +62,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Save the configuration"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for details" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -118,7 +118,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Get a list of all effects"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -142,7 +142,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Get all RGB scenes"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -162,7 +162,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Clears the active scene"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -190,7 +190,7 @@ export class RgbRouter extends AbstractRouter {
           name: "Scene name"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -228,7 +228,7 @@ export class RgbRouter extends AbstractRouter {
           name: "Scene name"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -265,7 +265,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Delete a scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -294,7 +294,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Get scene by id"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -320,7 +320,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Activates a scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -357,7 +357,7 @@ export class RgbRouter extends AbstractRouter {
           displayName: "Effect display name"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -409,7 +409,7 @@ export class RgbRouter extends AbstractRouter {
           displayName: "Effect display name"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -453,7 +453,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Remove an effect"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene or effect not found" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -506,7 +506,7 @@ export class RgbRouter extends AbstractRouter {
           value: "New value"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -588,7 +588,7 @@ function sceneToDTO(scene: RgbScene) {
   const effects: EffectData[] = [];
 
   scene.effects.forEach(effect => {
-    const properties: PropertyData[] = [];
+    const properties: RgbPropertyData[] = [];
 
     Object.values(effect.propertyMap).forEach(property => {
       properties.push({
@@ -640,11 +640,11 @@ const AddEffectModel = z.object({
 interface EffectData {
   id: string;
   name: string;
-  properties: PropertyData[];
+  properties: RgbPropertyData[];
   displayName: string;
 }
 
-interface PropertyData {
+export interface RgbPropertyData {
   type: string;
   name: string;
   value: any;

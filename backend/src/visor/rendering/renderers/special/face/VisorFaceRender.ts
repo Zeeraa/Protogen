@@ -4,11 +4,14 @@ import { VisorRenderer } from "../../../VisorRenderer";
 import { RendererType } from "../../../RendererType";
 import { FaceExpression } from "./FaceExpression";
 import { FaceExpressionData } from "../../../../../database/models/visor/FaceExpression.model";
-import { cyan } from "colors";
-import { KF_DefaultExpression } from "../../../../../utils/KVDataStorageKeys";
-import { AbstractColorMod } from "./colormod/AbstractColorMod";
-import { StaticColorMod } from "./colormod/effects/StaticColorMod";
+import { cyan, red } from "colors";
+import { KV_ActiveVisorColorEffect, KV_DefaultExpression } from "../../../../../utils/KVDataStorageKeys";
 import { typeAssert } from "../../../../../utils/Utils";
+import { FaceColorEffect } from "../../../../../database/models/visor/FaceColorEffect";
+import { constructVisorColorEffect } from "./colormod/VisorColorEffects";
+import { AbstractVisorColorEffect } from "./colormod/AbstractVisorColorEffect";
+import { Equal } from "typeorm";
+import { FaceColorEffectProperty } from "../../../../../database/models/visor/FaceColorEffectProperty";
 
 export const FaceRendererId = "PROTOGEN_FACE";
 
@@ -18,7 +21,8 @@ export class VisorFaceRenderer extends VisorRenderer {
   private _defaultExpression: string | null;
   private _colorAdjustmentCanvas: Canvas | null;
   private _colorAdjustmentCanvasDimensions: { width: number, height: number };
-  private _colorAdjustmentEffect: AbstractColorMod | null;
+  private _activeColorEffect: AbstractVisorColorEffect | null;
+  private _availableColorEffects: AbstractVisorColorEffect[];
 
   constructor(visor: ProtogenVisor) {
     super(visor, FaceRendererId, "Protogen Face");
@@ -26,19 +30,24 @@ export class VisorFaceRenderer extends VisorRenderer {
     this._activeExpression = null;
     this._colorAdjustmentCanvas = null;
     this._colorAdjustmentCanvasDimensions = { width: 0, height: 0 };
-    this._colorAdjustmentEffect = null;
-
-    //TODO: temp test
-    this._colorAdjustmentEffect = new StaticColorMod("STATIC_COLOR", "Static Color");
-
+    this._activeColorEffect = null;
+    this._availableColorEffects = [];
   }
 
-  get colorAdjustmentEffect() {
-    return this._colorAdjustmentEffect;
+  get availableColorEffects() {
+    return this._availableColorEffects;
   }
 
-  set colorAdjustmentEffect(value: AbstractColorMod | null) {
-    this._colorAdjustmentEffect = value;
+  get activeColorEffect() {
+    return this._activeColorEffect;
+  }
+
+  set activeColorEffect(effect: AbstractVisorColorEffect | null) {
+    this._activeColorEffect = effect;
+    this.protogen.database.setData(KV_ActiveVisorColorEffect, effect?.id || null).then().catch(err => {
+      this.protogen.logger.error("VisorFaceRenderer", "Failed to save active color effect");
+      console.error(err);
+    });
   }
 
   get expressions() {
@@ -78,7 +87,7 @@ export class VisorFaceRenderer extends VisorRenderer {
 
   set defaultExpression(value: string | null) {
     this._defaultExpression = value;
-    this.protogen.database.setData(KF_DefaultExpression, value).then().catch(err => {
+    this.protogen.database.setData(KV_DefaultExpression, value).then().catch(err => {
       this.protogen.logger.error("VisorFaceRenderer", "Failed to save default expression");
       console.error(err);
     });
@@ -89,6 +98,79 @@ export class VisorFaceRenderer extends VisorRenderer {
     const defaultExpression = this.expressions.find(e => e.data.uuid == this.defaultExpression);
     if (defaultExpression != null) {
       this.setActiveExpression(defaultExpression);
+    }
+  }
+
+  async saveColorEffect(effect: AbstractVisorColorEffect) {
+    const repo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
+    let dbEffect = await repo.findOne({
+      where: {
+        uuid: Equal(effect.id),
+      },
+      relations: ["properties"]
+    });
+
+    if (dbEffect == null) {
+      dbEffect = new FaceColorEffect();
+      dbEffect.properties = [];
+      dbEffect.uuid = effect.id;
+    }
+
+    dbEffect.name = effect.displayName;
+
+    // Remove any unused properties
+    dbEffect.properties = dbEffect.properties.filter(p => effect.getProperty(p.key) != null);
+
+    // Update or add property from effect
+    Object.values(effect.propertyMap).forEach(prop => {
+      let dbProp = dbEffect.properties.find(p => p.key == prop.name);
+      if (dbProp == null) {
+        dbProp = new FaceColorEffectProperty();
+        dbProp.key = prop.name;
+        dbEffect.properties.push(dbProp);
+      } else {
+        dbProp.value = prop.stringifyValue();
+      }
+    });
+
+    return await repo.save(dbEffect);
+  }
+
+  async loadColorEffects() {
+    const repo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
+    this._availableColorEffects = [];
+
+    const effects = await repo.find({
+      relations: ["properties"],
+    });
+
+
+    for (const effectData of effects) {
+      const effect = constructVisorColorEffect(effectData.effect, effectData.uuid, effectData.name);
+      if (effect == null) {
+        this.protogen.logger.error("VisorFaceRenderer", "Failed to construct color effect " + cyan(effectData.name) + " (" + cyan(effectData.uuid) + ")");
+        continue;
+      }
+
+      effectData.properties.forEach(prop => {
+        const result = effect.setProperty(prop.key, prop.value);
+        if (!result.success) {
+          this.protogen.logger.warn("VisorFaceRenderer", "Tried to set property " + cyan(prop.key) + " of effect " + cyan(effectData.effect) + " to " + cyan(prop.value) + " but got error " + red(result.error));
+        }
+      });
+
+      this._availableColorEffects.push(effect);
+    }
+
+    const activeColorEffectId = await this.protogen.database.getData(KV_ActiveVisorColorEffect);
+    if (activeColorEffectId != null) {
+      const activeEffect = this._availableColorEffects.find(e => e.id == activeColorEffectId);
+      if (activeEffect != null) {
+        this.activeColorEffect = activeEffect;
+      } else {
+        this.protogen.logger.error("VisorFaceRenderer", "Failed to find active color effect with id " + cyan(activeColorEffectId));
+        this.activeColorEffect = null;
+      }
     }
   }
 
@@ -108,8 +190,10 @@ export class VisorFaceRenderer extends VisorRenderer {
       this.expressions.push(expression);
     }
 
-    this._defaultExpression = await this.protogen.database.getData(KF_DefaultExpression);
+    this._defaultExpression = await this.protogen.database.getData(KV_DefaultExpression);
     this.activateDefaultExpression();
+
+    await this.loadColorEffects();
   }
 
   public onRender(ctx: CanvasRenderingContext2D, width: number, height: number) {
@@ -119,7 +203,7 @@ export class VisorFaceRenderer extends VisorRenderer {
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
     } else {
-      if (this.activeExpression.data.replaceColors && this.colorAdjustmentEffect != null) {
+      if (this.activeExpression.data.replaceColors && this.activeColorEffect != null) {
         // Color replacement rendering
 
         if (this._colorAdjustmentCanvas == null || this._colorAdjustmentCanvasDimensions.width != width || this._colorAdjustmentCanvasDimensions.height != height) {
@@ -135,7 +219,7 @@ export class VisorFaceRenderer extends VisorRenderer {
 
         // Extract image and modify data
         const image = colorCtx.getImageData(0, 0, width, height);
-        this.colorAdjustmentEffect.apply(typeAssert<number[]>(image.data), width, height, time);
+        this.activeColorEffect.apply(typeAssert<number[]>(image.data), width, height, time);
 
         ctx.putImageData(image, 0, 0);
       } else {

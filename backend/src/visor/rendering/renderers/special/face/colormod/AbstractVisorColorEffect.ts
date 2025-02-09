@@ -2,14 +2,16 @@ import { AbstractRgbEffectProperty } from "../../../../../../rgb/effects/propert
 import { RgbEffectPropertyMap } from "../../../../../../rgb/effects/properties/RgbEffectPropertyMap";
 import { SetPropertyResult } from "../../../../../../rgb/effects/properties/SetPropertyResult";
 
-export abstract class AbstractColorMod {
+export abstract class AbstractVisorColorEffect {
   private _id: string;
-  private _name: string;
+  private _effectName: string;
+  private _displayName: string;
   private _propertyMap: RgbEffectPropertyMap;
 
-  constructor(id: string, name: string) {
+  constructor(id: string, effectName: string, displayName: string) {
     this._id = id;
-    this._name = name;
+    this._effectName = effectName;
+    this._displayName = displayName;
     this._propertyMap = {};
   }
 
@@ -17,12 +19,16 @@ export abstract class AbstractColorMod {
     return this._id;
   }
 
-  public get name() {
-    return this._name;
+  public get effectName() {
+    return this._effectName;
   }
 
-  protected set name(value: string) {
-    this._name = value;
+  public get displayName() {
+    return this._displayName;
+  }
+
+  public set displayName(value: string) {
+    this._displayName = value;
   }
 
   protected addProperty<T>(prop: AbstractRgbEffectProperty<T>): AbstractRgbEffectProperty<T> {
