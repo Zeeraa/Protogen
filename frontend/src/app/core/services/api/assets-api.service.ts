@@ -18,9 +18,23 @@ export class AssetsApiService extends ApiBaseService {
   getAssetUrl(asset: BuiltInAsset) {
     return this.apiBaseUrl + "/assets/" + asset.name;
   }
+
+  /**
+   * Get asset image by the asset name. Only works if assets has been cached.
+   * @param name The name of the asset to load
+   * @returns Image path or null if not found
+   */
+  getAssetUrlByName(name: string): string | null {
+    const asset = this._cache?.find(asset => asset.name === name);
+    if (asset == null) {
+      return null;
+    }
+    return this.apiBaseUrl + "/assets/" + asset.name;
+  }
 }
 
 export interface BuiltInAsset {
+  group: string;
   name: string;
   display_name: string;
   type: BuiltInAssetType;
