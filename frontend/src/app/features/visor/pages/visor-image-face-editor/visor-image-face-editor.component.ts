@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -6,19 +6,23 @@ import { SaveCustomisableImageRendererPayload, VisorApiService, VisorRenderer, V
 import { FormControl, FormGroup } from '@angular/forms';
 import { FilesApiService } from '../../../../core/services/api/files-api.service';
 import { catchError } from 'rxjs';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-visor-image-face-editor',
   templateUrl: './visor-image-face-editor.component.html',
   styleUrl: './visor-image-face-editor.component.scss'
 })
-export class VisorImageFaceEditorComponent implements OnInit {
+export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
   @ViewChild("filePicker")
   private filePicker!: ElementRef<any>;
 
   renderer: VisorRenderer | null = null;
   isLoading = false;
   id = "";
+
+  @ViewChild("deletePrompt") deletePrompt!: ElementRef<any>;
+  private deletePromptModal?: NgbModalRef;
 
   image: string | null = null;
   form = new FormGroup({
@@ -35,6 +39,7 @@ export class VisorImageFaceEditorComponent implements OnInit {
     private title: Title,
     private visor: VisorApiService,
     private fileApi: FilesApiService,
+    private modal: NgbModal,
   ) { }
 
   public get data(): CustomImageRendererData | null {
@@ -60,7 +65,7 @@ export class VisorImageFaceEditorComponent implements OnInit {
     }
   }
 
-  deleteRenderer() {
+  confirmDelete() {
     if (this.renderer == null) {
       return;
     }
@@ -72,6 +77,11 @@ export class VisorImageFaceEditorComponent implements OnInit {
       this.toastr.success("Renderer deleted");
       this.router.navigate(["/visor"])
     });
+  }
+
+  deleteRenderer() {
+    this.deletePromptModal?.close();
+    this.deletePromptModal = this.modal.open(this.deletePrompt);
   }
 
   save() {
@@ -94,6 +104,10 @@ export class VisorImageFaceEditorComponent implements OnInit {
       this.toastr.success("Saved");
       console.log(data);
     });
+  }
+
+  ngOnDestroy(): void {
+    this.deletePromptModal?.close();
   }
 
   ngOnInit(): void {
