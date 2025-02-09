@@ -1,0 +1,89 @@
+<div class="row">
+  @if(image != null) {
+  <div class="col-12 mb-2">
+    <img [src]="activeImageUrl" alt="Selected image" />
+  </div>
+  }
+
+  <div class="col-12 col-md-8 mb-2">
+    <label for="image_file_picker" class="form-label">Upload new image</label>
+    <input class="form-control" id="image_file_picker" type="file" placeholder="Select new image"
+      (change)="onFileSelected($event)" [class.is-invalid]="showInvalid" attr.aria-labelledby="{{instanceId}}_invalid"
+      #imageFilePicker>
+    <div id="{{instanceId}}_invalid" class="invalid-feedback col-12 mb-2">Please select an image</div>
+  </div>
+
+  <div class="col-12 col-md-4 mb-2">
+    <!-- Label use for correct spacing -->
+    <label for="open_asset_picker_button" class="form-label d-none d-md-block">&nbsp;</label>
+    <button class="btn btn-primary" id="open_asset_picker_button" (click)="openAssetPicker()">Built-in images</button>
+  </div>
+</div>
+
+<ng-template #assetPickerModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Select existing image</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      @for (group of assetGroups; track $index) {
+      <div class="col-12 mb-2">
+        @if($index > 0) {
+        <hr>
+        }
+        <h4>{{group.name}}</h4>
+      </div>
+
+      @for(asset of group.assets; track $index) {
+      <div class="col-12 col-md-6 mb-2">
+        <div class="card">
+          <img [src]="getAssetUrl(asset)" class="card-img-top" alt="Asset image">
+          <div class="card-body">
+            <h5 class="card-title">{{asset.display_name}}</h5>
+            @if(asset.author != null) {
+            <div class="card-text mb-2">
+              @if(asset.author.links?.length == 0) {
+              <span>
+                By <span class="text-secondary">{{asset.author.name}}</span>
+              </span>
+              } @else{
+              <span class="clickable" data-bs-toggle="collapse"
+                [attr.data-bs-target]="'#collapse_asset_' + asset.name + '_' + instanceId">
+                By <span class="text-primary">{{asset.author.name}}</span>
+              </span>
+              }
+
+              <div class="collapse mt-2" id="collapse_asset_{{asset.name}}_{{instanceId}}">
+                <div class="card card-body">
+                  <h4>Socials</h4>
+                  <ul>
+                    @for (link of asset.author.links; track $index) {
+                    <li>
+                      @if(link.service != null) {
+                      {{link.service}}:
+                      }
+                      <a [href]="link.url" target="_blank">{{link.text}}</a>
+                    </li>
+                    }
+                  </ul>
+                </div>
+              </div>
+            </div>
+            }
+            <button class="btn btn-primary" (click)="selectAsset(asset)">Select</button>
+          </div>
+        </div>
+      </div>
+      }
+      }
+    </div>
+
+    <div class="col-12 mt-4">
+      If the name is <span class="text-primary">blue</span>, you can click the name to show social links.
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+  </div>
+</ng-template>

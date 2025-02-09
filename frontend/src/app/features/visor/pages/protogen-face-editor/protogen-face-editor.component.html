@@ -26,7 +26,7 @@
       <div title="Select the expression that will activate when the protogen face renderer is activated">
         <label for="face_default_expression" class="form-label">Default expression</label>
         <select class="form-select" id="face_default_expression" aria-describedby="face_default_expression_info"
-          [(ngModel)]="defaultExpression">
+          [(ngModel)]="defaultExpression" (change)="defaultExpressionChanged($event)">
           <option value="">None</option>
           @for (expression of faceExpressions; track $index) {
           <option value="{{expression.data.uuid}}">
@@ -39,12 +39,17 @@
       </div>
     </div>
 
-    <!-- Spacing -->
-    <div class="col-12"></div>
+    <div class="col-12 mb-2">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="showEditOptions" [(ngModel)]="showEdit">
+        <label class="form-check-label" for="showEditOptions">Show edit options</label>
+      </div>
+    </div>
 
     @for (expression of faceExpressions; track $index) {
     <div class="col-12 col-md-6 col-lg-4 col-xl-3 mt-2">
-      <app-protogen-expression-card [expression]="expression" [isDefault]="isDefault(expression)" />
+      <app-protogen-expression-card [expression]="expression" [isDefault]="isDefault(expression)" [showEdit]="showEdit"
+        (deleted)="expressionDeleted(expression)" />
     </div>
     }
 
@@ -63,7 +68,13 @@
     <form [formGroup]="newExpressionForm">
       <div class="mb-2">
         <label for="newExpressionName">Name</label>
-        <input type="text" placeholder="Name" class="form-control" id="newExpressionName" formControlName="name">
+        <input type="text" placeholder="Name" class="form-control" id="newExpressionName" formControlName="name"
+          [class.is-invalid]="nameInUse || nameInvalid" aria-labelledby="validationExpressionName" />
+        <div class="invalid-feedback" id="validationExpressionName">Name is already in use</div>
+      </div>
+
+      <div class="mb-2">
+        <app-visor-asset-picker formControlName="image" [showInvalid]="imageMissing" />
       </div>
     </form>
   </div>
