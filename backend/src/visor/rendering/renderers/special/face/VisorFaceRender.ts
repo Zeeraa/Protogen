@@ -113,6 +113,7 @@ export class VisorFaceRenderer extends VisorRenderer {
   }
 
   onActivate(): void {
+    console.debug("VisorFace::onActivate()");
     this.activateDefaultExpression();
   }
 }

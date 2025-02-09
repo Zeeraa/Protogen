@@ -4,6 +4,9 @@ import { AbstractRenderableImage, DrawMode, Type } from "../../../images/Abstrac
 import { AnimatedRenderableImage } from "../../../images/AnimatedRenderableImage";
 import { StaticRenderableImage } from "../../../images/StaticRenderableImage";
 import { VisorFaceRenderer } from "./VisorFaceRender";
+import { resolve } from "path";
+import { existsSync } from "fs";
+import { cyan } from "colors";
 
 export class FaceExpression {
   private _faceRenderer;
@@ -39,23 +42,44 @@ export class FaceExpression {
   }
 
   public async loadImage() {
-    if (this.data.image != null) {
-      if (this.data.image.toLowerCase().endsWith(".gif")) {
-        if (this._renderableImage?.type !== Type.Animated) {
-          this._renderableImage = new AnimatedRenderableImage(this.faceRenderer.protogen);
-        }
-      } else {
-        if (this._renderableImage?.type !== Type.Static) {
-          this._renderableImage = new StaticRenderableImage(this.faceRenderer.protogen);
+    if (this.data.image.startsWith("asset://")) {
+      const assetName = this.data.image.split("asset://")[1];
+      const asset = this.faceRenderer.protogen.builtInAssets.find(a => a.name === assetName);
+      let imagePath = resolve("assets/missing_texture.png");
+      if (asset != null) {
+        const assetPath = resolve(asset.path);
+        if (existsSync(assetPath)) {
+          imagePath = assetPath;
+        } else {
+          this.faceRenderer.protogen.logger.error("FaceExpression", "Failed to find image file for asset: " + cyan(assetName));
         }
       }
 
-      const image = this.data.image;
-      const fullImagePath = this.faceRenderer.protogen.imageDirectory + "/" + image.substring(0, 2) + "/" + image;
+      if (this._renderableImage?.type !== Type.Static) {
+        this._renderableImage = new StaticRenderableImage(this.faceRenderer.protogen);
+      }
 
-      console.debug("Load face expression " + this.data.uuid + ". Path: " + fullImagePath);
-      await this._renderableImage?.loadImage(fullImagePath);
+      await this._renderableImage.loadImage(imagePath);
       this.generatePreview();
+    } else {
+      if (this.data.image != null) {
+        if (this.data.image.toLowerCase().endsWith(".gif")) {
+          if (this._renderableImage?.type !== Type.Animated) {
+            this._renderableImage = new AnimatedRenderableImage(this.faceRenderer.protogen);
+          }
+        } else {
+          if (this._renderableImage?.type !== Type.Static) {
+            this._renderableImage = new StaticRenderableImage(this.faceRenderer.protogen);
+          }
+        }
+
+        const image = this.data.image;
+        const fullImagePath = this.faceRenderer.protogen.imageDirectory + "/" + image.substring(0, 2) + "/" + image;
+
+        console.debug("Load face expression " + this.data.uuid + ". Path: " + fullImagePath);
+        await this._renderableImage?.loadImage(fullImagePath);
+        this.generatePreview();
+      }
     }
   }
 
