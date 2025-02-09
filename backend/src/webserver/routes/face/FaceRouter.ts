@@ -78,9 +78,15 @@ export class FaceRouter extends AbstractRouter {
           return;
         }
 
-        //const data = parsed.data;
+        const data = parsed.data;
 
+        if (data.defaultExpressionId !== undefined) {
+          this.protogen.visor.faceRenderer.defaultExpression = data.defaultExpressionId;
+        }
 
+        res.json({
+          defaultExpressionId: this.protogen.visor.faceRenderer.defaultExpression,
+        });
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -226,6 +232,37 @@ export class FaceRouter extends AbstractRouter {
 
         await expression.loadImage();
         expression.generatePreview();
+
+        res.json({
+          data: expression.data,
+          preview: expression.preview,
+        });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.post("/expressions/:id/activate", async (req, res) => {
+      /*
+      #swagger.path = '/face/expressions/{id}/activate'
+      #swagger.tags = ['Face'],
+      #swagger.description = "Activate expression"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Expression not found" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const expression = this.protogen.visor.faceRenderer.expressions.find(e => e.data.uuid == req.params.id);
+        if (expression == null) {
+          res.status(404).send({ message: "Expression not found" });
+          return;
+        }
+
+        this.protogen.visor.faceRenderer.setActiveExpression(expression);
 
         res.json({
           data: expression.data,
