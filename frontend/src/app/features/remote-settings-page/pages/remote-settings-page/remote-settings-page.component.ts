@@ -13,6 +13,7 @@ import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { typeAssert } from '../../../../core/services/utils/Utils';
+import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
 
 @Component({
   selector: 'app-remote-settings-page',
@@ -25,6 +26,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     rgbScenes: [],
     savedVideos: [],
     visorRenderers: [],
+    expressions: [],
   }
 
   remoteState: RemoteState = blankRemoteState();
@@ -48,19 +50,22 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     private modal: NgbModal,
     private title: Title,
     private socket: SocketService,
+    private faceApi: FaceApiService,
   ) { }
 
   loadData() {
     const rgbScenesRequest = this.rgbApi.getScenes();
     const visorRenderersRequest = this.visorApi.getRenderers();
     const videosRequest = this.videoApi.getSavedVideos();
+    const faceExpressionsRequest = this.faceApi.getExpressions();
 
-    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest]).subscribe({
-      next: ([rgbScenes, visorRenderers, videos]) => {
+    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest]).subscribe({
+      next: ([rgbScenes, visorRenderers, videos, faceExpressions]) => {
         this.actionDataSet = {
           rgbScenes: rgbScenes,
           savedVideos: videos,
           visorRenderers: visorRenderers,
+          expressions: faceExpressions,
         }
         console.log(this.actionDataSet);
         console.log("Related data loaded. Loading profiles...");
@@ -149,4 +154,5 @@ export interface RemoteActionDataSet {
   visorRenderers: VisorRenderer[];
   rgbScenes: RgbScene[];
   savedVideos: SavedVideo[];
+  expressions: FaceExpression[];
 }
