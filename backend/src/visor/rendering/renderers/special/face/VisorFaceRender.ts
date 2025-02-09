@@ -97,6 +97,32 @@ export class VisorFaceRenderer extends VisorRenderer {
       ctx.fillRect(0, 0, width, height);
     } else {
       this.activeExpression.renderExpression(ctx, width, height);
+
+      if (this.activeExpression.data.replaceColors) {
+        // TODO: Implement color effects
+        const color: RGBValue = { r: 0, g: 174, b: 255 };
+
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+
+          // Check if the pixel is white (allowing slight tolerance)
+          if (r > 250 && g > 250 && b > 250 && a > 0) {
+            data[i] = color.r;
+            data[i + 1] = color.g;
+            data[i + 2] = color.b;
+
+            console.log(r, g, b, a, "mod", data[i], data[i + 1], data[i + 2]);
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
     }
   }
 
@@ -116,4 +142,10 @@ export class VisorFaceRenderer extends VisorRenderer {
     console.debug("VisorFace::onActivate()");
     this.activateDefaultExpression();
   }
+}
+
+interface RGBValue {
+  r: number;
+  g: number;
+  b: number;
 }
