@@ -116,8 +116,6 @@ export class VisorFaceRenderer extends VisorRenderer {
             data[i] = color.r;
             data[i + 1] = color.g;
             data[i + 2] = color.b;
-
-            console.log(r, g, b, a, "mod", data[i], data[i + 1], data[i + 2]);
           }
         }
 
