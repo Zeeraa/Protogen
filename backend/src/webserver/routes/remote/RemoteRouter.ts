@@ -20,7 +20,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.tags = ['Remote'],
       #swagger.description = "Get remote settings"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -40,7 +40,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.description = "Get remote profiles and settings"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -69,7 +69,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -117,7 +117,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.description = "Get the data when profiles where edited"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -145,7 +145,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.description = "Get all configure remote profiles"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -174,7 +174,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[409] = { description: "There is already another profile with this name" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -251,7 +251,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.responses[404] = { description: "Profile not found" }
       #swagger.responses[409] = { description: "There is already another profile with this name" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -357,7 +357,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[404] = { description: "Profile not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -404,7 +404,7 @@ export class RemoteRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[409] = { description: "There is already another profile with this name" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -428,6 +428,11 @@ export class RemoteRouter extends AbstractRouter {
         }
 
         const status = await this.protogen.remoteManager.performAction(data.type, data.action);
+
+        if (status && data.type == RemoteControlActionType.ACTIVATE_VISOR_RENDERER) {
+          // If a video is playing stop playback
+          this.protogen.videoPlaybackManager.kill(false);
+        }
 
         res.json({ status, sequenceFail: false });
       } catch (err) {
