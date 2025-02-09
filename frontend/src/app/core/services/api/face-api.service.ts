@@ -24,7 +24,7 @@ export class FaceApiService extends ApiBaseService {
   }
 
   getExpressions() {
-    return this.http.get<FaceExpression>(this.apiBaseUrl + "/face/expressions").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<FaceExpression[]>(this.apiBaseUrl + "/face/expressions").pipe(catchError(this.defaultErrorHandler));
   }
 
   activateExpression(id: string) {
