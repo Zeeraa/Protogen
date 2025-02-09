@@ -4,6 +4,7 @@ import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { Equal, Not } from "typeorm";
 import { FaceExpressionData } from "../../../database/models/visor/FaceExpression.model";
 import { FaceExpression } from "../../../visor/rendering/renderers/special/face/FaceExpression";
+import { uuidv7 } from "uuidv7";
 
 export class FaceRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -147,6 +148,7 @@ export class FaceRouter extends AbstractRouter {
         }
 
         const expressionData = new FaceExpressionData();
+        expressionData.uuid = uuidv7();
         expressionData.name = data.name;
         expressionData.image = data.image;
         expressionData.mirrorImage = data.mirrorImage;
