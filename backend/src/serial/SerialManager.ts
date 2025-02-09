@@ -103,6 +103,10 @@ export class SerialManager {
 
     const additionalInfo: string[] = [];
 
+    if (this.protogen.visor.activeRenderer?.id == this.protogen.visor.faceRenderer.id) {
+      additionalInfo.push("Face: " + cleanText(this.protogen.visor.faceRenderer.activeExpression?.data.name || "None"));
+    }
+
     if (!this.protogen.networkManager.hasConnectivity) {
       additionalInfo.push("Connectivity issues!");
     }

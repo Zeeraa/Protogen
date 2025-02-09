@@ -97,7 +97,7 @@ export class RemoteManager {
 
       return true;
     }
-    //#region 
+    //#region
 
     //#region Disable RGB
     if (type == RemoteControlActionType.DISABLE_RGB) {
@@ -114,6 +114,18 @@ export class RemoteManager {
       }
 
       this.protogen.visor.activateRenderer(renderer.id, true);
+      return true;
+    }
+    //#endregion
+
+    //#region Expression
+    if (type == RemoteControlActionType.FACE_EXPRESSION) {
+      const expression = this.protogen.visor.faceRenderer.expressions.find(e => e.data.uuid == action);
+      if (expression == null) {
+        return false;
+      }
+
+      this.protogen.visor.faceRenderer.setActiveExpression(expression);
       return true;
     }
     //#endregion
