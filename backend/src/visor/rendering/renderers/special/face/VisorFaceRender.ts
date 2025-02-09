@@ -1,4 +1,4 @@
-import { CanvasRenderingContext2D } from "canvas";
+import { CanvasRenderingContext2D, Canvas, createCanvas } from "canvas";
 import { ProtogenVisor } from "../../../../ProtogenVisor";
 import { VisorRenderer } from "../../../VisorRenderer";
 import { RendererType } from "../../../RendererType";
@@ -6,6 +6,9 @@ import { FaceExpression } from "./FaceExpression";
 import { FaceExpressionData } from "../../../../../database/models/visor/FaceExpression.model";
 import { cyan } from "colors";
 import { KF_DefaultExpression } from "../../../../../utils/KVDataStorageKeys";
+import { AbstractColorMod } from "./colormod/AbstractColorMod";
+import { StaticColorMod } from "./colormod/effects/StaticColorMod";
+import { typeAssert } from "../../../../../utils/Utils";
 
 export const FaceRendererId = "PROTOGEN_FACE";
 
@@ -13,11 +16,29 @@ export class VisorFaceRenderer extends VisorRenderer {
   private _expressions: FaceExpression[];
   private _activeExpression: FaceExpression | null;
   private _defaultExpression: string | null;
+  private _colorAdjustmentCanvas: Canvas | null;
+  private _colorAdjustmentCanvasDimensions: { width: number, height: number };
+  private _colorAdjustmentEffect: AbstractColorMod | null;
 
   constructor(visor: ProtogenVisor) {
     super(visor, FaceRendererId, "Protogen Face");
     this._expressions = [];
     this._activeExpression = null;
+    this._colorAdjustmentCanvas = null;
+    this._colorAdjustmentCanvasDimensions = { width: 0, height: 0 };
+    this._colorAdjustmentEffect = null;
+
+    //TODO: temp test
+    this._colorAdjustmentEffect = new StaticColorMod("STATIC_COLOR", "Static Color");
+
+  }
+
+  get colorAdjustmentEffect() {
+    return this._colorAdjustmentEffect;
+  }
+
+  set colorAdjustmentEffect(value: AbstractColorMod | null) {
+    this._colorAdjustmentEffect = value;
   }
 
   get expressions() {
@@ -92,34 +113,34 @@ export class VisorFaceRenderer extends VisorRenderer {
   }
 
   public onRender(ctx: CanvasRenderingContext2D, width: number, height: number) {
+    const time = new Date().getTime();
+
     if (this.activeExpression == null) {
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
     } else {
-      this.activeExpression.renderExpression(ctx, width, height);
+      if (this.activeExpression.data.replaceColors && this.colorAdjustmentEffect != null) {
+        // Color replacement rendering
 
-      if (this.activeExpression.data.replaceColors) {
-        // TODO: Implement color effects
-        const color: RGBValue = { r: 0, g: 174, b: 255 };
-
-        const imageData = ctx.getImageData(0, 0, width, height);
-        const data = imageData.data;
-
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const a = data[i + 3];
-
-          // Check if the pixel is white (allowing slight tolerance)
-          if (r > 250 && g > 250 && b > 250 && a > 0) {
-            data[i] = color.r;
-            data[i + 1] = color.g;
-            data[i + 2] = color.b;
-          }
+        if (this._colorAdjustmentCanvas == null || this._colorAdjustmentCanvasDimensions.width != width || this._colorAdjustmentCanvasDimensions.height != height) {
+          this._colorAdjustmentCanvas = createCanvas(width, height);
+          this._colorAdjustmentCanvasDimensions = { width, height };
         }
+        const colorCtx = this._colorAdjustmentCanvas.getContext('2d');
 
-        ctx.putImageData(imageData, 0, 0);
+        // Render image
+        colorCtx.fillStyle = '#000000';
+        colorCtx.fillRect(0, 0, width, height);
+        this.activeExpression.renderExpression(colorCtx, width, height, time);
+
+        // Extract image and modify data
+        const image = colorCtx.getImageData(0, 0, width, height);
+        this.colorAdjustmentEffect.apply(typeAssert<number[]>(image.data), width, height, time);
+
+        ctx.putImageData(image, 0, 0);
+      } else {
+        // Normal rendering
+        this.activeExpression.renderExpression(ctx, width, height, time);
       }
     }
   }
@@ -140,10 +161,4 @@ export class VisorFaceRenderer extends VisorRenderer {
     console.debug("VisorFace::onActivate()");
     this.activateDefaultExpression();
   }
-}
-
-interface RGBValue {
-  r: number;
-  g: number;
-  b: number;
 }

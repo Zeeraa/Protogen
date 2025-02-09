@@ -18,6 +18,15 @@ export function encodeRGB(r: number, g: number, b: number): number {
   return (r << 16) | (g << 8) | b;
 }
 
+export function decodeRGB(value: number): { r: number, g: number, b: number } {
+  // Extract the RGB values from the number
+  const r = (value >> 16) & 0xFF;
+  const g = (value >> 8) & 0xFF;
+  const b = value & 0xFF;
+
+  return { r, g, b };
+}
+
 export function compareStringArrays(arr1: string[], arr2: string[]): boolean {
   if (arr1.length !== arr2.length) {
     return false;

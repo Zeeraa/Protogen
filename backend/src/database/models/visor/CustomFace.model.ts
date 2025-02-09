@@ -13,6 +13,7 @@ export class CustomFace {
     name: "name",
     type: "varchar",
     length: 255,
+    unique: true,
   })
   name: string;
 

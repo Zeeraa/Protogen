@@ -1,3 +1,5 @@
+import { SetPropertyResult } from "./SetPropertyResult";
+
 export abstract class AbstractRgbEffectProperty<T> {
   private _type: string;
   private _name: string;
@@ -41,8 +43,6 @@ export abstract class AbstractRgbEffectProperty<T> {
     return {};
   }
 }
-
-export type SetPropertyResult<T> = | { success: true, property: AbstractRgbEffectProperty<T> } | { success: false; error: string };
 
 interface RgbPropertyMetadata {
   [key: string]: any;

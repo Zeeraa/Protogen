@@ -89,12 +89,11 @@ export class FaceExpression {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    this.renderExpression(ctx, scale.width, scale.height);
+    this.renderExpression(ctx, scale.width, scale.height, new Date().getTime());
     this._preview = canvas.toDataURL();
   }
 
-  public renderExpression(ctx: CanvasRenderingContext2D, width: number, height: number) {
-    const time = new Date().getTime();
+  public renderExpression(ctx: CanvasRenderingContext2D, width: number, height: number, time: number) {
     const halfW = Math.ceil(width / 2);
 
     if (this.renderableImage == null) {

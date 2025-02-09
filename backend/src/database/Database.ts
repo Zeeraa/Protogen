@@ -14,6 +14,8 @@ import { RemoteProfile } from "./models/remote/RemoteProfile.model";
 import { RemoteAction } from "./models/remote/RemoteAction.model";
 import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 import { FaceExpressionData } from "./models/visor/FaceExpression.model";
+import { FaceColorEffectProperty } from "./models/visor/FaceColorEffectProperty";
+import { FaceColorEffect } from "./models/visor/FaceColorEffect";
 
 export class Database {
   private _protogen;
@@ -48,6 +50,8 @@ export class Database {
         // ---------- Visor ----------
         CustomFace,
         FaceExpressionData,
+        FaceColorEffect,
+        FaceColorEffectProperty,
 
         // ---------- Users / Api keys ----------
         User,

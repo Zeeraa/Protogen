@@ -1,4 +1,6 @@
-import { AbstractRgbEffectProperty, SetPropertyResult } from "./properties/AbstractRgbEffectProperty";
+import { AbstractRgbEffectProperty } from "./properties/AbstractRgbEffectProperty";
+import { RgbEffectPropertyMap } from "./properties/RgbEffectPropertyMap";
+import { SetPropertyResult } from "./properties/SetPropertyResult";
 import { RgbEffectIntProperty } from "./properties/variants/RgbEffectIntProperty";
 
 export const DefaultEffectMaxWidth = 2048;
@@ -79,8 +81,4 @@ export abstract class AbstractRgbEffect {
   public set displayName(displayName: string) {
     this._displayName = displayName;
   }
-}
-
-interface RgbEffectPropertyMap {
-  [key: string]: AbstractRgbEffectProperty<any>;
 }

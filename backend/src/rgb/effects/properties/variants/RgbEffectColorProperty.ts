@@ -1,5 +1,6 @@
 import { ProtoColors } from "../../../../utils/ProtoColors";
-import { AbstractRgbEffectProperty, SetPropertyResult } from "../AbstractRgbEffectProperty";
+import { AbstractRgbEffectProperty } from "../AbstractRgbEffectProperty";
+import { SetPropertyResult } from "../SetPropertyResult";
 
 export class RgbEffectColorProperty extends AbstractRgbEffectProperty<number> {
   constructor(name: string, defaultValue: number) {

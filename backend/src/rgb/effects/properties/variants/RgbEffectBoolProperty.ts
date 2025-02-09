@@ -1,4 +1,5 @@
-import { AbstractRgbEffectProperty, SetPropertyResult } from "../AbstractRgbEffectProperty";
+import { AbstractRgbEffectProperty } from "../AbstractRgbEffectProperty";
+import { SetPropertyResult } from "../SetPropertyResult";
 
 export class RgbEffectBoolProperty extends AbstractRgbEffectProperty<boolean> {
   private _options;
