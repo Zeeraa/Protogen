@@ -21,21 +21,15 @@ jobs:
 
       - name: Audit Frontend
         working-directory: frontend
-        run: |
-          npm ci
-          npm audit --json > audit-frontend.json || echo "Audit completed with vulnerabilities"
+        run: npm audit --json > audit-frontend.json || echo "Audit completed with vulnerabilities"
       
       - name: Audit Backend
         working-directory: backend
-        run: |
-          npm ci
-          npm audit --json > audit-backend.json || echo "Audit completed with vulnerabilities"
+        run: npm audit --json > audit-backend.json || echo "Audit completed with vulnerabilities"
 
       - name: Audit Remote Worker
         working-directory: remote_worker
-        run: |
-          npm ci
-          npm audit --json > audit-remote-worker.json || echo "Audit completed with vulnerabilities"
+        run: npm audit --json > audit-remote-worker.json || echo "Audit completed with vulnerabilities"
 
       - name: Upload Audit Reports
         uses: actions/upload-artifact@v4
