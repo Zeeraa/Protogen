@@ -71,9 +71,13 @@
     @for (rgbEffect of faceColorEffects; track $index) {
     <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
       <app-face-color-effect-card [effect]="rgbEffect" [showEdit]="showEdit" [lockInputs]="lockInputs || !showEdit"
-        [effectTypes]="faceColorEffectTypes" />
+        [effectTypes]="faceColorEffectTypes" (deleted)="visorEffectDelete($event)" />
     </div>
     }
+
+    <div class="col-12 mt-2">
+      <button class="btn btn-primary" (click)="showNewEffect()">New RGB effect</button>
+    </div>
   </div>
 </div>
 
@@ -88,7 +92,13 @@
         <label for="newExpressionName">Name</label>
         <input type="text" placeholder="Name" class="form-control" id="newExpressionName" formControlName="name"
           [class.is-invalid]="nameInUse || nameInvalid" aria-labelledby="validationExpressionName" />
-        <div class="invalid-feedback" id="validationExpressionName">Name is already in use</div>
+        <div class="invalid-feedback" id="validationExpressionName">
+          @if(nameInUse) {
+          Name is already in use
+          } @else {
+          Name is required
+          }
+        </div>
       </div>
 
       <div class="mb-2">
@@ -100,5 +110,44 @@
     <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
       [disabled]="lockInputs">Cancel</button>
     <button type="button" class="btn btn-primary" (click)="addNewExpression()" [disabled]="lockInputs">Save</button>
+  </div>
+</ng-template>
+
+<ng-template #newFaceRgbEffectPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Add effect</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newFaceRgbEffectForm">
+      <div class="mb-2">
+        <label for="newEffectName">Name</label>
+        <input type="text" placeholder="Name" class="form-control" id="newEffectName" formControlName="name"
+          [class.is-invalid]="nameInUse || nameInvalid" aria-labelledby="validationEffectName" />
+        <div class="invalid-feedback" id="validationEffectName">
+          @if(nameInUse) {
+          Name is already in use
+          } @else {
+          Name is required
+          }
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <label for="newEffectType">Type</label>
+        <select class="form-select" id="newEffectType" formControlName="type">
+          @for (effectType of faceColorEffectTypes; track $index) {
+          <option value="{{effectType.name}}">
+            {{effectType.description}}
+          </option>
+          }
+        </select>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="addNewEffect()" [disabled]="lockInputs">Save</button>
   </div>
 </ng-template>

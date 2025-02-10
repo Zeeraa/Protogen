@@ -76,6 +76,14 @@ export class FaceApiService extends ApiBaseService {
   updateEffect(effectId: string, data: UpdateFaceColorEffect) {
     return this.http.put<FaceColorEffect>(this.apiBaseUrl + "/face/color-effects/" + effectId, data).pipe(catchError(this.defaultErrorHandler));
   }
+
+  newFaceColorEffect(name: string, effect: string) {
+    return this.http.post<FaceColorEffect>(this.apiBaseUrl + "/face/color-effects/new", { name, effect }).pipe(catchError(this.defaultErrorHandler));
+  }
+
+  removeColorEffect(id: string) {
+    return this.http.delete<any>(this.apiBaseUrl + "/face/color-effects/" + id).pipe(catchError(this.defaultErrorHandler));
+  }
 }
 
 export interface FaceColorEffect {

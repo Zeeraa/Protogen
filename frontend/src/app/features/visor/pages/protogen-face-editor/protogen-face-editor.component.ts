@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FaceApiService, FaceColorEffect, FaceColorEffectType, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { catchError } from 'rxjs';
@@ -13,7 +13,7 @@ import { Title } from '@angular/platform-browser';
   templateUrl: './protogen-face-editor.component.html',
   styleUrl: './protogen-face-editor.component.scss'
 })
-export class ProtogenFaceEditorComponent implements OnInit {
+export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
   faceExpressions: FaceExpression[] = [];
   assets: BuiltInAsset[] = [];
   faceColorEffectTypes: FaceColorEffectType[] = [];
@@ -23,11 +23,19 @@ export class ProtogenFaceEditorComponent implements OnInit {
 
   @ViewChild("newExpressionPrompt") private newExpressionPromptTemplate!: TemplateRef<any>;
   private newExpressionPrompt: NgbModalRef | null = null;
-  lockInputs = false;
   newExpressionForm = new FormGroup({
     name: new FormControl<string>(""),
     image: new FormControl<string | null>(null),
   })
+
+  @ViewChild("newFaceRgbEffectPrompt") private newFaceRgbEffectPromptTemplate!: TemplateRef<any>;
+  private newFaceRgbEffectPrompt: NgbModalRef | null = null;
+  newFaceRgbEffectForm = new FormGroup({
+    name: new FormControl<string>(""),
+    type: new FormControl<string>(""),
+  });
+
+  lockInputs = false;
 
   nameInvalid = false;
   nameInUse = false;
@@ -44,6 +52,11 @@ export class ProtogenFaceEditorComponent implements OnInit {
 
   isDefault(expression: FaceExpression) {
     return expression.data.uuid == this.defaultExpression;
+  }
+
+  ngOnDestroy(): void {
+    this.newFaceRgbEffectPrompt?.close();
+    this.newExpressionPrompt?.close();
   }
 
   deactivate() {
@@ -168,6 +181,60 @@ export class ProtogenFaceEditorComponent implements OnInit {
       this.newExpressionForm.enable();
       this.newExpressionPrompt?.close();
       this.faceExpressions.push(expression);
+    });
+  }
+
+  showNewEffect() {
+    this.lockInputs = false;
+    this.nameInUse = false;
+    this.nameInvalid = false;
+
+    this.newFaceRgbEffectForm.reset();
+    if (this.faceColorEffectTypes.length > 0) {
+      this.newFaceRgbEffectForm.get("type")?.setValue(this.faceColorEffectTypes[0].name);
+    }
+
+    this.newFaceRgbEffectPrompt?.close();
+    this.newFaceRgbEffectPrompt = this.modal.open(this.newFaceRgbEffectPromptTemplate);
+  }
+
+  visorEffectDelete(effect: FaceColorEffect) {
+    this.faceColorEffects = this.faceColorEffects.filter(e => e.id != effect.id);
+  }
+
+  addNewEffect() {
+    this.nameInvalid = false;
+    this.nameInUse = false;
+
+    const name = this.newFaceRgbEffectForm.get("name")?.value || "";
+
+    if (name.trim().length == 0) {
+      this.nameInvalid = true;
+      this.toastr.error("Please enter a name");
+      return;
+    }
+
+    const effectType = this.faceColorEffectTypes.find(t => t.name == this.newFaceRgbEffectForm.get("type")?.value);
+
+    if (effectType == null) {
+      this.toastr.error("Invalid effect type");
+      return;
+    }
+
+    this.lockInputs = true;
+    this.faceApi.newFaceColorEffect(name, effectType.name).pipe(catchError((err: HttpErrorResponse) => {
+      if (err.status === 409) {
+        this.nameInUse = true;
+        this.toastr.error("Name already in use");
+      } else {
+        this.toastr.error("Failed to add effect");
+      }
+      this.lockInputs = false;
+      throw err;
+    })).subscribe(effect => {
+      this.lockInputs = false;
+      this.newFaceRgbEffectPrompt?.close();
+      this.faceColorEffects.push(effect);
     });
   }
 }

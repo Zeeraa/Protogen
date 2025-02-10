@@ -21,7 +21,7 @@ export class RgbEffectCardComponent {
 
   handleDisplayNameChange() {
     if (this.effect.displayName.trim().length == 0) {
-      this.toastr.warning("NAme cant be empty");
+      this.toastr.warning("Name cant be empty");
     }
 
     console.debug("New name: " + this.effect.displayName);

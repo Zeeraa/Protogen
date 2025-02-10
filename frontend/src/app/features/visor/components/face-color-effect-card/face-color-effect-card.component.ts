@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FaceApiService, FaceColorEffect, FaceColorEffectType } from '../../../../core/services/api/face-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -14,6 +14,8 @@ export class FaceColorEffectCardComponent implements OnDestroy {
   @Input({ required: true }) effectTypes!: FaceColorEffectType[];
   @Input() showEdit = false;
   @Input() lockInputs = false;
+
+  @Output() deleted = new EventEmitter<FaceColorEffect>();
 
   @ViewChild('deletePrompt') deletePromptTemplate!: TemplateRef<any>;
   private deletePromptModa?: NgbModalRef;
@@ -63,6 +65,15 @@ export class FaceColorEffectCardComponent implements OnDestroy {
   }
 
   confirmDelete() {
-    this.deletePromptModa?.close();
+    this.api.removeColorEffect(this.effect.id).pipe(
+      catchError(err => {
+        this.toastr.error("Failed to remove effect");
+        throw err;
+      })
+    ).subscribe(() => {
+      this.toastr.success("Effect removed");
+      this.deleted.emit(this.effect);
+      this.deletePromptModa?.close();
+    });
   }
 }
