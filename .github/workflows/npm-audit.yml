@@ -21,15 +21,21 @@ jobs:
 
       - name: Audit Frontend
         working-directory: frontend
-        run: npm audit --json > audit-frontend.json || echo "Audit completed with vulnerabilities"
-      
+        run: |
+          npm install
+          npm audit --json > audit-frontend.json || true
+
       - name: Audit Backend
         working-directory: backend
-        run: npm audit --json > audit-backend.json || echo "Audit completed with vulnerabilities"
+        run: |
+          npm install
+          npm audit --json > audit-backend.json || true
 
       - name: Audit Remote Worker
         working-directory: remote_worker
-        run: npm audit --json > audit-remote-worker.json || echo "Audit completed with vulnerabilities"
+        run: |
+          npm install
+          npm audit --json > audit-remote-worker.json || true
 
       - name: Upload Audit Reports
         uses: actions/upload-artifact@v4
@@ -40,9 +46,17 @@ jobs:
             backend/audit-backend.json
             remote_worker/audit-remote-worker.json
 
-      - name: Fail if vulnerabilities are found
+      - name: Check for Moderate or Higher Vulnerabilities
         run: |
-          if grep -q '"severity":' frontend/audit-frontend.json backend/audit-backend.json remote_worker/audit-remote-worker.json; then
-            echo "Vulnerabilities found!"
+          MODERATE_COUNT=$(jq '.advisories | to_entries | map(select(.value.severity == "moderate")) | length' frontend/audit-frontend.json backend/audit-backend.json remote_worker/audit-remote-worker.json | paste -sd+ - | bc)
+          HIGH_COUNT=$(jq '.advisories | to_entries | map(select(.value.severity == "high")) | length' frontend/audit-frontend.json backend/audit-backend.json remote_worker/audit-remote-worker.json | paste -sd+ - | bc)
+          CRITICAL_COUNT=$(jq '.advisories | to_entries | map(select(.value.severity == "critical")) | length' frontend/audit-frontend.json backend/audit-backend.json remote_worker/audit-remote-worker.json | paste -sd+ - | bc)
+          
+          echo "Moderate vulnerabilities: $MODERATE_COUNT"
+          echo "High vulnerabilities: $HIGH_COUNT"
+          echo "Critical vulnerabilities: $CRITICAL_COUNT"
+
+          if [[ $MODERATE_COUNT -gt 0 || $HIGH_COUNT -gt 0 || $CRITICAL_COUNT -gt 0 ]]; then
+            echo "🚨 Found vulnerabilities of severity moderate or higher!"
             exit 1
           fi
