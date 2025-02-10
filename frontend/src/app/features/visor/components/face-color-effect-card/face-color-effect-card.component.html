@@ -1,0 +1,45 @@
+<div class="card w-100">
+  <div class="card-body">
+    <h5 class="card-title">{{effect.name}}</h5>
+
+    @if(showEdit) {
+    <div>
+      <input maxlength="255" type="text" class="form-control" placeholder="Effect name" [(ngModel)]="this.effect.name"
+        (change)="handleDisplayNameChange()">
+    </div>
+    }
+
+    <p>{{effectTypeDescription}}</p>
+
+    <h6>Properties</h6>
+    <div class="row">
+      @for (property of effect.properties; track $index) {
+      <div class="col-12 mb-1 mb-1">
+        <app-face-rgb-property [effect]="effect" [property]="property" [readOnly]="!showEdit || lockInputs" />
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="card-body">
+    @if(showEdit) {
+    <button class="btn btn-danger mt-1 me-1" (click)="showDeletePrompt()">Remove</button>
+    }
+    <button class="btn btn-primary mt-1 me-1" (click)="activate()">Activate</button>
+  </div>
+</div>
+
+
+<ng-template #deletePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Confirm delete</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to delete this effect?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+  </div>
+</ng-template>
