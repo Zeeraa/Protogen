@@ -469,9 +469,9 @@ export class FaceRouter extends AbstractRouter {
       }
     });
 
-    this.router.put("/color-effects/:effectId/properties/:property", async (req, res) => {
+    this.router.put("/color-effects/:effectId/property/:property", async (req, res) => {
       /*
-      #swagger.path = '/face/color-effects/{effectId}/properties/{property}'
+      #swagger.path = '/face/color-effects/{effectId}/property/{property}'
       #swagger.tags = ['Face'],
       #swagger.description = "Update effect property"
       #swagger.responses[200] = { description: "Ok" }
