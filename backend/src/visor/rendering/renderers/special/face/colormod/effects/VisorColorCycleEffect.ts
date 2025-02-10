@@ -4,14 +4,11 @@ import { hueToRGB } from "../../../../../../../utils/ProtoColors";
 import { AbstractVisorColorEffect } from "../AbstractVisorColorEffect";
 
 export class VisorColorCycleEffect extends AbstractVisorColorEffect {
-  private _hue: number;
-
   private _speedProp;
   private _reverseProp;
 
   constructor(id: string, name: string, displayName: string) {
     super(id, name, displayName);
-    this._hue = 0;
 
     this._speedProp = new RgbEffectIntProperty("Speed", 1, { min: 1, max: 360 });
     this._reverseProp = new RgbEffectBoolProperty("Reverse", false, { inputType: BoolPropInputType.Switch });
@@ -20,17 +17,10 @@ export class VisorColorCycleEffect extends AbstractVisorColorEffect {
     this.addProperty(this._reverseProp);
   }
 
-  public onFixedTickRate(): void {
-    if (this._reverseProp.value) {
-      this._hue -= (this._speedProp.value / 20);
-    } else {
-      this._hue += (this._speedProp.value / 20);
-    }
-    this._hue = (this._hue % 360 + 360) % 360;
-  }
-
-  public apply(data: number[], _w: number, _h: number, _t: number): void {
-    const color = hueToRGB(this._hue % 360);
+  public apply(data: number[], _w: number, _h: number, time: number): void {
+    const adjustedTimeValue = ((this._reverseProp ? time * -1 : time) / 1000) * this._speedProp.value;
+    const hue = ((adjustedTimeValue % 360) + 360) % 360;
+    const color = hueToRGB(hue);
 
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i];
