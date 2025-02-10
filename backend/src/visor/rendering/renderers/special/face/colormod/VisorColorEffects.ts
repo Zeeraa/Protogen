@@ -1,12 +1,18 @@
 import { uuidv7 } from "uuidv7";
 import { AbstractVisorColorEffect } from "./AbstractVisorColorEffect";
 import { StaticVisorColorEffect } from "./effects/StaticVisorColorEffect";
+import { VisorColorCycleEffect } from "./effects/VisorColorCycleEffect";
 
 export const VisorColorEffects: VisorColorEffectMetadata[] = [
   {
     name: "Static",
     description: "Static non animated color",
     class: StaticVisorColorEffect,
+  },
+  {
+    name: "ColorCycle",
+    description: "Animated color cycle effect",
+    class: VisorColorCycleEffect,
   }
 ]
 

@@ -54,7 +54,6 @@ export abstract class AbstractVisorColorEffect {
     return this._propertyMap[key].setRaw(value);
   }
 
-
   /**
    * Change the pixel values in the data array to adjust colors. The provided array should be modified to adjust colors
    * @param data Array of pixel values
@@ -63,4 +62,9 @@ export abstract class AbstractVisorColorEffect {
    * @param time Time in milliseconds
    */
   public abstract apply(data: number[], width: number, height: number, time: number): void;
+
+  /**
+   * This gets called 20 times per second if the effect is active
+   */
+  public onFixedTickRate(): void { }
 }

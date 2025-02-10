@@ -444,6 +444,7 @@ export class FaceRouter extends AbstractRouter {
         if (data.id == null) {
           this.protogen.visor.faceRenderer.activeColorEffect = null;
           res.json({ active: null });
+          return;
         }
 
         const effect = this.protogen.visor.faceRenderer.availableColorEffects.find(e => e.id == data.id);
@@ -454,6 +455,34 @@ export class FaceRouter extends AbstractRouter {
 
         this.protogen.visor.faceRenderer.activeColorEffect = effect;
         res.json({ active: effectToDTO(effect) });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.delete("/color-effects/:effectId", async (req, res) => {
+      /*
+      #swagger.path = '/face/color-effects/{effectId}'
+      #swagger.tags = ['Face'],
+      #swagger.description = "Delete color effect"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Effect not found" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const effect = this.protogen.visor.faceRenderer.availableColorEffects.find(e => e.id == req.params.effectId);
+        if (effect == null) {
+          res.status(404).send({ message: "Effect not found" });
+          return;
+        }
+
+        await this.protogen.visor.faceRenderer.deleteColorEffect(effect);
+
+        res.json({})
       } catch (err) {
         this.handleError(err, req, res);
       }
