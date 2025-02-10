@@ -113,6 +113,7 @@ export class VisorFaceRenderer extends VisorRenderer {
     if (dbEffect == null) {
       dbEffect = new FaceColorEffect();
       dbEffect.properties = [];
+      dbEffect.effect = effect.effectName;
       dbEffect.uuid = effect.id;
     }
 
@@ -128,9 +129,8 @@ export class VisorFaceRenderer extends VisorRenderer {
         dbProp = new FaceColorEffectProperty();
         dbProp.key = prop.name;
         dbEffect.properties.push(dbProp);
-      } else {
-        dbProp.value = prop.stringifyValue();
       }
+      dbProp.value = prop.stringifyValue();
     });
 
     return await repo.save(dbEffect);

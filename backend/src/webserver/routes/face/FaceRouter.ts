@@ -391,7 +391,7 @@ export class FaceRouter extends AbstractRouter {
         const repo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
         const data = parsed.data;
 
-        const conflict = repo.findOne({
+        const conflict = await repo.findOne({
           where: {
             name: Equal(data.name),
           }
@@ -413,6 +413,47 @@ export class FaceRouter extends AbstractRouter {
         this.protogen.visor.faceRenderer.availableColorEffects.push(effect);
 
         res.json(effectToDTO(effect));
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.put("/color-effects/active", async (req, res) => {
+      /*
+      #swagger.path = '/face/color-effects/active'
+      #swagger.tags = ['Face'],
+      #swagger.description = "Set active effect. Accepts null values"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for details" }
+      #swagger.responses[404] = { description: "Effect not found" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = SetActiveEffectModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+
+        if (data.id == null) {
+          this.protogen.visor.faceRenderer.activeColorEffect = null;
+          res.json({ active: null });
+        }
+
+        const effect = this.protogen.visor.faceRenderer.availableColorEffects.find(e => e.id == data.id);
+        if (effect == null) {
+          res.status(404).send({ message: "Effect not found" });
+          return;
+        }
+
+        this.protogen.visor.faceRenderer.activeColorEffect = effect;
+        res.json({ active: effectToDTO(effect) });
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -523,20 +564,32 @@ export class FaceRouter extends AbstractRouter {
           await this.protogen.visor.faceRenderer.saveColorEffect(effect);
         } else {
           const repo = this.protogen.database.dataSource.getRepository(FaceColorEffectProperty);
-          const prop = await repo.findOne({
+          let prop = await repo.findOne({
             where: {
               effect: Equal(effect.id),
               key: Equal(req.params.property),
             }
           });
 
-          if (prop != null) {
-            prop.value = result.property.stringifyValue();
+          if (prop == null) {
+            const effect = await this.protogen.database.dataSource.getRepository(FaceColorEffect).findOne({
+              where: {
+                uuid: Equal(req.params.effectId),
+              }
+            });
 
-            await repo.save(prop);
-          } else {
-            this.protogen.logger.warn("VisorRouter", "Failed to fetch property " + req.params.property + " for saving");
+            if (effect == null) {
+              res.status(404).send({ message: "Failed to set property. Parent effect not found" });
+              return;
+            }
+
+            prop = new FaceColorEffectProperty();
+            prop.effect = effect;
+            prop.key = req.params.property;
           }
+
+          prop.value = result.property.stringifyValue();
+          await repo.save(prop);
         }
 
         res.json(effectToDTO(effect));
@@ -567,6 +620,10 @@ function effectToDTO(effect: AbstractVisorColorEffect) {
     properties: properties,
   }
 }
+
+export const SetActiveEffectModel = z.object({
+  id: z.string().nullable(),
+})
 
 export const NewEffectModel = z.object({
   name: z.string().max(255).trim().min(1),
