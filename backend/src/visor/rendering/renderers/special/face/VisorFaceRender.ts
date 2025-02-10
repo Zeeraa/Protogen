@@ -113,6 +113,7 @@ export class VisorFaceRenderer extends VisorRenderer {
     if (dbEffect == null) {
       dbEffect = new FaceColorEffect();
       dbEffect.properties = [];
+      dbEffect.effect = effect.effectName;
       dbEffect.uuid = effect.id;
     }
 
