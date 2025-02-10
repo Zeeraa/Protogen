@@ -73,6 +73,16 @@ export class VisorFaceRenderer extends VisorRenderer {
     }
   }
 
+  async deleteColorEffect(effect: AbstractVisorColorEffect) {
+    const repo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
+    await repo.delete(effect.id);
+
+    this._availableColorEffects = this.availableColorEffects.filter(e => e.id != effect.id);
+    if (this.activeColorEffect?.id == effect.id) {
+      this.activeColorEffect = null;
+    }
+  }
+
   setActiveExpression(expression: FaceExpression | null) {
     this._activeExpression = expression;
   }
@@ -194,6 +204,10 @@ export class VisorFaceRenderer extends VisorRenderer {
     this.activateDefaultExpression();
 
     await this.loadColorEffects();
+
+    setInterval(() => {
+      this.activeColorEffect?.onFixedTickRate();
+    }, 1000 / 20);
   }
 
   public onRender(ctx: CanvasRenderingContext2D, width: number, height: number) {
