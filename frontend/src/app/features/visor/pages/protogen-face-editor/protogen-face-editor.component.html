@@ -70,7 +70,8 @@
 
     @for (rgbEffect of faceColorEffects; track $index) {
     <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
-      <app-face-color-effect-card [effect]="rgbEffect" [showEdit]="showEdit" [lockInputs]="lockInputs || !showEdit" />
+      <app-face-color-effect-card [effect]="rgbEffect" [showEdit]="showEdit" [lockInputs]="lockInputs || !showEdit"
+        [effectTypes]="faceColorEffectTypes" />
     </div>
     }
   </div>

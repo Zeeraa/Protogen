@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { FaceApiService, FaceColorEffect } from '../../../../core/services/api/face-api.service';
+import { FaceApiService, FaceColorEffect, FaceColorEffectType } from '../../../../core/services/api/face-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -11,6 +11,7 @@ import { catchError } from 'rxjs';
 })
 export class FaceColorEffectCardComponent implements OnDestroy {
   @Input({ required: true }) effect!: FaceColorEffect;
+  @Input({ required: true }) effectTypes!: FaceColorEffectType[];
   @Input() showEdit = false;
   @Input() lockInputs = false;
 
@@ -22,6 +23,11 @@ export class FaceColorEffectCardComponent implements OnDestroy {
     private toastr: ToastrService,
     private modal: NgbModal,
   ) { }
+
+  get effectTypeDescription() {
+    return this.effectTypes.find(t => t.name == this.effect.type)?.description || "Unknown type";
+
+  }
 
   ngOnDestroy(): void {
     this.deletePromptModa?.close();

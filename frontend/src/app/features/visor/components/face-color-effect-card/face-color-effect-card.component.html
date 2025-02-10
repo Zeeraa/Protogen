@@ -8,18 +8,16 @@
         (change)="handleDisplayNameChange()">
     </div>
     }
-  </div>
 
-  <div class="card-body">
+    <p>{{effectTypeDescription}}</p>
+
     <h6>Properties</h6>
-    <div class="container-fluid mt-1">
-      <div class="row">
-        @for (property of effect.properties; track $index) {
-        <div class="col-12 mt-1 mb-1">
-          <app-face-rgb-property [effect]="effect" [property]="property" [readOnly]="!showEdit || lockInputs" />
-        </div>
-        }
+    <div class="row">
+      @for (property of effect.properties; track $index) {
+      <div class="col-12 mb-1 mb-1">
+        <app-face-rgb-property [effect]="effect" [property]="property" [readOnly]="!showEdit || lockInputs" />
       </div>
+      }
     </div>
   </div>
 
