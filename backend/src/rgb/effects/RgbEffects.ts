@@ -2,6 +2,7 @@ import { uuidv7 } from "uuidv7";
 import { AbstractRgbEffect } from "./AbstractRgbEffect";
 import { StaticRgbEffect } from "./implementations/StaticRgbEffect";
 import { RgbWaveEffect } from "./implementations/RgbWaveEffect";
+import { ColorShiftEffect } from "./implementations/ColorShiftEffect";
 
 export const RgbEffects: RgbEffect[] = [
   {
@@ -13,6 +14,11 @@ export const RgbEffects: RgbEffect[] = [
     name: "RGB Wave",
     description: "An animated rgb wave. Speed can be set to 0 to disable animation",
     class: RgbWaveEffect,
+  },
+  {
+    name: "Color shift",
+    description: "Single shifting color",
+    class: ColorShiftEffect,
   }
 ]
 
