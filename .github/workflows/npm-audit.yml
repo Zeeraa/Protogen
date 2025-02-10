@@ -1,0 +1,54 @@
+name: Daily NPM Audit
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Run NPM Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Audit Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --json > audit-frontend.json || echo "Audit completed with vulnerabilities"
+      
+      - name: Audit Backend
+        working-directory: backend
+        run: |
+          npm ci
+          npm audit --json > audit-backend.json || echo "Audit completed with vulnerabilities"
+
+      - name: Audit Remote Worker
+        working-directory: remote_worker
+        run: |
+          npm ci
+          npm audit --json > audit-remote-worker.json || echo "Audit completed with vulnerabilities"
+
+      - name: Upload Audit Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-reports
+          path: |
+            frontend/audit-frontend.json
+            backend/audit-backend.json
+            remote_worker/audit-remote-worker.json
+
+      - name: Fail if vulnerabilities are found
+        run: |
+          if grep -q '"severity":' frontend/audit-frontend.json backend/audit-backend.json remote_worker/audit-remote-worker.json; then
+            echo "Vulnerabilities found!"
+            exit 1
+          fi
