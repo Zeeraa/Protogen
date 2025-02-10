@@ -1,0 +1,19 @@
+<label [htmlFor]="inputId" class="form-label">
+  {{property.name}}
+  @if(type == "SLIDER") {
+  <span class="text-info">
+    ({{property.value}})
+  </span>
+  }
+</label>
+@if(type == "DEFAULT") {
+<input type="number" class="form-control" [min]="min" [max]="max" [id]="inputId" [(ngModel)]="property.value"
+  (change)="onChange($event)" [disabled]="lockInputs">
+} @else if (type == "SLIDER") {
+<input type="range" class="form-range" [min]="min" [max]="max" step="1" [id]="inputId" [(ngModel)]="property.value"
+  (change)="onChange($event)" [disabled]="lockInputs">
+} @else {
+<span class="text-danger" [id]="inputId">
+  Invalid input type {{type}}
+</span>
+}

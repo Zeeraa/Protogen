@@ -9,6 +9,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProtogenFaceEditorComponent } from './pages/protogen-face-editor/protogen-face-editor.component';
 import { ProtogenExpressionCardComponent } from './components/protogen-expression-card/protogen-expression-card.component';
 import { VisorAssetPickerComponent } from './components/visor-asset-picker/visor-asset-picker.component';
+import { FaceColorEffectCardComponent } from './components/face-color-effect-card/face-color-effect-card.component';
+import { FaceRgbBooleanPropertyComponent } from './components/face-rgb-property/properties/face-rgb-boolean-property/face-rgb-boolean-property.component';
+import { FaceRgbColorPropertyComponent } from './components/face-rgb-property/properties/face-rgb-color-property/face-rgb-color-property.component';
+import { FaceRgbIntPropertyComponent } from './components/face-rgb-property/properties/face-rgb-int-property/face-rgb-int-property.component';
+import { FaceRgbPropertyComponent } from './components/face-rgb-property/face-rgb-property.component';
+import { RgbModule } from "../rgb/rgb.module";
 
 @NgModule({
   declarations: [
@@ -18,13 +24,19 @@ import { VisorAssetPickerComponent } from './components/visor-asset-picker/visor
     VisorLivePreviewComponent,
     ProtogenFaceEditorComponent,
     ProtogenExpressionCardComponent,
-    VisorAssetPickerComponent
+    VisorAssetPickerComponent,
+    FaceColorEffectCardComponent,
+    FaceRgbPropertyComponent,
+    FaceRgbBooleanPropertyComponent,
+    FaceRgbColorPropertyComponent,
+    FaceRgbIntPropertyComponent
   ],
   imports: [
     CommonModule,
     RouterLink,
     FormsModule,
     ReactiveFormsModule,
+    RgbModule
   ],
   exports: [
     VisorPageComponent

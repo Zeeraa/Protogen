@@ -1,0 +1,18 @@
+@if(type == "SWITCH") {
+<div class="form-check form-switch">
+  <input class="form-check-input" type="checkbox" role="switch" [id]="inputId" [(ngModel)]="property.value"
+    [disabled]="lockInputs" (change)="onChange($event)">
+  <label class="form-check-label" [htmlFor]="inputId">{{property.name}}</label>
+</div>
+} @else if (type == "SELECT") {
+<label [htmlFor]="inputId" class="form-label">{{property.name}}</label>
+<select class="form-select" [id]="inputId" [value]="valueSelect" (change)="onChangeParse($event)"
+  [disabled]="lockInputs">
+  <option value="true">{{selectTrueText}}</option>
+  <option value="false">{{selectFalseText}}</option>
+</select>
+} @else {
+<span class="text-danger" [id]="inputId">
+  Invalid input type {{type}}
+</span>
+}

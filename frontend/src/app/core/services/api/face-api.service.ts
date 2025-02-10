@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
-import { catchError } from 'rxjs';
+import { catchError, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FaceApiService extends ApiBaseService {
+  private faceColorEffectTypeCache: FaceColorEffectType[] | null = null;
+
   constructor(
     http: HttpClient,
     toastr: ToastrService,
@@ -39,9 +41,66 @@ export class FaceApiService extends ApiBaseService {
     return this.http.post<FaceExpression>(this.apiBaseUrl + "/face/expressions/" + id, data).pipe(catchError(this.defaultErrorHandler));
   }
 
+  activateColorEffect(id: string | null) {
+    return this.http.put<{ active: FaceColorEffect | null }>(this.apiBaseUrl + "/face/color-effects/active", {
+      id: id,
+    }).pipe(catchError(this.defaultErrorHandler));
+  }
+
   deleteExpression(id: string) {
     return this.http.delete(this.apiBaseUrl + "/face/expressions/" + id).pipe(catchError(this.defaultErrorHandler));
   }
+
+  getFaceColorEffectTypes(useCache = true) {
+    if (useCache && this.faceColorEffectTypeCache != null) {
+      return of(this.faceColorEffectTypeCache);
+    }
+    return this.http.get<FaceColorEffectType[]>(this.apiBaseUrl + "/face/color-effects/types").pipe(
+      catchError(this.defaultErrorHandler),
+      tap(types => {
+        this.faceColorEffectTypeCache = types;
+      })
+    );
+  }
+
+  getFaceColorEffects() {
+    return this.http.get<FaceColorEffect[]>(this.apiBaseUrl + "/face/color-effects").pipe(catchError(this.defaultErrorHandler));
+  }
+
+  setEffectProperty(effectId: string, propertyName: string, value: string, fullSave = false) {
+    return this.http.put<FaceColorEffect>(this.apiBaseUrl + "/face/color-effects/" + effectId + "/property/" + propertyName + "?fullSave=" + (fullSave ? "true" : "false"), {
+      value: value,
+    }).pipe(catchError(this.defaultErrorHandler));
+  }
+
+  updateEffect(effectId: string, data: UpdateFaceColorEffect) {
+    return this.http.put<FaceColorEffect>(this.apiBaseUrl + "/face/color-effects/" + effectId, data).pipe(catchError(this.defaultErrorHandler));
+  }
+}
+
+export interface FaceColorEffect {
+  id: string;
+  type: string;
+  name: string;
+  properties: FaceColorEffectProperty[];
+}
+
+export interface FaceColorEffectProperty {
+  name: string;
+  type: string;
+  restrictions: any;
+  metadata: any;
+  value: any;
+}
+
+export interface UpdateFaceColorEffect {
+  name: string;
+}
+
+
+export interface FaceColorEffectType {
+  name: string;
+  description: string;
 }
 
 export interface UpdateFaceSettingsDTO {

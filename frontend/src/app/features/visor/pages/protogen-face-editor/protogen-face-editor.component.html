@@ -57,6 +57,23 @@
       <button class="btn btn-primary" (click)="openNewExpressionModal()">Add new expression</button>
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-12">
+      <hr>
+    </div>
+
+    <div class="col-12 mt-2">
+      <h4>Face RGB effects</h4>
+      <button class="btn btn-secondary" (click)="deactivate()">Deactivate RGB effect</button>
+    </div>
+
+    @for (rgbEffect of faceColorEffects; track $index) {
+    <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
+      <app-face-color-effect-card [effect]="rgbEffect" [showEdit]="showEdit" [lockInputs]="lockInputs || !showEdit" />
+    </div>
+    }
+  </div>
 </div>
 
 <ng-template #newExpressionPrompt let-modal>

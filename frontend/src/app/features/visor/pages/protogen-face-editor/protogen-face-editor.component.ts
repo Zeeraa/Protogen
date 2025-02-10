@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
+import { FaceApiService, FaceColorEffect, FaceColorEffectType, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { catchError } from 'rxjs';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AssetsApiService, BuiltInAsset } from '../../../../core/services/api/assets-api.service';
@@ -16,6 +16,8 @@ import { Title } from '@angular/platform-browser';
 export class ProtogenFaceEditorComponent implements OnInit {
   faceExpressions: FaceExpression[] = [];
   assets: BuiltInAsset[] = [];
+  faceColorEffectTypes: FaceColorEffectType[] = [];
+  faceColorEffects: FaceColorEffect[] = [];
   defaultExpression = "";
   showEdit = false;
 
@@ -44,6 +46,13 @@ export class ProtogenFaceEditorComponent implements OnInit {
     return expression.data.uuid == this.defaultExpression;
   }
 
+  deactivate() {
+    this.faceApi.activateColorEffect(null).pipe(catchError(err => {
+      this.toastr.error("Failed to deactivate effect");
+      throw err;
+    })).subscribe();
+  }
+
   defaultExpressionChanged(event: any) {
     const target = event.target as HTMLInputElement;
     let newVal: string | null = target.value;
@@ -70,6 +79,13 @@ export class ProtogenFaceEditorComponent implements OnInit {
       this.defaultExpression = data.defaultExpression || "";
       this.faceExpressions = data.expressions;
     });
+
+    this.faceApi.getFaceColorEffects().pipe(catchError(err => {
+      this.toastr.error("Failed to fetch color effects");
+      throw err;
+    })).subscribe(effects => {
+      this.faceColorEffects = effects;
+    });
   }
 
   ngOnInit(): void {
@@ -80,7 +96,14 @@ export class ProtogenFaceEditorComponent implements OnInit {
       throw err;
     })).subscribe(assets => {
       this.assets = assets;
-    })
+    });
+
+    this.faceApi.getFaceColorEffectTypes(true).pipe(catchError(err => {
+      this.toastr.error("Failed to load available color effects");
+      throw err;
+    })).subscribe(effects => {
+      this.faceColorEffectTypes = effects;
+    });
 
     this.fetchData();
   }
