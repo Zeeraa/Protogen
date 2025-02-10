@@ -26,7 +26,11 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
   newExpressionForm = new FormGroup({
     name: new FormControl<string>(""),
     image: new FormControl<string | null>(null),
-  })
+    mirrorImage: new FormControl<boolean>(false),
+    flipRightSide: new FormControl<boolean>(false),
+    flipLeftSide: new FormControl<boolean>(false),
+    replaceColors: new FormControl<boolean>(false),
+  });
 
   @ViewChild("newFaceRgbEffectPrompt") private newFaceRgbEffectPromptTemplate!: TemplateRef<any>;
   private newFaceRgbEffectPrompt: NgbModalRef | null = null;
@@ -162,10 +166,10 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     this.faceApi.addExpression({
       name,
       image,
-      mirrorImage: false,
-      flipRightSide: false,
-      flipLeftSide: false,
-      replaceColors: false,
+      mirrorImage: this.newExpressionForm.get("mirrorImage")?.value || false,
+      flipRightSide: this.newExpressionForm.get("flipRightSide")?.value || false,
+      flipLeftSide: this.newExpressionForm.get("flipLeftSide")?.value || false,
+      replaceColors: this.newExpressionForm.get("replaceColors")?.value || false,
     }).pipe(catchError((err: HttpErrorResponse) => {
       this.lockInputs = false;
       this.newExpressionForm.enable();

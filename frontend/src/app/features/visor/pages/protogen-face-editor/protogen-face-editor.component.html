@@ -104,6 +104,41 @@
       <div class="mb-2">
         <app-visor-asset-picker formControlName="image" [showInvalid]="imageMissing" />
       </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror image on visor">
+          <input class="form-check-input" type="checkbox" role="switch" id="face_image_mirror"
+            formControlName="mirrorImage">
+          <label class="form-check-label" for="face_image_mirror">Mirror image</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror image on visor">
+          <input class="form-check-input" type="checkbox" role="switch" id="face_image_rflip"
+            formControlName="flipRightSide">
+          <label class="form-check-label" for="face_image_rflip">Flip right side</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror image on visor">
+          <input class="form-check-input" type="checkbox" role="switch" id="face_image_lflip"
+            formControlName="flipLeftSide">
+          <label class="form-check-label" for="face_image_lflip">Flip left side</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch" title="Mirror image on visor">
+          <input class="form-check-input" type="checkbox" role="switch" id="face_image_color_mod"
+            formControlName="replaceColors">
+          <label class="form-check-label" for="face_image_color_mod">Apply color mod</label>
+          <p>
+            If enabled all fully white pixels will be replaced by colors from enabled face rgb effect
+          </p>
+        </div>
+      </div>
     </form>
   </div>
   <div class="modal-footer">
