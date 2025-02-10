@@ -4,9 +4,10 @@ import { catchError } from 'rxjs';
 import { hexColorToNumber, numberToHexColor } from '../../../../../core/services/utils/Utils';
 
 @Component({
-  selector: 'app-rgb-color-property',
-  templateUrl: './rgb-color-property.component.html',
-  styleUrl: './rgb-color-property.component.scss'
+    selector: 'app-rgb-color-property',
+    templateUrl: './rgb-color-property.component.html',
+    styleUrl: './rgb-color-property.component.scss',
+    standalone: false
 })
 export class RgbColorPropertyComponent extends RgbPropertySharedClass implements OnInit {
   hexColor = "#000000";

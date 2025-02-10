@@ -5,9 +5,10 @@ import { catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-protogen-expression-card',
-  templateUrl: './protogen-expression-card.component.html',
-  styleUrl: './protogen-expression-card.component.scss'
+    selector: 'app-protogen-expression-card',
+    templateUrl: './protogen-expression-card.component.html',
+    styleUrl: './protogen-expression-card.component.scss',
+    standalone: false
 })
 export class ProtogenExpressionCardComponent implements OnDestroy {
   @Input({ required: true }) expression!: FaceExpression;

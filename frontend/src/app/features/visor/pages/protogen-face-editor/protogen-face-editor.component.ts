@@ -9,9 +9,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-protogen-face-editor',
-  templateUrl: './protogen-face-editor.component.html',
-  styleUrl: './protogen-face-editor.component.scss'
+    selector: 'app-protogen-face-editor',
+    templateUrl: './protogen-face-editor.component.html',
+    styleUrl: './protogen-face-editor.component.scss',
+    standalone: false
 })
 export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
   faceExpressions: FaceExpression[] = [];

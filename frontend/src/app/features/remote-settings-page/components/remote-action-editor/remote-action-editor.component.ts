@@ -4,9 +4,10 @@ import { uuidv7 } from 'uuidv7';
 import { RemoteActionDataSet } from '../../pages/remote-settings-page/remote-settings-page.component';
 
 @Component({
-  selector: 'app-remote-action-editor',
-  templateUrl: './remote-action-editor.component.html',
-  styleUrl: './remote-action-editor.component.scss'
+    selector: 'app-remote-action-editor',
+    templateUrl: './remote-action-editor.component.html',
+    styleUrl: './remote-action-editor.component.scss',
+    standalone: false
 })
 export class RemoteActionEditorComponent implements OnInit {
   @Input({ required: true }) profile!: RemoteProfile;

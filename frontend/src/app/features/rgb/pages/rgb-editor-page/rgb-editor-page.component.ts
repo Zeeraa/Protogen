@@ -6,9 +6,10 @@ import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-rgb-editor-page',
-  templateUrl: './rgb-editor-page.component.html',
-  styleUrl: './rgb-editor-page.component.scss'
+    selector: 'app-rgb-editor-page',
+    templateUrl: './rgb-editor-page.component.html',
+    styleUrl: './rgb-editor-page.component.scss',
+    standalone: false
 })
 export class RgbEditorPageComponent implements OnInit {
   scene: RgbScene | null = null;

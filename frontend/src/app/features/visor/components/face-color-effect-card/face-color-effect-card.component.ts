@@ -5,9 +5,10 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-face-color-effect-card',
-  templateUrl: './face-color-effect-card.component.html',
-  styleUrl: './face-color-effect-card.component.scss'
+    selector: 'app-face-color-effect-card',
+    templateUrl: './face-color-effect-card.component.html',
+    styleUrl: './face-color-effect-card.component.scss',
+    standalone: false
 })
 export class FaceColorEffectCardComponent implements OnDestroy {
   @Input({ required: true }) effect!: FaceColorEffect;

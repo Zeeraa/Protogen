@@ -3,9 +3,10 @@ import { RgbPropertySharedClass } from '../RgbPropertySharedClass';
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-rgb-boolean-property',
-  templateUrl: './rgb-boolean-property.component.html',
-  styleUrl: './rgb-boolean-property.component.scss'
+    selector: 'app-rgb-boolean-property',
+    templateUrl: './rgb-boolean-property.component.html',
+    styleUrl: './rgb-boolean-property.component.scss',
+    standalone: false
 })
 export class RgbBooleanPropertyComponent extends RgbPropertySharedClass {
   get type(): string {

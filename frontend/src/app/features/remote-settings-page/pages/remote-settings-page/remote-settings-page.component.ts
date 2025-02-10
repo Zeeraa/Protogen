@@ -16,9 +16,10 @@ import { typeAssert } from '../../../../core/services/utils/Utils';
 import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
 
 @Component({
-  selector: 'app-remote-settings-page',
-  templateUrl: './remote-settings-page.component.html',
-  styleUrl: './remote-settings-page.component.scss'
+    selector: 'app-remote-settings-page',
+    templateUrl: './remote-settings-page.component.html',
+    styleUrl: './remote-settings-page.component.scss',
+    standalone: false
 })
 export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
   profiles: RemoteProfile[] = [];

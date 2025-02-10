@@ -9,9 +9,10 @@ import { HudApiService } from '../../../../core/services/api/hud-api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-system-page',
-  templateUrl: './system-page.component.html',
-  styleUrl: './system-page.component.scss'
+    selector: 'app-system-page',
+    templateUrl: './system-page.component.html',
+    styleUrl: './system-page.component.scss',
+    standalone: false
 })
 export class SystemPageComponent implements OnInit, OnDestroy {
   @ViewChild("shutdownModal") shutdownModalTemplate!: TemplateRef<any>;

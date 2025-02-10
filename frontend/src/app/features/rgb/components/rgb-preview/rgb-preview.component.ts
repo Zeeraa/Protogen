@@ -8,9 +8,10 @@ import { ToastrService } from 'ngx-toastr';
 import { uuidv7 } from 'uuidv7';
 
 @Component({
-  selector: 'app-rgb-preview',
-  templateUrl: './rgb-preview.component.html',
-  styleUrl: './rgb-preview.component.scss'
+    selector: 'app-rgb-preview',
+    templateUrl: './rgb-preview.component.html',
+    styleUrl: './rgb-preview.component.scss',
+    standalone: false
 })
 export class RgbPreviewComponent implements OnInit, OnDestroy, AfterViewInit {
   private interval: any;

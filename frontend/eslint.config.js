@@ -40,6 +40,7 @@ module.exports = tseslint.config(
         "ignoreRestSiblings": true, // Ignore unused destructured variables
         "caughtErrorsIgnorePattern": "^_" // Ignore unused catch variables starting with _
       }], // Allow unused variables starting with _
+      "@angular-eslint/prefer-standalone": "off", // This is a non standalone project
     },
   },
   {

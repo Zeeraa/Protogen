@@ -4,9 +4,10 @@ import { hexColorToNumber, numberToHexColor } from '../../../../../../core/servi
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-face-rgb-color-property',
-  templateUrl: './face-rgb-color-property.component.html',
-  styleUrl: './face-rgb-color-property.component.scss'
+    selector: 'app-face-rgb-color-property',
+    templateUrl: './face-rgb-color-property.component.html',
+    styleUrl: './face-rgb-color-property.component.scss',
+    standalone: false
 })
 export class FaceRgbColorPropertyComponent extends SharedFaceRbgProperty implements OnInit {
   hexColor = "#000000";

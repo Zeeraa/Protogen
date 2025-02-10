@@ -2,7 +2,10 @@ import { Component, Input } from "@angular/core";
 import { FaceApiService, FaceColorEffect, FaceColorEffectProperty } from "../../../../../core/services/api/face-api.service";
 import { ToastrService } from "ngx-toastr";
 
-@Component({ template: '' })
+@Component({
+    template: '',
+    standalone: false
+})
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export abstract class SharedFaceRbgProperty {
   @Input({ required: true }) effect!: FaceColorEffect;

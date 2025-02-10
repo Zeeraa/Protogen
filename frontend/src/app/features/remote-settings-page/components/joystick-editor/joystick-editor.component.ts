@@ -8,9 +8,10 @@ import { typeAssert } from '../../../../core/services/utils/Utils';
 import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
 
 @Component({
-  selector: 'app-joystick-editor',
-  templateUrl: './joystick-editor.component.html',
-  styleUrl: './joystick-editor.component.scss'
+    selector: 'app-joystick-editor',
+    templateUrl: './joystick-editor.component.html',
+    styleUrl: './joystick-editor.component.scss',
+    standalone: false
 })
 export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit {
   private drawInterval: any;

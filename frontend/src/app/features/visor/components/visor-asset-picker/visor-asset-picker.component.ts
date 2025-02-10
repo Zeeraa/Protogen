@@ -8,16 +8,17 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { uuidv7 } from 'uuidv7';
 
 @Component({
-  selector: 'app-visor-asset-picker',
-  templateUrl: './visor-asset-picker.component.html',
-  styleUrl: './visor-asset-picker.component.scss',
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => VisorAssetPickerComponent),
-      multi: true
-    }
-  ]
+    selector: 'app-visor-asset-picker',
+    templateUrl: './visor-asset-picker.component.html',
+    styleUrl: './visor-asset-picker.component.scss',
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => VisorAssetPickerComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class VisorAssetPickerComponent implements ControlValueAccessor, OnInit, OnDestroy {
   //#region ControlValueAccessor

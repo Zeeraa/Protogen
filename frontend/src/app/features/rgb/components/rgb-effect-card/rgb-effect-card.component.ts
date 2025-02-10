@@ -4,9 +4,10 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-rgb-effect-card',
-  templateUrl: './rgb-effect-card.component.html',
-  styleUrl: './rgb-effect-card.component.scss'
+    selector: 'app-rgb-effect-card',
+    templateUrl: './rgb-effect-card.component.html',
+    styleUrl: './rgb-effect-card.component.scss',
+    standalone: false
 })
 export class RgbEffectCardComponent {
   @Input({ required: true }) effectList!: RgbEffectInfo[];

@@ -4,9 +4,10 @@ import { undefinedToNull } from '../../../../../core/services/utils/Utils';
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-rgb-int-property',
-  templateUrl: './rgb-int-property.component.html',
-  styleUrl: './rgb-int-property.component.scss'
+    selector: 'app-rgb-int-property',
+    templateUrl: './rgb-int-property.component.html',
+    styleUrl: './rgb-int-property.component.scss',
+    standalone: false
 })
 export class RgbIntPropertyComponent extends RgbPropertySharedClass {
   get type(): string {

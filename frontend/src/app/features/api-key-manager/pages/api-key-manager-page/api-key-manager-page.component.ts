@@ -9,9 +9,10 @@ import { ClipboardService } from 'ngx-clipboard'
 import { Title } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-api-key-manager-page',
-  templateUrl: './api-key-manager-page.component.html',
-  styleUrl: './api-key-manager-page.component.scss'
+    selector: 'app-api-key-manager-page',
+    templateUrl: './api-key-manager-page.component.html',
+    styleUrl: './api-key-manager-page.component.scss',
+    standalone: false
 })
 export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
   protected apiKeys: ApiKey[] = [];

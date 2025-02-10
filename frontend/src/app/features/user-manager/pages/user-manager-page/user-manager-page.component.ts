@@ -9,9 +9,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-user-manager-page',
-  templateUrl: './user-manager-page.component.html',
-  styleUrl: './user-manager-page.component.scss'
+    selector: 'app-user-manager-page',
+    templateUrl: './user-manager-page.component.html',
+    styleUrl: './user-manager-page.component.scss',
+    standalone: false
 })
 export class UserManagerPageComponent implements OnInit, OnDestroy {
   users: ProtogenUser[] = [];

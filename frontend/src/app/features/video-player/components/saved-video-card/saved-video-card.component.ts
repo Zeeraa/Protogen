@@ -7,9 +7,10 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-saved-video-card',
-  templateUrl: './saved-video-card.component.html',
-  styleUrl: './saved-video-card.component.scss'
+    selector: 'app-saved-video-card',
+    templateUrl: './saved-video-card.component.html',
+    styleUrl: './saved-video-card.component.scss',
+    standalone: false
 })
 export class SavedVideoCardComponent implements OnDestroy {
   @Input({ required: true }) video!: SavedVideo;

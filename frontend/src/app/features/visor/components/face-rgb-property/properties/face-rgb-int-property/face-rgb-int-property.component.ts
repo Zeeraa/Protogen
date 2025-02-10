@@ -4,9 +4,10 @@ import { undefinedToNull } from '../../../../../../core/services/utils/Utils';
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-face-rgb-int-property',
-  templateUrl: './face-rgb-int-property.component.html',
-  styleUrl: './face-rgb-int-property.component.scss'
+    selector: 'app-face-rgb-int-property',
+    templateUrl: './face-rgb-int-property.component.html',
+    styleUrl: './face-rgb-int-property.component.scss',
+    standalone: false
 })
 export class FaceRgbIntPropertyComponent extends SharedFaceRbgProperty {
   get type(): string {

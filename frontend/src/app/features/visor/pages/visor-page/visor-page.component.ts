@@ -6,9 +6,10 @@ import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-visor-page',
-  templateUrl: './visor-page.component.html',
-  styleUrl: './visor-page.component.scss'
+    selector: 'app-visor-page',
+    templateUrl: './visor-page.component.html',
+    styleUrl: './visor-page.component.scss',
+    standalone: false
 })
 export class VisorPageComponent implements OnInit, OnDestroy {
   status: VisorStatus | null = null;

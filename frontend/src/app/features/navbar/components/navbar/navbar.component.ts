@@ -3,9 +3,10 @@ import { NavbarService } from '../../../../core/services/navbar.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss'
+    selector: 'app-navbar',
+    templateUrl: './navbar.component.html',
+    styleUrl: './navbar.component.scss',
+    standalone: false
 })
 export class NavbarComponent implements AfterViewInit {
   isTogglerVisible = false;

@@ -5,9 +5,10 @@ import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-rgb-dashboard-page',
-  templateUrl: './rgb-dashboard-page.component.html',
-  styleUrl: './rgb-dashboard-page.component.scss'
+    selector: 'app-rgb-dashboard-page',
+    templateUrl: './rgb-dashboard-page.component.html',
+    styleUrl: './rgb-dashboard-page.component.scss',
+    standalone: false
 })
 export class RgbDashboardPageComponent implements OnInit {
   scenes: RgbScene[] = [];

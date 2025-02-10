@@ -8,9 +8,10 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
-  selector: 'app-remote-profile-card',
-  templateUrl: './remote-profile-card.component.html',
-  styleUrl: './remote-profile-card.component.scss'
+    selector: 'app-remote-profile-card',
+    templateUrl: './remote-profile-card.component.html',
+    styleUrl: './remote-profile-card.component.scss',
+    standalone: false
 })
 export class RemoteProfileCardComponent implements OnDestroy {
   @Input({ required: true }) profile!: RemoteProfile;

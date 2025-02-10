@@ -9,9 +9,10 @@ import { catchError } from 'rxjs';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-visor-image-face-editor',
-  templateUrl: './visor-image-face-editor.component.html',
-  styleUrl: './visor-image-face-editor.component.scss'
+    selector: 'app-visor-image-face-editor',
+    templateUrl: './visor-image-face-editor.component.html',
+    styleUrl: './visor-image-face-editor.component.scss',
+    standalone: false
 })
 export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
   @ViewChild("filePicker")

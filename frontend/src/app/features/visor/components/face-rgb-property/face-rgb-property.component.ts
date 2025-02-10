@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { FaceColorEffect, FaceColorEffectProperty } from '../../../../core/services/api/face-api.service';
 
 @Component({
-  selector: 'app-face-rgb-property',
-  templateUrl: './face-rgb-property.component.html',
-  styleUrl: './face-rgb-property.component.scss'
+    selector: 'app-face-rgb-property',
+    templateUrl: './face-rgb-property.component.html',
+    styleUrl: './face-rgb-property.component.scss',
+    standalone: false
 })
 export class FaceRgbPropertyComponent {
   @Input({ required: true }) effect!: FaceColorEffect;

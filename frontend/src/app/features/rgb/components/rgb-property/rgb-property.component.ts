@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { RgbEffect, RgbEffectProperty, RgbScene } from '../../../../core/services/api/rgb-api.service';
 
 @Component({
-  selector: 'app-rgb-property',
-  templateUrl: './rgb-property.component.html',
-  styleUrl: './rgb-property.component.scss'
+    selector: 'app-rgb-property',
+    templateUrl: './rgb-property.component.html',
+    styleUrl: './rgb-property.component.scss',
+    standalone: false
 })
 export class RgbPropertyComponent {
   @Input({ required: true }) scene!: RgbScene;

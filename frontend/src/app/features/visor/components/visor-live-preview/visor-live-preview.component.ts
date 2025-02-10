@@ -6,9 +6,10 @@ import { Subscription } from 'rxjs';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 
 @Component({
-  selector: 'app-visor-live-preview',
-  templateUrl: './visor-live-preview.component.html',
-  styleUrl: './visor-live-preview.component.scss'
+    selector: 'app-visor-live-preview',
+    templateUrl: './visor-live-preview.component.html',
+    styleUrl: './visor-live-preview.component.scss',
+    standalone: false
 })
 export class VisorLivePreviewComponent implements OnInit, OnDestroy {
   private socketSubscription: Subscription | null = null;

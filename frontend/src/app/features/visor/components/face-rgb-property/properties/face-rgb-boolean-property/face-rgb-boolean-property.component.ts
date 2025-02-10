@@ -3,9 +3,10 @@ import { SharedFaceRbgProperty } from '../SharedFaceRbgProperty';
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-face-rgb-boolean-property',
-  templateUrl: './face-rgb-boolean-property.component.html',
-  styleUrl: './face-rgb-boolean-property.component.scss'
+    selector: 'app-face-rgb-boolean-property',
+    templateUrl: './face-rgb-boolean-property.component.html',
+    styleUrl: './face-rgb-boolean-property.component.scss',
+    standalone: false
 })
 export class FaceRgbBooleanPropertyComponent extends SharedFaceRbgProperty {
   get type(): string {

@@ -9,9 +9,10 @@ import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-video-player-page',
-  templateUrl: './video-player-page.component.html',
-  styleUrl: './video-player-page.component.scss'
+    selector: 'app-video-player-page',
+    templateUrl: './video-player-page.component.html',
+    styleUrl: './video-player-page.component.scss',
+    standalone: false
 })
 export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   videoInputUrl = "";

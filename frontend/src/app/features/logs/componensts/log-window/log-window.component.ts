@@ -12,10 +12,11 @@ import { SocketMessageType } from '../../../../core/services/socket/data/SocketM
 import { SocketEventType } from '../../../../core/services/socket/data/SocketEventType';
 
 @Component({
-  selector: 'app-log-window',
-  templateUrl: './log-window.component.html',
-  styleUrl: './log-window.component.scss',
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-log-window',
+    templateUrl: './log-window.component.html',
+    styleUrl: './log-window.component.scss',
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class LogWindowComponent implements AfterViewInit, OnDestroy {
   private terminal!: Terminal;

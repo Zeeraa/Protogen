@@ -4,9 +4,10 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 
 @Component({
-  selector: 'app-rgb-scene-card',
-  templateUrl: './rgb-scene-card.component.html',
-  styleUrl: './rgb-scene-card.component.scss'
+    selector: 'app-rgb-scene-card',
+    templateUrl: './rgb-scene-card.component.html',
+    styleUrl: './rgb-scene-card.component.scss',
+    standalone: false
 })
 export class RgbSceneCardComponent {
   @Input({ required: true }) scene!: RgbScene;

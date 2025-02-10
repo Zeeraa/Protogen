@@ -4,9 +4,10 @@ import { catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-renderer-card',
-  templateUrl: './renderer-card.component.html',
-  styleUrl: './renderer-card.component.scss'
+    selector: 'app-renderer-card',
+    templateUrl: './renderer-card.component.html',
+    styleUrl: './renderer-card.component.scss',
+    standalone: false
 })
 export class RendererCardComponent {
   @Input({ required: true }) renderer!: VisorRenderer;
