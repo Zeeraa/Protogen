@@ -3,11 +3,13 @@ import { SetPropertyResult } from "./SetPropertyResult";
 export abstract class AbstractRgbEffectProperty<T> {
   private _type: string;
   private _name: string;
+  private _description: string | null;
   private _value: T;
 
-  constructor(type: string, name: string, defaultValue: T) {
+  constructor(type: string, name: string, defaultValue: T, description: string | null) {
     this._type = type;
     this._name = name;
+    this._description = description;
     this._value = defaultValue;
   }
 
@@ -17,6 +19,10 @@ export abstract class AbstractRgbEffectProperty<T> {
 
   public get type() {
     return this._type;
+  }
+
+  get description() {
+    return this._description;
   }
 
   public get value(): T {

@@ -12,10 +12,10 @@ export class RgbWaveEffect extends AbstractRgbEffect {
 
   constructor(id: string, name: string, displayName: string) {
     super(id, name, displayName);
-    this._propHueStart = new RgbEffectIntProperty("HueStart", 0, { min: 0, max: 360 });
-    this._propHueEnd = new RgbEffectIntProperty("HueEnd", 360, { min: 0, max: 360 });
-    this._propSpeed = new RgbEffectIntProperty("Speed", 5, { min: 0, max: 30, inputType: IntPropInputType.Slider });
-    this._invertProperty = new RgbEffectBoolProperty("Invert", false, { inputType: BoolPropInputType.Switch });
+    this._propHueStart = new RgbEffectIntProperty("HueStart", 0, { min: 0, max: 360 }, "The HUE value to start at");
+    this._propHueEnd = new RgbEffectIntProperty("HueEnd", 360, { min: 0, max: 360 }, "The HUE value to end at");
+    this._propSpeed = new RgbEffectIntProperty("Speed", 5, { min: 0, max: 30, inputType: IntPropInputType.Slider }, "Speed the effect changes at. At the moment a smaller value means faster change bujt i will fix this in the future");
+    this._invertProperty = new RgbEffectBoolProperty("Invert", false, { inputType: BoolPropInputType.Switch }, "Reverse RGB animation order");
     this.addProperty(this._propHueStart);
     this.addProperty(this._propHueEnd);
     this.addProperty(this._propSpeed);

@@ -11,9 +11,9 @@ export class VisorColorCycleEffect extends AbstractVisorColorEffect {
   constructor(id: string, name: string, displayName: string) {
     super(id, name, displayName);
 
-    this._speedProp = new RgbEffectIntProperty("Speed", 30, { min: 1, max: 360 });
-    this._offsetProp = new RgbEffectIntProperty("Offset", 0, { min: 0, max: 360 });
-    this._reverseProp = new RgbEffectBoolProperty("Reverse", false, { inputType: BoolPropInputType.Switch });
+    this._speedProp = new RgbEffectIntProperty("Speed", 30, { min: 1, max: 360 }, "The speed of the animation. Hue will be changed by this value every second");
+    this._offsetProp = new RgbEffectIntProperty("Offset", 0, { min: 0, max: 360 }, "The hue offset to apply");
+    this._reverseProp = new RgbEffectBoolProperty("Reverse", false, { inputType: BoolPropInputType.Switch }, "Decrease hue every second instead of increasing");
 
     this.addProperty(this._speedProp);
     this.addProperty(this._offsetProp);
