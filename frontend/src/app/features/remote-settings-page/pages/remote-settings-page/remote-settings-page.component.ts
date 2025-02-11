@@ -13,13 +13,13 @@ import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { typeAssert } from '../../../../core/services/utils/Utils';
-import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
+import { FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
 
 @Component({
-    selector: 'app-remote-settings-page',
-    templateUrl: './remote-settings-page.component.html',
-    styleUrl: './remote-settings-page.component.scss',
-    standalone: false
+  selector: 'app-remote-settings-page',
+  templateUrl: './remote-settings-page.component.html',
+  styleUrl: './remote-settings-page.component.scss',
+  standalone: false
 })
 export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
   profiles: RemoteProfile[] = [];
@@ -28,6 +28,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     savedVideos: [],
     visorRenderers: [],
     expressions: [],
+    faceColorEffects: [],
   }
 
   remoteState: RemoteState = blankRemoteState();
@@ -59,14 +60,16 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     const visorRenderersRequest = this.visorApi.getRenderers();
     const videosRequest = this.videoApi.getSavedVideos();
     const faceExpressionsRequest = this.faceApi.getExpressions();
+    const faceColorEffectsRequest = this.faceApi.getFaceColorEffects();
 
-    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest]).subscribe({
-      next: ([rgbScenes, visorRenderers, videos, faceExpressions]) => {
+    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest]).subscribe({
+      next: ([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects]) => {
         this.actionDataSet = {
           rgbScenes: rgbScenes,
           savedVideos: videos,
           visorRenderers: visorRenderers,
           expressions: faceExpressions,
+          faceColorEffects: faceColorEffects,
         }
         console.log(this.actionDataSet);
         console.log("Related data loaded. Loading profiles...");
@@ -156,4 +159,5 @@ export interface RemoteActionDataSet {
   rgbScenes: RgbScene[];
   savedVideos: SavedVideo[];
   expressions: FaceExpression[];
+  faceColorEffects: FaceColorEffect[];
 }

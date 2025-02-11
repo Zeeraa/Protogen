@@ -42,6 +42,13 @@
       <option value="{{expression.data.uuid}}">{{expression.data.name}}</option>
       }
     </select>
+    } @else if(actionTypeAsString == "ACTIVATE_FACE_RGB_EFFECT") {
+    <label for="expression_{{componentId}}" class="form-label">Effect</label>
+    <select class="form-select" id="expression_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+      @for (colorEffect of actionDataSet.faceColorEffects; track $index) {
+      <option value="{{colorEffect.id}}">{{colorEffect.name}}</option>
+      }
+    </select>
     } @else if(actionTypeAsString == "DISABLE_RGB" ||actionTypeAsString == "STOP_VIDEO") {
     <!-- No parameters -->
     } @else if(actionTypeAsString != "NONE") {

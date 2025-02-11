@@ -87,6 +87,7 @@ export enum RemoteControlActionType {
   ACTIVATE_RGB_SCENE = "ACTIVATE_RGB_SCENE",
   PLAY_VIDEO = "PLAY_VIDEO",
   FACE_EXPRESSION = "FACE_EXPRESSION",
+  ACTIVATE_FACE_RGB_EFFECT = "ACTIVATE_FACE_RGB_EFFECT",
   DISABLE_RGB = "DISABLE_RGB",
   STOP_VIDEO = "STOP_VIDEO",
 }
@@ -132,6 +133,9 @@ export function translateRemoteActionType(type: RemoteControlActionType) {
 
     case RemoteControlActionType.FACE_EXPRESSION:
       return "Face expression";
+
+    case RemoteControlActionType.ACTIVATE_FACE_RGB_EFFECT:
+      return "Activate face RGB effect";
 
     case RemoteControlActionType.PLAY_VIDEO:
       return "Play video";
