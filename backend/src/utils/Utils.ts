@@ -74,7 +74,7 @@ export function getCertificateExpiry(certFile: string): Date {
  * @param validDays Number of days the certificate is valid
  */
 export function generateNewCertificate(privateKeyPath: string, publicKeyPath: string, validDays: number) {
-  console.log(`Generating a new password-free certificate (Valid for ${validDays} days)...`);
+  console.log(`Generating a new certificate (Valid for ${validDays} days)...`);
   console.log(`Private Key: ${privateKeyPath}`);
   console.log(`Public Certificate: ${publicKeyPath}`);
 

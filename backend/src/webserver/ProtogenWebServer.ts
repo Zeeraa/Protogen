@@ -16,7 +16,6 @@ import * as https from 'https';
 import { Server, Socket } from 'socket.io';
 import { UserSocketSession } from "./socket/UserSocketSession";
 import { SocketMessageType } from "./socket/SocketMessageType";
-import { SocketMessage } from "./socket/SocketMessage";
 import { HudRouter } from "./routes/hud/HudRouter";
 import { ImageRouter } from "./routes/images/ImageRouter";
 import { UserRouter } from "./routes/user/UserRouter";
@@ -65,9 +64,8 @@ export class ProtogenWebServer {
       certGenerationNeeded = true;
     } else {
       const expiresAt = getCertificateExpiry(this._internalHttpsPublicKeyFile);
-      // if it expires in 7 days. use 1000 * 60... to make it readable
-      if (expiresAt.getDate() - Date.now() < 1000 * 60 * 60 * 24 * 7) {
-        this.protogen.logger.info("WebServer", "Self signed certificate is expiring soon. Creating a new one");
+      if (expiresAt.getTime() - Date.now() < 1000 * 60 * 60 * 24 * 3) {
+        this.protogen.logger.info("WebServer", "Self signed certificate is expiring in 3 days. Creating a new one");
         certGenerationNeeded = true;
       }
     }
@@ -138,6 +136,7 @@ export class ProtogenWebServer {
             type: AuthType.Token,
             isSuperUser: user.superUser,
             user: user,
+            onlyRemotePermissions: false,
           }
         }
       } else if (token.startsWith("Key ")) {
@@ -149,6 +148,17 @@ export class ProtogenWebServer {
             type: AuthType.ApiKey,
             isSuperUser: apiKey.superUser,
             user: null,
+            onlyRemotePermissions: false,
+          }
+        }
+      } else if (token.startsWith("RemoteKey ")) {
+        const keyString = token.split("RemoteKey ")[1];
+        if (keyString == this.protogen.remoteManager.stateReportingKey) {
+          auth = {
+            type: AuthType.Remote,
+            isSuperUser: false,
+            user: null,
+            onlyRemotePermissions: true,
           }
         }
       }
@@ -159,7 +169,7 @@ export class ProtogenWebServer {
         return;
       }
 
-      const session = new UserSocketSession(this.protogen, socket);
+      const session = new UserSocketSession(this.protogen, socket, auth);
       this._sessions.push(session);
       this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
     }
@@ -248,11 +258,6 @@ export class ProtogenWebServer {
   }
 
   public broadcastMessage(type: SocketMessageType, data: any) {
-    const message: SocketMessage = {
-      type: type,
-      data: data,
-    }
-    this._socket.emit("message", message);
-    this._socketSecure?.emit("message", message);
+    this.socketSessions.filter(s => !s.auth.onlyRemotePermissions || (type == SocketMessageType.S2E_RemoteConfigChange || type == SocketMessageType.S2E_RemoteProfileChange)).forEach(s => s.sendMessage(type, data));
   }
 }

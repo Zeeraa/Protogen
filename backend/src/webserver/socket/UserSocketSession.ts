@@ -4,6 +4,7 @@ import { Socket } from "socket.io";
 import { SocketMessageType } from "./SocketMessageType";
 import { SocketMessage } from "./SocketMessage";
 import { constructRemoteStateFromSensorData } from "../../remote/RemoteState";
+import { AuthData } from "../middleware/AuthMiddleware";
 
 export class UserSocketSession {
   private _protogen;
@@ -13,11 +14,13 @@ export class UserSocketSession {
   private _enableRgbPreview = false;
   private _enableVisorPreview = false;
   private _enableRemotePreview = false;
+  private _auth: AuthData;
 
-  constructor(protogen: Protogen, socket: Socket) {
+  constructor(protogen: Protogen, socket: Socket, auth: AuthData) {
     this._protogen = protogen;
     this._sessionId = uuidv7();
     this._socket = socket;
+    this._auth = auth;
 
     socket.on("disconnect", () => {
       this._disconnected = true;
@@ -39,6 +42,10 @@ export class UserSocketSession {
 
   get socket() {
     return this._socket;
+  }
+
+  get auth() {
+    return this._auth;
   }
 
   public disconnect() {
@@ -79,6 +86,13 @@ export class UserSocketSession {
     }
 
     const type = message.type;
+
+    if (this.auth.onlyRemotePermissions) {
+      if (type != SocketMessageType.E2S_RemoteState) {
+        console.error("Received unauthorized message from remote: ", message);
+        return;
+      }
+    }
 
     if (type == SocketMessageType.C2S_EnableRgbPreview) {
       const enable = message.data === true;

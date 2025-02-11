@@ -6,10 +6,12 @@ import { KV_RemoteFlipAxis, KV_RemoteInvertX, KV_RemoteInvertY } from "../utils/
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { RemoteState } from "./RemoteState";
 import { RemoteControlInputType } from "../database/models/remote/RemoteControlInputType";
+import { uuidv7 } from "uuidv7";
 
 export class RemoteManager {
   private _protogen;
   private _state: RemoteState;
+  private _stateReportingKey: string;
   public invertX: boolean;
   public invertY: boolean;
   public flipAxis: boolean;
@@ -27,9 +29,14 @@ export class RemoteManager {
       joystickY: 0.5,
     }
 
+    this._stateReportingKey = uuidv7();
     this.invertX = false;
     this.invertY = false;
     this.flipAxis = false;
+  }
+
+  public get stateReportingKey() {
+    return this._stateReportingKey;
   }
 
   public async loadConfig() {

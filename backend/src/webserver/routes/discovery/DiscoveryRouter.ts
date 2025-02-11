@@ -19,6 +19,22 @@ export class DiscoveryRouter extends AbstractRouter {
       });
     });
 
+    this.router.get("/remote-key", [this.authMiddleware], async (req: Request, res: Response) => {
+      /*
+      #swagger.path = '/discovery/remote-key'
+      #swagger.tags = ['Discovery'],
+      #swagger.description = "Get key for remote socket communication"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      try {
+        res.send({
+          key: this.protogen.remoteManager.stateReportingKey,
+        })
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/certificate", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/discovery/certificate'
