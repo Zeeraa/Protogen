@@ -103,6 +103,7 @@ export interface RgbEffectProperty {
   restrictions: PropertyKVData<any>;
   metadata: PropertyKVData<any>;
   value: any;
+  description: string | null;
 }
 
 export type PropertyKVData<T> = Record<string, T>;

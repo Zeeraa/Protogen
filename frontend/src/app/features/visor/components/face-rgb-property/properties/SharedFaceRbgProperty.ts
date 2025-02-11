@@ -3,8 +3,8 @@ import { FaceApiService, FaceColorEffect, FaceColorEffectProperty } from "../../
 import { ToastrService } from "ngx-toastr";
 
 @Component({
-    template: '',
-    standalone: false
+  template: '',
+  standalone: false
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export abstract class SharedFaceRbgProperty {
@@ -25,4 +25,12 @@ export abstract class SharedFaceRbgProperty {
     protected faceApi: FaceApiService,
     protected toastr: ToastrService,
   ) { }
+
+  public get hasDescription() {
+    return this.property.description != null;
+  }
+
+  public get description() {
+    return this.property.description || undefined;
+  }
 }

@@ -3,8 +3,8 @@ import { RgbApiService, RgbEffect, RgbEffectProperty, RgbScene } from "../../../
 import { ToastrService } from "ngx-toastr";
 
 @Component({
-    template: '',
-    standalone: false
+  template: '',
+  standalone: false
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export abstract class RgbPropertySharedClass {
@@ -19,6 +19,14 @@ export abstract class RgbPropertySharedClass {
 
   public getMetadata(key: string) {
     return this.property.metadata[key];
+  }
+
+  public get hasDescription() {
+    return this.property.description != null;
+  }
+
+  public get description() {
+    return this.property.description || undefined;
   }
 
   constructor(

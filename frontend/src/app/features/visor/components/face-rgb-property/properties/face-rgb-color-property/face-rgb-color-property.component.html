@@ -1,3 +1,8 @@
-<label [htmlFor]="inputId" class="form-label">{{property.name}}</label>
+<label [htmlFor]="inputId" class="form-label" [title]="description">
+  {{property.name}}
+  @if(hasDescription) {
+  <i class="bi bi-question-circle"></i>
+  }
+</label>
 <input type="color" class="form-control form-control-color" [id]="inputId" [(ngModel)]="hexColor" title="Select color"
   (change)="onChange($event)" [disabled]="lockInputs">

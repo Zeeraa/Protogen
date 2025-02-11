@@ -1,13 +1,16 @@
-<label [htmlFor]="inputId" class="form-label">
+<label [htmlFor]="inputId" class="form-label" [title]="description">
   {{property.name}}
   @if(type == "SLIDER") {
   <span class="text-info">
     ({{property.value}})
   </span>
   }
+  @if(hasDescription) {
+  <i class="bi bi-question-circle"></i>
+  }
 </label>
 @if(type == "DEFAULT") {
-<input type="number" class="form-control" [min]="min" [max]="max" [id]="inputId" [(ngModel)]="property.value"
+<input type="number" [placeholder]="property.name" class="form-control" [min]="min" [max]="max" [id]="inputId" [(ngModel)]="property.value"
   (change)="onChange($event)" [disabled]="lockInputs">
 } @else if (type == "SLIDER") {
 <input type="range" class="form-range" [min]="min" [max]="max" step="1" [id]="inputId" [(ngModel)]="property.value"

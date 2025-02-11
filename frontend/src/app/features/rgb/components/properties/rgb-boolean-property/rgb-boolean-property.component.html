@@ -1,11 +1,21 @@
 @if(type == "SWITCH") {
-<div class="form-check form-switch">
+<div class="form-check form-switch" [title]="description">
   <input class="form-check-input" type="checkbox" role="switch" [id]="inputId" [(ngModel)]="property.value"
     (change)="onChange($event)">
-  <label class="form-check-label" [htmlFor]="inputId">{{property.name}}</label>
+  <label class="form-check-label" [htmlFor]="inputId">
+    {{property.name}}
+    @if(hasDescription) {
+      <i class="bi bi-question-circle"></i>
+      }
+  </label>
 </div>
 } @else if (type == "SELECT") {
-<label [htmlFor]="inputId" class="form-label">{{property.name}}</label>
+<label [htmlFor]="inputId" class="form-label" [title]="description">
+  {{property.name}}
+  @if(hasDescription) {
+  <i class="bi bi-question-circle"></i>
+  }
+</label>
 <select class="form-select" [id]="inputId" [value]="valueSelect" (change)="onChangeParse($event)">
   <option value="true">{{selectTrueText}}</option>
   <option value="false">{{selectFalseText}}</option>
