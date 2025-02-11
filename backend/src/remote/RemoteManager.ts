@@ -130,6 +130,19 @@ export class RemoteManager {
     }
     //#endregion
 
+    //#region Expression RGB
+    if (type == RemoteControlActionType.ACTIVATE_FACE_RGB_EFFECT) {
+      const effect = this.protogen.visor.faceRenderer.availableColorEffects.find(e => e.id == action);
+
+      if (effect == null) {
+        return false;
+      }
+
+      this.protogen.visor.faceRenderer.activeColorEffect = effect;
+      return true;
+    }
+    //#endregion
+
     return false;
   }
 
