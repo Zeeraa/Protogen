@@ -38,7 +38,7 @@ export class FaceApiService extends ApiBaseService {
   }
 
   updateExpression(id: string, data: AlterExpressionDTO) {
-    return this.http.post<FaceExpression>(this.apiBaseUrl + "/face/expressions/" + id, data).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put<FaceExpression>(this.apiBaseUrl + "/face/expressions/" + id, data).pipe(catchError(this.defaultErrorHandler));
   }
 
   activateColorEffect(id: string | null) {
