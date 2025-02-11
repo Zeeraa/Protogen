@@ -99,6 +99,7 @@ export interface FaceColorEffectProperty {
   restrictions: any;
   metadata: any;
   value: any;
+  description: string | null;
 }
 
 export interface UpdateFaceColorEffect {
