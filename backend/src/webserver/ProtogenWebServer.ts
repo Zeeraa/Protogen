@@ -2,15 +2,17 @@ import { Protogen } from "../Protogen";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { cyan, yellow } from "colors";
-import { existsSync, readFileSync } from "fs";
+import { cyan, green, yellow } from "colors";
+import { existsSync, mkdirSync, readFileSync, rmSync } from "fs";
 import swaggerUi from "swagger-ui-express";
 import { VideoPlayerRouter } from "./routes/video-player/VideoPlayerRouter";
 import { AudioRouter } from "./routes/volume/AudioRouter";
 import { VisorRouter } from "./routes/visor/VisorRouter";
 import { SystemRouter } from "./routes/system/SystemRouter";
 import { RgbRouter } from "./routes/rgb/RgbRouter";
-import { createServer } from "http";
+import { createServer as createHttpServer } from 'http';
+import { createServer as createHttpsServer } from 'https';
+import * as https from 'https';
 import { Server, Socket } from 'socket.io';
 import { UserSocketSession } from "./socket/UserSocketSession";
 import { SocketMessageType } from "./socket/SocketMessageType";
@@ -26,24 +28,82 @@ import { RemoteRouter } from "./routes/remote/RemoteRouter";
 import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 import { FaceRouter } from "./routes/face/FaceRouter";
 import { AssetsRouter } from "./routes/assets/AssetsRouter";
+import { resolve } from "path";
+import { generateNewCertificate, getCertificateExpiry } from "../utils/Utils";
+
+export const SocketPath = "/protogen-websocket.io";
 
 export class ProtogenWebServer {
   private _protogen;
   private _express;
   private _http;
+  private _https: https.Server | null = null;
   private _socket;
+  private _socketSecure: Server | null = null;
   private _sessions: UserSocketSession[];
   private _authMiddleware;
+
+  private _internalHttpsPublicKeyFile: string;
+  private _internalHttpsPrivateKeyFile: string;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this._sessions = [];
 
+    const certFolder = resolve(protogen.config.dataDirectory + "/cert");
+    if (!existsSync(certFolder)) {
+      protogen.logger.info("WebServer", "Creating certificate folder");
+      mkdirSync(certFolder);
+    }
+    this._internalHttpsPublicKeyFile = certFolder + "/cert_selfsigned.pub";
+    this._internalHttpsPrivateKeyFile = certFolder + "/cert_selfsigned.pem";
+
+    let certGenerationNeeded = false;
+
+    if (!existsSync(this._internalHttpsPublicKeyFile) || !existsSync(this._internalHttpsPrivateKeyFile)) {
+      this.protogen.logger.info("WebServer", "Self signed certificate not found");
+      certGenerationNeeded = true;
+    } else {
+      const expiresAt = getCertificateExpiry(this._internalHttpsPublicKeyFile);
+      // if it expires in 7 days. use 1000 * 60... to make it readable
+      if (expiresAt.getDate() - Date.now() < 1000 * 60 * 60 * 24 * 7) {
+        this.protogen.logger.info("WebServer", "Self signed certificate is expiring soon. Creating a new one");
+        certGenerationNeeded = true;
+      }
+    }
+
+    if (certGenerationNeeded) {
+      this.protogen.logger.info("WebServer", "Generating self signed certificate for secure local communication");
+      if (existsSync(this._internalHttpsPublicKeyFile)) {
+        rmSync(this._internalHttpsPublicKeyFile);
+      }
+
+      if (existsSync(this._internalHttpsPrivateKeyFile)) {
+        rmSync(this._internalHttpsPrivateKeyFile);
+      }
+
+      generateNewCertificate(this._internalHttpsPrivateKeyFile, this._internalHttpsPublicKeyFile, 30);
+    }
+
+
     this._express = express();
-    this._http = createServer(this._express);
+    this._http = createHttpServer(this._express);
+
     this._socket = new Server(this._http, {
-      path: "/protogen-websocket.io",
+      path: SocketPath,
     });
+
+    if (protogen.config.web.localHttpsPort != null) {
+      this._https = createHttpsServer({
+        key: readFileSync(this._internalHttpsPrivateKeyFile),
+        cert: readFileSync(this._internalHttpsPublicKeyFile),
+      }, this._express);
+
+      console.debug("Creating socket for https");
+      this._socketSecure = new Server(this._https, {
+        path: SocketPath,
+      });
+    }
 
     this._authMiddleware = AuthMiddleware(this);
 
@@ -65,7 +125,7 @@ export class ProtogenWebServer {
     new FaceRouter(this).register();
     new AssetsRouter(this).register({ noAuth: true });
 
-    this.socket.on("connection", async (socket: Socket) => {
+    const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
       let auth: AuthData | null = null;
 
@@ -102,7 +162,10 @@ export class ProtogenWebServer {
       const session = new UserSocketSession(this.protogen, socket);
       this._sessions.push(session);
       this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
-    });
+    }
+
+    this.socket.on("connection", socketConnectionHandler);
+    this.socketSecure?.on("connection", socketConnectionHandler);
 
     setInterval(() => {
       this.broadcastMessage(SocketMessageType.S2C_Ping, {});
@@ -131,8 +194,15 @@ export class ProtogenWebServer {
         }
 
         this._http.listen(this.config.port, () => {
-          this.protogen.logger.info("WebServer", "Listening on port " + cyan(String(this.config.port)));
+          this.protogen.logger.info("WebServer", "[" + green("HTTP") + "] Listening on port " + cyan(String(this.config.port)));
         });
+
+        if (this._https != null) {
+          this._https.listen(this.protogen.config.web.localHttpsPort, () => {
+            this.protogen.logger.info("WebServer", "[" + green("HTTPS") + "] Listening on port " + cyan(String(this.protogen.config.web.localHttpsPort)));
+          });
+        }
+
         resolve();
       } catch (err) {
         this.protogen.logger.error("WebServer", "Failed to start express");
@@ -157,8 +227,20 @@ export class ProtogenWebServer {
     return this._protogen;
   }
 
+  public get internalHttpsPublicKeyFile() {
+    return this._internalHttpsPublicKeyFile;
+  }
+
+  public get isLocalHttpsServerRunning() {
+    return this._https != null;
+  }
+
   public get socket() {
     return this._socket;
+  }
+
+  public get socketSecure() {
+    return this._socketSecure;
   }
 
   public get authMiddleware() {
@@ -171,5 +253,6 @@ export class ProtogenWebServer {
       data: data,
     }
     this._socket.emit("message", message);
+    this._socketSecure?.emit("message", message);
   }
 }

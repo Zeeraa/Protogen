@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import crypto from 'crypto';
 
 export function sleep(milliseconds: number) {
@@ -47,4 +48,41 @@ export function typeAssert<T>(input: any): T {
 
 export function generateSecretKey(keyLength: number = 64) {
   return crypto.randomBytes(keyLength).toString('hex');
+}
+
+/**
+ * Function to check the expiration date of the certificate
+ */
+export function getCertificateExpiry(certFile: string): Date {
+  // Extract the expiry date using OpenSSL
+  const expiryStr = execSync(`openssl x509 -enddate -noout -in ${certFile}`)
+    .toString()
+    .trim();
+
+  const match = expiryStr.match(/notAfter=(.*)/);
+  if (!match || match.length == 0) {
+    throw new Error("Could not parse certificate expiry date.");
+  }
+
+  return new Date(match[1]);
+}
+
+/**
+ * Function to generate a new certificate and private key
+ * @param privateKeyPath Path to the private key file
+ * @param publicKeyPath Path to generateNewCertificatethe public certificate file
+ * @param validDays Number of days the certificate is valid
+ */
+export function generateNewCertificate(privateKeyPath: string, publicKeyPath: string, validDays: number) {
+  console.log(`Generating a new password-free certificate (Valid for ${validDays} days)...`);
+  console.log(`Private Key: ${privateKeyPath}`);
+  console.log(`Public Certificate: ${publicKeyPath}`);
+
+  // Generate a new private key WITHOUT password protection
+  execSync(`openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out ${privateKeyPath}`);
+
+  // Generate a new self-signed certificate
+  execSync(
+    `openssl req -x509 -new -key ${privateKeyPath} -out ${publicKeyPath} -days ${validDays} -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:192.168.1.67"`
+  );
 }
