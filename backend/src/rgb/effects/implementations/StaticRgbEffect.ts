@@ -7,7 +7,7 @@ export class StaticRgbEffect extends AbstractRgbEffect {
 
   constructor(id: string, name: string, displayName: string) {
     super(id, name, displayName);
-    this._propColor = new RgbEffectColorProperty("Color", ProtoColors.black);
+    this._propColor = new RgbEffectColorProperty("Color", ProtoColors.black, "The color to set the LEDs to");
     this.addProperty(this._propColor);
   }
 

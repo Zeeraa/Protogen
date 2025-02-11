@@ -597,6 +597,7 @@ function sceneToDTO(scene: RgbScene) {
         restrictions: property.restrictions,
         metadata: property.metadata,
         value: property.value,
+        description: property.description,
       });
     });
 
@@ -650,6 +651,7 @@ export interface RgbPropertyData {
   value: any;
   restrictions: any;
   metadata: any;
+  description: string | null;
 }
 
 interface RgbPreviewConfiguration {

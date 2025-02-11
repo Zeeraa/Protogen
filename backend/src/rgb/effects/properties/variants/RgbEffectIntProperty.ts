@@ -4,8 +4,8 @@ import { SetPropertyResult } from "../SetPropertyResult";
 export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
   private _options;
 
-  constructor(name: string, defaultValue: number, options: IntPropOptions) {
-    super("IntProp", name, defaultValue);
+  constructor(name: string, defaultValue: number, options: IntPropOptions, description: string | null = null) {
+    super("IntProp", name, defaultValue, description);
     this._options = options;
   }
 

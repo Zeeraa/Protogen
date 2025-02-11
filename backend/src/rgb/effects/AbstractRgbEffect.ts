@@ -19,9 +19,9 @@ export abstract class AbstractRgbEffect {
     this._name = name;
     this._displayName = displayName;
     this._propertyMap = {};
-    this._propStartIndex = new RgbEffectIntProperty("StartIndex", 1, { min: 1, max: 2147483647 });
-    this._propWidth = new RgbEffectIntProperty("EffectWidth", 1, { min: 1, max: DefaultEffectMaxWidth });
-    this._propRenderOrder = new RgbEffectIntProperty("RenderOrder", 1, { min: -2147483648, max: 2147483647 });
+    this._propStartIndex = new RgbEffectIntProperty("StartIndex", 1, { min: 1, max: 2147483647 }, "The index of the first LED in the effect");
+    this._propWidth = new RgbEffectIntProperty("EffectWidth", 1, { min: 1, max: DefaultEffectMaxWidth }, "The index of the last LED in the effect");
+    this._propRenderOrder = new RgbEffectIntProperty("RenderOrder", 1, { min: -2147483648, max: 2147483647 }, "The order the effect is rendered in. Can be used to layer effects over other ones");
 
     // Default properties
     this.addProperty(this._propStartIndex);

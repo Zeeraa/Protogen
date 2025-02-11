@@ -4,8 +4,8 @@ import { SetPropertyResult } from "../SetPropertyResult";
 export class RgbEffectBoolProperty extends AbstractRgbEffectProperty<boolean> {
   private _options;
 
-  constructor(name: string, defaultValue: boolean, options: BoolPropOptions) {
-    super("BoolProp", name, defaultValue);
+  constructor(name: string, defaultValue: boolean, options: BoolPropOptions, description: string | null = null) {
+    super("BoolProp", name, defaultValue, description);
     this._options = options;
   }
 

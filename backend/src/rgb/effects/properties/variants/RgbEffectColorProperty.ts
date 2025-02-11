@@ -3,8 +3,8 @@ import { AbstractRgbEffectProperty } from "../AbstractRgbEffectProperty";
 import { SetPropertyResult } from "../SetPropertyResult";
 
 export class RgbEffectColorProperty extends AbstractRgbEffectProperty<number> {
-  constructor(name: string, defaultValue: number) {
-    super("ColorProp", name, defaultValue);
+  constructor(name: string, defaultValue: number, description: string | null = null) {
+    super("ColorProp", name, defaultValue, description);
   }
 
   public setRaw(raw: string): SetPropertyResult<number> {

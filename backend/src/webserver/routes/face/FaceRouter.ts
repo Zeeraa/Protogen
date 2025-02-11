@@ -639,6 +639,7 @@ function effectToDTO(effect: AbstractVisorColorEffect) {
       restrictions: property.restrictions,
       metadata: property.metadata,
       value: property.value,
+      description: property.description,
     });
   });
 

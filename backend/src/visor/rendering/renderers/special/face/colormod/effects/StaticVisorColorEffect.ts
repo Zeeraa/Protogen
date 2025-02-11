@@ -8,7 +8,7 @@ export class StaticVisorColorEffect extends AbstractVisorColorEffect {
 
   constructor(id: string, name: string, displayName: string) {
     super(id, name, displayName);
-    this._propColor = new RgbEffectColorProperty("Color", ProtoColors.white);
+    this._propColor = new RgbEffectColorProperty("Color", ProtoColors.white, "The color to apply to the expression");
     this.addProperty(this._propColor);
   }
 
