@@ -1,5 +1,6 @@
 import re
 import os
+import sys
 import requests
 import asyncio
 import socketio
@@ -7,6 +8,7 @@ import aiohttp
 import time
 import math
 import uuid
+import ssl
 
 from gpiozero import Button, MCP3008, LED
 from dotenv import load_dotenv
@@ -26,11 +28,12 @@ class Action:
     self.action = action
 
 class Profile:
-  def __init__(self, id, name, click_to_activate, actions):
+  def __init__(self, id, name, click_to_activate, actions, ssl_context):
     self.id = id
     self.name = name
     self.click_to_activate = click_to_activate
     self.actions = actions
+    self.ssl_context = ssl_context
     
   async def handle_action(self, remote, input_type):
     action = next((a for a in self.actions if a.input_type == input_type), None)
@@ -54,7 +57,7 @@ class Profile:
             data["sequenceId"] = remote.command_sequence_id
             remote.command_sequence_id += 1
         
-        async with session.post(remote.api_url + "/api/remote/perform-action", headers={"x-api-key": remote.api_key}, json=data) as response:
+        async with session.post(remote.api_url + "/remote/perform-action", headers={"x-api-key": remote.api_key}, json=data, ssl=self.ssl_context) as response:
           if response.status != 200:
             print("Received non 200 response: " + str(response.status))
           else:
@@ -62,7 +65,7 @@ class Profile:
 
 # ---------- Remote class ----------
 class Remote:
-  def __init__(self, api_url, api_key, use_direct_connection):
+  def __init__(self, api_url, api_key, use_direct_connection, use_direct_https):
     self.remote_session_id = uuid.uuid4()
     self.command_sequence_id = 1
     print("Session ID: " + str(self.remote_session_id))
@@ -70,6 +73,10 @@ class Remote:
     self.api_url = api_url
     self.api_key = api_key
     self.use_direct_connection = use_direct_connection
+    self.use_direct_https = use_direct_https
+    self.local_communication_cert = None
+    self.ssl_context = None
+    self.is_using_local = False
     self.websocket = None
     
     # Joystick ADC and button
@@ -127,7 +134,7 @@ class Remote:
   #region Profile data loading
   async def sync_settings(self):
     async with aiohttp.ClientSession() as session:
-      async with session.get(self.api_url + "/api/remote/config/full", headers={"x-api-key": self.api_key}) as response:
+      async with session.get(self.api_url + "/remote/config/full", headers={"x-api-key": self.api_key}, ssl=self.ssl_context) as response:
         if response.status == 200:
           data = await response.json()
           
@@ -140,7 +147,7 @@ class Remote:
             actions = []
             for action in profile["actions"]:
               actions.append(Action(action["inputType"], action["actionType"], action["action"]))
-            profiles.append(Profile(profile["id"], profile["name"], profile["clickToActivate"], actions))
+            profiles.append(Profile(profile["id"], profile["name"], profile["clickToActivate"], actions, self.ssl_context))
           
           # Make sure we are not above the max index
           profile_count = len(profiles)
@@ -159,17 +166,44 @@ class Remote:
   
   #region Start function
   async def start(self):
+    if self.use_direct_https:
+      self.local_communication_cert = os.path.abspath("./local_communication_cert.pem")
+      
+      if os.path.exists(self.local_communication_cert):
+        os.remove(self.local_communication_cert)
+      
+      try:
+        response = requests.get(url + "/discovery/certificate", timeout=10, headers={"x-api-key": remote.api_key})
+        response.raise_for_status()  # Raise an error for HTTP errors
+
+        with open(self.local_communication_cert, "wb") as file:
+          file.write(response.content)
+
+        print(f"Certificate saved to {self.local_communication_cert}")
+
+      except requests.RequestException as e:
+        print(f"Failed to download the certificate: {e}")
+        sys.exit(1)
+      
+      print("Certificate downloaded")
+      #os.environ["REQUESTS_CA_BUNDLE"] = self.local_communication_cert
+    
     if self.use_direct_connection:
       self.draw_text("Scan server")
       print("Direct conection enabled. Trying to find optimal interface for communication")
       optimal_url = self.find_optimal_url()
       if optimal_url is None:
         print("Could not find direct connection")
+        self.use_direct_connection = False
+        self.use_direct_https = False
         self.draw_text("No direct\nconnection")
         time.sleep(2)
       else:
         print("Found direct connection url " + optimal_url)
         self.api_url = optimal_url
+        self.is_using_local = True
+        if use_direct_https:
+          self.ssl_context = ssl.create_default_context(cafile=self.local_communication_cert)
         self.draw_text("Found server\n" + re.sub(r'^https?://', '', optimal_url))
         time.sleep(2)
     
@@ -177,7 +211,8 @@ class Remote:
     await self.sync_settings()
     
     self.draw_text("WS Connect...")
-    self.websocket = socketio.AsyncClient(reconnection=True, reconnection_attempts=0)
+    # SSL for socker is disabled but socket uses its own internal api key thats limited to just reporting remote values so the risk is acceptable
+    self.websocket = socketio.AsyncClient(reconnection=True, reconnection_attempts=0, ssl_verify=False)
     self.websocket.on("connect", self.on_connect)
     self.websocket.on("connect_error", self.on_connect_error)
     self.websocket.on("disconnect", self.on_disconnect)
@@ -241,15 +276,23 @@ class Remote:
   async def connect_to_socket(self):
     backoff = 1  # Initial wait time in seconds
     max_backoff = 30  # Maximum wait time
+    key = ""
     while True:
       socket_url = ("wss://" + self.api_url[8:]) if self.api_url.startswith("https://") else ("ws://" + self.api_url[7:] if self.api_url.startswith("http://") else self.api_url)
       try:
+        print("Fetching remote socket key")
+        async with aiohttp.ClientSession() as session:
+          async with session.get(self.api_url + "/discovery/remote-key", headers={"x-api-key": self.api_key}, ssl=self.ssl_context) as response:
+            if response.status == 200:
+              data = await response.json()
+              key = data.get("key")
+        
         print(f"Attempting to connect to socket at {socket_url}...")
         await self.websocket.connect(
           socket_url,
           transports=["websocket"],
           socketio_path=SOCKETIO_PATH,
-          headers={"authorization": "Key " + self.api_key}
+          headers={"authorization": "RemoteKey " + key}
         )
         await self.websocket.wait()
       except socketio.exceptions.ConnectionError:
@@ -260,8 +303,8 @@ class Remote:
   
   #region Session id detection
   def get_session_id(self, url, timeout = 30):
-    print("Trying to get session id of " + url)
-    response = requests.get(url + "/api/discovery", timeout=timeout)
+    print("Trying to get session id of " + url + "/discovery")
+    response = requests.get(url + "/discovery", timeout=timeout, verify=self.local_communication_cert)
     if response.status_code != 200:
       print("Failed to get session id")
       return None
@@ -279,20 +322,32 @@ class Remote:
     
     print("Trying to find optimal address to api")
     print("Reading discovery data")
-    response = requests.get(self.api_url + "/api/discovery/interfaces", headers=headers)
+    response = requests.get(self.api_url + "/discovery/interfaces", headers=headers)
     if response.status_code != 200:
       print("Failed to read discovery data. Status: " + str(response.status_code))
       raise Exception("Discovery failed with http status " + str(response.status_code))
     
     discovery = response.json()
     session_id = discovery.get("sessionId")
+    use_https = False
+    port = discovery.get("httpPort")
+    if self.use_direct_https:
+      if discovery.get("httpsSupported"):
+        port = discovery.get("httpsPort")
+        print("Remote supports https and port is " + str(port))
+        use_https = True
+      else:
+        print("Remote does not support HTTPS")
+    
     print("Session id: " + str(session_id))
 
     interfaces = discovery.get("interfaces")
     for interface in interfaces:
       try:
         print("Trying to contact api on ip " + interface.get("address"))
-        direct_url = "http://" + interface.get("address")
+        direct_url =  "http://" + interface.get("address") + ":" + str(port)
+        if use_https:
+          direct_url =  "https://" + interface.get("address") + ":" + str(port)
         other_session_id = self.get_session_id(direct_url, timeout=3)
         if other_session_id is None:
           print("No session id found")
@@ -444,5 +499,6 @@ if __name__ == "__main__":
   print("Configured url is: " + url)
 
   use_direct_connection = os.getenv("USE_DIRECT_CONNECTION") == "true"
-  remote = Remote(url, api_key, use_direct_connection)
+  use_direct_https = os.getenv("USE_HTTPS_FOR_LOCAL_COMMUNICATION") == "true"
+  remote = Remote(url, api_key, use_direct_connection, use_direct_https)
   asyncio.run(remote.start())
