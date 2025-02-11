@@ -211,8 +211,11 @@ class Remote:
     await self.sync_settings()
     
     self.draw_text("WS Connect...")
+    socket_ssl = None
+    if self.use_direct_connection:
+      socket_ssl = False
     # SSL for socker is disabled but socket uses its own internal api key thats limited to just reporting remote values so the risk is acceptable
-    self.websocket = socketio.AsyncClient(reconnection=True, reconnection_attempts=0, ssl_verify=False)
+    self.websocket = socketio.AsyncClient(reconnection=True, reconnection_attempts=0, ssl_verify=socket_ssl)
     self.websocket.on("connect", self.on_connect)
     self.websocket.on("connect_error", self.on_connect_error)
     self.websocket.on("disconnect", self.on_disconnect)
