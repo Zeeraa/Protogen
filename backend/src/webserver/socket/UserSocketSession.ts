@@ -5,6 +5,8 @@ import { SocketMessageType } from "./SocketMessageType";
 import { SocketMessage } from "./SocketMessage";
 import { constructRemoteStateFromSensorData } from "../../remote/RemoteState";
 import { AuthData } from "../middleware/AuthMiddleware";
+import { z } from "zod";
+import { RemoteControlInputType } from "../../database/models/remote/RemoteControlInputType";
 
 export class UserSocketSession {
   private _protogen;
@@ -92,6 +94,18 @@ export class UserSocketSession {
         console.error("Received unauthorized message from remote: ", message);
         return;
       }
+
+      // Parse it as RemoteStateModel using safe parse
+      const remoteState = RemoteStateModel.safeParse(message.data);
+      if (!remoteState.success) {
+        console.error("Rejecting invalid remote state message from socket: ", message);
+        return;
+      }
+
+      const state = constructRemoteStateFromSensorData(remoteState.data);
+      this.protogen.remoteManager.state = state;
+
+      return;
     }
 
     if (type == SocketMessageType.C2S_EnableRgbPreview) {
@@ -109,3 +123,14 @@ export class UserSocketSession {
     }
   }
 }
+
+const RemoteStateModel = z.object({
+  joystick_x: z.number().min(0).max(1),
+  joystick_y: z.number().min(0).max(1),
+  joystick_pressed: z.boolean(),
+  joystick_state: z.nativeEnum(RemoteControlInputType),
+  button_a: z.boolean(),
+  button_left: z.boolean(),
+  button_right: z.boolean(),
+  active_profile_id: z.number().int().nullable().optional()
+});
