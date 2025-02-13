@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { FaceColorEffect } from "./FaceColorEffect";
 
 @Entity({ name: "face_expressions" })
 export class FaceExpressionData {
@@ -52,4 +53,13 @@ export class FaceExpressionData {
     default: false,
   })
   replaceColors: boolean;
+
+  // Nullable @ManyToOne relation to FaceColorEffect. If effect is deleted this should be set to null
+  @ManyToOne(() => FaceColorEffect, e => e.linkedExpressions, {
+    nullable: true,
+    onDelete: "SET NULL",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "color_effect" })
+  linkedColorEffect: FaceColorEffect | null;
 }

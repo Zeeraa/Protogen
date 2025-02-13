@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { FaceColorEffectProperty } from "./FaceColorEffectProperty";
+import { FaceExpressionData } from "./FaceExpression.model";
 
 @Entity({
   name: "face_color_effects",
@@ -30,4 +31,7 @@ export class FaceColorEffect {
 
   @OneToMany(() => FaceColorEffectProperty, (property) => property.effect, { cascade: true })
   properties: FaceColorEffectProperty[];
+
+  @OneToMany(() => FaceExpressionData, (expression) => expression.linkedColorEffect)
+  linkedExpressions: FaceExpressionData[];
 }

@@ -22,6 +22,7 @@ export class VisorFaceRenderer extends VisorRenderer {
   private _colorAdjustmentCanvas: Canvas | null;
   private _colorAdjustmentCanvasDimensions: { width: number, height: number };
   private _activeColorEffect: AbstractVisorColorEffect | null;
+  private _forcedColorEffect: AbstractVisorColorEffect | null;
   private _availableColorEffects: AbstractVisorColorEffect[];
 
   constructor(visor: ProtogenVisor) {
@@ -48,6 +49,10 @@ export class VisorFaceRenderer extends VisorRenderer {
       this.protogen.logger.error("VisorFaceRenderer", "Failed to save active color effect");
       console.error(err);
     });
+  }
+
+  get forcedColorEffect() {
+    return this._forcedColorEffect;
   }
 
   get expressions() {
@@ -81,10 +86,12 @@ export class VisorFaceRenderer extends VisorRenderer {
     if (this.activeColorEffect?.id == effect.id) {
       this.activeColorEffect = null;
     }
+    this.reloadForcedRgbEffect();
   }
 
   setActiveExpression(expression: FaceExpression | null) {
     this._activeExpression = expression;
+    this.reloadForcedRgbEffect();
   }
 
   get activeExpression() {
@@ -144,6 +151,8 @@ export class VisorFaceRenderer extends VisorRenderer {
     });
 
     return await repo.save(dbEffect);
+
+    this.reloadForcedRgbEffect();
   }
 
   async loadColorEffects() {
@@ -184,9 +193,28 @@ export class VisorFaceRenderer extends VisorRenderer {
     }
   }
 
+  reloadForcedRgbEffect() {
+    this._forcedColorEffect = null;
+    const linkedEffect = this.activeExpression?.data.linkedColorEffect;
+    if (linkedEffect != null) {
+      const effect = this.availableColorEffects.find(e => e.id == linkedEffect.uuid);
+      if (effect != null) {
+        this._forcedColorEffect = effect;
+      }
+    }
+  }
+
+  get colorEffectToUse() {
+    return this.forcedColorEffect || this.activeColorEffect || null;
+  }
+
   public async onInit() {
     const repo = this.protogen.database.dataSource.getRepository(FaceExpressionData);
-    const expressions = await repo.find({});
+    const expressions = await repo.find({
+      relations: {
+        linkedColorEffect: true,
+      },
+    });
 
     for (const expressionData of expressions) {
       this.protogen.logger.info("VisorFaceRenderer", "Load expression " + cyan(expressionData.name) + " (" + cyan(expressionData.uuid) + ")");
@@ -217,7 +245,8 @@ export class VisorFaceRenderer extends VisorRenderer {
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
     } else {
-      if (this.activeExpression.data.replaceColors && this.activeColorEffect != null) {
+      const colorEffect = this.colorEffectToUse;
+      if (this.activeExpression.data.replaceColors && colorEffect != null) {
         // Color replacement rendering
 
         if (this._colorAdjustmentCanvas == null || this._colorAdjustmentCanvasDimensions.width != width || this._colorAdjustmentCanvasDimensions.height != height) {
@@ -233,7 +262,7 @@ export class VisorFaceRenderer extends VisorRenderer {
 
         // Extract image and modify data
         const image = colorCtx.getImageData(0, 0, width, height);
-        this.activeColorEffect.apply(typeAssert<number[]>(image.data), width, height, time);
+        colorEffect.apply(typeAssert<number[]>(image.data), width, height, time);
 
         ctx.putImageData(image, 0, 0);
       } else {

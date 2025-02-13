@@ -129,6 +129,7 @@ export class FaceRouter extends AbstractRouter {
       #swagger.description = "Create face expression"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for details" }
+      #swagger.responses[404] = { description: "Rgb effect not found" }
       #swagger.responses[409] = { description: "Expression name already in use" }
 
       #swagger.security = [
@@ -138,6 +139,7 @@ export class FaceRouter extends AbstractRouter {
       */
       try {
         const repo = this.protogen.database.dataSource.getRepository(FaceExpressionData);
+        const rgpRepo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
 
         const parsed = AlterFaceExpressionModel.safeParse(req.body);
         if (!parsed.success) {
@@ -166,6 +168,21 @@ export class FaceRouter extends AbstractRouter {
         expressionData.flipRightSide = data.flipRightSide;
         expressionData.flipLeftSide = data.flipLeftSide;
         expressionData.replaceColors = data.replaceColors;
+
+        if (data.linkedColorEffectId != null) {
+          const effect = await rgpRepo.findOne({
+            where: {
+              uuid: Equal(data.linkedColorEffectId),
+            }
+          });
+
+          if (effect == null) {
+            res.status(404).send({ message: "Linked color effect not found" });
+            return;
+          }
+
+          expressionData.linkedColorEffect = effect
+        }
 
         const newData = await repo.save(expressionData);
 
@@ -199,6 +216,7 @@ export class FaceRouter extends AbstractRouter {
       */
       try {
         const repo = this.protogen.database.dataSource.getRepository(FaceExpressionData);
+        const rgpRepo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
 
         const parsed = AlterFaceExpressionModel.safeParse(req.body);
         if (!parsed.success) {
@@ -233,7 +251,26 @@ export class FaceRouter extends AbstractRouter {
         expression.data.flipLeftSide = data.flipLeftSide;
         expression.data.replaceColors = data.replaceColors;
 
+        if (data.linkedColorEffectId != null) {
+          const effect = await rgpRepo.findOne({
+            where: {
+              uuid: Equal(data.linkedColorEffectId),
+            }
+          });
+
+          if (effect == null) {
+            res.status(404).send({ message: "Linked color effect not found" });
+            return;
+          }
+
+          expression.data.linkedColorEffect = effect
+        } else {
+          expression.data.linkedColorEffect = null;
+        }
+
         await expression.saveDataChanges();
+
+        this.protogen.visor.faceRenderer.reloadForcedRgbEffect();
 
         await expression.loadImage();
         expression.generatePreview();
@@ -680,4 +717,5 @@ export const AlterFaceExpressionModel = z.object({
   flipRightSide: z.boolean(),
   flipLeftSide: z.boolean(),
   replaceColors: z.boolean(),
+  linkedColorEffectId: z.string().uuid().nullable(),
 })
