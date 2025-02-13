@@ -249,7 +249,7 @@ class Remote:
         profile_name = active_profile.name
         
       header += "]"
-      self.draw_text(header + "\n" + profile_name)
+      self.draw_text(header + "\n" + profile_name + "\nC: " + ("Direct" if self.is_using_local else "Remote"))
   
   #region Websocket
   def on_connect(self):
