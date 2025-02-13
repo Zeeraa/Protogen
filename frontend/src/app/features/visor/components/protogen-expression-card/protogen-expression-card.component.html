@@ -53,6 +53,21 @@
           </div>
         </div>
       </div>
+
+      <div class="mb-3">
+        <label for="face_image_color_effect">Forced color effect</label>
+        <select id="face_image_color_effect" class="form-select" [(ngModel)]="linkedColorEffect">
+          <option [value]="null">None</option>
+          <optgroup label="Effects">
+            @for (effect of faceColorEffects; track $index) {
+            <option value="{{effect.id}}">{{effect.name}}</option>
+            }
+          </optgroup>
+        </select>
+        <p>
+          If a forced color effect is set this expression will always use that color effect
+        </p>
+      </div>
       }
     </div>
 

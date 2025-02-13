@@ -9,10 +9,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-    selector: 'app-protogen-face-editor',
-    templateUrl: './protogen-face-editor.component.html',
-    styleUrl: './protogen-face-editor.component.scss',
-    standalone: false
+  selector: 'app-protogen-face-editor',
+  templateUrl: './protogen-face-editor.component.html',
+  styleUrl: './protogen-face-editor.component.scss',
+  standalone: false
 })
 export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
   faceExpressions: FaceExpression[] = [];
@@ -31,6 +31,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     flipRightSide: new FormControl<boolean>(false),
     flipLeftSide: new FormControl<boolean>(false),
     replaceColors: new FormControl<boolean>(false),
+    linkedColorEffectId: new FormControl<string | null>(null),
   });
 
   @ViewChild("newFaceRgbEffectPrompt") private newFaceRgbEffectPromptTemplate!: TemplateRef<any>;
@@ -171,6 +172,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
       flipRightSide: this.newExpressionForm.get("flipRightSide")?.value || false,
       flipLeftSide: this.newExpressionForm.get("flipLeftSide")?.value || false,
       replaceColors: this.newExpressionForm.get("replaceColors")?.value || false,
+      linkedColorEffectId: this.newExpressionForm.get("linkedColorEffectId")?.value || null,
     }).pipe(catchError((err: HttpErrorResponse) => {
       this.lockInputs = false;
       this.newExpressionForm.enable();

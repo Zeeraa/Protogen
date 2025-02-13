@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
-import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
+import { colorEffectToLinkedColorEffect, FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -13,6 +13,7 @@ import { uuidv7 } from 'uuidv7';
 })
 export class ProtogenExpressionCardComponent implements OnDestroy {
   @Input({ required: true }) expression!: FaceExpression;
+  @Input({ required: true }) faceColorEffects!: FaceColorEffect[];
   @Input() isDefault = false;
   @Input() showEdit = false;
 
@@ -30,6 +31,14 @@ export class ProtogenExpressionCardComponent implements OnDestroy {
 
   get componentId() {
     return "expression_" + this._uuid;
+  }
+
+  get linkedColorEffect() {
+    return this.expression.data.linkedColorEffect?.uuid || null;
+  }
+
+  set linkedColorEffect(uuid: string | null) {
+    this.expression.data.linkedColorEffect = colorEffectToLinkedColorEffect(this.faceColorEffects.find(e => e.id == uuid));
   }
 
   activate() {
@@ -66,6 +75,7 @@ export class ProtogenExpressionCardComponent implements OnDestroy {
       flipLeftSide: this.expression.data.flipLeftSide,
       flipRightSide: this.expression.data.flipRightSide,
       image: this.expression.data.image,
+      linkedColorEffectId: this.expression.data.linkedColorEffect?.uuid || null,
     }).pipe(catchError(err => {
       this.toastr.error("Failed to save changes");
       throw err;

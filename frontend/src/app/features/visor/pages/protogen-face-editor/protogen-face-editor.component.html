@@ -49,7 +49,7 @@
     @for (expression of faceExpressions; track $index) {
     <div class="col-12 col-md-6 col-lg-4 col-xl-3 mt-2">
       <app-protogen-expression-card [expression]="expression" [isDefault]="isDefault(expression)" [showEdit]="showEdit"
-        (deleted)="expressionDeleted(expression)" />
+        [faceColorEffects]="faceColorEffects" (deleted)="expressionDeleted(expression)" />
     </div>
     }
 
@@ -138,6 +138,21 @@
             If enabled all fully white pixels will be replaced by colors from enabled face rgb effect
           </p>
         </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="face_image_color_effect">Forced color effect</label>
+        <select id="face_image_color_effect" class="form-select" formControlName="linkedColorEffectId">
+          <option [value]="null">None</option>
+          <optgroup label="Effects">
+            @for (effects of faceColorEffects; track $index) {
+            <option [value]="effects.id">{{effects.name}}</option>
+            }
+          </optgroup>
+        </select>
+        <p>
+          If a forced color effect is set this expression will always use that color effect
+        </p>
       </div>
     </form>
   </div>

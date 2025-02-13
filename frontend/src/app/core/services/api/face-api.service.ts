@@ -123,6 +123,7 @@ export interface AlterExpressionDTO {
   flipRightSide: boolean;
   flipLeftSide: boolean;
   replaceColors: boolean;
+  linkedColorEffectId: string | null;
 }
 
 export interface FaceData {
@@ -143,4 +144,21 @@ export interface FaceExpressionData extends AlterExpressionDTO {
   flipRightSide: boolean;
   flipLeftSide: boolean;
   replaceColors: boolean;
+  linkedColorEffect: LinkedColorEffect | null;
+  linkedColorEffectId: never;
+}
+
+interface LinkedColorEffect {
+  uuid: string;
+  name: string;
+}
+
+export function colorEffectToLinkedColorEffect(effect: FaceColorEffect | undefined | null): LinkedColorEffect | null {
+  if (effect != null) {
+    return {
+      uuid: effect.id,
+      name: effect.name,
+    };
+  }
+  return null;
 }
