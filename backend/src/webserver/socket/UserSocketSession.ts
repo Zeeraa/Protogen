@@ -4,6 +4,9 @@ import { Socket } from "socket.io";
 import { SocketMessageType } from "./SocketMessageType";
 import { SocketMessage } from "./SocketMessage";
 import { constructRemoteStateFromSensorData } from "../../remote/RemoteState";
+import { AuthData } from "../middleware/AuthMiddleware";
+import { z } from "zod";
+import { RemoteControlInputType } from "../../database/models/remote/RemoteControlInputType";
 
 export class UserSocketSession {
   private _protogen;
@@ -13,11 +16,13 @@ export class UserSocketSession {
   private _enableRgbPreview = false;
   private _enableVisorPreview = false;
   private _enableRemotePreview = false;
+  private _auth: AuthData;
 
-  constructor(protogen: Protogen, socket: Socket) {
+  constructor(protogen: Protogen, socket: Socket, auth: AuthData) {
     this._protogen = protogen;
     this._sessionId = uuidv7();
     this._socket = socket;
+    this._auth = auth;
 
     socket.on("disconnect", () => {
       this._disconnected = true;
@@ -39,6 +44,10 @@ export class UserSocketSession {
 
   get socket() {
     return this._socket;
+  }
+
+  get auth() {
+    return this._auth;
   }
 
   public disconnect() {
@@ -80,6 +89,25 @@ export class UserSocketSession {
 
     const type = message.type;
 
+    if (this.auth.onlyRemotePermissions) {
+      if (type != SocketMessageType.E2S_RemoteState) {
+        console.error("Received unauthorized message from remote: ", message);
+        return;
+      }
+
+      // Parse it as RemoteStateModel using safe parse
+      const remoteState = RemoteStateModel.safeParse(message.data);
+      if (!remoteState.success) {
+        console.error("Rejecting invalid remote state message from socket: ", message);
+        return;
+      }
+
+      const state = constructRemoteStateFromSensorData(remoteState.data);
+      this.protogen.remoteManager.state = state;
+
+      return;
+    }
+
     if (type == SocketMessageType.C2S_EnableRgbPreview) {
       const enable = message.data === true;
       this._enableRgbPreview = enable;
@@ -95,3 +123,14 @@ export class UserSocketSession {
     }
   }
 }
+
+const RemoteStateModel = z.object({
+  joystick_x: z.number().min(0).max(1),
+  joystick_y: z.number().min(0).max(1),
+  joystick_pressed: z.boolean(),
+  joystick_state: z.nativeEnum(RemoteControlInputType),
+  button_a: z.boolean(),
+  button_left: z.boolean(),
+  button_right: z.boolean(),
+  active_profile_id: z.number().int().nullable().optional()
+});

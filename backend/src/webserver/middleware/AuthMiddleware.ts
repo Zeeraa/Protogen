@@ -16,6 +16,7 @@ export const AuthMiddleware = (webServer: ProtogenWebServer) => {
             type: AuthType.Token,
             isSuperUser: user.superUser,
             user: user,
+            onlyRemotePermissions: false,
           };
 
           next();
@@ -31,6 +32,7 @@ export const AuthMiddleware = (webServer: ProtogenWebServer) => {
             type: AuthType.ApiKey,
             isSuperUser: key.superUser,
             user: null,
+            onlyRemotePermissions: false,
           }
 
           next();
@@ -51,9 +53,11 @@ export interface AuthData {
   type: AuthType;
   /** Can be null if using api key */
   user: User | null;
+  onlyRemotePermissions: boolean;
 }
 
 export enum AuthType {
   Token = "Token",
   ApiKey = "ApiKey",
+  Remote = "Remote",
 }

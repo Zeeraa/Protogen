@@ -103,7 +103,7 @@ export class RemoteRouter extends AbstractRouter {
           flipAxis: this.protogen.remoteManager.flipAxis,
         }
 
-        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteConfigChange, config)
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteConfigChange, config);
         res.json(config);
       } catch (err) {
         this.handleError(err, req, res);
@@ -388,6 +388,8 @@ export class RemoteRouter extends AbstractRouter {
         }
 
         await repo.delete(profile.id);
+
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteConfigChange, config);
 
         res.json({});
       } catch (err) {

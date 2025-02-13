@@ -19,6 +19,36 @@ export class DiscoveryRouter extends AbstractRouter {
       });
     });
 
+    this.router.get("/remote-key", [this.authMiddleware], async (req: Request, res: Response) => {
+      /*
+      #swagger.path = '/discovery/remote-key'
+      #swagger.tags = ['Discovery'],
+      #swagger.description = "Get key for remote socket communication"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      try {
+        res.send({
+          key: this.protogen.remoteManager.stateReportingKey,
+        })
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.get("/certificate", [this.authMiddleware], async (req: Request, res: Response) => {
+      /*
+      #swagger.path = '/discovery/certificate'
+      #swagger.tags = ['Discovery'],
+      #swagger.description = "Download the self signed certificate for secure local network communication"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      try {
+        res.sendFile(this.webServer.internalHttpsPublicKeyFile);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/interfaces", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/discovery/interfaces'
@@ -26,7 +56,7 @@ export class DiscoveryRouter extends AbstractRouter {
       #swagger.description = "Find potential ip addresses to use for direct communication"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -53,6 +83,9 @@ export class DiscoveryRouter extends AbstractRouter {
         });
 
         res.json({
+          httpsSupported: this.webServer.isLocalHttpsServerRunning,
+          httpsPort: this.protogen.config.web.localHttpsPort || null,
+          httpPort: this.protogen.config.web.port,
           interfaces: netWinterfaces,
           sessionId: this.protogen.sessionId,
         })

@@ -11,13 +11,27 @@ import { WebConfiguration } from "./objects/WebConfiguration";
 export function loadConfiguration(): Configuration {
   //#region Web
   const webPort = parseInt(String(process.env["PORT"]));
+  let webLocalHttpsPort: number | null = null;
 
   if (isNaN(webPort) || webPort <= 0 || webPort > 65535) {
     throw new Error("Missing or invalid: PORT");
   }
 
+  if (process.env["LOCAL_HTTPS_PORT"] != null) {
+    webLocalHttpsPort = parseInt(String(process.env["LOCAL_HTTPS_PORT"]));
+
+    if (isNaN(webLocalHttpsPort) || webLocalHttpsPort <= 0 || webLocalHttpsPort > 65535) {
+      throw new Error("Invalid: LOCAL_HTTPS_PORT");
+    }
+
+    if (webLocalHttpsPort == webPort) {
+      throw new Error("LOCAL_HTTPS_PORT cannot be the same as PORT");
+    }
+  }
+
   const web: WebConfiguration = {
     port: webPort,
+    localHttpsPort: webLocalHttpsPort
   }
   //#endregion
 
@@ -137,8 +151,6 @@ export function loadConfiguration(): Configuration {
   if (serialPort == null) {
     throw new Error("Missing: SERIAL_PORT");
   }
-
-
 
   const serialConfig: SerialConfiguration = {
     port: serialPort,
