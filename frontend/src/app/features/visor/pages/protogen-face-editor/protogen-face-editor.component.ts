@@ -7,6 +7,9 @@ import { AssetsApiService, BuiltInAsset } from '../../../../core/services/api/as
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
+import { VisorApiService, VisorStatus } from '../../../../core/services/api/visor-api.service';
+
+export const FaceRendererId = "PROTOGEN_FACE";
 
 @Component({
   selector: 'app-protogen-face-editor',
@@ -21,6 +24,9 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
   faceColorEffects: FaceColorEffect[] = [];
   defaultExpression = "";
   showEdit = false;
+
+  visorStatus: VisorStatus | null = null;
+  updateInterval: any = null;
 
   @ViewChild("newExpressionPrompt") private newExpressionPromptTemplate!: TemplateRef<any>;
   private newExpressionPrompt: NgbModalRef | null = null;
@@ -53,16 +59,12 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private modal: NgbModal,
     private assetsApi: AssetsApiService,
+    private visorApi: VisorApiService,
     private title: Title,
   ) { }
 
   isDefault(expression: FaceExpression) {
     return expression.data.uuid == this.defaultExpression;
-  }
-
-  ngOnDestroy(): void {
-    this.newFaceRgbEffectPrompt?.close();
-    this.newExpressionPrompt?.close();
   }
 
   deactivate() {
@@ -89,7 +91,25 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     });
   }
 
+  get isNotActivated() {
+    if (this.visorStatus != null) {
+      if (this.visorStatus.activeRenderer?.id != FaceRendererId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  activateSelf() {
+    this.visorApi.activateRenderer(FaceRendererId).pipe(catchError(err => {
+      this.toastr.error("Failed to activate renderer");
+      throw err;
+    })).subscribe();
+  }
+
   fetchData() {
+    this.updateVisorStatus();
+
     this.faceApi.getData().pipe(catchError(err => {
       this.toastr.error("Failed to fetch expressions");
       throw err;
@@ -105,6 +125,21 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     })).subscribe(effects => {
       this.faceColorEffects = effects;
     });
+  }
+
+  updateVisorStatus() {
+    this.visorApi.getStatus().pipe(catchError(err => {
+      this.toastr.error("Failed to fetch visor status");
+      throw err;
+    })).subscribe(status => {
+      this.visorStatus = status;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.newFaceRgbEffectPrompt?.close();
+    this.newExpressionPrompt?.close();
+    clearInterval(this.updateInterval);
   }
 
   ngOnInit(): void {
@@ -125,6 +160,10 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     });
 
     this.fetchData();
+
+    this.updateInterval = setInterval(() => {
+      this.updateVisorStatus();
+    }, 2000);
   }
 
   openNewExpressionModal() {

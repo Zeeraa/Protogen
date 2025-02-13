@@ -1,4 +1,14 @@
 <div class="container mt-4">
+  @if(isNotActivated) {
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-danger">
+        Face renderer is not activated. Preview will not show active face expression
+      </div>
+    </div>
+  </div>
+  }
+
   <div class="row">
     <div class="col-12">
       <h1>Protogen face editor</h1>
@@ -21,6 +31,12 @@
     <div class="col-12">
       <h4>Expressions</h4>
     </div>
+
+    @if(isNotActivated) {
+    <div class="col-12">
+      <button class="btn btn-primary" (click)="activateSelf()">Activate face renderer</button>
+    </div>
+    }
 
     <div class="col-auto mt-2 mb-2">
       <div title="Select the expression that will activate when the protogen face renderer is activated">
