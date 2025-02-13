@@ -389,6 +389,12 @@ export class RemoteRouter extends AbstractRouter {
 
         await repo.delete(profile.id);
 
+        const config = {
+          invertX: this.protogen.remoteManager.invertX,
+          invertY: this.protogen.remoteManager.invertY,
+          flipAxis: this.protogen.remoteManager.flipAxis,
+        }
+
         this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteConfigChange, config);
 
         res.json({});
