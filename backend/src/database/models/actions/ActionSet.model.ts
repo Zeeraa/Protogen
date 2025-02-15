@@ -17,6 +17,13 @@ export class ActionSet {
   })
   name: string;
 
+  @Column({
+    name: "show_on_dashboard",
+    type: "boolean",
+    default: false,
+  })
+  showOnDashboard: boolean;
+
   @OneToMany(() => ActionSetAction, e => e.actionSet, { cascade: true })
   actions: ActionSetAction[];
 }
