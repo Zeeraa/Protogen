@@ -1,18 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { RemoteAction, RemoteControlActionType, RemoteProfile, translateRemoteActionType, translateRemoteInputType } from '../../../../core/services/api/remote-api.service';
+import { RemoteAction, RemoteProfile, translateRemoteInputType } from '../../../../core/services/api/remote-api.service';
 import { uuidv7 } from 'uuidv7';
-import { RemoteActionDataSet } from '../../pages/remote-settings-page/remote-settings-page.component';
+import { ActionType, translateActionType } from '../../../../core/enum/ActionType';
+import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
 
 @Component({
-    selector: 'app-remote-action-editor',
-    templateUrl: './remote-action-editor.component.html',
-    styleUrl: './remote-action-editor.component.scss',
-    standalone: false
+  selector: 'app-remote-action-editor',
+  templateUrl: './remote-action-editor.component.html',
+  styleUrl: './remote-action-editor.component.scss',
+  standalone: false
 })
 export class RemoteActionEditorComponent implements OnInit {
   @Input({ required: true }) profile!: RemoteProfile;
   @Input({ required: true }) action!: RemoteAction;
-  @Input({ required: true }) actionDataSet!: RemoteActionDataSet;
+  @Input({ required: true }) actionDataSet!: ActionDataSet;
   @Input({ required: true }) disabled!: boolean;
   private _componentId = uuidv7();
 
@@ -20,12 +21,12 @@ export class RemoteActionEditorComponent implements OnInit {
     return translateRemoteInputType(this.action.inputType);
   }
 
-  translateActionName(action: RemoteControlActionType) {
-    return translateRemoteActionType(action);
+  translateActionName(action: ActionType) {
+    return translateActionType(action);
   }
 
   get actionList() {
-    return Object.values(RemoteControlActionType);
+    return Object.values(ActionType);
   }
 
   get componentId() {

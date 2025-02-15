@@ -1,0 +1,49 @@
+<td>
+  <select class="form-select" id="action_{{componentId}}" [(ngModel)]="action.type" [disabled]="disabled">
+    @for (action of actionList; track $index) {
+    <option [value]="action">{{translateActionName(action)}}</option>
+    }
+  </select>
+</td>
+<th>
+  @if(actionTypeAsString == "PLAY_VIDEO") {
+  <select class="form-select" id="video_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+    @for (video of actionDataSet.savedVideos; track $index) {
+    <option value="{{video.id}}">{{video.name}}</option>
+    }
+  </select>
+  } @else if(actionTypeAsString == "ACTIVATE_VISOR_RENDERER") {
+  <select class="form-select" id="renderer_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+    @for (renderer of actionDataSet.visorRenderers; track $index) {
+    <option value="{{renderer.id}}">{{renderer.name}}</option>
+    }
+  </select>
+  } @else if(actionTypeAsString == "ACTIVATE_RGB_SCENE") {
+  <select class="form-select" id="rgb_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+    @for (rgbScene of actionDataSet.rgbScenes; track $index) {
+    <option value="{{rgbScene.id}}">{{rgbScene.name}}</option>
+    }
+  </select>
+  } @else if(actionTypeAsString == "FACE_EXPRESSION") {
+  <select class="form-select" id="expression_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+    @for (expression of actionDataSet.expressions; track $index) {
+    <option value="{{expression.data.uuid}}">{{expression.data.name}}</option>
+    }
+  </select>
+  } @else if(actionTypeAsString == "ACTIVATE_FACE_RGB_EFFECT") {
+  <select class="form-select" id="expression_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+    @for (colorEffect of actionDataSet.faceColorEffects; track $index) {
+    <option value="{{colorEffect.id}}">{{colorEffect.name}}</option>
+    }
+  </select>
+  } @else if(actionTypeAsString == "DISABLE_RGB" ||actionTypeAsString == "STOP_VIDEO") {
+  <!-- No parameters -->
+  } @else if(actionTypeAsString != "NONE") {
+  <span class="text-danger">Unknown action type</span>
+  }
+</th>
+<th>
+  <button class="btn btn-danger" (click)="deleteAction()">
+    <i class="bi bi-trash-fill"></i>
+  </button>
+</th>

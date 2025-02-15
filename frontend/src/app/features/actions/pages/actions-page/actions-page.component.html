@@ -1,0 +1,62 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>Actions</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    @for (action of actionSets; track $index) {
+    <div class="col-12 col-sm-12 col-md-6 mt-2">
+      <app-action-card [actionSet]="action" [actionDataSet]="actionDataSet" (deleted)="actionSetDeleted($event)"
+        (revertChanged)="undoEdit($event)" />
+    </div>
+    }
+  </div>
+
+  <div class="row mt-2">
+    <div class="col">
+      <button class="btn btn-primary" (click)="openNewModal()">Create new action</button>
+    </div>
+  </div>
+</div>
+
+<ng-template #newActionModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Create action</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newActionForm">
+      <div class="mb-2">
+        <label for="newActionName" class="form-label">Name</label>
+        <input type="text" name="name" id="newActionName" class="form-control" formControlName="name"
+          placeholder="Action name" maxlength="16" [class.is-invalid]="nameEmpty || nameTaken" [disabled]="lockInputs"
+          aria-labelledby="newActionNameError">
+
+
+        <div id="newActionNameError" class="invalid-feedback">
+          @if(nameEmpty) {
+          Name can not be empty
+          } @else if(nameTaken){
+          Name already in use by another action
+          }
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="showOnDashboard"
+            formControlName="showOnDashboard">
+          <label class="form-check-label" for="showOnDashboard">Show on dashboard</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="confirmCreateAction()" [disabled]="lockInputs">Create
+      action</button>
+  </div>
+</ng-template>

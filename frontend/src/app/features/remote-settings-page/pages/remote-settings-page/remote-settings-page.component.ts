@@ -2,9 +2,9 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { RemoteApiService, RemoteProfile } from '../../../../core/services/api/remote-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, forkJoin, of, Subscription } from 'rxjs';
-import { VisorApiService, VisorRenderer } from '../../../../core/services/api/visor-api.service';
-import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
-import { SavedVideo, VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
+import { VisorApiService, } from '../../../../core/services/api/visor-api.service';
+import { RgbApiService } from '../../../../core/services/api/rgb-api.service';
+import { VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -13,7 +13,8 @@ import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { typeAssert } from '../../../../core/services/utils/Utils';
-import { FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
+import { FaceApiService } from '../../../../core/services/api/face-api.service';
+import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
 
 @Component({
   selector: 'app-remote-settings-page',
@@ -23,7 +24,7 @@ import { FaceApiService, FaceColorEffect, FaceExpression } from '../../../../cor
 })
 export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
   profiles: RemoteProfile[] = [];
-  actionDataSet: RemoteActionDataSet = {
+  actionDataSet: ActionDataSet = {
     rgbScenes: [],
     savedVideos: [],
     visorRenderers: [],
@@ -152,12 +153,4 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     this.newProfilePrompt?.close();
     this.socketSubscription?.unsubscribe();
   }
-}
-
-export interface RemoteActionDataSet {
-  visorRenderers: VisorRenderer[];
-  rgbScenes: RgbScene[];
-  savedVideos: SavedVideo[];
-  expressions: FaceExpression[];
-  faceColorEffects: FaceColorEffect[];
 }

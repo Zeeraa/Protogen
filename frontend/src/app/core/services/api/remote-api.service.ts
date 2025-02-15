@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { catchError } from 'rxjs';
+import { ActionType } from '../../enum/ActionType';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +46,7 @@ export interface RemoteConfig {
 
 export interface AlterProfileActions {
   id: number | undefined;
-  actionType: RemoteControlActionType;
+  actionType: ActionType;
   action: string | null;
   inputType: RemoteControlInputType;
 }
@@ -67,7 +68,7 @@ export interface RemoteProfile {
 export interface RemoteAction {
   id: number;
   inputType: RemoteControlInputType;
-  actionType: RemoteControlActionType;
+  actionType: ActionType;
   action: any;
 }
 
@@ -79,17 +80,6 @@ export enum RemoteControlInputType {
   JOYSTICK_CENTER = "JOYSTICK_CENTER",
   JOYSTICK_BUTTON = "JOYSTICK_BUTTON",
   BUTTON_1 = "BUTTON_1",
-}
-
-export enum RemoteControlActionType {
-  NONE = "NONE",
-  ACTIVATE_VISOR_RENDERER = "ACTIVATE_VISOR_RENDERER",
-  ACTIVATE_RGB_SCENE = "ACTIVATE_RGB_SCENE",
-  PLAY_VIDEO = "PLAY_VIDEO",
-  FACE_EXPRESSION = "FACE_EXPRESSION",
-  ACTIVATE_FACE_RGB_EFFECT = "ACTIVATE_FACE_RGB_EFFECT",
-  DISABLE_RGB = "DISABLE_RGB",
-  STOP_VIDEO = "STOP_VIDEO",
 }
 
 export function translateRemoteInputType(type: RemoteControlInputType) {
@@ -114,37 +104,6 @@ export function translateRemoteInputType(type: RemoteControlInputType) {
 
     case RemoteControlInputType.BUTTON_1:
       return "Button 1";
-
-    default:
-      return "Unknown";
-  }
-}
-
-export function translateRemoteActionType(type: RemoteControlActionType) {
-  switch (type) {
-    case RemoteControlActionType.NONE:
-      return "None";
-
-    case RemoteControlActionType.ACTIVATE_RGB_SCENE:
-      return "Set RGB scene";
-
-    case RemoteControlActionType.ACTIVATE_VISOR_RENDERER:
-      return "Activate visor renderer";
-
-    case RemoteControlActionType.FACE_EXPRESSION:
-      return "Face expression";
-
-    case RemoteControlActionType.ACTIVATE_FACE_RGB_EFFECT:
-      return "Activate face RGB effect";
-
-    case RemoteControlActionType.PLAY_VIDEO:
-      return "Play video";
-
-    case RemoteControlActionType.DISABLE_RGB:
-      return "Disable RGB";
-
-    case RemoteControlActionType.STOP_VIDEO:
-      return "Stop video";
 
     default:
       return "Unknown";

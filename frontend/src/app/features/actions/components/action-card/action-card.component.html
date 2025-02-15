@@ -1,0 +1,117 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">
+      {{actionSet.name}}
+    </h5>
+
+    <div class="card-text mt-3">
+      <div class="container">
+        @if(editEnabled) {
+        <div class="row mb-2">
+          <div class="col">
+            <label for="profileName_{{componentId}}" class="form-label">Action name</label>
+            <input type="text" class="form-control" id="profileName_{{componentId}}" maxlength="16"
+              placeholder="Profile name" [(ngModel)]="actionSet.name" [disabled]="lockInputs"
+              [class.is-invalid]="nameEmpty || nameTaken" [attr.aria-labelledby]="invalidNameLabel" />
+
+            <div [id]="invalidNameLabel" class="invalid-feedback">
+              @if(nameEmpty) {
+              Name can not be empty
+              } @else if(nameTaken){
+              Name already in use by another action
+              }
+            </div>
+          </div>
+        </div>
+        }
+
+        <div class="row">
+          <div class="col">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" [disabled]="!editEnabled"
+                id="showOnDashboard_{{componentId}}" [(ngModel)]="actionSet.showOnDashboard">
+              <label class="form-check-label" for="showOnDashboard_{{componentId}}"
+                title="If enabled the action will be visible on the dashboard page">
+                Show on dashboard
+              </label>
+            </div>
+          </div>
+        </div>
+
+        @if(editEnabled) {
+        <div class="row mt-2">
+          <h5>Actions</h5>
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Value</th>
+                <th class="t-fit"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (action of actionSet.actions; track $index) {
+              <tr action-list-entry [action]="action" [disabled]="lockInputs" [actionDataSet]="actionDataSet"
+                (deleted)="actionDeleted($event)"></tr>
+              }
+            </tbody>
+
+            <tbody>
+              <tr>
+                <td colspan="3">
+                  <button class="btn btn-primary" (click)="addAction()">Add</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer text-end">
+    @if(editEnabled) {
+    <button class="btn btn-danger me-1 mb-1" (click)="showDeletePrompt()">Delete</button>
+    <button class="btn btn-secondary me-1 mb-1" (click)="undoEdit()">Undo</button>
+    <button class="btn btn-primary me-1 mb-1" [disabled]="lockInputs" (click)="save()">Save</button>
+    } @else {
+    <button class="btn btn-primary me-1 mb-1" (click)="enableEdit()">Edit</button>
+    <button class="btn btn-success me-1 mb-1" (click)="activate()">Activate</button>
+    }
+  </div>
+</div>
+
+<ng-template #deleteActionPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Delete action</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>Please confirm that you want to delete the action <span class="text-info">{{actionSet.name}}</span></p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="lockInputs">Delete
+      action</button>
+  </div>
+</ng-template>
+
+<ng-template #undoChangesPrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Undo changes</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>Please confirm that you want to discard changes made to action <span class="text-info">{{actionSet.name}}</span>
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="lockInputs">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmUndoEdit()" [disabled]="lockInputs">Discard
+      changes</button>
+  </div>
+</ng-template>

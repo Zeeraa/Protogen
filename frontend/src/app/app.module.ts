@@ -19,6 +19,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserManagerModule } from './features/user-manager/user-manager.module';
 import { ApiKeyManagerModule } from './features/api-key-manager/api-key-manager.module';
 import { RemoteSettingsPageModule } from './features/remote-settings-page/remote-settings-page.module';
+import { ActionsModule } from './features/actions/actions.module';
 
 @NgModule({
   declarations: [
@@ -42,6 +43,7 @@ import { RemoteSettingsPageModule } from './features/remote-settings-page/remote
     UserManagerModule,
     ApiKeyManagerModule,
     RemoteSettingsPageModule,
+    ActionsModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),

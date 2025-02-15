@@ -1,21 +1,21 @@
 import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
 import { AlterProfileActions, RemoteApiService, RemoteProfile } from '../../../../core/services/api/remote-api.service';
 import { uuidv7 } from 'uuidv7';
-import { RemoteActionDataSet } from '../../pages/remote-settings-page/remote-settings-page.component';
 import { catchError, of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
 
 @Component({
-    selector: 'app-remote-profile-card',
-    templateUrl: './remote-profile-card.component.html',
-    styleUrl: './remote-profile-card.component.scss',
-    standalone: false
+  selector: 'app-remote-profile-card',
+  templateUrl: './remote-profile-card.component.html',
+  styleUrl: './remote-profile-card.component.scss',
+  standalone: false
 })
 export class RemoteProfileCardComponent implements OnDestroy {
   @Input({ required: true }) profile!: RemoteProfile;
-  @Input({ required: true }) actionDataSet!: RemoteActionDataSet;
+  @Input({ required: true }) actionDataSet!: ActionDataSet;
   @Input() isActive = false;
   @Output() deleted = new EventEmitter<RemoteProfile>();
   editEnabled = false;

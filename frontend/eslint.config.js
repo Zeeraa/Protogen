@@ -22,14 +22,6 @@ module.exports = tseslint.config(
           style: "camelCase",
         },
       ],
-      "@angular-eslint/component-selector": [
-        "error",
-        {
-          type: "element",
-          prefix: "app",
-          style: "kebab-case",
-        },
-      ],
       "no-empty": ["error", { "allowEmptyCatch": true }],
       "@typescript-eslint/no-explicit-any": "off", // Any can be useful in some cases
       "no-eval": "error", // Eval is evil
