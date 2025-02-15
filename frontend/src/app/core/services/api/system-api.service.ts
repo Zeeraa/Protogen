@@ -68,6 +68,7 @@ export interface SystemOverview {
   network: Network;
   hudEnabled: boolean;
   swaggerEnabled: boolean;
+  backendVersion: string;
 }
 
 export interface Network {
