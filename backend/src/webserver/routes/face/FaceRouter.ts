@@ -570,6 +570,17 @@ export class FaceRouter extends AbstractRouter {
 
         effect.displayName = data.name;
 
+        const self = await repo.findOne({
+          where: {
+            uuid: Equal(effect.id),
+          }
+        });
+
+        if (self != null) {
+          self.name = data.name;
+          await repo.save(self);
+        }
+
         res.json(effectToDTO(effect));
       } catch (err) {
         this.handleError(err, req, res);
