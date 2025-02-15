@@ -67,7 +67,7 @@ export class ActionsRouter extends AbstractRouter {
 
         const set = new ActionSet();
         set.name = data.name;
-        action.showOnDashboard = data.showOnDashboard;
+        set.showOnDashboard = data.showOnDashboard;
         set.actions = [];
 
         for (const action of data.actions) {
