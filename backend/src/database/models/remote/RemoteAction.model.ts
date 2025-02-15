@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { RemoteControlInputType } from "./RemoteControlInputType";
 import { RemoteProfile } from "./RemoteProfile.model";
-import { RemoteControlActionType } from "./RemoteControlActionType";
+import { ActionType } from "../../../actions/ActionType";
 
 @Entity({
   name: "remote_action",
@@ -24,10 +24,10 @@ export class RemoteAction {
   @Column({
     name: "action_type",
     type: "enum",
-    enum: RemoteControlActionType,
-    default: RemoteControlActionType.NONE,
+    enum: ActionType,
+    default: ActionType.NONE,
   })
-  actionType: RemoteControlActionType;
+  actionType: ActionType;
 
   @Column({
     name: "action",

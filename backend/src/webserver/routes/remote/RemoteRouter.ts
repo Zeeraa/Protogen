@@ -4,9 +4,9 @@ import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { z } from "zod";
 import { Equal, Not } from "typeorm";
 import { RemoteAction } from "../../../database/models/remote/RemoteAction.model";
-import { RemoteControlActionType } from "../../../database/models/remote/RemoteControlActionType";
 import { RemoteControlInputType } from "../../../database/models/remote/RemoteControlInputType";
 import { SocketMessageType } from "../../socket/SocketMessageType";
+import { ActionType } from "../../../actions/ActionType";
 
 export class RemoteRouter extends AbstractRouter {
   private sequenceIdMap: SequenceIdMap = {};
@@ -224,7 +224,7 @@ export class RemoteRouter extends AbstractRouter {
             const actionObj = new RemoteAction();
 
             actionObj.action = null;
-            actionObj.actionType = RemoteControlActionType.NONE;
+            actionObj.actionType = ActionType.NONE;
             actionObj.inputType = type;
 
             profile.actions.push(actionObj);
@@ -331,7 +331,7 @@ export class RemoteRouter extends AbstractRouter {
             const actionObj = new RemoteAction();
 
             actionObj.action = null;
-            actionObj.actionType = RemoteControlActionType.NONE;
+            actionObj.actionType = ActionType.NONE;
             actionObj.inputType = type;
 
             profile.actions.push(actionObj);
@@ -435,9 +435,9 @@ export class RemoteRouter extends AbstractRouter {
           this.sequenceIdMap[data.sessionId] = data.sequenceId;
         }
 
-        const status = await this.protogen.remoteManager.performAction(data.type, data.action);
+        const status = await this.protogen.actionManager.performAction(data.type, data.action);
 
-        if (status && data.type == RemoteControlActionType.ACTIVATE_VISOR_RENDERER) {
+        if (status && data.type == ActionType.ACTIVATE_VISOR_RENDERER) {
           // If a video is playing stop playback
           this.protogen.videoPlaybackManager.kill(false);
         }
@@ -455,7 +455,7 @@ type SequenceIdMap = {
 }
 
 const PerformActionDTO = z.object({
-  type: z.nativeEnum(RemoteControlActionType),
+  type: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
   sessionId: z.string().uuid(),
   sequenceId: z.number().int().safe().optional(),
@@ -463,7 +463,7 @@ const PerformActionDTO = z.object({
 
 const AlterProfileActions = z.object({
   id: z.number().int().safe().positive().optional(),
-  actionType: z.nativeEnum(RemoteControlActionType),
+  actionType: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
   inputType: z.nativeEnum(RemoteControlInputType),
 });

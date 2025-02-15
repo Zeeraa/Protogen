@@ -1,4 +1,4 @@
-export enum RemoteControlActionType {
+export enum ActionType {
   NONE = "NONE",
   ACTIVATE_VISOR_RENDERER = "ACTIVATE_VISOR_RENDERER",
   ACTIVATE_RGB_SCENE = "ACTIVATE_RGB_SCENE",

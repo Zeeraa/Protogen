@@ -16,6 +16,8 @@ import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 import { FaceExpressionData } from "./models/visor/FaceExpression.model";
 import { FaceColorEffectProperty } from "./models/visor/FaceColorEffectProperty";
 import { FaceColorEffect } from "./models/visor/FaceColorEffect";
+import { ActionSetAction } from "./models/actions/ActionSetEntry.model";
+import { ActionSet } from "./models/actions/ActionSet.model";
 
 export class Database {
   private _protogen;
@@ -60,6 +62,10 @@ export class Database {
         // ---------- Remote ----------
         RemoteProfile,
         RemoteAction,
+
+        // ---------- Actions ----------
+        ActionSet,
+        ActionSetAction,
       ]
     });
   }

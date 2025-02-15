@@ -18,8 +18,8 @@ import { ApiKeyManager } from "./apikeys/ApiKeyManager";
 import { RemoteManager } from "./remote/RemoteManager";
 import { BuiltInAsset, BuiltInAssetSchema } from "./assets/BuiltInAsset";
 import { z } from "zod";
+import { ActionManager } from "./actions/ActionManager";
 
-export const VersionNumber = "0.0.1";
 export const BootMessageColor = "#00FF00";
 
 export class Protogen {
@@ -42,6 +42,8 @@ export class Protogen {
   private _imageDirectory: string;
   private _tempDirectory: string;
   private _builtInAssets: BuiltInAsset[] = [];
+  private _actionManager: ActionManager;
+  private _versionNumber: string;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -108,6 +110,10 @@ export class Protogen {
       this._builtInAssets.push(asset);
     });
 
+    const packageJson = JSON.parse(readFileSync("package.json").toString());
+    this._versionNumber = String(packageJson.version || "0.0.0");
+
+    Object.freeze(this._versionNumber);
     Object.freeze(this._builtInAssets);
 
 
@@ -123,6 +129,7 @@ export class Protogen {
     this._rgb = new RgbManager(this);
     this._networkManager = new NetworkManager(this);
     this._remoteManager = new RemoteManager(this);
+    this._actionManager = new ActionManager(this);
   }
 
   public async init() {
@@ -151,7 +158,7 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit serial\nconnection", BootMessageColor);
     await this.serial.init();
 
-    await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + VersionNumber, BootMessageColor);
+    await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + this.versionNumber, BootMessageColor);
     await sleep(1000); // Show ready message for 1000ms before starting visor render loop
     this.visor.beginMainLoop();
     this.logger.info("Protogen", "Protogen::init() finished");
@@ -232,6 +239,14 @@ export class Protogen {
 
   get builtInAssets() {
     return this._builtInAssets;
+  }
+
+  get actionManager() {
+    return this._actionManager;
+  }
+
+  get versionNumber() {
+    return this._versionNumber;
   }
   //#endregion
 }
