@@ -9,10 +9,10 @@ import { HudApiService } from '../../../../core/services/api/hud-api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
-    selector: 'app-system-page',
-    templateUrl: './system-page.component.html',
-    styleUrl: './system-page.component.scss',
-    standalone: false
+  selector: 'app-system-page',
+  templateUrl: './system-page.component.html',
+  styleUrl: './system-page.component.scss',
+  standalone: false
 })
 export class SystemPageComponent implements OnInit, OnDestroy {
   @ViewChild("shutdownModal") shutdownModalTemplate!: TemplateRef<any>;
@@ -51,6 +51,10 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       this.toastr.error("Failed to toggle hud");
       throw err;
     })).subscribe();
+  }
+
+  get backendVersion() {
+    return this.overview?.backendVersion || "Unknown";
   }
 
   get swaggerEnabled(): boolean {
