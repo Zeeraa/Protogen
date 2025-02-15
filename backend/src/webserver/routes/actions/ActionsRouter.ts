@@ -67,13 +67,13 @@ export class ActionsRouter extends AbstractRouter {
 
         const set = new ActionSet();
         set.name = data.name;
+        action.showOnDashboard = data.showOnDashboard;
         set.actions = [];
 
         for (const action of data.actions) {
           const actionObj = new ActionSetAction();
           actionObj.type = action.actionType;
           actionObj.action = action.action;
-          actionObj.showOnDashboard = actionData.showOnDashboard;
           set.actions.push(actionObj);
         }
 
@@ -136,7 +136,8 @@ export class ActionsRouter extends AbstractRouter {
         }
 
         action.name = data.name;
-        // Remove all actions from the action object that is not oincluded in data.actions
+        action.showOnDashboard = data.showOnDashboard;
+
         action.actions = action.actions.filter(a => data.actions.some((d) => d.id == a.id));
 
         for (const actionData of data.actions) {
@@ -147,7 +148,6 @@ export class ActionsRouter extends AbstractRouter {
           }
           actionObj.action = actionData.action;
           actionObj.type = actionData.actionType;
-          actionObj.showOnDashboard = actionData.showOnDashboard;
         }
 
         const result = await repo.save(action);
