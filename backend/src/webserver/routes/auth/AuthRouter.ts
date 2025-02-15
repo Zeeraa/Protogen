@@ -274,7 +274,7 @@ export class AuthRouter extends AbstractRouter {
             signinKey: data.signinKey,
             expiresAt: MoreThan(new Date()),
             used: Equal(false),
-            approvedBy: Equal(null),
+            approvedBy: IsNull(),
           }
         });
 
