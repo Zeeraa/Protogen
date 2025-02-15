@@ -1,5 +1,7 @@
 <div class="card w-100">
-  @if(hasPreview) {
+  @if(isFace) {
+  <img src="/protogen_face.png" class="card-img-top" alt="Protogen face">
+  } @else if(hasPreview) {
   <img [src]="previewSrc" class="card-img-top" [alt]="renderer.name">
   }
   <div class="card-body">
