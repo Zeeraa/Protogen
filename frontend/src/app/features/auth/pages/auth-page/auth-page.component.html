@@ -9,7 +9,8 @@
     <p>Enter the code from the other device in the box below to log them in</p>
     <div class="input-group mt-2">
       <div class="col">
-        <input type="text" class="form-control" placeholder="Code" [(ngModel)]="code" />
+        <input type="text" class="form-control" placeholder="Code" [(ngModel)]="code"
+          (keydown.enter)="approveLogin()" />
       </div>
       <button class="btn btn-primary" (click)="approveLogin()">Login</button>
     </div>
