@@ -5,7 +5,7 @@
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-lg-4">
     <div class="col-12">
       <h4>Actions</h4>
     </div>
@@ -17,8 +17,26 @@
     }
 
     @for (action of actions; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
       <app-dashboard-action-card [action]="action" />
+    </div>
+    }
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Face expressions</h4>
+    </div>
+
+    @if(actions.length == 0) {
+    <div class="col-12">
+      <p>No face expressions defined</p>
+    </div>
+    }
+
+    @for (expression of expressions; track $index) {
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+      <app-dashboard-expression-card [expression]="expression" />
     </div>
     }
   </div>
