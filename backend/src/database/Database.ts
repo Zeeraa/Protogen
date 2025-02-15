@@ -8,7 +8,6 @@ import { KVDataStoreEntry } from "./models/data/KVDataStoreEntry.model";
 import { RgbEditorPreviewElement } from "./models/rgb/RgbEditorConfig.model";
 import { SavedVideoGroup } from "./models/video-player/SavedVideoGroup.model";
 import { CustomFace } from "./models/visor/CustomFace.model";
-import { User } from "./models/user/User.model";
 import { ApiKey } from "./models/apikeys/ApiKey.model";
 import { RemoteProfile } from "./models/remote/RemoteProfile.model";
 import { RemoteAction } from "./models/remote/RemoteAction.model";
@@ -18,6 +17,8 @@ import { FaceColorEffectProperty } from "./models/visor/FaceColorEffectProperty"
 import { FaceColorEffect } from "./models/visor/FaceColorEffect";
 import { ActionSetAction } from "./models/actions/ActionSetEntry.model";
 import { ActionSet } from "./models/actions/ActionSet.model";
+import { User } from "./models/auth/User.model";
+import { PasswordlessSignInRequest } from "./models/auth/PasswordlessSignInRequest.model";
 
 export class Database {
   private _protogen;
@@ -57,6 +58,7 @@ export class Database {
 
         // ---------- Users / Api keys ----------
         User,
+        PasswordlessSignInRequest,
         ApiKey,
 
         // ---------- Remote ----------

@@ -1,11 +1,12 @@
 import { Equal, Raw } from "typeorm";
-import { User } from "../database/models/user/User.model";
 import { Protogen } from "../Protogen";
 import * as argon2 from "argon2";
 import { generateSecretKey, typeAssert } from "../utils/Utils";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { format } from "date-fns";
 import jwt from 'jsonwebtoken';
+import { User } from "../database/models/auth/User.model";
+import { PasswordlessSignInRequest } from "../database/models/auth/PasswordlessSignInRequest.model";
 
 const ERR_NO_KEY = "JWT Key has not yet been configured";
 
@@ -42,6 +43,23 @@ export class UserManager {
       this.protogen.logger.info("UserManager", "Could not find JWT key. Generating a random one");
       this._key = generateSecretKey(64);
       writeFileSync(keyFile, this._key);
+    }
+
+    await this.runCleanup();
+
+    setInterval(() => {
+      this.runCleanup();
+    }, 1000 * 60); // Every minute
+  }
+
+  public async runCleanup() {
+    // Remove unused passwordless signin requests
+    const passwordlessSigninRepo = this.protogen.database.dataSource.getRepository(PasswordlessSignInRequest);
+    const passwordlessSigninRequests = await passwordlessSigninRepo.find();
+    const now = new Date();
+    const expired = passwordlessSigninRequests.filter((req) => req.expiresAt < now);
+    if (expired.length > 0) {
+      await passwordlessSigninRepo.remove(expired);
     }
   }
 
