@@ -72,7 +72,7 @@ export class ActionsRouter extends AbstractRouter {
 
         for (const action of data.actions) {
           const actionObj = new ActionSetAction();
-          actionObj.type = action.actionType;
+          actionObj.type = action.type;
           actionObj.action = action.action;
           set.actions.push(actionObj);
         }
@@ -129,6 +129,9 @@ export class ActionsRouter extends AbstractRouter {
           where: {
             id: id,
           },
+          relations: {
+            actions: true,
+          }
         });
         if (action == null) {
           res.status(404).send({ message: "Action set not found" });
@@ -147,7 +150,7 @@ export class ActionsRouter extends AbstractRouter {
             action.actions.push(actionObj);
           }
           actionObj.action = actionData.action;
-          actionObj.type = actionData.actionType;
+          actionObj.type = actionData.type;
         }
 
         const result = await repo.save(action);
