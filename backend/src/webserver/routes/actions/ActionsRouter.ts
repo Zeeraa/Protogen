@@ -241,7 +241,7 @@ export class ActionsRouter extends AbstractRouter {
 
 const ActionModel = z.object({
   id: z.number().int().safe().positive().optional(),
-  actionType: z.nativeEnum(ActionType),
+  type: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
 });
 
