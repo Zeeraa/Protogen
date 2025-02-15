@@ -13,6 +13,7 @@ import { ApiKeyManagerPageComponent } from './features/api-key-manager/pages/api
 import { RemoteSettingsPageComponent } from './features/remote-settings-page/pages/remote-settings-page/remote-settings-page.component';
 import { ProtogenFaceEditorComponent } from './features/visor/pages/protogen-face-editor/protogen-face-editor.component';
 import { ActionsPageComponent } from './features/actions/pages/actions-page/actions-page.component';
+import { AuthPageComponent } from './features/auth/pages/auth-page/auth-page.component';
 
 export const routes: Routes = [
   {
@@ -76,6 +77,10 @@ export const routes: Routes = [
   {
     path: "actions",
     component: ActionsPageComponent,
+  },
+  {
+    path: "auth",
+    component: AuthPageComponent,
   }
 ];
 

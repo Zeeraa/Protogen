@@ -55,6 +55,11 @@ export class AuthService {
     }
   }
 
+  public setToken(token: string) {
+    this.token = token;
+    this._loggedIn = true;
+  }
+
   public parseToken(token: string) {
     const decoded = typeAssert<ProtogenJWTPayload>(jwtDecode(token));
     this._authDetails = {

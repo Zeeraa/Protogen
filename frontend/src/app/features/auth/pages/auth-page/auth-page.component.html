@@ -1,0 +1,21 @@
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Passwordless sign in</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <p>Enter the code from the other device in the box below to log them in</p>
+    <div class="input-group mt-2">
+      <div class="col">
+        <input type="text" class="form-control" placeholder="Code" [(ngModel)]="code" />
+      </div>
+      <button class="btn btn-primary" (click)="approveLogin()">Login</button>
+    </div>
+    <p class="text-danger mt-2">
+      Warning: This will log the other device in as your user. Make sure the other device is secure and that the code is
+      matching what you see on your other device.
+    </p>
+  </div>
+</div>

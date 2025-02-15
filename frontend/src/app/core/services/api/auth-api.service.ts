@@ -52,6 +52,50 @@ export class AuthApiService extends ApiBaseService {
   changePassword(userId: number, data: ChangePasswordData) {
     return this.http.put<ProtogenUser>(this.apiBaseUrl + "/users/" + userId + "/password", data).pipe(catchError(this.defaultErrorHandler));
   }
+
+  beginPasswordlessSignIn() {
+    return this.http.post<PasswordlessSigninRequest>(this.apiBaseUrl + "/auth/passwordless-signin/new", {}).pipe(catchError(this.defaultErrorHandler));
+  }
+
+  checkSigninRequestStatus(request: PasswordlessSigninRequest) {
+    return this.http.post<PasswordlessSigninRequestStatus>(this.apiBaseUrl + "/auth/passwordless-signin/check", request).pipe(catchError(this.defaultErrorHandler));
+  }
+
+  aquireTokenFromPasswordless(request: PasswordlessSigninRequest) {
+    return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/passwordless-signin/authenticate", request).pipe(catchError(this.defaultErrorHandler));
+  }
+
+  approveLogin(signinKey: string) {
+    return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/passwordless-signin/approve", { signinKey }).pipe(
+      catchError(this.defaultErrorHandler),
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 404) {
+          return of(null);
+        } else {
+          throw error;
+        }
+      }),
+    );
+  }
+}
+
+export interface PasswordlessSigninRequest {
+  requestId: string;
+  signinKey: string;
+}
+
+export interface PassworlessSigninApproval extends PasswordlessSigninRequest {
+  expiresAt: string;
+}
+
+export interface PasswordlessSigninRequestStatus extends PasswordlessSigninRequest {
+  expiresAt: string;
+  used: boolean;
+  approvedBy: PasswordlessApprovalBy | null;
+}
+
+interface PasswordlessApprovalBy {
+  name: string;
 }
 
 interface ITokenResponse {

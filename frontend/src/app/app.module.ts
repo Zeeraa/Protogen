@@ -20,6 +20,7 @@ import { UserManagerModule } from './features/user-manager/user-manager.module';
 import { ApiKeyManagerModule } from './features/api-key-manager/api-key-manager.module';
 import { RemoteSettingsPageModule } from './features/remote-settings-page/remote-settings-page.module';
 import { ActionsModule } from './features/actions/actions.module';
+import { AuthModule } from './features/auth/auth.module';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import { ActionsModule } from './features/actions/actions.module';
     ApiKeyManagerModule,
     RemoteSettingsPageModule,
     ActionsModule,
+    AuthModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
