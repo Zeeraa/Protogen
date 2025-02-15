@@ -17,7 +17,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Get all logs"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -42,7 +42,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Get the session id"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -57,7 +57,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Exits the service"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -79,7 +79,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Get system overview"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while gathering information" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -105,6 +105,7 @@ export class SystemRouter extends AbstractRouter {
           },
           hudEnabled: this.protogen.serial.enableHud,
           swaggerEnabled: swaggerEnabled,
+          backendVersion: this.protogen.versionNumber,
         });
       } catch (err) {
         return this.handleError(err, req, res);
@@ -118,7 +119,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Shutdown the system"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -139,7 +140,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.description = "Restart the flaschen-taschen service"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -159,7 +160,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.tags = ['System'],
       #swagger.description = "Get the flaschen taschen settings"
       #swagger.responses[200] = { description: "Ok" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -180,7 +181,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
-  
+
       #swagger.parameters['body'] = {
         in: 'body',
         description: 'Update flaschen taschen settings',
@@ -189,7 +190,7 @@ export class SystemRouter extends AbstractRouter {
           ledSlowdownGpio: "GPIO slowdown value"
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -231,7 +232,7 @@ export class SystemRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response" }
       #swagger.responses[500] = { description: "An error occured while executing command" }
-  
+
       #swagger.parameters['body'] = {
         in: 'body',
         description: 'Enable/Disable swagger',
@@ -239,7 +240,7 @@ export class SystemRouter extends AbstractRouter {
           enabled: true
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}

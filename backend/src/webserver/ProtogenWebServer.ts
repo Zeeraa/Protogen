@@ -29,6 +29,7 @@ import { FaceRouter } from "./routes/face/FaceRouter";
 import { AssetsRouter } from "./routes/assets/AssetsRouter";
 import { resolve } from "path";
 import { generateNewCertificate, getCertificateExpiry } from "../utils/Utils";
+import { ActionsRouter } from "./routes/actions/ActionsRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 
@@ -122,6 +123,7 @@ export class ProtogenWebServer {
     new RemoteRouter(this).register();
     new FaceRouter(this).register();
     new AssetsRouter(this).register({ noAuth: true });
+    new ActionsRouter(this).register();
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
