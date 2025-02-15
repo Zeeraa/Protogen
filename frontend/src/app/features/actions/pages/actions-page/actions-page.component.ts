@@ -10,6 +10,7 @@ import { RgbApiService } from '../../../../core/services/api/rgb-api.service';
 import { VisorApiService } from '../../../../core/services/api/visor-api.service';
 import { VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
 import { FaceApiService } from '../../../../core/services/api/face-api.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-actions-page',
@@ -47,6 +48,7 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
     private visorApi: VisorApiService,
     private rgbApi: RgbApiService,
     private faceApi: FaceApiService,
+    private title: Title,
   ) { }
 
   openNewModal() {
@@ -120,6 +122,7 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("Actions - Protogen");
     this.initialLoad();
   }
 

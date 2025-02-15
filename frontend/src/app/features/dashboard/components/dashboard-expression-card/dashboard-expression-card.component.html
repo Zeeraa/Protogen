@@ -1,0 +1,10 @@
+<div class="card w-100">
+  <img [src]="previewB64" class="card-img-top" alt="Expression">
+  <div class="card-body">
+    <h5 class="card-title">
+      {{expression.data.name}}
+    </h5>
+
+    <button class="btn btn-success mt-1 me-1" (click)="activate()">Activate</button>
+  </div>
+</div>

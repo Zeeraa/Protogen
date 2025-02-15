@@ -33,6 +33,7 @@ module.exports = tseslint.config(
         "caughtErrorsIgnorePattern": "^_" // Ignore unused catch variables starting with _
       }], // Allow unused variables starting with _
       "@angular-eslint/prefer-standalone": "off", // This is a non standalone project
+      "no-debugger": "off", // Allow use of debugger
     },
   },
   {
