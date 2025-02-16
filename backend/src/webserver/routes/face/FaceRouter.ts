@@ -10,6 +10,7 @@ import { AbstractVisorColorEffect } from "../../../visor/rendering/renderers/spe
 import { RgbPropertyData } from "../rgb/RgbRouter";
 import { FaceColorEffect } from "../../../database/models/visor/FaceColorEffect";
 import { FaceColorEffectProperty } from "../../../database/models/visor/FaceColorEffectProperty";
+import { FaceRendererId } from "../../../visor/rendering/renderers/special/face/VisorFaceRender";
 
 export class FaceRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -292,6 +293,12 @@ export class FaceRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Expression not found" }
 
+      #swagger.parameters['activateRenderer'] = {
+        in: 'query',
+        description: 'If true also activate the face renderer'
+        type: 'boolean'
+      }
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -302,6 +309,12 @@ export class FaceRouter extends AbstractRouter {
         if (expression == null) {
           res.status(404).send({ message: "Expression not found" });
           return;
+        }
+
+        if (String(req.query["activateRenderer"]).toLowerCase() == "true") {
+          if (this.protogen.visor.activeRenderer?.id != FaceRendererId) {
+            this.protogen.visor.activateRenderer(FaceRendererId, true);
+          }
         }
 
         this.protogen.visor.faceRenderer.setActiveExpression(expression);
