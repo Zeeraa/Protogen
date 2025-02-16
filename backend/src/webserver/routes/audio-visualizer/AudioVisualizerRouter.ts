@@ -49,7 +49,6 @@ export class AudioVisualiserRouter extends AbstractRouter {
 
         const data = parsed.data;
 
-
         this.protogen.audioVisualiser.rawAmplification = data.rawAmplification;
         this.protogen.audioVisualiser.lowThreshold = data.lowThreshold;
         this.protogen.audioVisualiser.highThreshold = data.highThreshold;
