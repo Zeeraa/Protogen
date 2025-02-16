@@ -30,6 +30,7 @@ import { AssetsRouter } from "./routes/assets/AssetsRouter";
 import { resolve } from "path";
 import { generateNewCertificate, getCertificateExpiry } from "../utils/Utils";
 import { ActionsRouter } from "./routes/actions/ActionsRouter";
+import morgan from 'morgan';
 
 export const SocketPath = "/protogen-websocket.io";
 
@@ -105,6 +106,11 @@ export class ProtogenWebServer {
     }
 
     this._authMiddleware = AuthMiddleware(this);
+
+    if (String(process.env["LOG_ALL_REQUESTS"]).toLowerCase() == "true") {
+      // Use morgan to log all requests
+      this.express.use(morgan('combined'));
+    }
 
     this.express.use(cors())
     this.express.use(bodyParser.json());
