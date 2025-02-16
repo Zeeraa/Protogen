@@ -17,6 +17,7 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
   sceneName = "";
   availableEffects: RgbEffectInfo[] = [];
   selectedEffectToAdd = "";
+  lockDelete = false;
 
   @ViewChild("deleteScenePrompt") private deleteScenePromptTemplate!: TemplateRef<any>;
   private deleteScenePrompt?: NgbModalRef;
@@ -101,13 +102,16 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.lockDelete = true;
     this.rgbApi.getScene(this.scene.id).pipe(catchError(err => {
       this.toastr.error("Failed to refresh scene data");
       this.router.navigate(["/rgb"]);
+      this.lockDelete = false;
       throw err;
     })).subscribe((scene) => {
       this.sceneName = scene.name;
       this.scene = scene;
+      this.lockDelete = false;
     });
   }
 

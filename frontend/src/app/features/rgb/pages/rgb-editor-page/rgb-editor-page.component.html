@@ -65,6 +65,6 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete scene</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="lockDelete">Delete scene</button>
   </div>
 </ng-template>
