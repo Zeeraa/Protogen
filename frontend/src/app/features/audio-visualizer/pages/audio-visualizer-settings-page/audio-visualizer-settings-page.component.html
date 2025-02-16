@@ -1,0 +1,62 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>Audio visualizer settings</h1>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-auto">
+      <p>Raw value</p>
+      <canvas width="50" height="200" #rawVolumePreviewCanvas></canvas>
+    </div>
+    <div class="col-auto">
+      <p>Adjusted value</p>
+      <canvas width="50" height="200" #adjustedVolumePreviewCanvas></canvas>
+    </div>
+
+    <div class="col-auto">
+      <p>History</p>
+      <canvas width="400" height="200" #historyGraphCanvas></canvas>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <label for="lowRange" class="form-label">
+        Raw value amplification
+        <span class="text-info">
+          {{rawAmplification}}
+        </span>
+      </label>
+      <input type="range" class="form-range" min="0" max="100" step="0.1" id="lowRange" [(ngModel)]="rawAmplification">
+    </div>
+
+    <div class="col-12">
+      <label for="lowRange" class="form-label">
+        Low threshold
+        <span class="text-info">
+          {{lowThreshold}}
+        </span>
+      </label>
+      <input type="range" class="form-range" min="0" max="100" step="0.01" id="lowRange" [(ngModel)]="lowThreshold">
+    </div>
+
+    <div class="col-12">
+      <label for="highRange" class="form-label">
+        High threshold
+        <span class="text-info">
+          {{highThreshold}}
+        </span>
+      </label>
+      <input type="range" class="form-range" min="0" max="100" step="0.01" id="highRange" [(ngModel)]="highThreshold">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <button class="btn btn-danger me-2 mb-2" (click)="rollback()">Rollback settings</button>
+      <button class="btn btn-success me-2 mb-2" (click)="saveSettings()">Save settings</button>
+    </div>
+  </div>
+</div>

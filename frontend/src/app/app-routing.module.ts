@@ -14,6 +14,7 @@ import { RemoteSettingsPageComponent } from './features/remote-settings-page/pag
 import { ProtogenFaceEditorComponent } from './features/visor/pages/protogen-face-editor/protogen-face-editor.component';
 import { ActionsPageComponent } from './features/actions/pages/actions-page/actions-page.component';
 import { AuthPageComponent } from './features/auth/pages/auth-page/auth-page.component';
+import { AudioVisualizerSettingsPageComponent } from './features/audio-visualizer/pages/audio-visualizer-settings-page/audio-visualizer-settings-page.component';
 
 export const routes: Routes = [
   {
@@ -81,6 +82,10 @@ export const routes: Routes = [
   {
     path: "auth",
     component: AuthPageComponent,
+  },
+  {
+    path: "audio-visualizer",
+    component: AudioVisualizerSettingsPageComponent,
   }
 ];
 

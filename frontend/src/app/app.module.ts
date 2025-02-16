@@ -21,6 +21,7 @@ import { ApiKeyManagerModule } from './features/api-key-manager/api-key-manager.
 import { RemoteSettingsPageModule } from './features/remote-settings-page/remote-settings-page.module';
 import { ActionsModule } from './features/actions/actions.module';
 import { AuthModule } from './features/auth/auth.module';
+import { AudioVisualizerModule } from './features/audio-visualizer/audio-visualizer.module';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { AuthModule } from './features/auth/auth.module';
     RemoteSettingsPageModule,
     ActionsModule,
     AuthModule,
+    AudioVisualizerModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
