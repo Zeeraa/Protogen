@@ -40,4 +40,26 @@
     </div>
     }
   </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>RGB Scenes</h4>
+    </div>
+
+    <div class="col-12 mt-1">
+      <button class="btn btn-secondary" (click)="disableRgb()">Disable RGB</button>
+    </div>
+
+    @if(actions.length == 0) {
+    <div class="col-12 mt-1">
+      <p>No RGB scenes defined</p>
+    </div>
+    }
+
+    @for (scene of rgbScenes; track $index) {
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+      <app-dashboard-rgb-card [scene]="scene" />
+    </div>
+    }
+  </div>
 </div>

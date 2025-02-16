@@ -4,6 +4,7 @@ import { ActionApiService, ActionSet } from '../../../../core/services/api/actio
 import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -14,12 +15,14 @@ import { ToastrService } from 'ngx-toastr';
 export class DashboardPageComponent implements OnInit {
   actions: ActionSet[] = [];
   expressions: FaceExpression[] = [];
+  rgbScenes: RgbScene[] = [];
 
   constructor(
     private title: Title,
     private toastr: ToastrService,
     private actionApi: ActionApiService,
     private faceApi: FaceApiService,
+    private rgbApi: RgbApiService,
   ) { }
 
   ngOnInit(): void {
@@ -38,8 +41,27 @@ export class DashboardPageComponent implements OnInit {
       catchError(err => {
         this.toastr.error("Failed to load expressions");
         throw err
-      })).subscribe(expressions => {
-        this.expressions = expressions;
-      });
+      })
+    ).subscribe(expressions => {
+      this.expressions = expressions;
+    });
+
+    this.rgbApi.getScenes().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to load RGB scenes");
+        throw err;
+      })
+    ).subscribe(scenes => {
+      this.rgbScenes = scenes;
+    });
+  }
+
+  disableRgb() {
+    this.rgbApi.deactivate().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to disable RGB");
+        throw err;
+      })
+    ).subscribe();
   }
 }
