@@ -52,3 +52,19 @@
     }
   </div>
 </div>
+
+<ng-template #deleteScenePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Delete scene</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>
+      Please confirm that you want to delete the rgb scene <span class="text-info">{{sceneName}}</span>
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete scene</button>
+  </div>
+</ng-template>

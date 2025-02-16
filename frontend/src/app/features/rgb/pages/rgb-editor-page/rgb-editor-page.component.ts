@@ -1,21 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { RgbApiService, RgbEffectInfo, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'app-rgb-editor-page',
-    templateUrl: './rgb-editor-page.component.html',
-    styleUrl: './rgb-editor-page.component.scss',
-    standalone: false
+  selector: 'app-rgb-editor-page',
+  templateUrl: './rgb-editor-page.component.html',
+  styleUrl: './rgb-editor-page.component.scss',
+  standalone: false
 })
-export class RgbEditorPageComponent implements OnInit {
+export class RgbEditorPageComponent implements OnInit, OnDestroy {
   scene: RgbScene | null = null;
   sceneName = "";
   availableEffects: RgbEffectInfo[] = [];
   selectedEffectToAdd = "";
+
+  @ViewChild("deleteScenePrompt") private deleteScenePromptTemplate!: TemplateRef<any>;
+  private deleteScenePrompt?: NgbModalRef;
+
 
   addEffect() {
     if (this.selectedEffectToAdd.trim().length == 0) {
@@ -41,6 +46,7 @@ export class RgbEditorPageComponent implements OnInit {
     private toastr: ToastrService,
     private router: Router,
     private route: ActivatedRoute,
+    private modal: NgbModal,
     private title: Title,
   ) { }
 
@@ -73,10 +79,11 @@ export class RgbEditorPageComponent implements OnInit {
   }
 
   deleteScene() {
-    if (!confirm("Do you really want to delete this scene")) {
-      return;
-    }
+    this.deleteScenePrompt?.close();
+    this.deleteScenePrompt = this.modal.open(this.deleteScenePromptTemplate);
+  }
 
+  confirmDelete() {
     if (this.scene == null) {
       return;
     }
@@ -137,5 +144,9 @@ export class RgbEditorPageComponent implements OnInit {
     });
 
     this.title.setTitle("RGB Editor - Protogen");
+  }
+
+  ngOnDestroy(): void {
+    this.deleteScenePrompt?.close();
   }
 }
