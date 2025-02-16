@@ -1,3 +1,4 @@
+import { Protogen } from "../../Protogen";
 import { AbstractRgbEffectProperty } from "./properties/AbstractRgbEffectProperty";
 import { RgbEffectPropertyMap } from "./properties/RgbEffectPropertyMap";
 import { SetPropertyResult } from "./properties/SetPropertyResult";
@@ -13,8 +14,9 @@ export abstract class AbstractRgbEffect {
   private _propStartIndex;
   private _propWidth;
   private _propRenderOrder;
+  private _protogen: Protogen;
 
-  constructor(id: string, name: string, displayName: string) {
+  constructor(id: string, name: string, displayName: string, protogen: Protogen) {
     this._id = id;
     this._name = name;
     this._displayName = displayName;
@@ -22,11 +24,16 @@ export abstract class AbstractRgbEffect {
     this._propStartIndex = new RgbEffectIntProperty("StartIndex", 1, { min: 1, max: 2147483647 }, "The index of the first LED in the effect");
     this._propWidth = new RgbEffectIntProperty("EffectWidth", 1, { min: 1, max: DefaultEffectMaxWidth }, "The index of the last LED in the effect");
     this._propRenderOrder = new RgbEffectIntProperty("RenderOrder", 1, { min: -2147483648, max: 2147483647 }, "The order the effect is rendered in. Can be used to layer effects over other ones");
+    this._protogen = protogen;
 
     // Default properties
     this.addProperty(this._propStartIndex);
     this.addProperty(this._propWidth);
     this.addProperty(this._propRenderOrder);
+  }
+
+  protected get protogen() {
+    return this._protogen;
   }
 
   public abstract render(time: number): (number | null)[];

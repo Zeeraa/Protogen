@@ -19,6 +19,7 @@ import { RemoteManager } from "./remote/RemoteManager";
 import { BuiltInAsset, BuiltInAssetSchema } from "./assets/BuiltInAsset";
 import { z } from "zod";
 import { ActionManager } from "./actions/ActionManager";
+import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
 
 export const BootMessageColor = "#00FF00";
 
@@ -43,6 +44,7 @@ export class Protogen {
   private _tempDirectory: string;
   private _builtInAssets: BuiltInAsset[] = [];
   private _actionManager: ActionManager;
+  private _audioVisualiser: AudioVisualiser;
   private _versionNumber: string;
 
   constructor(config: Configuration) {
@@ -127,6 +129,7 @@ export class Protogen {
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
     this._serial = new SerialManager(this);
     this._rgb = new RgbManager(this);
+    this._audioVisualiser = new AudioVisualiser(this);
     this._networkManager = new NetworkManager(this);
     this._remoteManager = new RemoteManager(this);
     this._actionManager = new ActionManager(this);
@@ -157,6 +160,9 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit serial\nconnection", BootMessageColor);
     await this.serial.init();
+
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
+    await this.audioVisualiser.init();
 
     await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + this.versionNumber, BootMessageColor);
     await sleep(1000); // Show ready message for 1000ms before starting visor render loop
@@ -243,6 +249,10 @@ export class Protogen {
 
   get actionManager() {
     return this._actionManager;
+  }
+
+  get audioVisualiser() {
+    return this._audioVisualiser;
   }
 
   get versionNumber() {

@@ -31,6 +31,7 @@ import { resolve } from "path";
 import { generateNewCertificate, getCertificateExpiry } from "../utils/Utils";
 import { ActionsRouter } from "./routes/actions/ActionsRouter";
 import morgan from 'morgan';
+import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualizerRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 
@@ -130,6 +131,7 @@ export class ProtogenWebServer {
     new FaceRouter(this).register();
     new AssetsRouter(this).register({ noAuth: true });
     new ActionsRouter(this).register();
+    new AudioVisualiserRouter(this).register();
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
