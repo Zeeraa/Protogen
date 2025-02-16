@@ -22,7 +22,7 @@ export class DashboardExpressionCardComponent {
   }
 
   activate() {
-    this.faceApi.activateExpression(this.expression.data.uuid).pipe(
+    this.faceApi.activateExpression(this.expression.data.uuid, true).pipe(
       catchError(err => {
         this.toastr.error("Failed to activate expression");
         throw err;
