@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
-import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
+import { FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
@@ -16,6 +16,7 @@ export class DashboardPageComponent implements OnInit {
   actions: ActionSet[] = [];
   expressions: FaceExpression[] = [];
   rgbScenes: RgbScene[] = [];
+  faceRgbEffects: FaceColorEffect[] = [];
 
   constructor(
     private title: Title,
@@ -54,12 +55,30 @@ export class DashboardPageComponent implements OnInit {
     ).subscribe(scenes => {
       this.rgbScenes = scenes;
     });
+
+    this.faceApi.getFaceColorEffects().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to load face color effects");
+        throw err;
+      })
+    ).subscribe(effects => {
+      this.faceRgbEffects = effects;
+    });
   }
 
   disableRgb() {
     this.rgbApi.deactivate().pipe(
       catchError(err => {
         this.toastr.error("Failed to disable RGB");
+        throw err;
+      })
+    ).subscribe();
+  }
+
+  disableFaceRgb() {
+    this.faceApi.activateColorEffect(null).pipe(
+      catchError(err => {
+        this.toastr.error("Failed to disable face RGB effect");
         throw err;
       })
     ).subscribe();

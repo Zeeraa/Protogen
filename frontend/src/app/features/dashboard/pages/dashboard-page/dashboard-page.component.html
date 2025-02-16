@@ -62,4 +62,26 @@
     </div>
     }
   </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Face RGB effects</h4>
+    </div>
+
+    <div class="col-12 mt-1">
+      <button class="btn btn-secondary" (click)="disableFaceRgb()">Disable RGB</button>
+    </div>
+
+    @if(actions.length == 0) {
+    <div class="col-12 mt-1">
+      <p>No face RGB effects defined</p>
+    </div>
+    }
+
+    @for (effect of faceRgbEffects; track $index) {
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+      <app-dashboard-face-rgb-card [effect]="effect" />
+    </div>
+    }
+  </div>
 </div>
