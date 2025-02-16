@@ -16,6 +16,7 @@ export class UserSocketSession {
   private _enableRgbPreview = false;
   private _enableVisorPreview = false;
   private _enableRemotePreview = false;
+  private _enableAudioPreview = false;
   private _auth: AuthData;
 
   constructor(protogen: Protogen, socket: Socket, auth: AuthData) {
@@ -56,6 +57,14 @@ export class UserSocketSession {
     }
   }
 
+  get enableAudioPreview() {
+    return this._enableAudioPreview;
+  }
+
+  set enableAudioPreview(enable: boolean) {
+    this._enableAudioPreview = enable;
+  }
+
   get enableRgbPreview() {
     return this._enableRgbPreview;
   }
@@ -90,22 +99,28 @@ export class UserSocketSession {
     const type = message.type;
 
     if (this.auth.onlyRemotePermissions) {
-      if (type != SocketMessageType.E2S_RemoteState) {
+      if (type == SocketMessageType.E2S_RemoteState) {
+        // Parse it as RemoteStateModel using safe parse
+        const remoteState = RemoteStateModel.safeParse(message.data);
+        if (!remoteState.success) {
+          console.error("Rejecting invalid remote state message from socket: ", message);
+          return;
+        }
+
+        const state = constructRemoteStateFromSensorData(remoteState.data);
+        this.protogen.remoteManager.state = state;
+      } else if (type == SocketMessageType.E2S_AudioLevel) {
+        const audioLevel = AudioLevelModel.safeParse(message.data);
+        if (!audioLevel.success) {
+          console.error("Rejecting invalid remote audio level message from socket: ", message);
+          return;
+        }
+
+        this.protogen.audioVisualiser.rawValue = audioLevel.data.level;
+      } else {
         console.error("Received unauthorized message from remote: ", message);
         return;
       }
-
-      // Parse it as RemoteStateModel using safe parse
-      const remoteState = RemoteStateModel.safeParse(message.data);
-      if (!remoteState.success) {
-        console.error("Rejecting invalid remote state message from socket: ", message);
-        return;
-      }
-
-      const state = constructRemoteStateFromSensorData(remoteState.data);
-      this.protogen.remoteManager.state = state;
-
-      return;
     }
 
     if (type == SocketMessageType.C2S_EnableRgbPreview) {
@@ -120,9 +135,32 @@ export class UserSocketSession {
     } else if (type == SocketMessageType.E2S_RemoteState) {
       const state = constructRemoteStateFromSensorData(message.data);
       this.protogen.remoteManager.state = state;
+    } else if (type == SocketMessageType.C2S_EnableAudioPreview) {
+      const enable = message.data === true;
+      this._enableAudioPreview = enable;
+    } else if (type == SocketMessageType.C2S_AudioVisualiserSettings) {
+      const settings = AudioVisualiserSettingsModel.safeParse(message.data);
+      if (!settings.success) {
+        console.error("Rejecting invalid audio visualiser settings message from socket: ", message);
+        return;
+      }
+
+      this.protogen.audioVisualiser.rawAmplification = settings.data.rawAmplification;
+      this.protogen.audioVisualiser.lowThreshold = settings.data.lowThreshold;
+      this.protogen.audioVisualiser.highThreshold = settings.data.highThreshold;
     }
   }
 }
+
+const AudioVisualiserSettingsModel = z.object({
+  rawAmplification: z.number().min(0).max(100),
+  lowThreshold: z.number().min(0).max(100),
+  highThreshold: z.number().min(0).max(100)
+});
+
+const AudioLevelModel = z.object({
+  level: z.number().min(0).max(100)
+});
 
 const RemoteStateModel = z.object({
   joystick_x: z.number().min(0).max(1),

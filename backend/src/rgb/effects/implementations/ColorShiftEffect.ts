@@ -1,3 +1,4 @@
+import { Protogen } from "../../../Protogen";
 import { hueToRGB } from "../../../utils/ProtoColors";
 import { encodeRGB } from "../../../utils/Utils";
 import { AbstractRgbEffect } from "../AbstractRgbEffect";
@@ -9,8 +10,8 @@ export class ColorShiftEffect extends AbstractRgbEffect {
   private _offsetProp;
   private _reverseProp;
 
-  constructor(id: string, name: string, displayName: string) {
-    super(id, name, displayName);
+  constructor(id: string, name: string, displayName: string, protogen: Protogen) {
+    super(id, name, displayName, protogen);
 
     this._speedProp = new RgbEffectIntProperty("Speed", 30, { min: 1, max: 360 }, "The speed of the animation. Hue will be changed by this value every second");
     this._offsetProp = new RgbEffectIntProperty("Offset", 0, { min: 0, max: 360 }, "The hue offset to apply");

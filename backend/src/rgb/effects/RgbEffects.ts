@@ -3,6 +3,8 @@ import { AbstractRgbEffect } from "./AbstractRgbEffect";
 import { StaticRgbEffect } from "./implementations/StaticRgbEffect";
 import { RgbWaveEffect } from "./implementations/RgbWaveEffect";
 import { ColorShiftEffect } from "./implementations/ColorShiftEffect";
+import { Protogen } from "../../Protogen";
+import { AudioVisualizerEffect } from "./implementations/AudioVisualizerEffect";
 
 export const RgbEffects: RgbEffect[] = [
   {
@@ -19,10 +21,15 @@ export const RgbEffects: RgbEffect[] = [
     name: "Color shift",
     description: "Single shifting color",
     class: ColorShiftEffect,
+  },
+  {
+    name: "Audio Visualizer",
+    description: "An audio visualizer showing the audio level from the remote microphone",
+    class: AudioVisualizerEffect,
   }
 ]
 
-export function constructRgbEffect(name: string, displayName: string, id: string | null = null): AbstractRgbEffect | null {
+export function constructRgbEffect(name: string, displayName: string, id: string | null, protogen: Protogen): AbstractRgbEffect | null {
   if (id == null) {
     id = uuidv7();
   }
@@ -32,10 +39,10 @@ export function constructRgbEffect(name: string, displayName: string, id: string
     return null;
   }
 
-  return new effect.class(id, name, displayName);
+  return new effect.class(id, name, displayName, protogen);
 }
 
-type EffectClass = { new(id: string, name: string, displayName: string): AbstractRgbEffect };
+type EffectClass = { new(id: string, name: string, displayName: string, protogen: Protogen): AbstractRgbEffect };
 
 interface RgbEffect {
   name: string;

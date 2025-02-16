@@ -335,7 +335,7 @@ export class RgbRouter extends AbstractRouter {
 
         await this.protogen.rgb.setActiveScene(scene);
 
-        res.json(scene);
+        res.json(sceneToDTO(scene));
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -378,7 +378,7 @@ export class RgbRouter extends AbstractRouter {
           return;
         }
 
-        const effect = constructRgbEffect(data.effect, data.displayName);
+        const effect = constructRgbEffect(data.effect, data.displayName, null, this.protogen);
         if (effect == null) {
           res.status(404).send({ message: "Effect not found" });
           return;

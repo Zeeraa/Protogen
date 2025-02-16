@@ -138,7 +138,7 @@ export class RgbManager {
       const loadedScene = new RgbScene(scene.id, scene.name);
 
       scene.effects.forEach(effect => {
-        const loadedEffect = constructRgbEffect(effect.effect, effect.displayName, effect.id);
+        const loadedEffect = constructRgbEffect(effect.effect, effect.displayName, effect.id, this.protogen);
         if (loadedEffect == null) {
           this.protogen.logger.error("RgbManager", "Failed to load RGB effect by name " + effect.effect);
           return;

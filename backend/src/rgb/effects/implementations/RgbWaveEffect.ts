@@ -1,3 +1,4 @@
+import { Protogen } from "../../../Protogen";
 import { hueToRGB } from "../../../utils/ProtoColors";
 import { encodeRGB } from "../../../utils/Utils";
 import { AbstractRgbEffect } from "../AbstractRgbEffect";
@@ -10,8 +11,8 @@ export class RgbWaveEffect extends AbstractRgbEffect {
   private _propSpeed;
   private _invertProperty;
 
-  constructor(id: string, name: string, displayName: string) {
-    super(id, name, displayName);
+  constructor(id: string, name: string, displayName: string, protogen: Protogen) {
+    super(id, name, displayName, protogen);
     this._propHueStart = new RgbEffectIntProperty("HueStart", 0, { min: 0, max: 360 }, "The HUE value to start at");
     this._propHueEnd = new RgbEffectIntProperty("HueEnd", 360, { min: 0, max: 360 }, "The HUE value to end at");
     this._propSpeed = new RgbEffectIntProperty("Speed", 5, { min: 0, max: 30, inputType: IntPropInputType.Slider }, "Speed the effect changes at. At the moment a smaller value means faster change bujt i will fix this in the future");
