@@ -7,6 +7,7 @@ import { Title } from '@angular/platform-browser';
 import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
 import { HudApiService } from '../../../../core/services/api/hud-api.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-system-page',
@@ -30,6 +31,10 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     const apiBase = this.api.apiBaseUrl;
 
     return apiBase + (apiBase.endsWith("/") ? "" : "/");
+  }
+
+  get phpMyAdminLink() {
+    return environment.phpMyAdminLink;
   }
 
   get ip() {
