@@ -20,6 +20,7 @@ import { BuiltInAsset, BuiltInAssetSchema } from "./assets/BuiltInAsset";
 import { z } from "zod";
 import { ActionManager } from "./actions/ActionManager";
 import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
+import { red } from "colors";
 
 export const BootMessageColor = "#00FF00";
 
@@ -163,6 +164,18 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
     await this.audioVisualiser.init();
+
+    // Custom crash handler
+    process.on('uncaughtException', (err) => {
+      this.visor.appendRenderLock("Crash");
+      this.serial.stopUpdateLoop = true;
+      this.serial.writeToHUD(["Protogen OS", "Has crashed :(", "Please reboot"]);
+      console.error(red("Uncaught exception: "), err);
+      console.log("Showing crash message and shutting down");
+      this.visor.tryRenderTextFrame("Protogen OS\nHas crashed :(\nPlease reboot", "#FF0000").then(() => {
+        process.exit(1);
+      })
+    })
 
     await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + this.versionNumber, BootMessageColor);
     await sleep(1000); // Show ready message for 1000ms before starting visor render loop

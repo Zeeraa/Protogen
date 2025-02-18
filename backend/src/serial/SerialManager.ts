@@ -16,16 +16,23 @@ export class SerialManager {
   private _boopSensorLastState = false; // What system thinks is active (debounced signal)
   private _boopSensorReportedState = false; // Last reported by sensor
   private _boopSensorDebounceTime = 0;
+  private _stopUpdateLoop = false;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this.connect();
 
     setInterval(() => {
+      if (this.stopUpdateLoop) {
+        return;
+      }
       this.updateDisplay();
-    }, 1000 * 1);
+    }, 1000 * 0.5);
 
     setInterval(() => {
+      if (this.stopUpdateLoop) {
+        return;
+      }
       if (this._boopSensorDebounceTime > 0) {
         this._boopSensorDebounceTime--;
       } else if (this._boopSensorLastState != this._boopSensorReportedState) {
@@ -38,6 +45,14 @@ export class SerialManager {
         this.protogen.eventEmitter.emit(ProtogenEvents.Booped, this._boopSensorReportedState);
       }
     }, 100);
+  }
+
+  get stopUpdateLoop() {
+    return this._stopUpdateLoop;
+  }
+
+  set stopUpdateLoop(value: boolean) {
+    this._stopUpdateLoop = value;
   }
 
   protected get config() {
@@ -130,6 +145,10 @@ export class SerialManager {
     this._lastDisplayContent = lineArray;
 
     this.write("TEXT:" + lineArray.join("|"));
+  }
+
+  public writeToHUD(lines: string[]) {
+    this.write("TEXT:" + lines.join("|"));
   }
 
   get isReady() {
