@@ -3,7 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { cyan, green, yellow } from "colors";
-import { existsSync, mkdirSync, readFileSync, rmSync } from "fs";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, rmSync } from "fs";
 import swaggerUi from "swagger-ui-express";
 import { VideoPlayerRouter } from "./routes/video-player/VideoPlayerRouter";
 import { AudioRouter } from "./routes/volume/AudioRouter";
@@ -108,7 +108,10 @@ export class ProtogenWebServer {
 
     this._authMiddleware = AuthMiddleware(this);
 
-    if (String(process.env["LOG_ALL_REQUESTS"]).toLowerCase() == "true") {
+    const logStream = createWriteStream(this.protogen.config.logDirectory + "/web.log", { flags: 'a' });
+    this.express.use(morgan('combined', { stream: logStream }));
+
+    if (String(process.env["LOG_REQUESTS_IN_CONSOLE"]).toLowerCase() == "true") {
       // Use morgan to log all requests
       this.express.use(morgan('combined'));
     }
