@@ -4,6 +4,7 @@ import { SocketMessageType } from '../../../../core/services/socket/data/SocketM
 import { catchError, Subscription } from 'rxjs';
 import { AudioVisualizerApiService } from '../../../../core/services/api/audio-visualizer-api.service';
 import { ToastrService } from 'ngx-toastr';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-audio-visualizer-settings-page',
@@ -124,6 +125,7 @@ export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, 
     private socket: SocketService,
     private audioVisualizerApi: AudioVisualizerApiService,
     private toastr: ToastrService,
+    private title: Title,
   ) { }
 
   rollback() {
@@ -177,6 +179,8 @@ export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, 
 
         this.draw();
       }
+
+      this.title.setTitle("Audio Visualizer - Protogen");
     });
 
     this.audioVisualizerApi.getSettings().pipe(
