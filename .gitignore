@@ -1,4 +1,4 @@
 
-remote/venv
-remote/local_communication_cert.pem
-remote/.env
+remote/joystick/venv
+remote/joystick/local_communication_cert.pem
+remote/joystick/.env

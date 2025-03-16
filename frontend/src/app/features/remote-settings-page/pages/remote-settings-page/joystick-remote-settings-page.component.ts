@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { RemoteApiService, RemoteProfile } from '../../../../core/services/api/remote-api.service';
+import { JoystickRemoteApiService, JoystickRemoteProfile } from '../../../../core/services/api/joystick-remote-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, forkJoin, of, Subscription } from 'rxjs';
 import { VisorApiService, } from '../../../../core/services/api/visor-api.service';
@@ -9,21 +9,21 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
-import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { typeAssert } from '../../../../core/services/utils/Utils';
 import { FaceApiService } from '../../../../core/services/api/face-api.service';
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
+import { blankJoystickRemoteState, JoystickRemoteState } from '../../../../core/interfaces/JoystickRemoteState';
 
 @Component({
-  selector: 'app-remote-settings-page',
-  templateUrl: './remote-settings-page.component.html',
-  styleUrl: './remote-settings-page.component.scss',
+  selector: 'app-joystick-remote-settings-page',
+  templateUrl: './joystick-remote-settings-page.component.html',
+  styleUrl: './joystick-remote-settings-page.component.scss',
   standalone: false
 })
-export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
-  profiles: RemoteProfile[] = [];
+export class JoystickRemoteSettingsPageComponent implements OnInit, OnDestroy {
+  profiles: JoystickRemoteProfile[] = [];
   actionDataSet: ActionDataSet = {
     rgbScenes: [],
     savedVideos: [],
@@ -32,7 +32,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     faceColorEffects: [],
   }
 
-  remoteState: RemoteState = blankRemoteState();
+  remoteState: JoystickRemoteState = blankJoystickRemoteState();
   private socketSubscription: Subscription | null = null;
 
   private newProfilePrompt: NgbModalRef | null = null;
@@ -45,7 +45,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
   lockInputs = false;
 
   constructor(
-    private remoteApi: RemoteApiService,
+    private remoteApi: JoystickRemoteApiService,
     private toastr: ToastrService,
     private videoApi: VideoPlayerApiService,
     private visorApi: VisorApiService,
@@ -101,7 +101,7 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     this.newProfilePrompt = this.modal.open(this.newProfilePromptTemplate);
   }
 
-  profileDeleted(profile: RemoteProfile) {
+  profileDeleted(profile: JoystickRemoteProfile) {
     this.profiles = this.profiles.filter(p => p.id != profile.id);
   }
 
@@ -143,8 +143,8 @@ export class RemoteSettingsPageComponent implements OnInit, OnDestroy {
     this.title.setTitle("Remote - Protogen");
 
     this.socketSubscription = this.socket.messageObservable.subscribe((msg) => {
-      if (msg.type == SocketMessageType.S2C_RemoteState) {
-        this.remoteState = typeAssert<RemoteState>(msg.data);
+      if (msg.type == SocketMessageType.S2C_JoystickRemoteState) {
+        this.remoteState = typeAssert<JoystickRemoteState>(msg.data);
       }
     });
   }

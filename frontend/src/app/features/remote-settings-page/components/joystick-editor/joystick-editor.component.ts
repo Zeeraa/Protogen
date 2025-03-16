@@ -1,23 +1,23 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { ToastrService } from 'ngx-toastr';
-import { RemoteApiService, RemoteControlInputType } from '../../../../core/services/api/remote-api.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
 import { typeAssert } from '../../../../core/services/utils/Utils';
-import { blankRemoteState, RemoteState } from '../../interface/RemoteState';
+import { JoystickRemoteApiService, JoystickRemoteControlInputType } from '../../../../core/services/api/joystick-remote-api.service';
+import { blankJoystickRemoteState, JoystickRemoteState } from '../../../../core/interfaces/JoystickRemoteState';
 
 @Component({
-    selector: 'app-joystick-editor',
-    templateUrl: './joystick-editor.component.html',
-    styleUrl: './joystick-editor.component.scss',
-    standalone: false
+  selector: 'app-joystick-editor',
+  templateUrl: './joystick-editor.component.html',
+  styleUrl: './joystick-editor.component.scss',
+  standalone: false
 })
 export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit {
   private drawInterval: any;
   private socketSubscribeInterval: any;
   private socketSubscription: Subscription | null = null;
-  joystickState: RemoteState = blankRemoteState();
+  joystickState: JoystickRemoteState = blankJoystickRemoteState();
 
   width = 200;
   height = 200;
@@ -35,7 +35,7 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
   constructor(
     private socket: SocketService,
     private toastr: ToastrService,
-    private remoteApi: RemoteApiService,
+    private remoteApi: JoystickRemoteApiService,
   ) { }
 
   draw() {
@@ -99,13 +99,13 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
     let zoneX = this.width / 2;
     let zoneY = this.height / 2;
 
-    if (this.joystickState.state == RemoteControlInputType.JOYSTICK_UP) {
+    if (this.joystickState.state == JoystickRemoteControlInputType.JOYSTICK_UP) {
       zoneY = zoneIndicatorOffset;
-    } else if (this.joystickState.state == RemoteControlInputType.JOYSTICK_DOWN) {
+    } else if (this.joystickState.state == JoystickRemoteControlInputType.JOYSTICK_DOWN) {
       zoneY = this.height - zoneIndicatorOffset;
-    } else if (this.joystickState.state == RemoteControlInputType.JOYSTICK_LEFT) {
+    } else if (this.joystickState.state == JoystickRemoteControlInputType.JOYSTICK_LEFT) {
       zoneX = zoneIndicatorOffset;
-    } else if (this.joystickState.state == RemoteControlInputType.JOYSTICK_RIGHT) {
+    } else if (this.joystickState.state == JoystickRemoteControlInputType.JOYSTICK_RIGHT) {
       zoneX = this.width - zoneIndicatorOffset;
     }
 
@@ -155,8 +155,8 @@ export class JoystickEditorComponent implements OnInit, OnDestroy, AfterViewInit
     this.socket.sendMessage(SocketMessageType.C2S_EnableRemotePreview, true);
 
     this.socketSubscription = this.socket.messageObservable.subscribe((msg) => {
-      if (msg.type == SocketMessageType.S2C_RemoteState) {
-        this.joystickState = typeAssert<RemoteState>(msg.data)
+      if (msg.type == SocketMessageType.S2C_JoystickRemoteState) {
+        this.joystickState = typeAssert<JoystickRemoteState>(msg.data)
       }
     });
 

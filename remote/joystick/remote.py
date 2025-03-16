@@ -57,7 +57,7 @@ class Profile:
             data["sequenceId"] = remote.command_sequence_id
             remote.command_sequence_id += 1
         
-        async with session.post(remote.api_url + "/remote/perform-action", headers={"x-api-key": remote.api_key}, json=data, ssl=self.ssl_context) as response:
+        async with session.post(remote.api_url + "/remote/joystick/perform-action", headers={"x-api-key": remote.api_key}, json=data, ssl=self.ssl_context) as response:
           if response.status != 200:
             print("Received non 200 response: " + str(response.status))
           else:
@@ -134,7 +134,7 @@ class Remote:
   #region Profile data loading
   async def sync_settings(self):
     async with aiohttp.ClientSession() as session:
-      async with session.get(self.api_url + "/remote/config/full", headers={"x-api-key": self.api_key}, ssl=self.ssl_context) as response:
+      async with session.get(self.api_url + "/remote/joystick/config/full", headers={"x-api-key": self.api_key}, ssl=self.ssl_context) as response:
         if response.status == 200:
           data = await response.json()
           
@@ -266,10 +266,10 @@ class Remote:
     self.update_display()
   
   async def on_message(self, data):
-    if data.get("type") == "S2E_RemoteProfileChange":
+    if data.get("type") == "S2E_JoystickRemoteProfileChange":
       print("Server send message indicating change in profiles")
       await self.sync_settings()
-    elif data.get("type") == "S2E_RemoteConfigChange":
+    elif data.get("type") == "S2E_JoystickRemoteConfigChange":
       print("New settings received from server")
       settings = data.get("data")
       self.invert_x = settings.get("invertX")
@@ -285,7 +285,7 @@ class Remote:
       try:
         print("Fetching remote socket key")
         async with aiohttp.ClientSession() as session:
-          async with session.get(self.api_url + "/discovery/remote-key", headers={"x-api-key": self.api_key}, ssl=self.ssl_context) as response:
+          async with session.get(self.api_url + "/discovery/integration-state-key", headers={"x-api-key": self.api_key}, ssl=self.ssl_context) as response:
             if response.status == 200:
               data = await response.json()
               key = data.get("key")
@@ -414,7 +414,7 @@ class Remote:
           "active_profile_id": active_profile_id,
         }
         
-        await self.websocket.emit("message", {"type": "E2S_RemoteState", "data": sensor_readings})
+        await self.websocket.emit("message", {"type": "E2S_JoystickRemoteState", "data": sensor_readings})
       await asyncio.sleep(1.0 / 8.0) # 8 times per second
   
   def get_joystick_distance(self):

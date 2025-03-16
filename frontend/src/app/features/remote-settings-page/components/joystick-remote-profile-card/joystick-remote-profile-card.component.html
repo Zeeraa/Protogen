@@ -45,7 +45,7 @@
           @for (action of profile.actions; track $index) {
           @if(!profile.clickToActivate || stringify(action.inputType) != "JOYSTICK_BUTTON") {
           <div class="col-12 mb-2 mt-2">
-            <app-remote-action-editor [action]="action" [profile]="profile" [actionDataSet]="actionDataSet"
+            <app-joystick-remote-action-editor [action]="action" [profile]="profile" [actionDataSet]="actionDataSet"
               [actionDataSet]="actionDataSet" [disabled]="!editEnabled" />
           </div>
           }

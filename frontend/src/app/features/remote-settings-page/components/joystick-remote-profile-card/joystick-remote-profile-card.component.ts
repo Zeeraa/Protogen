@@ -1,23 +1,23 @@
 import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
-import { AlterProfileActions, RemoteApiService, RemoteProfile } from '../../../../core/services/api/remote-api.service';
 import { uuidv7 } from 'uuidv7';
 import { catchError, of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
+import { JoystickAlterProfileActions, JoystickRemoteApiService, JoystickRemoteProfile } from '../../../../core/services/api/joystick-remote-api.service';
 
 @Component({
-  selector: 'app-remote-profile-card',
-  templateUrl: './remote-profile-card.component.html',
-  styleUrl: './remote-profile-card.component.scss',
+  selector: 'app-joystick-remote-profile-card',
+  templateUrl: './joystick-remote-profile-card.component.html',
+  styleUrl: './joystick-remote-profile-card.component.scss',
   standalone: false
 })
-export class RemoteProfileCardComponent implements OnDestroy {
-  @Input({ required: true }) profile!: RemoteProfile;
+export class JoystickRemoteProfileCardComponent implements OnDestroy {
+  @Input({ required: true }) profile!: JoystickRemoteProfile;
   @Input({ required: true }) actionDataSet!: ActionDataSet;
   @Input() isActive = false;
-  @Output() deleted = new EventEmitter<RemoteProfile>();
+  @Output() deleted = new EventEmitter<JoystickRemoteProfile>();
   editEnabled = false;
 
   private _componentId = uuidv7();
@@ -93,7 +93,7 @@ export class RemoteProfileCardComponent implements OnDestroy {
   }
 
   save() {
-    const actions: AlterProfileActions[] = [];
+    const actions: JoystickAlterProfileActions[] = [];
     this.profile.actions.forEach(action => {
       actions.push({
         action: action.action,
@@ -159,7 +159,7 @@ export class RemoteProfileCardComponent implements OnDestroy {
 
   constructor(
     private toastr: ToastrService,
-    private api: RemoteApiService,
+    private api: JoystickRemoteApiService,
     private modal: NgbModal,
   ) { }
 }

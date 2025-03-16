@@ -20,8 +20,8 @@
   <div class="row">
     @for (profile of profiles; track $index) {
     <div class="col-12 col-sm-12 col-md-12 col-lg-6 mt-2">
-      <app-remote-profile-card [profile]="profile" [actionDataSet]="actionDataSet" (deleted)="profileDeleted($event)"
-        [isActive]="remoteState.activeProfileId == profile.id" />
+      <app-joystick-remote-profile-card [profile]="profile" [actionDataSet]="actionDataSet"
+        (deleted)="profileDeleted($event)" [isActive]="remoteState.activeProfileId == profile.id" />
     </div>
     }
   </div>

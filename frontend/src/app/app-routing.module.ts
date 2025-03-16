@@ -10,11 +10,11 @@ import { LogsPageComponent } from './features/logs/pages/logs-page/logs-page.com
 import { VisorImageFaceEditorComponent } from './features/visor/pages/visor-image-face-editor/visor-image-face-editor.component';
 import { UserManagerPageComponent } from './features/user-manager/pages/user-manager-page/user-manager-page.component';
 import { ApiKeyManagerPageComponent } from './features/api-key-manager/pages/api-key-manager-page/api-key-manager-page.component';
-import { RemoteSettingsPageComponent } from './features/remote-settings-page/pages/remote-settings-page/remote-settings-page.component';
 import { ProtogenFaceEditorComponent } from './features/visor/pages/protogen-face-editor/protogen-face-editor.component';
 import { ActionsPageComponent } from './features/actions/pages/actions-page/actions-page.component';
 import { AuthPageComponent } from './features/auth/pages/auth-page/auth-page.component';
 import { AudioVisualizerSettingsPageComponent } from './features/audio-visualizer/pages/audio-visualizer-settings-page/audio-visualizer-settings-page.component';
+import { JoystickRemoteSettingsPageComponent } from './features/remote-settings-page/pages/remote-settings-page/joystick-remote-settings-page.component';
 
 export const routes: Routes = [
   {
@@ -72,8 +72,8 @@ export const routes: Routes = [
     component: ApiKeyManagerPageComponent,
   },
   {
-    path: "remote",
-    component: RemoteSettingsPageComponent,
+    path: "remote/joystick",
+    component: JoystickRemoteSettingsPageComponent,
   },
   {
     path: "actions",

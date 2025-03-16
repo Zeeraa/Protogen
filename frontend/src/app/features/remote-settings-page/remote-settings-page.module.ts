@@ -1,17 +1,17 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RemoteSettingsPageComponent } from './pages/remote-settings-page/remote-settings-page.component';
-import { RemoteProfileCardComponent } from './components/remote-profile-card/remote-profile-card.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RemoteActionEditorComponent } from './components/remote-action-editor/remote-action-editor.component';
 import { JoystickEditorComponent } from './components/joystick-editor/joystick-editor.component';
+import { JoystickRemoteActionEditorComponent } from './components/joystick-remote-action-editor/joystick-remote-action-editor.component';
+import { JoystickRemoteProfileCardComponent } from './components/joystick-remote-profile-card/joystick-remote-profile-card.component';
+import { JoystickRemoteSettingsPageComponent } from './pages/remote-settings-page/joystick-remote-settings-page.component';
 
 @NgModule({
   declarations: [
-    RemoteSettingsPageComponent,
-    RemoteProfileCardComponent,
-    RemoteActionEditorComponent,
-    JoystickEditorComponent
+    JoystickEditorComponent,
+    JoystickRemoteActionEditorComponent,
+    JoystickRemoteProfileCardComponent,
+    JoystickRemoteSettingsPageComponent,
   ],
   imports: [
     CommonModule,
@@ -19,7 +19,7 @@ import { JoystickEditorComponent } from './components/joystick-editor/joystick-e
     ReactiveFormsModule,
   ],
   exports: [
-    RemoteSettingsPageComponent
+    JoystickRemoteSettingsPageComponent,
   ]
 })
 export class RemoteSettingsPageModule { }
