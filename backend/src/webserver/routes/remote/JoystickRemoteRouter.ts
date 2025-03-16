@@ -1,22 +1,22 @@
-import { RemoteProfile } from "../../../database/models/remote/RemoteProfile.model";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { z } from "zod";
 import { Equal, Not } from "typeorm";
-import { RemoteAction } from "../../../database/models/remote/RemoteAction.model";
-import { RemoteControlInputType } from "../../../database/models/remote/RemoteControlInputType";
 import { SocketMessageType } from "../../socket/SocketMessageType";
 import { ActionType } from "../../../actions/ActionType";
+import { JoystickRemoteProfile } from "../../../database/models/remote/joystick/JoystickRemoteProfile.model";
+import { JoystickRemoteAction } from "../../../database/models/remote/joystick/JoystickRemoteAction.model";
+import { JoystickRemoteControlInputType } from "../../../database/models/remote/joystick/JoystickRemoteControlInputType";
 
-export class RemoteRouter extends AbstractRouter {
+export class JoystickRemoteRouter extends AbstractRouter {
   private sequenceIdMap: SequenceIdMap = {};
 
   constructor(webServer: ProtogenWebServer) {
-    super(webServer, "/remote");
+    super(webServer, "/remote/joystick");
 
     this.router.get("/config", async (req, res) => {
       /*
-      #swagger.path = '/remote/config'
+      #swagger.path = '/remote/joystick/config'
       #swagger.tags = ['Remote'],
       #swagger.description = "Get remote settings"
       #swagger.responses[200] = { description: "Ok" }
@@ -27,15 +27,15 @@ export class RemoteRouter extends AbstractRouter {
       ]
       */
       res.json({
-        invertX: this.protogen.remoteManager.invertX,
-        invertY: this.protogen.remoteManager.invertY,
-        flipAxis: this.protogen.remoteManager.flipAxis,
+        invertX: this.protogen.joystickRemoteManager.invertX,
+        invertY: this.protogen.joystickRemoteManager.invertY,
+        flipAxis: this.protogen.joystickRemoteManager.flipAxis,
       });
     });
 
     this.router.get("/config/full", async (req, res) => {
       /*
-      #swagger.path = '/remote/config/full'
+      #swagger.path = '/remote/joystick/config/full'
       #swagger.tags = ['Remote'],
       #swagger.description = "Get remote profiles and settings"
       #swagger.responses[200] = { description: "Ok" }
@@ -46,7 +46,7 @@ export class RemoteRouter extends AbstractRouter {
         {"tokenAuth": []}
       ]
       */
-      const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+      const repo = this.protogen.database.dataSource.getRepository(JoystickRemoteProfile);
       const profiles = await repo.find({
         relations: {
           actions: true,
@@ -55,15 +55,15 @@ export class RemoteRouter extends AbstractRouter {
 
       res.json({
         profiles: profiles,
-        invertX: this.protogen.remoteManager.invertX,
-        invertY: this.protogen.remoteManager.invertY,
-        flipAxis: this.protogen.remoteManager.flipAxis,
+        invertX: this.protogen.joystickRemoteManager.invertX,
+        invertY: this.protogen.joystickRemoteManager.invertY,
+        flipAxis: this.protogen.joystickRemoteManager.flipAxis,
       });
     });
 
     this.router.put("/config", async (req, res) => {
       /*
-      #swagger.path = '/remote/config'
+      #swagger.path = '/remote/joystick/config'
       #swagger.tags = ['Remote'],
       #swagger.description = "Update remote settings"
       #swagger.responses[200] = { description: "Ok" }
@@ -84,26 +84,26 @@ export class RemoteRouter extends AbstractRouter {
         const data = parsed.data;
 
         if (data.invertX !== undefined) {
-          this.protogen.remoteManager.invertX = data.invertX;
+          this.protogen.joystickRemoteManager.invertX = data.invertX;
         }
 
         if (data.invertY !== undefined) {
-          this.protogen.remoteManager.invertY = data.invertY;
+          this.protogen.joystickRemoteManager.invertY = data.invertY;
         }
 
         if (data.flipAxis !== undefined) {
-          this.protogen.remoteManager.flipAxis = data.flipAxis;
+          this.protogen.joystickRemoteManager.flipAxis = data.flipAxis;
         }
 
-        await this.protogen.remoteManager.saveConfig();
+        await this.protogen.joystickRemoteManager.saveConfig();
 
         const config = {
-          invertX: this.protogen.remoteManager.invertX,
-          invertY: this.protogen.remoteManager.invertY,
-          flipAxis: this.protogen.remoteManager.flipAxis,
+          invertX: this.protogen.joystickRemoteManager.invertX,
+          invertY: this.protogen.joystickRemoteManager.invertY,
+          flipAxis: this.protogen.joystickRemoteManager.flipAxis,
         }
 
-        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteConfigChange, config);
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_JoystickRemoteConfigChange, config);
         res.json(config);
       } catch (err) {
         this.handleError(err, req, res);
@@ -112,7 +112,7 @@ export class RemoteRouter extends AbstractRouter {
 
     this.router.get("/profiles/last-change", async (req, res) => {
       /*
-      #swagger.path = '/remote/profiles/last-change'
+      #swagger.path = '/remote/joystick/profiles/last-change'
       #swagger.tags = ['Remote'],
       #swagger.description = "Get the data when profiles where edited"
       #swagger.responses[200] = { description: "Ok" }
@@ -124,7 +124,7 @@ export class RemoteRouter extends AbstractRouter {
       ]
       */
       try {
-        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+        const repo = this.protogen.database.dataSource.getRepository(JoystickRemoteProfile);
         const profiles = await repo.find({
           select: {
             id: true,
@@ -140,7 +140,7 @@ export class RemoteRouter extends AbstractRouter {
 
     this.router.get("/profiles", async (req, res) => {
       /*
-      #swagger.path = '/remote/profiles'
+      #swagger.path = '/remote/joystick/profiles'
       #swagger.tags = ['Remote'],
       #swagger.description = "Get all configure remote profiles"
       #swagger.responses[200] = { description: "Ok" }
@@ -152,7 +152,7 @@ export class RemoteRouter extends AbstractRouter {
       ]
       */
       try {
-        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+        const repo = this.protogen.database.dataSource.getRepository(JoystickRemoteProfile);
         const profiles = await repo.find({
           relations: {
             actions: true,
@@ -167,7 +167,7 @@ export class RemoteRouter extends AbstractRouter {
 
     this.router.post("/profiles", async (req, res) => {
       /*
-      #swagger.path = '/remote/profiles'
+      #swagger.path = '/remote/joystick/profiles'
       #swagger.tags = ['Remote'],
       #swagger.description = "Create a new profile"
       #swagger.responses[200] = { description: "Ok" }
@@ -188,7 +188,7 @@ export class RemoteRouter extends AbstractRouter {
         }
         const data = parsed.data;
 
-        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+        const repo = this.protogen.database.dataSource.getRepository(JoystickRemoteProfile);
 
         const existing = await repo.findOne({
           where: {
@@ -201,7 +201,7 @@ export class RemoteRouter extends AbstractRouter {
           return;
         }
 
-        const profile = new RemoteProfile();
+        const profile = new JoystickRemoteProfile();
         profile.name = data.name.trim();
         profile.actions = [];
         profile.clickToActivate = data.clickToActivate;
@@ -209,7 +209,7 @@ export class RemoteRouter extends AbstractRouter {
 
         // Add / update actions
         data.actions.forEach(action => {
-          const actionObj = new RemoteAction();
+          const actionObj = new JoystickRemoteAction();
 
           actionObj.action = action.action;
           actionObj.actionType = action.actionType;
@@ -219,9 +219,9 @@ export class RemoteRouter extends AbstractRouter {
         });
 
         // Fill unspecified actions with null values
-        Object.values(RemoteControlInputType).forEach(type => {
+        Object.values(JoystickRemoteControlInputType).forEach(type => {
           if (profile.actions.find(a => a.inputType == type) == null) {
-            const actionObj = new RemoteAction();
+            const actionObj = new JoystickRemoteAction();
 
             actionObj.action = null;
             actionObj.actionType = ActionType.NONE;
@@ -233,7 +233,7 @@ export class RemoteRouter extends AbstractRouter {
 
         const result = await repo.save(profile);
 
-        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteProfileChange, { id: result.id });
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_JoystickRemoteProfileChange, { id: result.id });
 
         res.json(result);
       } catch (err) {
@@ -243,7 +243,7 @@ export class RemoteRouter extends AbstractRouter {
 
     this.router.put("/profiles/:id", async (req, res) => {
       /*
-      #swagger.path = '/remote/profiles/{id}'
+      #swagger.path = '/remote/joystick/profiles/{id}'
       #swagger.tags = ['Remote'],
       #swagger.description = "Alter an existing profile"
       #swagger.responses[200] = { description: "Ok" }
@@ -272,7 +272,7 @@ export class RemoteRouter extends AbstractRouter {
         }
         const data = parsed.data;
 
-        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+        const repo = this.protogen.database.dataSource.getRepository(JoystickRemoteProfile);
 
         const profile = await repo.findOne({
           where: {
@@ -309,7 +309,7 @@ export class RemoteRouter extends AbstractRouter {
 
         // Add / update actions
         data.actions.forEach(action => {
-          const actionObj = new RemoteAction();
+          const actionObj = new JoystickRemoteAction();
 
           if (action.id != null) {
             const existing = oldActions.find(a => a.id == action.id);
@@ -326,9 +326,9 @@ export class RemoteRouter extends AbstractRouter {
         });
 
         // Fill unspecified actions with null values
-        Object.values(RemoteControlInputType).forEach(type => {
+        Object.values(JoystickRemoteControlInputType).forEach(type => {
           if (profile.actions.find(a => a.inputType == type) == null) {
-            const actionObj = new RemoteAction();
+            const actionObj = new JoystickRemoteAction();
 
             actionObj.action = null;
             actionObj.actionType = ActionType.NONE;
@@ -340,7 +340,7 @@ export class RemoteRouter extends AbstractRouter {
 
         const result = await repo.save(profile);
 
-        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteProfileChange, { id: result.id });
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_JoystickRemoteProfileChange, { id: result.id });
 
         res.json(result);
       } catch (err) {
@@ -350,7 +350,7 @@ export class RemoteRouter extends AbstractRouter {
 
     this.router.delete("/profiles/:id", async (req, res) => {
       /*
-      #swagger.path = '/remote/profiles/{id}'
+      #swagger.path = '/remote/joystick/profiles/{id}'
       #swagger.tags = ['Remote'],
       #swagger.description = "Delete a profile"
       #swagger.responses[200] = { description: "Ok" }
@@ -371,7 +371,7 @@ export class RemoteRouter extends AbstractRouter {
           return;
         }
 
-        const repo = this.protogen.database.dataSource.getRepository(RemoteProfile);
+        const repo = this.protogen.database.dataSource.getRepository(JoystickRemoteProfile);
 
         const profile = await repo.findOne({
           where: {
@@ -390,12 +390,12 @@ export class RemoteRouter extends AbstractRouter {
         await repo.delete(profile.id);
 
         const config = {
-          invertX: this.protogen.remoteManager.invertX,
-          invertY: this.protogen.remoteManager.invertY,
-          flipAxis: this.protogen.remoteManager.flipAxis,
+          invertX: this.protogen.joystickRemoteManager.invertX,
+          invertY: this.protogen.joystickRemoteManager.invertY,
+          flipAxis: this.protogen.joystickRemoteManager.flipAxis,
         }
 
-        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_RemoteConfigChange, config);
+        this.protogen.webServer.broadcastMessage(SocketMessageType.S2E_JoystickRemoteConfigChange, config);
 
         res.json({});
       } catch (err) {
@@ -405,7 +405,7 @@ export class RemoteRouter extends AbstractRouter {
 
     this.router.post("/perform-action", async (req, res) => {
       /*
-      #swagger.path = '/remote/perform-action'
+      #swagger.path = '/remote/joystick/perform-action'
       #swagger.tags = ['Remote'],
       #swagger.description = "Performs and action based on input"
       #swagger.responses[200] = { description: "Ok" }
@@ -465,7 +465,7 @@ const AlterProfileActions = z.object({
   id: z.number().int().safe().positive().optional(),
   actionType: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
-  inputType: z.nativeEnum(RemoteControlInputType),
+  inputType: z.nativeEnum(JoystickRemoteControlInputType),
 });
 
 const AlterProfileModel = z.object({

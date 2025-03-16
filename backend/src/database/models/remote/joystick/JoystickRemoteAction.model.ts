@@ -1,13 +1,13 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
-import { RemoteControlInputType } from "./RemoteControlInputType";
-import { RemoteProfile } from "./RemoteProfile.model";
-import { ActionType } from "../../../actions/ActionType";
+import { ActionType } from "../../../../actions/ActionType";
+import { JoystickRemoteProfile } from "./JoystickRemoteProfile.model";
+import { JoystickRemoteControlInputType } from "./JoystickRemoteControlInputType";
 
 @Entity({
-  name: "remote_action",
+  name: "joystick_remote_action",
 })
 @Unique(["profile", "inputType"])
-export class RemoteAction {
+export class JoystickRemoteAction {
   @PrimaryGeneratedColumn({
     name: "id",
     unsigned: true,
@@ -17,9 +17,9 @@ export class RemoteAction {
   @Column({
     name: "input_type",
     type: "enum",
-    enum: RemoteControlInputType,
+    enum: JoystickRemoteControlInputType,
   })
-  inputType: RemoteControlInputType;
+  inputType: JoystickRemoteControlInputType;
 
   @Column({
     name: "action_type",
@@ -38,7 +38,7 @@ export class RemoteAction {
   })
   action: string | null;
 
-  @ManyToOne(() => RemoteProfile, p => p.actions, { onDelete: "CASCADE", onUpdate: "CASCADE", nullable: false })
+  @ManyToOne(() => JoystickRemoteProfile, p => p.actions, { onDelete: "CASCADE", onUpdate: "CASCADE", nullable: false })
   @JoinColumn({ name: "profile_id" })
-  profile: RemoteProfile;
+  profile: JoystickRemoteProfile;
 }

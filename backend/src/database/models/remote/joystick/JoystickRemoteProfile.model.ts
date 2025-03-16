@@ -1,10 +1,10 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { RemoteAction } from "./RemoteAction.model";
+import { JoystickRemoteAction } from "./JoystickRemoteAction.model";
 
 @Entity({
-  name: "remote_profile",
+  name: "joystick_remote_profile",
 })
-export class RemoteProfile {
+export class JoystickRemoteProfile {
   @PrimaryGeneratedColumn({
     name: "id",
     unsigned: true,
@@ -25,8 +25,8 @@ export class RemoteProfile {
   })
   clickToActivate: boolean;
 
-  @OneToMany(() => RemoteAction, a => a.profile, { cascade: true })
-  actions: RemoteAction[];
+  @OneToMany(() => JoystickRemoteAction, a => a.profile, { cascade: true })
+  actions: JoystickRemoteAction[];
 
   @Column({
     name: "last_save_date",

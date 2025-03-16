@@ -1,7 +1,7 @@
-import { RemoteControlInputType } from "../database/models/remote/RemoteControlInputType";
+import { JoystickRemoteControlInputType } from "../database/models/remote/joystick/JoystickRemoteControlInputType";
 
 export interface RemoteState {
-  state: RemoteControlInputType;
+  state: JoystickRemoteControlInputType;
   joystickX: number;
   joystickY: number;
   joystickPressed: boolean;
@@ -11,7 +11,7 @@ export interface RemoteState {
   activeProfileId: number;
 }
 
-export function constructRemoteStateFromSensorData(data: any): RemoteState {
+export function constructJoystickRemoteStateFromSensorData(data: any): RemoteState {
   return {
     state: data.joystick_state,
     joystickX: data.joystick_x,

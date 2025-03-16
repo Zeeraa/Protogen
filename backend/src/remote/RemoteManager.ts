@@ -1,14 +1,12 @@
+import { JoystickRemoteControlInputType } from "../database/models/remote/joystick/JoystickRemoteControlInputType";
 import { Protogen } from "../Protogen";
 import { KV_RemoteFlipAxis, KV_RemoteInvertX, KV_RemoteInvertY } from "../utils/KVDataStorageKeys";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
-import { RemoteState } from "./RemoteState";
-import { RemoteControlInputType } from "../database/models/remote/RemoteControlInputType";
-import { uuidv7 } from "uuidv7";
+import { RemoteState } from "./JoystickRemoteState";
 
-export class RemoteManager {
+export class JoystickRemoteManager {
   private _protogen;
   private _state: RemoteState;
-  private _stateReportingKey: string;
   public invertX: boolean;
   public invertY: boolean;
   public flipAxis: boolean;
@@ -16,7 +14,7 @@ export class RemoteManager {
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this._state = {
-      state: RemoteControlInputType.JOYSTICK_CENTER,
+      state: JoystickRemoteControlInputType.JOYSTICK_CENTER,
       activeProfileId: -1,
       buttonA: false,
       buttonLeft: false,
@@ -26,14 +24,9 @@ export class RemoteManager {
       joystickY: 0.5,
     }
 
-    this._stateReportingKey = uuidv7();
     this.invertX = false;
     this.invertY = false;
     this.flipAxis = false;
-  }
-
-  public get stateReportingKey() {
-    return this._stateReportingKey;
   }
 
   public async loadConfig() {
@@ -63,7 +56,7 @@ export class RemoteManager {
   set state(state: RemoteState) {
     this._state = state;
     this.protogen.webServer.socketSessions.filter(s => s.enableRemotePreview).forEach(subscriber => {
-      subscriber.sendMessage(SocketMessageType.S2C_RemoteState, state);
+      subscriber.sendMessage(SocketMessageType.S2C_JoystickRemoteState, state);
     })
   }
 }

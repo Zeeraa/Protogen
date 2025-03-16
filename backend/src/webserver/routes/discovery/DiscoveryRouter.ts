@@ -19,16 +19,16 @@ export class DiscoveryRouter extends AbstractRouter {
       });
     });
 
-    this.router.get("/remote-key", [this.authMiddleware], async (req: Request, res: Response) => {
+    this.router.get("/integration-state-key", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
-      #swagger.path = '/discovery/remote-key'
+      #swagger.path = '/discovery/integration-state-key'
       #swagger.tags = ['Discovery'],
-      #swagger.description = "Get key for remote socket communication"
+      #swagger.description = "Get key for integrations such as remotes or audio listeners"
       #swagger.responses[200] = { description: "Ok" }
       */
       try {
         res.send({
-          key: this.protogen.remoteManager.stateReportingKey,
+          key: this.protogen.integrationStateReportingKey,
         })
       } catch (err) {
         this.handleError(err, req, res);

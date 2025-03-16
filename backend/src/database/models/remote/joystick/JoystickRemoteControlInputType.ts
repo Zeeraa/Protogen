@@ -1,4 +1,4 @@
-export enum RemoteControlInputType {
+export enum JoystickRemoteControlInputType {
   JOYSTICK_UP = "JOYSTICK_UP",
   JOYSTICK_DOWN = "JOYSTICK_DOWN",
   JOYSTICK_LEFT = "JOYSTICK_LEFT",

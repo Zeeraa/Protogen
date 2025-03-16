@@ -23,7 +23,6 @@ import { AuthRouter } from "./routes/auth/AuthRouter";
 import { AuthData, AuthMiddleware, AuthType } from "./middleware/AuthMiddleware";
 import { DiscoveryRouter } from "./routes/discovery/DiscoveryRouter";
 import { ApiKeyRouter } from "./routes/apikeys/ApiKeyRouter";
-import { RemoteRouter } from "./routes/remote/RemoteRouter";
 import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 import { FaceRouter } from "./routes/face/FaceRouter";
 import { AssetsRouter } from "./routes/assets/AssetsRouter";
@@ -32,6 +31,7 @@ import { generateNewCertificate, getCertificateExpiry } from "../utils/Utils";
 import { ActionsRouter } from "./routes/actions/ActionsRouter";
 import morgan from 'morgan';
 import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualizerRouter";
+import { JoystickRemoteRouter } from "./routes/remote/JoystickRemoteRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 
@@ -130,7 +130,7 @@ export class ProtogenWebServer {
     new AuthRouter(this).register({ noAuth: true });
     new DiscoveryRouter(this).register({ noAuth: true });
     new ApiKeyRouter(this).register();
-    new RemoteRouter(this).register();
+    new JoystickRemoteRouter(this).register();
     new FaceRouter(this).register();
     new AssetsRouter(this).register({ noAuth: true });
     new ActionsRouter(this).register();
@@ -166,7 +166,7 @@ export class ProtogenWebServer {
         }
       } else if (token.startsWith("RemoteKey ")) {
         const keyString = token.split("RemoteKey ")[1];
-        if (keyString == this.protogen.remoteManager.stateReportingKey) {
+        if (keyString == this.protogen.integrationStateReportingKey) {
           auth = {
             type: AuthType.Remote,
             isSuperUser: false,
@@ -271,6 +271,6 @@ export class ProtogenWebServer {
   }
 
   public broadcastMessage(type: SocketMessageType, data: any) {
-    this.socketSessions.filter(s => !s.auth.onlyRemotePermissions || (type == SocketMessageType.S2E_RemoteConfigChange || type == SocketMessageType.S2E_RemoteProfileChange)).forEach(s => s.sendMessage(type, data));
+    this.socketSessions.filter(s => !s.auth.onlyRemotePermissions || (type == SocketMessageType.S2E_JoystickRemoteConfigChange || type == SocketMessageType.S2E_JoystickRemoteProfileChange)).forEach(s => s.sendMessage(type, data));
   }
 }

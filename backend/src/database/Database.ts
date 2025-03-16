@@ -9,8 +9,6 @@ import { RgbEditorPreviewElement } from "./models/rgb/RgbEditorConfig.model";
 import { SavedVideoGroup } from "./models/video-player/SavedVideoGroup.model";
 import { CustomFace } from "./models/visor/CustomFace.model";
 import { ApiKey } from "./models/apikeys/ApiKey.model";
-import { RemoteProfile } from "./models/remote/RemoteProfile.model";
-import { RemoteAction } from "./models/remote/RemoteAction.model";
 import { KV_EnableSwagger } from "../utils/KVDataStorageKeys";
 import { FaceExpressionData } from "./models/visor/FaceExpression.model";
 import { FaceColorEffectProperty } from "./models/visor/FaceColorEffectProperty";
@@ -19,6 +17,8 @@ import { ActionSetAction } from "./models/actions/ActionSetEntry.model";
 import { ActionSet } from "./models/actions/ActionSet.model";
 import { User } from "./models/auth/User.model";
 import { PasswordlessSignInRequest } from "./models/auth/PasswordlessSignInRequest.model";
+import { JoystickRemoteAction } from "./models/remote/joystick/JoystickRemoteAction.model";
+import { JoystickRemoteProfile } from "./models/remote/joystick/JoystickRemoteProfile.model";
 
 export class Database {
   private _protogen;
@@ -62,8 +62,8 @@ export class Database {
         ApiKey,
 
         // ---------- Remote ----------
-        RemoteProfile,
-        RemoteAction,
+        JoystickRemoteProfile,
+        JoystickRemoteAction,
 
         // ---------- Actions ----------
         ActionSet,

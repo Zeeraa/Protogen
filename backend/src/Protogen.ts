@@ -15,12 +15,12 @@ import { sleep } from "./utils/Utils";
 import { uuidv7 } from "uuidv7";
 import { UserManager } from "./user-manager/UserManager";
 import { ApiKeyManager } from "./apikeys/ApiKeyManager";
-import { RemoteManager } from "./remote/RemoteManager";
 import { BuiltInAsset, BuiltInAssetSchema } from "./assets/BuiltInAsset";
 import { z } from "zod";
 import { ActionManager } from "./actions/ActionManager";
 import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
 import { red } from "colors";
+import { JoystickRemoteManager } from "./remote/RemoteManager";
 
 export const BootMessageColor = "#00FF00";
 
@@ -39,7 +39,7 @@ export class Protogen {
   private _eventEmitter: EventEmitter;
   private _userManager: UserManager;
   private _apiKeyManager: ApiKeyManager;
-  private _remoteManager: RemoteManager;
+  private _joystickRemoteManager: JoystickRemoteManager;
   private _sessionId: string;
   private _imageDirectory: string;
   private _tempDirectory: string;
@@ -47,6 +47,7 @@ export class Protogen {
   private _actionManager: ActionManager;
   private _audioVisualiser: AudioVisualiser;
   private _versionNumber: string;
+  private _integrationStateReportingKey: string;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -56,6 +57,8 @@ export class Protogen {
 
     this._eventEmitter = new EventEmitter();
     this._logger = new Logger(this);
+
+    this._integrationStateReportingKey = uuidv7();
 
     if (!existsSync(this.config.logDirectory)) {
       mkdirSync(this.config.logDirectory);
@@ -119,7 +122,6 @@ export class Protogen {
     Object.freeze(this._versionNumber);
     Object.freeze(this._builtInAssets);
 
-
     this._database = new Database(this);
     this._userManager = new UserManager(this);
     this._apiKeyManager = new ApiKeyManager(this);
@@ -132,7 +134,7 @@ export class Protogen {
     this._rgb = new RgbManager(this);
     this._audioVisualiser = new AudioVisualiser(this);
     this._networkManager = new NetworkManager(this);
-    this._remoteManager = new RemoteManager(this);
+    this._joystickRemoteManager = new JoystickRemoteManager(this);
     this._actionManager = new ActionManager(this);
   }
 
@@ -141,7 +143,7 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit database", BootMessageColor);
     await this.database.init();
-    await this.remoteManager.loadConfig();
+    await this.joystickRemoteManager.loadConfig();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit auth", BootMessageColor);
     await this.userManager.init();
@@ -252,8 +254,8 @@ export class Protogen {
     return this._apiKeyManager;
   }
 
-  get remoteManager() {
-    return this._remoteManager;
+  get joystickRemoteManager() {
+    return this._joystickRemoteManager;
   }
 
   get builtInAssets() {
@@ -270,6 +272,10 @@ export class Protogen {
 
   get versionNumber() {
     return this._versionNumber;
+  }
+
+  get integrationStateReportingKey() {
+    return this._integrationStateReportingKey;
   }
   //#endregion
 }
