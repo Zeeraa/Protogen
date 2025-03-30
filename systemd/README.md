@@ -1,1 +1,1 @@
-This folder contains systemd siles to run the remote and backend
+This folder contains systemd files to run the remote and backend
