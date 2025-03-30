@@ -73,7 +73,7 @@ export class VideoPlayerRouter extends AbstractRouter {
 
         const data = parsed.data;
 
-        const result = this.playbackManager.playVideo(data.url, data.mirrorVideo);
+        const result = this.playbackManager.playVideoCached(data.url, data.mirrorVideo, data.flipVideo);
 
         res.json(result);
       } catch (err) {
@@ -434,7 +434,7 @@ export class VideoPlayerRouter extends AbstractRouter {
         if (isStream) {
           await this.protogen.videoPlaybackManager.streamVideo(savedVideo.url);
         } else {
-          downloadJob = await this.protogen.videoPlaybackManager.playVideo(savedVideo.url, savedVideo.mirrorVideo, savedVideo.flipVideo);
+          downloadJob = await this.protogen.videoPlaybackManager.playVideoCached(savedVideo.url, savedVideo.mirrorVideo, savedVideo.flipVideo);
         }
 
         res.json({

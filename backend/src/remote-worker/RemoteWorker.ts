@@ -97,6 +97,7 @@ export interface VideoDownloadJob {
   jobId: string;
   videoUrl: string;
   mirrorVideo: boolean;
+  flipVideo: boolean;
   outputHash: string | null;
   errorMessage: string | null;
   createdAt: string;

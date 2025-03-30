@@ -5,7 +5,9 @@ import { existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { ChildProcess, exec } from "child_process";
 import { sleep } from "../utils/Utils";
-
+import { VideoCache } from "../database/models/video-player/VideoCache.model";
+import { generateSHA256 } from "../utils/Hashing";
+import { Equal } from "typeorm";
 
 const LockName = "ProtogenVideoPlaybackManager";
 
@@ -72,10 +74,34 @@ export class ProtogenVideoPlaybackManager {
             if (this._monitoredJob!.status == VideoDownloadJobStatus.DONE) {
               this.protogen.logger.info("VideoPlaybackManager", "Job with ID " + this._monitoredJob!.jobId + " is done. Attempting to download it and start playback");
               const hash = this._monitoredJob!.outputHash;
+              const urlHash = generateSHA256(this._monitoredJob!.videoUrl);
+              const jobId = this._monitoredJob!.jobId;
+
+              const settingsHash = this.generateSettingsHash(this._monitoredJob!.mirrorVideo, this._monitoredJob!.flipVideo);
               this._monitoredJob = null;
               if (hash == null) {
                 throw new Error("Video hash was null after success");
               }
+
+              const repo = this.protogen.database.dataSource.getRepository(VideoCache);
+              // Check if a cache entry already exists
+              const existingEntry = await repo.findOne({
+                where: {
+                  hash: Equal(hash),
+                  urlHash: Equal(urlHash),
+                  settingsHash: Equal(settingsHash),
+                },
+              });
+
+              if (existingEntry == null) {
+                const entry = new VideoCache();
+                entry.hash = hash;
+                entry.urlHash = urlHash;
+                entry.settingsHash = settingsHash;
+                entry.jobId = jobId;
+                await repo.save(entry);
+              }
+
               await this.downloadAndStartPlayback(hash);
             } else if (this._monitoredJob!.status == VideoDownloadJobStatus.FAILED) {
               this.protogen.logger.error("VideoPlaybackManager", "Job with ID " + this._monitoredJob!.jobId + " failed with message " + this._monitoredJob!.errorMessage);
@@ -96,7 +122,12 @@ export class ProtogenVideoPlaybackManager {
   }
 
   private async downloadAndStartPlayback(hash: string): Promise<boolean> {
-    const output = this._videoDirectory + "/" + hash + ".mp4";
+    const targetDirectory = this._videoDirectory + "/" + hash.substring(0, 2);
+    if (!existsSync(targetDirectory)) {
+      mkdirSync(targetDirectory, { recursive: true });
+    }
+
+    const output = targetDirectory + "/" + hash + ".mp4";
     if (existsSync(output)) {
       this.protogen.logger.info("VideoPlaybackManager", "Video already in cache. Skipping download");
     } else {
@@ -114,6 +145,49 @@ export class ProtogenVideoPlaybackManager {
     await this.killAndAwait();
     this.startPlayback(resolve(output));
     return true;
+  }
+
+  async playVideoCached(url: string, mirror: boolean, flip: boolean): Promise<VideoDownloadJob> {
+    const urlHash = generateSHA256(url);
+    const settingsHash = this.generateSettingsHash(mirror, flip);
+    const repo = this.protogen.database.dataSource.getRepository(VideoCache);
+    const entry = await repo.findOne({
+      where: {
+        urlHash: Equal(urlHash),
+        settingsHash: Equal(settingsHash),
+      },
+    });
+
+    if (entry != null) {
+      this.protogen.logger.info("VideoPlaybackManager", "Starting download/playback from local cache");
+      await this.downloadAndStartPlayback(entry.hash);
+      return {
+        jobId: entry.jobId,
+        videoUrl: url,
+        mirrorVideo: mirror,
+        flipVideo: flip,
+        outputHash: entry.hash,
+        errorMessage: null,
+        createdAt: new Date().toISOString(),
+        status: VideoDownloadJobStatus.DONE,
+      }
+    } else {
+      return await this.playVideo(url, mirror, flip);
+    }
+  }
+
+  async removeDeletedCache() {
+    this.protogen.logger.info("VideoPlaybackManager", "Cheching video cache for deleted files...");
+    const repo = this.protogen.database.dataSource.getRepository(VideoCache);
+    const entries = await repo.find();
+    for (const entry of entries) {
+      const targetDirectory = this._videoDirectory + "/" + entry.hash.substring(0, 2);
+      const output = targetDirectory + "/" + entry.hash + ".mp4";
+      if (!existsSync(output)) {
+        this.protogen.logger.info("VideoPlaybackManager", "Deleting video cache entry " + cyan(entry.hash) + " becuse the video file was no longer found locally");
+        await repo.delete(entry.id);
+      }
+    }
   }
 
   private async killAndAwait() {
@@ -186,6 +260,7 @@ export class ProtogenVideoPlaybackManager {
 
   public async playVideo(url: string, mirror: boolean = false, flip: boolean = false): Promise<VideoDownloadJob> {
     this._canceled = false;
+
     this.protogen.logger.info("VideoPlaybackManager", "Requesting job for video " + cyan(url) + ". Mirror: " + (mirror ? green("true") : red("false")));
     const job = await this.protogen.remoteWorker.createJob(url, mirror, flip);
     this.protogen.logger.info("VideoPlaybackManager", "Job ID is " + job.jobId);
@@ -194,6 +269,11 @@ export class ProtogenVideoPlaybackManager {
       this._nextCheck = 0;
     }
     return job;
+  }
+
+  generateSettingsHash(mirror: boolean, flip: boolean): string {
+    const settingsString = "mirror=" + String(mirror) + ",flip=" + String(flip);
+    return generateSHA256(settingsString);
   }
 
   public get status() {

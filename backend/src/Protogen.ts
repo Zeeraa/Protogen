@@ -157,6 +157,9 @@ export class Protogen {
     await this.rgb.loadScenes();
     await this.rgb.applyLastScene();
 
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit video", BootMessageColor);
+    await this.videoPlaybackManager.removeDeletedCache();
+
     await this.visor.tryRenderTextFrame("BOOTING...\nInit VISOR", BootMessageColor);
     await this.visor.loadActiveRendererFromDatabase();
     await this.visor.init();

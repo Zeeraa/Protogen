@@ -19,6 +19,7 @@ import { User } from "./models/auth/User.model";
 import { PasswordlessSignInRequest } from "./models/auth/PasswordlessSignInRequest.model";
 import { JoystickRemoteAction } from "./models/remote/joystick/JoystickRemoteAction.model";
 import { JoystickRemoteProfile } from "./models/remote/joystick/JoystickRemoteProfile.model";
+import { VideoCache } from "./models/video-player/VideoCache.model";
 
 export class Database {
   private _protogen;
@@ -40,6 +41,7 @@ export class Database {
         // ---------- Video manager ----------
         SavedVideo,
         SavedVideoGroup,
+        VideoCache,
 
         // ---------- RGB ----------
         StoredRgbScene,
