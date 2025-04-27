@@ -295,7 +295,7 @@ export class FaceRouter extends AbstractRouter {
 
       #swagger.parameters['activateRenderer'] = {
         in: 'query',
-        description: 'If true also activate the face renderer'
+        description: 'If true also activate the face renderer',
         type: 'boolean'
       }
 
