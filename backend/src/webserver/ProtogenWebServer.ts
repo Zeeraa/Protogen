@@ -32,6 +32,7 @@ import { ActionsRouter } from "./routes/actions/ActionsRouter";
 import morgan from 'morgan';
 import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualizerRouter";
 import { JoystickRemoteRouter } from "./routes/remote/JoystickRemoteRouter";
+import { AppRouter } from "./routes/apps/AppRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 
@@ -135,6 +136,7 @@ export class ProtogenWebServer {
     new AssetsRouter(this).register({ noAuth: true });
     new ActionsRouter(this).register();
     new AudioVisualiserRouter(this).register();
+    new AppRouter(this).register();
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);

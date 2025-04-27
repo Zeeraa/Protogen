@@ -21,6 +21,8 @@ import { ActionManager } from "./actions/ActionManager";
 import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
 import { red } from "colors";
 import { JoystickRemoteManager } from "./remote/RemoteManager";
+import { AppManager } from "./apps/AppManager";
+import { TestApp } from "./apps/test/TestApp";
 
 export const BootMessageColor = "#00FF00";
 
@@ -48,6 +50,7 @@ export class Protogen {
   private _audioVisualiser: AudioVisualiser;
   private _versionNumber: string;
   private _integrationStateReportingKey: string;
+  private _appManager: AppManager;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -136,6 +139,9 @@ export class Protogen {
     this._networkManager = new NetworkManager(this);
     this._joystickRemoteManager = new JoystickRemoteManager(this);
     this._actionManager = new ActionManager(this);
+    this._appManager = new AppManager(this);
+
+    this.appManager.registerApp(new TestApp(this.appManager));
   }
 
   public async init() {
@@ -279,6 +285,10 @@ export class Protogen {
 
   get integrationStateReportingKey() {
     return this._integrationStateReportingKey;
+  }
+
+  get appManager() {
+    return this._appManager;
   }
   //#endregion
 }
