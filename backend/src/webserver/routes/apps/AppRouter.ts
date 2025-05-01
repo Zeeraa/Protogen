@@ -56,7 +56,7 @@ export class AppRouter extends AbstractRouter {
 
     this.router.post("/:name/activate", async (req, res) => {
       /*
-      #swagger.path = '/apps/{name}'
+      #swagger.path = '/apps/{name}/activate'
       #swagger.tags = ['Apps'],
       #swagger.description = "Get app by name"
       #swagger.responses[200] = { description: "App activated" }
@@ -87,7 +87,7 @@ export class AppRouter extends AbstractRouter {
       }
     });
 
-    this.router.post("/active", async (req, res) => {
+    this.router.get("/active", async (req, res) => {
       /*
       #swagger.path = '/apps/active'
       #swagger.tags = ['Apps'],
