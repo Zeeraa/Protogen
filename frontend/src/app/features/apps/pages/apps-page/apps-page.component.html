@@ -7,6 +7,17 @@
 
   <div class="row mt-2">
     <div class="col-12 mt-2">
+      <h3>Active app:
+        @if(activeApp) {
+        <span class="text-info">
+          {{activeApp.displayName}}
+        </span>
+        } @else {
+        <span class="text-danger">None</span>
+        }
+      </h3>
+    </div>
+    <div class="col-12 mt-2">
       <button class="btn btn-danger" (click)="closeActiveApp()">Close active app</button>
     </div>
   </div>
@@ -14,7 +25,7 @@
   <div class="row mt-2">
     @for (app of apps; track $index) {
     <div class="col-12 col-sm-12 col-md-6 mt-2">
-      <app-app-card [app]="app" />
+      <app-app-card [app]="app" [isActive]="activeApp?.name == app.name" (activated)="appActivated($event)" />
     </div>
     }
   </div>

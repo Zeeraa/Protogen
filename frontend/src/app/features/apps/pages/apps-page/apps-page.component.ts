@@ -46,7 +46,21 @@ export class AppsPageComponent implements OnInit, OnDestroy {
     })
   }
 
+  protected appActivated(app: App) {
+    this.activeApp = app;
+  }
+
   closeActiveApp() {
-    this.toastr.info("Close app function"); // TODO: api call
+    this.appsApi.deactivateApp().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to close app");
+        throw err;
+      }),
+    ).subscribe(result => {
+      if (result == true) {
+        this.toastr.success("App closed");
+        this.activeApp = null;
+      }
+    });
   }
 }
