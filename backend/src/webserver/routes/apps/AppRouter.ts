@@ -19,8 +19,9 @@ export class AppRouter extends AbstractRouter {
       ]
       */
       try {
+        const active = this.protogen.appManager.activeApp;
         res.json({
-          activeApp: this.protogen.appManager.activeApp == null ? null : appToDTO(this.protogen.appManager.activateApp),
+          activeApp: active == null ? null : appToDTO(active),
           apps: this.protogen.appManager.apps.map((app) => appToDTO(app)),
         });
       } catch (err) {
@@ -44,7 +45,7 @@ export class AppRouter extends AbstractRouter {
         const app = this.protogen.appManager.activeApp;
 
         res.json({
-          activeApp: this.protogen.appManager.activeApp == null ? null : appToDTO(this.protogen.appManager.activateApp)
+          activeApp: app == null ? null : appToDTO(app)
         });
       } catch (err) {
         this.handleError(err, req, res);
