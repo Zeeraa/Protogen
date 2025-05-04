@@ -22,6 +22,7 @@ import { RemoteSettingsPageModule } from './features/remote-settings-page/remote
 import { ActionsModule } from './features/actions/actions.module';
 import { AuthModule } from './features/auth/auth.module';
 import { AudioVisualizerModule } from './features/audio-visualizer/audio-visualizer.module';
+import { AppsModule } from './features/apps/apps.module';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { AudioVisualizerModule } from './features/audio-visualizer/audio-visuali
     ActionsModule,
     AuthModule,
     AudioVisualizerModule,
+    AppsModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
