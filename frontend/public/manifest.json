@@ -1,0 +1,16 @@
+{
+  "name": "Protogen UI",
+  "short_name": "Protogen",
+  "description": "Web-app to control protogen cosplay equipment",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0091FF",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
