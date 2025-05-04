@@ -20,9 +20,65 @@ export class AppRouter extends AbstractRouter {
       */
       try {
         res.json({
-          activeApp: this.protogen.appManager.activeApp || null,
+          activeApp: this.protogen.appManager.activeApp == null ? null : appToDTO(this.protogen.appManager.activateApp),
           apps: this.protogen.appManager.apps.map((app) => appToDTO(app)),
         });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.get("/active", async (req, res) => {
+      /*
+      #swagger.path = '/apps/active'
+      #swagger.tags = ['Apps'],
+      #swagger.description = "Get active app"
+      #swagger.responses[200] = { description: "Details about activated app" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const app = this.protogen.appManager.activeApp;
+
+        res.json({
+          activeApp: this.protogen.appManager.activeApp == null ? null : appToDTO(this.protogen.appManager.activateApp)
+        });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.delete("/active", async (req, res) => {
+      /*
+      #swagger.path = '/apps/active'
+      #swagger.tags = ['Apps'],
+      #swagger.description = "Deactivate active app"
+      #swagger.responses[200] = { description: "App deactivated" }
+      #swagger.responses[404] = { description: "No active app found" }
+      #swagger.responses[500] = { description: "Failed to deactivate app" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const app = this.protogen.appManager.activeApp;
+        if (!app) {
+          res.status(404).json({ message: "No active app" });
+          return;
+        }
+
+        const result = await this.protogen.appManager.deactivateApp();
+        if (!result) {
+          res.status(500).json({ message: "Failed to deactivate app" });
+          return;
+        }
+
+        res.json({});
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -75,72 +131,13 @@ export class AppRouter extends AbstractRouter {
           return;
         }
 
-        const result = this.protogen.appManager.activateApp(app.name);
+        const result = await this.protogen.appManager.activateApp(app.name);
         if (!result) {
           res.status(500).json({ message: "Failed to activate app" });
           return;
         }
 
         res.json(appToDTO(app));
-      } catch (err) {
-        this.handleError(err, req, res);
-      }
-    });
-
-    this.router.get("/active", async (req, res) => {
-      /*
-      #swagger.path = '/apps/active'
-      #swagger.tags = ['Apps'],
-      #swagger.description = "Get active app"
-      #swagger.responses[200] = { description: "Details about activated app" }
-      #swagger.responses[404] = { description: "No active app found" }
-
-      #swagger.security = [
-        {"apiKeyAuth": []},
-        {"tokenAuth": []}
-      ]
-      */
-      try {
-        const app = this.protogen.appManager.activeApp;
-        if (!app) {
-          res.status(404).json({ message: "No active app" });
-          return;
-        }
-
-        res.json(appToDTO(app));
-      } catch (err) {
-        this.handleError(err, req, res);
-      }
-    });
-
-    this.router.delete("/active", async (req, res) => {
-      /*
-      #swagger.path = '/apps/active'
-      #swagger.tags = ['Apps'],
-      #swagger.description = "Deactivate active app"
-      #swagger.responses[200] = { description: "App deactivated" }
-      #swagger.responses[404] = { description: "No active app found" }
-      #swagger.responses[500] = { description: "Failed to deactivate app" }
-
-      #swagger.security = [
-        {"apiKeyAuth": []},
-        {"tokenAuth": []}
-      ]
-      */
-      try {
-        const app = this.protogen.appManager.activeApp;
-        if (!app) {
-          res.status(404).json({ message: "No active app" });
-          return;
-        }
-
-        const result = this.protogen.appManager.deactivateApp();
-        if (!result) {
-          res.status(500).json({ message: "Failed to deactivate app" });
-          return;
-        }
-
-        res.json({});
       } catch (err) {
         this.handleError(err, req, res);
       }
