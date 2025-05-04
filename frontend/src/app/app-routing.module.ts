@@ -15,6 +15,7 @@ import { ActionsPageComponent } from './features/actions/pages/actions-page/acti
 import { AuthPageComponent } from './features/auth/pages/auth-page/auth-page.component';
 import { AudioVisualizerSettingsPageComponent } from './features/audio-visualizer/pages/audio-visualizer-settings-page/audio-visualizer-settings-page.component';
 import { JoystickRemoteSettingsPageComponent } from './features/remote-settings-page/pages/remote-settings-page/joystick-remote-settings-page.component';
+import { AppsPageComponent } from './features/apps/pages/apps-page/apps-page.component';
 
 export const routes: Routes = [
   {
@@ -86,6 +87,10 @@ export const routes: Routes = [
   {
     path: "audio-visualizer",
     component: AudioVisualizerSettingsPageComponent,
+  },
+  {
+    path: "apps",
+    component: AppsPageComponent,
   }
 ];
 
