@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { App, AppsApi } from '../../../../core/services/api/apps-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-apps-page',
@@ -17,9 +18,11 @@ export class AppsPageComponent implements OnInit, OnDestroy {
   constructor(
     private appsApi: AppsApi,
     private toastr: ToastrService,
+    private title: Title,
   ) { }
 
   ngOnInit(): void {
+    this.title.setTitle("Apps - Protogen");
     this.loadApps();
     this.interval = setInterval(() => {
       this.getOpenApp();
