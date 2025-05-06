@@ -35,6 +35,7 @@ import { JoystickRemoteRouter } from "./routes/remote/JoystickRemoteRouter";
 import { AppRouter } from "./routes/apps/AppRouter";
 
 export const SocketPath = "/protogen-websocket.io";
+export const AppSocketPath = "/protogen-app-websocket.io";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -43,6 +44,7 @@ export class ProtogenWebServer {
   private _https: https.Server | null = null;
   private _socket;
   private _socketSecure: Server | null = null;
+  private _appSocket;
   private _sessions: UserSocketSession[];
   private _authMiddleware;
 
@@ -95,6 +97,11 @@ export class ProtogenWebServer {
       path: SocketPath,
     });
 
+    // Use dedicated socket for apps to simplify communication and to increase security
+    this._appSocket = new Server(this._http, {
+      path: AppSocketPath,
+    });
+
     if (protogen.config.web.localHttpsPort != null) {
       this._https = createHttpsServer({
         key: readFileSync(this._internalHttpsPrivateKeyFile),
@@ -102,6 +109,7 @@ export class ProtogenWebServer {
       }, this._express);
 
       console.debug("Creating socket for https");
+
       this._socketSecure = new Server(this._https, {
         path: SocketPath,
       });
@@ -179,7 +187,7 @@ export class ProtogenWebServer {
       }
 
       if (auth == null) {
-        this.protogen.logger.info("WebServer", "Invalid token. Disconnecting socket.");
+        this.protogen.logger.info("WebServer", "Invalid token (web socket). Disconnecting socket.");
         socket.disconnect(true);
         return;
       }
@@ -189,8 +197,37 @@ export class ProtogenWebServer {
       this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
     }
 
+    const appSocketConnectionHandler = async (socket: Socket) => {
+      const token = String(socket.handshake.headers.authorization);
+      if (token.startsWith("Bearer ")) {
+        const jwt = token.split("Bearer ")[1];
+        const tokenData = await this.protogen.appManager.validateJWTToken(jwt);
+        if (tokenData != null) {
+          const app = this.protogen.appManager.apps.find(a => a.name == tokenData.targetApplicationName);
+          if (app == null) {
+            this.protogen.logger.info("WebServer", "App socket token deemed invalid. App not found");
+            socket.disconnect(true);
+            return;
+          }
+
+          if (app.interactionKey != tokenData.interactionKey) {
+            this.protogen.logger.info("WebServer", "App socket token deemed invalid. Interaction key does not match");
+            socket.disconnect(true);
+            return;
+          }
+
+          //TODO: Create client wrapper
+          console.log(tokenData);
+          return;
+        }
+      }
+      this.protogen.logger.info("WebServer", "Invalid token (app socket). Disconnecting socket.");
+      socket.disconnect(true);
+    }
+
     this.socket.on("connection", socketConnectionHandler);
     this.socketSecure?.on("connection", socketConnectionHandler);
+    this.appSocket.on("connection", appSocketConnectionHandler);
 
     setInterval(() => {
       this.broadcastMessage(SocketMessageType.S2C_Ping, {});
@@ -266,6 +303,10 @@ export class ProtogenWebServer {
 
   public get socketSecure() {
     return this._socketSecure;
+  }
+
+  public get appSocket() {
+    return this._appSocket;
   }
 
   public get authMiddleware() {

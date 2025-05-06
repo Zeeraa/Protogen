@@ -187,9 +187,10 @@ export class SerialManager {
       }
 
       if (string.startsWith("BOOP:")) {
-        console.debug("Raw boop state value: " + string.split(":")[1].toLowerCase().trim());
+        //console.debug("Raw boop state value: " + string.split(":")[1].toLowerCase().trim());
         const state = string.split(":")[1].toLowerCase().trim() == "true";
         this._boopSensorReportedState = state;
+        this.protogen.eventEmitter.emit(ProtogenEvents.UnfilteredBoopState, state);
         return;
       }
 

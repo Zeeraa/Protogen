@@ -1,3 +1,4 @@
+import { generateSecretKey } from "../utils/Utils";
 import { AppManager } from "./AppManager";
 import { AppOptions } from "./AppOptions";
 import { createCanvas } from "canvas";
@@ -9,12 +10,15 @@ export abstract class AbstractApp {
   private readonly _options;
   private readonly _appCanvas;
   private readonly _appCanvasCtx;
+  private _interactionKey: string;
 
   constructor(appManager: AppManager, name: string, displayName: string, options: AppOptions = {}) {
     this._appManager = appManager;
     this._name = name;
     this._displayName = displayName;
     this._options = options;
+
+    this.regenerateInteractionKey();
 
     // Setup the app canvas
     const { width, height } = this.protogen.config.ledMatrix;
@@ -24,6 +28,14 @@ export abstract class AbstractApp {
     // Clear the canvas
     this.appCanvasCtx.fillStyle = "black";
     this.appCanvasCtx.fillRect(0, 0, width, height);
+  }
+
+  public regenerateInteractionKey() {
+    this._interactionKey = generateSecretKey(32);
+  }
+
+  public get interactionKey() {
+    return this._interactionKey;
   }
 
   protected get appManager() {
@@ -59,6 +71,13 @@ export abstract class AbstractApp {
   }
 
   /**
+   * Get metadata for use in ui
+   */
+  public getMetadata(): any {
+    return {};
+  }
+
+  /**
    * Called each tick when the visor tries to render a frame. Only called if the app is active and useRenderer is enabled in options
    */
   public onVisorRenderTick() {
@@ -67,35 +86,48 @@ export abstract class AbstractApp {
   /**
    * Called when the app is activated
    */
-  public onActivated() {
+  public async onActivated() {
+  }
+
+  /**
+   * Called when the app is initialized
+   */
+  public async onInit() {
   }
 
   /**
    * Called when the app is deactivated
    */
-  public onDeactivated() {
+  public async onDeactivated() {
   }
 
   /**
    * Activates the app if its not already active
    */
-  public activate() {
-    this.appManager.activateApp(this.name);
+  public async activate() {
+    await this.appManager.activateApp(this.name);
   }
 
   /**
    * Deactivates self if active
    */
-  public deactivateSelf() {
+  public async deactivateSelf() {
     if (this.isActive) {
-      this.appManager.deactivateApp();
+      await this.appManager.deactivateApp();
     }
   }
 
   /**
    * Deactivates any active app
    */
-  public deactivateAny() {
-    this.appManager.deactivateApp();
+  public async deactivateAny() {
+    await this.appManager.deactivateApp();
   }
+
+  /**
+   * Called when the app receives a message from the web interface. The data object is unfiltered and should not be trusted without input validation
+   * @param data Unfiltered data from the user
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async onAppMessage(data: any) { }
 }
