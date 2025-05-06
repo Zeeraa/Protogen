@@ -143,6 +143,43 @@ export class AppRouter extends AbstractRouter {
         this.handleError(err, req, res);
       }
     });
+
+    this.router.get("/:name/get-token", async (req, res) => {
+      /*
+      #swagger.path = '/apps/{name}/get-token'
+      #swagger.tags = ['Apps'],
+      #swagger.description = "Generate a JWT token for acessing the app"
+      #swagger.responses[200] = { description: "App token" }
+      #swagger.responses[404] = { description: "App not found" }
+      #swagger.responses[500] = { description: "Failed to generate token" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const app = this.protogen.appManager.getAppByName(req.params.name);
+        if (!app) {
+          res.status(404).json({ message: "App not found" });
+          return;
+        }
+
+        if (req.auth.user == null) {
+          res.status(403).json({ message: "User not authenticated" });
+          return;
+        }
+
+        const token = await this.protogen.appManager.generateJwtToken(req.auth.user, app);
+
+        res.json({
+          app: appToDTO(app),
+          token: token,
+        });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
   }
 }
 
@@ -151,5 +188,6 @@ function appToDTO(app: AbstractApp) {
     name: app.name,
     displayName: app.displayName,
     options: app.options,
+    metadata: app.getMetadata(),
   }
 }

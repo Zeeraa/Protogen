@@ -1,5 +1,5 @@
 import { Equal, Raw } from "typeorm";
-import { Protogen } from "../Protogen";
+import { JwtKeyLength, Protogen } from "../Protogen";
 import * as argon2 from "argon2";
 import { generateSecretKey, typeAssert } from "../utils/Utils";
 import { existsSync, readFileSync, writeFileSync } from "fs";
@@ -41,7 +41,7 @@ export class UserManager {
       this._key = readFileSync(keyFile).toString();
     } else {
       this.protogen.logger.info("UserManager", "Could not find JWT key. Generating a random one");
-      this._key = generateSecretKey(64);
+      this._key = generateSecretKey(JwtKeyLength);
       writeFileSync(keyFile, this._key);
     }
 
