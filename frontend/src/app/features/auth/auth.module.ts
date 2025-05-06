@@ -2,16 +2,19 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PasswordlessSigninButtonComponent } from './passwordless-signin-button/passwordless-signin-button.component';
 import { AuthPageComponent } from './pages/auth-page/auth-page.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LoginPageComponent } from './pages/login-page/login-page.component';
 
 @NgModule({
   declarations: [
     PasswordlessSigninButtonComponent,
-    AuthPageComponent
+    AuthPageComponent,
+    LoginPageComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
   ],
   exports: [
     PasswordlessSigninButtonComponent,
