@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { NavbarService } from '../../../../core/services/navbar.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ThemeService } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -33,6 +34,14 @@ export class NavbarComponent implements AfterViewInit {
     return this.auth.loggedIn && !this.auth.loginNeeded;
   }
 
+  toggleTheme() {
+    this.theme.toggleTheme();
+  }
+
+  get themeString() {
+    return String(this.theme.theme);
+  }
+
   checkTogglerVisibility() {
     // Bootstrap breakpoint for `navbar-expand-lg` is 992px
     const currentWidth = window.innerWidth;
@@ -60,5 +69,6 @@ export class NavbarComponent implements AfterViewInit {
   constructor(
     private navbarService: NavbarService,
     private auth: AuthService,
+    private theme: ThemeService,
   ) { }
 }

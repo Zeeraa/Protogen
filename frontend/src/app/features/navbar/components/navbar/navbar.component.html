@@ -21,6 +21,20 @@
             System
           </a>
           <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" (click)="toggleTheme()">
+                Toggle theme
+                @if(themeString == 'dark') {
+                <i class="bi bi-sun"></i>
+                } @else if(themeString == 'light') {
+                <i class="bi bi-moon"></i>
+                }
+                @else if(themeString == 'system') {
+                <i class="bi bi-circle-half"></i>
+                }
+              </a>
+            </li>
+
             @if(showLoggedInOptions) {
             <li>
               <a class="dropdown-item" routerLink="/system">Settings</a>
