@@ -2,19 +2,25 @@ import { Injectable } from '@angular/core';
 import { LocalStorageKey_AuthToken } from './utils/LocalStorageKeys';
 import { jwtDecode } from 'jwt-decode';
 import { AuthApiService } from './api/auth-api.service';
-import { catchError, Subject } from 'rxjs';
+import { BehaviorSubject, catchError, Subject } from 'rxjs';
 import { typeAssert } from './utils/Utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private authStateSubject = new BehaviorSubject<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+
   private _loggedIn = false;
   private _loginNeeded = false;
   private _authDetails: ProtogenJWTPayload | null = null;
   private _token: string | null = null;
   private _tokenRefreshedSubject = new Subject<string>();
   private _tokenChangedSubject = new Subject<string>();
+
+  public get authState$() {
+    return this.authStateSubject.asObservable();
+  }
 
   get tokenRefreshedObservable() {
     return this._tokenRefreshedSubject.asObservable();
@@ -104,6 +110,7 @@ export class AuthService {
             this.token = newToken;
             this._loggedIn = true;
             this._tokenRefreshedSubject.next(newToken);
+            this.authStateSubject.next('authenticated');
             return resolve();
           }
         } else {
@@ -117,6 +124,7 @@ export class AuthService {
       console.log("Not logged in or token expired");
       this._loggedIn = false;
       this._loginNeeded = true;
+      this.authStateSubject.next('unauthenticated');
       resolve();
     });
   }
@@ -133,6 +141,8 @@ export class AuthService {
 
         this.token = token;
         this._loggedIn = true;
+        this._loginNeeded = false;
+        this.authStateSubject.next('authenticated');
         resolve(true);
       })
     });
@@ -147,6 +157,7 @@ export class AuthService {
           const newToken = await this.tryRefreshToken();
           if (newToken == null) {
             console.log("Token seems to have expired. Showing login page");
+            this.authStateSubject.next('unauthenticated');
             this._loggedIn = false;
             this._loginNeeded = true;
           } else {

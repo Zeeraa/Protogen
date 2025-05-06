@@ -1,12 +1,13 @@
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { NavbarService } from '../../../../core/services/navbar.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ThemeService } from '../../../../core/services/theme.service';
 
 @Component({
-    selector: 'app-navbar',
-    templateUrl: './navbar.component.html',
-    styleUrl: './navbar.component.scss',
-    standalone: false
+  selector: 'app-navbar',
+  templateUrl: './navbar.component.html',
+  styleUrl: './navbar.component.scss',
+  standalone: false
 })
 export class NavbarComponent implements AfterViewInit {
   isTogglerVisible = false;
@@ -27,6 +28,18 @@ export class NavbarComponent implements AfterViewInit {
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
     this.checkTogglerVisibility();
+  }
+
+  get showLoggedInOptions() {
+    return this.auth.loggedIn && !this.auth.loginNeeded;
+  }
+
+  toggleTheme() {
+    this.theme.toggleTheme();
+  }
+
+  get themeString() {
+    return String(this.theme.theme);
   }
 
   checkTogglerVisibility() {
@@ -56,5 +69,6 @@ export class NavbarComponent implements AfterViewInit {
   constructor(
     private navbarService: NavbarService,
     private auth: AuthService,
+    private theme: ThemeService,
   ) { }
 }
