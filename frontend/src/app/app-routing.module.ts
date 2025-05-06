@@ -18,6 +18,7 @@ import { JoystickRemoteSettingsPageComponent } from './features/remote-settings-
 import { AuthGuard } from './core/guards/auth-guard.guard';
 import { LoginPageComponent } from './features/auth/pages/login-page/login-page.component';
 import { AppsPageComponent } from './features/apps/pages/apps-page/apps-page.component';
+import { PaintAppPageComponent } from './features/apps/ui/paint/paint-app-page/paint-app-page.component';
 
 export const routes: Routes = [
   {
@@ -110,9 +111,19 @@ export const routes: Routes = [
   },
   {
     path: "apps",
-    component: AppsPageComponent,
-    canActivate: [AuthGuard],
+    children: [
+      {
+        path: "",
+        component: AppsPageComponent,
+        canActivate: [AuthGuard],
+      },
+      {
+        path: "paint",
+        component: PaintAppPageComponent,
+      }
+    ]
   }
+
 ];
 
 @NgModule({
