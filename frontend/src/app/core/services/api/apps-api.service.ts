@@ -19,6 +19,22 @@ export class AppsApi extends ApiBaseService {
     return this.http.get<AppList>(this.apiBaseUrl + "/apps").pipe(catchError(this.defaultErrorHandler));
   }
 
+  activateApp(name: string) {
+    return this.http.post<App>(this.apiBaseUrl + "/apps/" + name + "/activate", {}).pipe(catchError(this.defaultErrorHandler));
+  }
+
+  deactivateApp() {
+    return this.http.delete(this.apiBaseUrl + "/apps/active", { observe: 'response' }).pipe(
+      map(response => response.status === 200 ? true : false),
+      catchError(error => {
+        if (error.status === 404) {
+          return [false];
+        }
+        throw error;
+      })
+    );
+  }
+
   getActiveApp() {
     return this.http.get<{ activeApp: App | null }>(this.apiBaseUrl + "/apps/active").pipe(
       catchError(this.defaultErrorHandler),

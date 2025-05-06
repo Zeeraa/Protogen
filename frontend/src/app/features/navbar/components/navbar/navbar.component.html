@@ -1,6 +1,9 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary" #protogen_navbar>
   <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/">Protogen</a>
+    <a class="navbar-brand" routerLink="/">
+      <img src="/icon.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+      Protogen
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
       aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -8,17 +11,35 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup" (shown.bs.collapse)="onNavbarExpanded()"
       (hidden.bs.collapse)="onNavbarCollapsed()">
       <div class="navbar-nav">
+
+        @if(showLoggedInOptions) {
         <a class="nav-link" routerLink="/visor">Visor</a>
         <a class="nav-link" routerLink="/rgb">RGB</a>
         <a class="nav-link" routerLink="/video-player">Video Player</a>
         <a class="nav-link" routerLink="/actions">Actions</a>
         <a class="nav-link" routerLink="/apps">Apps</a>
+        }
 
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             System
           </a>
           <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" (click)="toggleTheme()">
+                Toggle theme
+                @if(themeString == 'dark') {
+                <i class="bi bi-sun"></i>
+                } @else if(themeString == 'light') {
+                <i class="bi bi-moon"></i>
+                }
+                @else if(themeString == 'system') {
+                <i class="bi bi-circle-half"></i>
+                }
+              </a>
+            </li>
+
+            @if(showLoggedInOptions) {
             <li>
               <a class="dropdown-item" routerLink="/system">Settings</a>
             </li>
@@ -42,8 +63,10 @@
             <li>
               <a class="dropdown-item text-danger" (click)="logout()">Logout</a>
             </li>
+            }
           </ul>
         </li>
+
       </div>
     </div>
   </div>

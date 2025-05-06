@@ -2,6 +2,9 @@
   <div class="card-body">
     <h5 class="card-title">
       {{app.displayName}}
+      @if(isActive) {
+      <span class="badge bg-primary">Active</span>
+      }
     </h5>
   </div>
 
