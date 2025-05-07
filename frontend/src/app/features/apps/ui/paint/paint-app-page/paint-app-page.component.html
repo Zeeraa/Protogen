@@ -1,1 +1,21 @@
-<p>paint-app-page works!</p>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Protogen Paint</h1>
+    </div>
+  </div>
+
+  @if(disconnected) {
+  <div class="row mt-2">
+    <div class="col">
+      <div class="alert alert-danger">Socket disconnected. Try reloading and check that your invite is still valid</div>
+    </div>
+  </div>
+  }
+
+  <div class="row mt-2">
+    <div class="col">
+      <canvas class="w-100" [width]="canvasWidth" [height]="canvasHeight" #paintCanvas></canvas>
+    </div>
+  </div>
+</div>

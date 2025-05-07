@@ -27,6 +27,14 @@ export class AppsApi extends ApiBaseService {
     return this.http.get<AppToken>(this.apiBaseUrl + "/apps/" + name + "/get-token").pipe(catchError(this.defaultErrorHandler));
   }
 
+  getUserAppDetails(token: string) {
+    return this.http.get<App>(this.apiBaseUrl + "/apps/user-app-info", {
+      headers: {
+        "x-app-token": token,
+      },
+    }).pipe(catchError(this.defaultErrorHandler));
+  }
+
   deactivateApp() {
     return this.http.delete(this.apiBaseUrl + "/apps/active", { observe: 'response' }).pipe(
       map(response => response.status === 200 ? true : false),
