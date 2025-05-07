@@ -86,7 +86,7 @@ export class AppManager {
   }
 
   public getAppByName(name: string): AbstractApp | null {
-    const app = this._apps.find((app) => app.name === name);
+    const app = this._apps.find((app) => app.name == name);
     return app || null;
   }
 

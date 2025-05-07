@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import { AbstractApp } from "../../../apps/AbstractApp";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
@@ -6,7 +7,7 @@ export class AppRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
     super(webServer, "/apps");
 
-    this.router.get("/", async (req, res) => {
+    this.router.get("/", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/apps'
       #swagger.tags = ['Apps'],
@@ -29,7 +30,7 @@ export class AppRouter extends AbstractRouter {
       }
     });
 
-    this.router.get("/active", async (req, res) => {
+    this.router.get("/active", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/apps/active'
       #swagger.tags = ['Apps'],
@@ -52,7 +53,7 @@ export class AppRouter extends AbstractRouter {
       }
     });
 
-    this.router.delete("/active", async (req, res) => {
+    this.router.delete("/active", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/apps/active'
       #swagger.tags = ['Apps'],
@@ -85,7 +86,53 @@ export class AppRouter extends AbstractRouter {
       }
     });
 
-    this.router.get("/:name", async (req, res) => {
+    this.router.get("/user-app-info", async (req, res) => {
+      /*
+      #swagger.path = '/apps/user-app-info'
+      #swagger.tags = ['Apps'],
+      #swagger.description = "Get add details using app token"
+      #swagger.responses[200] = { description: "App info" }
+      #swagger.responses[403] = { description: "Missing or expired token" }
+      #swagger.responses[404] = { description: "Token belongs to an app that dies not exist" }
+      #swagger.responses[500] = { description: "An error occured" }
+      */
+      try {
+        if (req.headers["x-app-token"] == null) {
+          res.status(403).json({ message: "No app token header found" });
+          return;
+        }
+
+        let token = String(req.headers["x-app-token"]);
+
+        if (token.startsWith("Bearer ")) {
+          token = token.substring(7);
+        }
+
+        const auth = await this.protogen.appManager.validateJWTToken(token)
+
+        if (auth == null) {
+          res.status(403).json({ message: "Invalid or expired app token" });
+          return;
+        }
+
+        const app = this.protogen.appManager.getAppByName(auth.targetApplicationName);
+        if (app == null) {
+          res.status(404).json({ message: "App not found" });
+          return;
+        }
+
+        if (app.interactionKey != auth.interactionKey) {
+          res.status(403).json({ message: "App token expired" });
+          return;
+        }
+
+        res.json(appToDTO(app));
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.get("/:name", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/apps/{name}'
       #swagger.tags = ['Apps'],
@@ -111,7 +158,7 @@ export class AppRouter extends AbstractRouter {
       }
     });
 
-    this.router.post("/:name/activate", async (req, res) => {
+    this.router.post("/:name/activate", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/apps/{name}/activate'
       #swagger.tags = ['Apps'],
@@ -144,7 +191,7 @@ export class AppRouter extends AbstractRouter {
       }
     });
 
-    this.router.get("/:name/get-token", async (req, res) => {
+    this.router.get("/:name/get-token", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/apps/{name}/get-token'
       #swagger.tags = ['Apps'],

@@ -144,7 +144,7 @@ export class ProtogenWebServer {
     new AssetsRouter(this).register({ noAuth: true });
     new ActionsRouter(this).register();
     new AudioVisualiserRouter(this).register();
-    new AppRouter(this).register();
+    new AppRouter(this).register({ noAuth: true });
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
@@ -217,7 +217,6 @@ export class ProtogenWebServer {
           }
 
           //TODO: Create client wrapper
-          console.log(tokenData);
           return;
         }
       }
