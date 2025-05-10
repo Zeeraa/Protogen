@@ -58,7 +58,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     this.socket = new AppSocketConnection(token);
 
     this.connectSubscriptsion = this.socket.connectedObservable.subscribe(() => {
-      this.toastr.success("Connected to app socket. Fetching data...");
+      this.toastr.success("Connected. Fetching data...");
 
       this.appsApi.getUserAppDetails(token).pipe(
         catchError((err: HttpErrorResponse) => {
