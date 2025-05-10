@@ -8,6 +8,7 @@ export class AppSocketConnection {
   private _disconnected = false;
 
   private _connectedSubject = new Subject<void>();
+  private _messageSubject = new Subject<AppSocketPacket<any>>();
 
   constructor(token: string) {
     this._token = token;
@@ -19,18 +20,22 @@ export class AppSocketConnection {
     }
   }
 
-  get connectedObservable() {
+  public get connectedObservable() {
     return this._connectedSubject.asObservable();
   }
 
-  destroy() {
+  public get messageObservable() {
+    return this._messageSubject.asObservable();
+  }
+
+  public destroy() {
     if (this._socket != null) {
       this._socket.disconnect();
       this._socket = null;
     }
   }
 
-  connect() {
+  public connect() {
     if (this.socket != null) {
       this.socket.disconnect();
       this._socket = null;
@@ -63,7 +68,8 @@ export class AppSocketConnection {
     });
 
     this._socket.on('message', (msg: any) => {
-      console.log(msg);
+      console.debug('Socket message received:', msg);
+      this._messageSubject.next(msg);
     });
 
     this._socket.on('reconnect_attempt', () => {
@@ -73,15 +79,26 @@ export class AppSocketConnection {
     });
   }
 
-  get connected() {
+  public sendMessage<T>(msg: AppSocketPacket<T>) {
+    if (this._socket != null) {
+      this._socket.emit('message', msg);
+    }
+  }
+
+  public get connected() {
     return this._connected;
   }
 
-  get socket() {
+  public get socket() {
     return this._socket;
   }
 
-  get disconnected() {
+  public get disconnected() {
     return this._disconnected;
   }
+}
+
+export interface AppSocketPacket<T> {
+  type: string;
+  data: T;
 }
