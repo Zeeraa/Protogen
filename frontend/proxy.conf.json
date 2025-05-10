@@ -1,0 +1,17 @@
+{
+  "/api": {
+    "target": "http://protogen.local:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "ws": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  },
+  "/protogen-websocket.io": {
+    "target": "http://protogen.local:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "ws": true
+  }
+}
