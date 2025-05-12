@@ -51,11 +51,17 @@ export class PaintApp extends AbstractApp {
     if (data.type == ProtogenPaintPackets.PaintPixel) {
       const result = PaintPixelModel.safeParse(data.data);
       if (!result.success) {
-        this.protogen.logger.error("PaintApp", "Invalid PaintPixel packet" + result.error.toString());
+        this.protogen.logger.error("PaintApp", "Invalid paint pixel packet" + result.error.toString());
         return;
       }
 
       const payload = result.data as PaintPixelPayload;
+
+      if (payload.position.x < 0 || payload.position.x >= this.appCanvas.width ||
+        payload.position.y < 0 || payload.position.y >= this.appCanvas.height) {
+        this.protogen.logger.error("PaintApp", "Invalid pixel position: " + JSON.stringify(payload.position));
+        return;
+      }
 
       this.appCanvasCtx.fillStyle = `rgb(${payload.color.r}, ${payload.color.g}, ${payload.color.b})`;
       this.appCanvasCtx.fillRect(payload.position.x, payload.position.y, 1, 1);
@@ -70,6 +76,25 @@ export class PaintApp extends AbstractApp {
       }
 
       this.protogen.webServer.broadcastAppMessage(this, paintPacket)
+    } else if (data.type == ProtogenPaintPackets.Clear) {
+      const result = ClearModel.safeParse(data.data);
+      if (!result.success) {
+        this.protogen.logger.error("PaintApp", "Invalid clear packet" + result.error.toString());
+        return;
+      }
+
+      const payload = result.data as ClearPayload;
+
+      this.clearCanvas();
+
+      const clearPacket: AppSocketPacket<ClearPayload> = {
+        type: ProtogenPaintPackets.Clear,
+        data: {
+          sessionId: payload.sessionId,
+        }
+      }
+
+      this.protogen.webServer.broadcastAppMessage(this, clearPacket)
     }
   }
 }
@@ -93,6 +118,10 @@ enum ProtogenPaintPackets {
   PaintPixel = "PaintPixel",
   Clear = "Clear",
 }
+
+const ClearModel = z.object({
+  sessionId: z.string().uuid(),
+});
 
 const PaintPixelModel = z.object({
   sessionId: z.string().uuid(),
