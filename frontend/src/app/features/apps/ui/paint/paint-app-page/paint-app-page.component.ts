@@ -1,10 +1,12 @@
-import { AfterViewInit, ApplicationRef, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, ApplicationRef, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { AppSocketConnection } from '../../../../../core/apps/AppSocketConnection';
+import { AppSocketConnection, AppSocketPacket } from '../../../../../core/apps/AppSocketConnection';
 import { AppsApi } from '../../../../../core/services/api/apps-api.service';
 import { catchError, Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { uuidv4 } from 'uuidv7';
+import { RGBColor, rgbToHex } from '../../../../../core/utils';
 
 @Component({
   selector: 'app-paint-app-page',
@@ -15,11 +17,21 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   private socket: AppSocketConnection | null = null;
   private connectSubscriptsion?: Subscription;
+  private socketSubscriptsion?: Subscription;
 
   private pixelSize = 10;
 
   private width = 128;
   private height = 32;
+
+  private isReady = false;
+  private isDrawing = false;
+  // Postions we have already drawn on the canvas
+  private preventDrawPositions: Position[] = [];
+
+  private selectedColor: RGBColor = { r: 255, g: 255, b: 255 };
+
+  private sessionId = uuidv4();
 
   @ViewChild("paintCanvas") private canvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
@@ -57,8 +69,12 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     }
     this.socket = new AppSocketConnection(token);
 
+    this.socketSubscriptsion = this.socket.messageObservable.subscribe((message) => {
+      this.handleMessage(message);
+    });
+
     this.connectSubscriptsion = this.socket.connectedObservable.subscribe(() => {
-      this.toastr.success("Connected to app socket. Fetching data...");
+      this.toastr.success("Connected. Fetching data...");
 
       this.appsApi.getUserAppDetails(token).pipe(
         catchError((err: HttpErrorResponse) => {
@@ -92,12 +108,85 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
           this.ctx.imageSmoothingEnabled = false;
           this.ctx.drawImage(image, 0, 0, this.canvasWidth, this.canvasHeight);
           this.drawGrid();
+          this.isReady = true;
         };
         image.src = data.metadata.image;
       });
     });
 
     this.socket.connect();
+  }
+
+  getCanvasCoordinates(event: MouseEvent): Position {
+    const canvas = this.canvas.nativeElement;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY
+    };
+  }
+
+  onCanvasMouseDown(event: MouseEvent) {
+    const pos = this.getCanvasCoordinates(event);
+    this.isDrawing = true;
+    if (!this.isDrawing) {
+      this.preventDrawPositions = [];
+      console.log("Begin drawing");
+    }
+    this.userDrawAt(pos);
+  }
+
+  onCanvasMouseMove(event: MouseEvent) {
+    if (this.isDrawing) {
+      const pos = this.getCanvasCoordinates(event);
+      this.userDrawAt(pos);
+    }
+  }
+
+  @HostListener('document:mouseup', ['$event'])
+  onGlobalMouseUp(_event: MouseEvent) {
+    if (this.isDrawing) {
+      this.isDrawing = false;
+      this.preventDrawPositions = [];
+    }
+  }
+
+  userDrawAt(canvasPos: Position) {
+    if (this.socket?.connected !== true || !this.isReady) {
+      return; // Don't draw if we are not connected
+    }
+
+    const x = Math.floor(canvasPos.x / this.pixelSize);
+    const y = Math.floor(canvasPos.y / this.pixelSize);
+
+    const locedPosition = this.preventDrawPositions.find(p => p.x == x && p.y == y);
+    if (locedPosition) {
+      return;
+    }
+    this.preventDrawPositions.push({ x, y });
+
+    this.drawAt({ x, y }, this.selectedColor);
+
+    const packet: PaintPixelPayload = {
+      sessionId: this.sessionId,
+      position: { x, y },
+      color: this.selectedColor,
+    };
+
+    this.socket?.sendMessage({
+      type: PaintActions.PaintPixel,
+      data: packet,
+    });
+  }
+
+  drawAt(gridPos: Position, color: RGBColor) {
+    this.ctx.fillStyle = rgbToHex(color);
+    this.ctx.fillRect(gridPos.x * this.pixelSize, gridPos.y * this.pixelSize, this.pixelSize, this.pixelSize);
+
+    this.drawGrid(); // Draw the grid again
   }
 
   private clearCanvas() {
@@ -132,13 +221,50 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     this.ctx.stroke();
   }
 
+  handleMessage(message: AppSocketPacket<any>) {
+    if (message.type == ProtogenPaintPackets.PaintPixel) {
+      const payload = message.data as PaintPixelPayload;
+      if (payload.sessionId != this.sessionId) {
+        this.drawAt(payload.position, payload.color);
+        this.preventDrawPositions = this.preventDrawPositions.filter(p => p.x != payload.position.x || p.y != payload.position.y);
+      }
+    } else if (message.type == ProtogenPaintPackets.Clear) {
+      const payload = message.data as ClearPayload;
+      if (payload.sessionId != this.sessionId) {
+        this.clearCanvas();
+        this.preventDrawPositions = [];
+      }
+    }
+  }
+
   ngOnDestroy(): void {
     this.connectSubscriptsion?.unsubscribe();
+    this.socketSubscriptsion?.unsubscribe();
     this.socket?.destroy();
   }
 }
 
 enum PaintActions {
+  PaintPixel = "PaintPixel",
+  Clear = "Clear",
+}
+
+type Position = {
+  x: number;
+  y: number;
+}
+
+interface PaintPixelPayload {
+  sessionId: string;
+  position: Position;
+  color: RGBColor;
+}
+
+interface ClearPayload {
+  sessionId: string;
+}
+
+enum ProtogenPaintPackets {
   PaintPixel = "PaintPixel",
   Clear = "Clear",
 }
