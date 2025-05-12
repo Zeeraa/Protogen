@@ -7,7 +7,7 @@ export function rgbToHex(color: RGBColor): string {
     .join("");
 }
 
-export type RGBColor = {
+export interface RGBColor {
   r: number;
   g: number;
   b: number;

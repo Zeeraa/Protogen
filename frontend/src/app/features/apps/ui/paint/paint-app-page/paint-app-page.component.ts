@@ -177,7 +177,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     };
 
     this.socket?.sendMessage({
-      type: PaintActions.PaintPixel,
+      type: ProtogenPaintPackets.PaintPixel,
       data: packet,
     });
   }
@@ -244,12 +244,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   }
 }
 
-enum PaintActions {
-  PaintPixel = "PaintPixel",
-  Clear = "Clear",
-}
-
-type Position = {
+interface Position {
   x: number;
   y: number;
 }
