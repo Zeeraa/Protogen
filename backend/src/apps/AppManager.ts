@@ -142,6 +142,7 @@ export class AppManager {
     if (this._activeApp) {
       try {
         await this._activeApp.onDeactivated();
+        this._activeApp.disconnectSocketUsers();
         this._activeApp = null;
         return true;
       } catch (err) {

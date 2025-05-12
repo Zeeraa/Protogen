@@ -33,6 +33,8 @@ import morgan from 'morgan';
 import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualizerRouter";
 import { JoystickRemoteRouter } from "./routes/remote/JoystickRemoteRouter";
 import { AppRouter } from "./routes/apps/AppRouter";
+import { AppSocketPacket, AppUserSocketSession } from "./socket/AppUserSocketSession";
+import { AbstractApp } from "../apps/AbstractApp";
 
 export const SocketPath = "/protogen-websocket.io";
 export const AppSocketPath = "/protogen-app-websocket.io";
@@ -46,6 +48,7 @@ export class ProtogenWebServer {
   private _socketSecure: Server | null = null;
   private _appSocket;
   private _sessions: UserSocketSession[];
+  private _appSessions: AppUserSocketSession[];
   private _authMiddleware;
 
   private _internalHttpsPublicKeyFile: string;
@@ -54,6 +57,7 @@ export class ProtogenWebServer {
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this._sessions = [];
+    this._appSessions = [];
 
     const certFolder = resolve(protogen.config.dataDirectory + "/cert");
     if (!existsSync(certFolder)) {
@@ -216,7 +220,9 @@ export class ProtogenWebServer {
             return;
           }
 
-          //TODO: Create client wrapper
+          const session = new AppUserSocketSession(this.protogen, socket, app, tokenData.interactionKey);
+          this._appSessions.push(session);
+          this.protogen.logger.info("WebServer", "App socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._appSessions.length)));
           return;
         }
       }
@@ -231,6 +237,12 @@ export class ProtogenWebServer {
     setInterval(() => {
       this.broadcastMessage(SocketMessageType.S2C_Ping, {});
     }, 5000);
+  }
+
+  public disconnectAppSocket(session: AppUserSocketSession) {
+    session.disconnect();
+    this._appSessions = this._appSessions.filter(s => s.sessionId != session.sessionId);
+    this.protogen.logger.info("WebServer", "App socket with id " + cyan(session.sessionId) + " disconnected. Client count: " + cyan(String(this._appSessions.length)));
   }
 
   public disconnectSocket(session: UserSocketSession) {
@@ -276,6 +288,10 @@ export class ProtogenWebServer {
     return this._sessions;
   }
 
+  public get appSocketSessions() {
+    return this._appSessions;
+  }
+
   private get config() {
     return this.protogen.config.web;
   }
@@ -314,5 +330,9 @@ export class ProtogenWebServer {
 
   public broadcastMessage(type: SocketMessageType, data: any) {
     this.socketSessions.filter(s => !s.auth.onlyRemotePermissions || (type == SocketMessageType.S2E_JoystickRemoteConfigChange || type == SocketMessageType.S2E_JoystickRemoteProfileChange)).forEach(s => s.sendMessage(type, data));
+  }
+
+  public broadcastAppMessage(app: AbstractApp, data: AppSocketPacket<any>) {
+    this.appSocketSessions.filter(s => s.app.name == app.name && s.interactionKey == app.interactionKey).forEach(s => s.sendMessage(data));
   }
 }
