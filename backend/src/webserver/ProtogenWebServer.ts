@@ -220,6 +220,13 @@ export class ProtogenWebServer {
             return;
           }
 
+          if (!app.isActive) {
+            this.protogen.logger.info("WebServer", "Preventing app socket connection since app is not active");
+            socket.disconnect(true);
+            return;
+          }
+
+
           const session = new AppUserSocketSession(this.protogen, socket, app, tokenData.interactionKey);
           this._appSessions.push(session);
           this.protogen.logger.info("WebServer", "App socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._appSessions.length)));
