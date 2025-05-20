@@ -10,7 +10,7 @@ export const ProtoColors = {
 
 Object.freeze(ProtoColors);
 
-export function hueToRGB(hue: number): { r: number, g: number, b: number } {
+export function hueToRGB(hue: number): RGBColor {
   const s = 1;
   const l = 0.5;
 
@@ -40,4 +40,19 @@ export function hueToRGB(hue: number): { r: number, g: number, b: number } {
   b = Math.round((b + m) * 255);
 
   return { r, g, b };
+}
+
+export function rgbToHex(color: RGBColor): string {
+  return "#" + [color.r, color.g, color.b]
+    .map(x => {
+      const hex = x.toString(16);
+      return hex.length === 1 ? "0" + hex : hex;
+    })
+    .join("");
+}
+
+export interface RGBColor {
+  r: number;
+  g: number;
+  b: number;
 }

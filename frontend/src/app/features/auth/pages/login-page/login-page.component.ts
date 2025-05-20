@@ -60,7 +60,7 @@ export class LoginPageComponent {
       }
     } catch (err) {
       console.error(err);
-      this.toastr.error("An error occured while logging in");
+      this.toastr.error("An error occurred while logging in");
     }
     this.loginForm.enable();
   }

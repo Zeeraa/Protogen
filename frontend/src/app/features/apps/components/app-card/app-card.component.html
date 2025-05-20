@@ -1,0 +1,33 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">
+      {{app.displayName}}
+      @if(isActive) {
+      <span class="badge bg-primary">Active</span>
+      }
+    </h5>
+  </div>
+
+  <div class="card-body">
+    <button class="btn btn-success me-1 mb-1" (click)="startApp()">Start</button>
+    @if(hasWebUiPage) {
+    <button class="btn btn-primary me-1 mb-1" (click)="createInvite()" [disabled]="!isActive">Open</button>
+    }
+  </div>
+</div>
+
+<ng-template #appInviteModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">App invite</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <img [src]="qrCode" alt="QRCode" /><br>
+      <a [href]="appLink" target="_blank" class="btn btn-primary mt-2">Open in browser</a>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Close</button>
+  </div>
+</ng-template>
