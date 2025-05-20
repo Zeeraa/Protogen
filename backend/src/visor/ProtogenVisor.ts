@@ -226,7 +226,7 @@ export class ProtogenVisor {
         await this.push(app.appCanvas);
         this._lastFrame = this.canvas.toBuffer();
       } catch (err) {
-        this.protogen.logger.error("Visor", "An error occured during app rendering. " + (err as any).message);
+        this.protogen.logger.error("Visor", "An error occurred during app rendering. " + (err as any).message);
         console.error(err);
       }
       return;
