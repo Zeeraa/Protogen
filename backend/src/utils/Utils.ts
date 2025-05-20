@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import crypto from 'crypto';
+import { RGBColor } from './ProtoColors';
 
 export function sleep(milliseconds: number) {
   return new Promise<void>(resolve => {
@@ -7,6 +8,10 @@ export function sleep(milliseconds: number) {
       resolve();
     }, milliseconds);
   });
+}
+
+export function encodeRGBObject(color: RGBColor): number {
+  return encodeRGB(color.r, color.g, color.b);
 }
 
 export function encodeRGB(r: number, g: number, b: number): number {
@@ -19,7 +24,7 @@ export function encodeRGB(r: number, g: number, b: number): number {
   return (r << 16) | (g << 8) | b;
 }
 
-export function decodeRGB(value: number): { r: number, g: number, b: number } {
+export function decodeRGB(value: number): RGBColor {
   // Extract the RGB values from the number
   const r = (value >> 16) & 0xFF;
   const g = (value >> 8) & 0xFF;

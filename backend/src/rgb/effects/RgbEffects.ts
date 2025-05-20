@@ -5,6 +5,7 @@ import { RgbWaveEffect } from "./implementations/RgbWaveEffect";
 import { ColorShiftEffect } from "./implementations/ColorShiftEffect";
 import { Protogen } from "../../Protogen";
 import { AudioVisualizerEffect } from "./implementations/AudioVisualizerEffect";
+import { TwinkleEffect } from "./implementations/TwinkleEffect";
 
 export const RgbEffects: RgbEffect[] = [
   {
@@ -26,6 +27,11 @@ export const RgbEffects: RgbEffect[] = [
     name: "Audio Visualizer",
     description: "An audio visualizer showing the audio level from the remote microphone",
     class: AudioVisualizerEffect,
+  },
+  {
+    name: "Twinkle Glow",
+    description: "A twinkle glow effect that fades in and out pixels",
+    class: TwinkleEffect,
   }
 ]
 
