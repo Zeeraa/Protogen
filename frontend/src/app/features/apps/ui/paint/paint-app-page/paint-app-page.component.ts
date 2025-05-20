@@ -41,7 +41,11 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private appsApi: AppsApi,
     private appRef: ApplicationRef,
-  ) { }
+  ) {
+    this.onCanvasMouseDown = this.onCanvasMouseDown.bind(this);
+    this.onCanvasMouseMove = this.onCanvasMouseMove.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+  }
 
   get canvasWidth() {
     return this.width * this.pixelSize;
@@ -62,10 +66,10 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     this.ctx = canvasEl.getContext('2d')!;
     this.clearCanvas();
 
-    canvasEl.addEventListener('touchstart', this.onCanvasMouseDown, { passive: false });
-    canvasEl.addEventListener('touchmove', this.onCanvasMouseMove, { passive: false });
-    canvasEl.addEventListener('touchend', this.onTouchEnd);
-    canvasEl.addEventListener('touchcancel', this.onTouchEnd);
+    canvasEl.addEventListener('touchstart', (e) => { this.onCanvasMouseDown(e); }, { passive: false });
+    canvasEl.addEventListener('touchmove', (e) => { this.onCanvasMouseMove(e); }, { passive: false });
+    canvasEl.addEventListener('touchend', () => { this.onTouchEnd(); });
+    canvasEl.addEventListener('touchcancel', () => { this.onTouchEnd(); });
 
     const token = this.route.snapshot.queryParams['token'];
     if (!token) {
@@ -134,7 +138,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     let clientX = 0;
     let clientY = 0;
     if ('touches' in event) {
-      if (event.touches.length > 1) {
+      if (event.touches.length > 0) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;
       }
