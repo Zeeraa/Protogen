@@ -17,6 +17,8 @@ import { AudioVisualizerSettingsPageComponent } from './features/audio-visualize
 import { JoystickRemoteSettingsPageComponent } from './features/remote-settings-page/pages/remote-settings-page/joystick-remote-settings-page.component';
 import { AuthGuard } from './core/guards/auth-guard.guard';
 import { LoginPageComponent } from './features/auth/pages/login-page/login-page.component';
+import { AppsPageComponent } from './features/apps/pages/apps-page/apps-page.component';
+import { PaintAppPageComponent } from './features/apps/ui/paint/paint-app-page/paint-app-page.component';
 
 export const routes: Routes = [
   {
@@ -106,8 +108,22 @@ export const routes: Routes = [
   {
     path: "audio-visualizer",
     component: AudioVisualizerSettingsPageComponent,
-    canActivate: [AuthGuard],
+  },
+  {
+    path: "apps",
+    children: [
+      {
+        path: "",
+        component: AppsPageComponent,
+        canActivate: [AuthGuard],
+      },
+      {
+        path: "paint",
+        component: PaintAppPageComponent,
+      }
+    ]
   }
+
 ];
 
 @NgModule({

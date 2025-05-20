@@ -7,10 +7,10 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'app-saved-video-card',
-    templateUrl: './saved-video-card.component.html',
-    styleUrl: './saved-video-card.component.scss',
-    standalone: false
+  selector: 'app-saved-video-card',
+  templateUrl: './saved-video-card.component.html',
+  styleUrl: './saved-video-card.component.scss',
+  standalone: false
 })
 export class SavedVideoCardComponent implements OnDestroy {
   @Input({ required: true }) video!: SavedVideo;
@@ -117,7 +117,7 @@ export class SavedVideoCardComponent implements OnDestroy {
 
     this.isSaving = true;
     this.api.editSavedVideo(this.video.id, data).pipe(catchError(err => {
-      this.toastr.error("An error occured while trying to update saved video");
+      this.toastr.error("An error occurred while trying to update saved video");
       this.isSaving = false;
       throw err;
     })).subscribe(_ => {

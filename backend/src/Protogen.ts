@@ -21,8 +21,11 @@ import { ActionManager } from "./actions/ActionManager";
 import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
 import { red } from "colors";
 import { JoystickRemoteManager } from "./remote/RemoteManager";
+import { AppManager } from "./apps/AppManager";
+import { PaintApp } from "./apps/paint/PaintApp";
 
 export const BootMessageColor = "#00FF00";
+export const JwtKeyLength = 64;
 
 export class Protogen {
   private _config: Configuration;
@@ -48,6 +51,7 @@ export class Protogen {
   private _audioVisualiser: AudioVisualiser;
   private _versionNumber: string;
   private _integrationStateReportingKey: string;
+  private _appManager: AppManager;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -136,6 +140,7 @@ export class Protogen {
     this._networkManager = new NetworkManager(this);
     this._joystickRemoteManager = new JoystickRemoteManager(this);
     this._actionManager = new ActionManager(this);
+    this._appManager = new AppManager(this);
   }
 
   public async init() {
@@ -170,6 +175,9 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
     await this.audioVisualiser.init();
 
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit apps", BootMessageColor);
+    await this.appManager.registerApp(new PaintApp(this.appManager));
+
     // Custom crash handler
     process.on('uncaughtException', (err) => {
       this.visor.appendRenderLock("Crash");
@@ -179,8 +187,8 @@ export class Protogen {
       console.log("Showing crash message and shutting down");
       this.visor.tryRenderTextFrame("Protogen OS\nHas crashed :(\nPlease reboot", "#FF0000").then(() => {
         process.exit(1);
-      })
-    })
+      });
+    });
 
     await this.visor.tryRenderTextFrame("Protogen OS\nReady!\nv" + this.versionNumber, BootMessageColor);
     await sleep(1000); // Show ready message for 1000ms before starting visor render loop
@@ -279,6 +287,10 @@ export class Protogen {
 
   get integrationStateReportingKey() {
     return this._integrationStateReportingKey;
+  }
+
+  get appManager() {
+    return this._appManager;
   }
   //#endregion
 }

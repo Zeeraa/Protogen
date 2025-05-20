@@ -123,7 +123,7 @@ export class AuthService {
           console.log("No token found");
         }
       } catch (err) {
-        console.error("An error occured while logging in");
+        console.error("An error occurred while logging in");
         console.error(err);
       }
 

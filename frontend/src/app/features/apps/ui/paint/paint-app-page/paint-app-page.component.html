@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Protogen Paint</h1>
+    </div>
+  </div>
+
+  @if(disconnected) {
+  <div class="row mt-2">
+    <div class="col">
+      <div class="alert alert-danger">Socket disconnected. Try reloading and check that your invite is still valid</div>
+    </div>
+  </div>
+  }
+
+  <div class="row mt-2">
+    <div class="col-auto">
+      <input type="color" class="form-control form-control-color" id="paintColorPicker" [(ngModel)]="selectedColor"
+        title="Select color">
+    </div>
+
+    <div class="col-auto">
+      <button class="btn btn-danger" (click)="userClearCanvas()">Clear canvas</button>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col">
+      <canvas class="w-100 protogen-paint-app-canvas" [width]="canvasWidth" [height]="canvasHeight"
+        (mousedown)="onCanvasMouseDown($event)" (mousemove)="onCanvasMouseMove($event)" #paintCanvas></canvas>
+    </div>
+  </div>
+</div>

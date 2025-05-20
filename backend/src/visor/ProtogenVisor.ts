@@ -1,4 +1,4 @@
-import { createCanvas } from "canvas";
+import { Canvas, createCanvas } from "canvas";
 import { BootMessageColor, Protogen } from "../Protogen";
 import { cyan, yellow } from "colors";
 import { VisorRenderer } from "./rendering/VisorRenderer";
@@ -14,6 +14,7 @@ import { StaticPictureRenderer } from "./rendering/renderers/StaticPictureRender
 import { CustomFace } from "../database/models/visor/CustomFace.model";
 import { existsSync } from "fs";
 import { FileImageSourceProvider } from "./image/FileImageSourceProvider";
+import { AppRenderLockName } from "../apps/AppManager";
 
 export class ProtogenVisor {
   private _protogen;
@@ -214,6 +215,23 @@ export class ProtogenVisor {
   }
 
   public async render() {
+    if (this.hasRenderLockExcluding(AppRenderLockName)) {
+      return;
+    }
+
+    if (this.protogen.appManager.activeApp?.options.useRenderer === true) {
+      try {
+        const app = this.protogen.appManager.activeApp;
+        app.onVisorRenderTick();
+        await this.push(app.appCanvas);
+        this._lastFrame = this.canvas.toBuffer();
+      } catch (err) {
+        this.protogen.logger.error("Visor", "An error occurred during app rendering. " + (err as any).message);
+        console.error(err);
+      }
+      return;
+    }
+
     if (this.hasRenderLock) {
       return;
     }
@@ -268,10 +286,15 @@ export class ProtogenVisor {
     return this.renderLocks.length > 0;
   }
 
-  public async push() {
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-    this.protogen.flaschenTaschen.sendImageBuffer(this.canvas.toBuffer(), w, h);
+  public hasRenderLockExcluding(...args: string[]) {
+    return this.renderLocks.filter(l => !args.includes(l)).length > 0;
+  }
+
+
+  public async push(canvas?: Canvas) {
+    const w = (canvas || this.canvas).width;
+    const h = (canvas || this.canvas).height;
+    this.protogen.flaschenTaschen.sendImageBuffer((canvas || this.canvas).toBuffer(), w, h);
   }
 
   public get protogen() {

@@ -13,5 +13,11 @@
     "secure": false,
     "changeOrigin": true,
     "ws": true
+  },
+  "/protogen-app-websocket.io": {
+    "target": "http://protogen.local:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "ws": true
   }
 }

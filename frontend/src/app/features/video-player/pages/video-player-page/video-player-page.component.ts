@@ -9,10 +9,10 @@ import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-    selector: 'app-video-player-page',
-    templateUrl: './video-player-page.component.html',
-    styleUrl: './video-player-page.component.scss',
-    standalone: false
+  selector: 'app-video-player-page',
+  templateUrl: './video-player-page.component.html',
+  styleUrl: './video-player-page.component.scss',
+  standalone: false
 })
 export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   videoInputUrl = "";
@@ -248,7 +248,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
     this.api.saveVideo(data).pipe(catchError(err => {
-      this.toastr.error("An error occured while trying to save video");
+      this.toastr.error("An error occurred while trying to save video");
       this.isSaving = false;
       throw err;
     })).subscribe(_ => {

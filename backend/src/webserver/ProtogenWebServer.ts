@@ -32,8 +32,12 @@ import { ActionsRouter } from "./routes/actions/ActionsRouter";
 import morgan from 'morgan';
 import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualizerRouter";
 import { JoystickRemoteRouter } from "./routes/remote/JoystickRemoteRouter";
+import { AppRouter } from "./routes/apps/AppRouter";
+import { AppSocketPacket, AppUserSocketSession } from "./socket/AppUserSocketSession";
+import { AbstractApp } from "../apps/AbstractApp";
 
 export const SocketPath = "/protogen-websocket.io";
+export const AppSocketPath = "/protogen-app-websocket.io";
 
 export class ProtogenWebServer {
   private _protogen;
@@ -42,7 +46,9 @@ export class ProtogenWebServer {
   private _https: https.Server | null = null;
   private _socket;
   private _socketSecure: Server | null = null;
+  private _appSocket;
   private _sessions: UserSocketSession[];
+  private _appSessions: AppUserSocketSession[];
   private _authMiddleware;
 
   private _internalHttpsPublicKeyFile: string;
@@ -51,6 +57,7 @@ export class ProtogenWebServer {
   constructor(protogen: Protogen) {
     this._protogen = protogen;
     this._sessions = [];
+    this._appSessions = [];
 
     const certFolder = resolve(protogen.config.dataDirectory + "/cert");
     if (!existsSync(certFolder)) {
@@ -94,6 +101,11 @@ export class ProtogenWebServer {
       path: SocketPath,
     });
 
+    // Use dedicated socket for apps to simplify communication and to increase security
+    this._appSocket = new Server(this._http, {
+      path: AppSocketPath,
+    });
+
     if (protogen.config.web.localHttpsPort != null) {
       this._https = createHttpsServer({
         key: readFileSync(this._internalHttpsPrivateKeyFile),
@@ -101,6 +113,7 @@ export class ProtogenWebServer {
       }, this._express);
 
       console.debug("Creating socket for https");
+
       this._socketSecure = new Server(this._https, {
         path: SocketPath,
       });
@@ -135,6 +148,7 @@ export class ProtogenWebServer {
     new AssetsRouter(this).register({ noAuth: true });
     new ActionsRouter(this).register();
     new AudioVisualiserRouter(this).register();
+    new AppRouter(this).register({ noAuth: true });
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
@@ -177,7 +191,7 @@ export class ProtogenWebServer {
       }
 
       if (auth == null) {
-        this.protogen.logger.info("WebServer", "Invalid token. Disconnecting socket.");
+        this.protogen.logger.info("WebServer", "Invalid token (web socket). Disconnecting socket.");
         socket.disconnect(true);
         return;
       }
@@ -187,12 +201,55 @@ export class ProtogenWebServer {
       this.protogen.logger.info("WebServer", "Socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._sessions.length)));
     }
 
+    const appSocketConnectionHandler = async (socket: Socket) => {
+      const token = String(socket.handshake.headers.authorization);
+      if (token.startsWith("Bearer ")) {
+        const jwt = token.split("Bearer ")[1];
+        const tokenData = await this.protogen.appManager.validateJWTToken(jwt);
+        if (tokenData != null) {
+          const app = this.protogen.appManager.apps.find(a => a.name == tokenData.targetApplicationName);
+          if (app == null) {
+            this.protogen.logger.info("WebServer", "App socket token deemed invalid. App not found");
+            socket.disconnect(true);
+            return;
+          }
+
+          if (app.interactionKey != tokenData.interactionKey) {
+            this.protogen.logger.info("WebServer", "App socket token deemed invalid. Interaction key does not match");
+            socket.disconnect(true);
+            return;
+          }
+
+          if (!app.isActive) {
+            this.protogen.logger.info("WebServer", "Preventing app socket connection since app is not active");
+            socket.disconnect(true);
+            return;
+          }
+
+
+          const session = new AppUserSocketSession(this.protogen, socket, app, tokenData.interactionKey);
+          this._appSessions.push(session);
+          this.protogen.logger.info("WebServer", "App socket connected with id " + cyan(session.sessionId) + ". Client count: " + cyan(String(this._appSessions.length)));
+          return;
+        }
+      }
+      this.protogen.logger.info("WebServer", "Invalid token (app socket). Disconnecting socket.");
+      socket.disconnect(true);
+    }
+
     this.socket.on("connection", socketConnectionHandler);
     this.socketSecure?.on("connection", socketConnectionHandler);
+    this.appSocket.on("connection", appSocketConnectionHandler);
 
     setInterval(() => {
       this.broadcastMessage(SocketMessageType.S2C_Ping, {});
     }, 5000);
+  }
+
+  public disconnectAppSocket(session: AppUserSocketSession) {
+    session.disconnect();
+    this._appSessions = this._appSessions.filter(s => s.sessionId != session.sessionId);
+    this.protogen.logger.info("WebServer", "App socket with id " + cyan(session.sessionId) + " disconnected. Client count: " + cyan(String(this._appSessions.length)));
   }
 
   public disconnectSocket(session: UserSocketSession) {
@@ -238,6 +295,10 @@ export class ProtogenWebServer {
     return this._sessions;
   }
 
+  public get appSocketSessions() {
+    return this._appSessions;
+  }
+
   private get config() {
     return this.protogen.config.web;
   }
@@ -266,11 +327,19 @@ export class ProtogenWebServer {
     return this._socketSecure;
   }
 
+  public get appSocket() {
+    return this._appSocket;
+  }
+
   public get authMiddleware() {
     return this._authMiddleware;
   }
 
   public broadcastMessage(type: SocketMessageType, data: any) {
     this.socketSessions.filter(s => !s.auth.onlyRemotePermissions || (type == SocketMessageType.S2E_JoystickRemoteConfigChange || type == SocketMessageType.S2E_JoystickRemoteProfileChange)).forEach(s => s.sendMessage(type, data));
+  }
+
+  public broadcastAppMessage(app: AbstractApp, data: AppSocketPacket<any>) {
+    this.appSocketSessions.filter(s => s.app.name == app.name && s.interactionKey == app.interactionKey).forEach(s => s.sendMessage(data));
   }
 }
