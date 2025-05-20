@@ -6,6 +6,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClipboardService } from 'ngx-clipboard';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-passwordless-signin-button',
@@ -28,6 +29,8 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
     private modal: NgbModal,
     private auth: AuthService,
     private clipboard: ClipboardService,
+    private router: Router,
+    private route: ActivatedRoute,
   ) { }
 
   get authUrl() {
@@ -80,8 +83,19 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
               })
             ).subscribe(token => {
               this.auth.setToken(token.token);
+              this.auth.setLoginStateToAuthenticated();
               this.activeRequest = null;
               this.passwordlessSigninPrompt?.close();
+              console.log("Token aquire success. Redirecting with small delay");
+              setTimeout(() => {
+                this.route.queryParams.subscribe(params => {
+                  if (params['returnUrl']) {
+                    this.router.navigateByUrl(params['returnUrl']);
+                  } else {
+                    this.router.navigate(['/']);
+                  }
+                });
+              }, 500);
             });
           }
         });

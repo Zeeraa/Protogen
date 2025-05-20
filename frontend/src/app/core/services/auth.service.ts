@@ -95,6 +95,12 @@ export class AuthService {
     });
   }
 
+  public setLoginStateToAuthenticated() {
+    this._loggedIn = true;
+    this._loginNeeded = false;
+    this.authStateSubject.next('authenticated');
+  }
+
   public init(): Promise<void> {
     return new Promise<void>(async (resolve) => {
       try {

@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
           return true;
         } else {
           let returnUrl: string | undefined = state.url; // Use the target URL from RouterStateSnapshot
-          console.log("returnUrl:", returnUrl);
+          console.log("Redirecting to auth page since user is not authenticated. returnUrl:", returnUrl);
 
           if (returnUrl == "/") {
             returnUrl = undefined; // Dont include only / for a cleaner url
