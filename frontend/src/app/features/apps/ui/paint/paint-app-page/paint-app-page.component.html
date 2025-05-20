@@ -14,9 +14,20 @@
   }
 
   <div class="row mt-2">
+    <div class="col-auto">
+      <input type="color" class="form-control form-control-color" id="paintColorPicker" [(ngModel)]="selectedColor"
+        title="Select color">
+    </div>
+
+    <div class="col-auto">
+      <button class="btn btn-danger" (click)="userClearCanvas()">Clear canvas</button>
+    </div>
+  </div>
+
+  <div class="row mt-2">
     <div class="col">
-      <canvas class="w-100" [width]="canvasWidth" [height]="canvasHeight" (mousedown)="onCanvasMouseDown($event)"
-        (mousemove)="onCanvasMouseMove($event)" #paintCanvas></canvas>
+      <canvas class="w-100 protogen-paint-app-canvas" [width]="canvasWidth" [height]="canvasHeight"
+        (mousedown)="onCanvasMouseDown($event)" (mousemove)="onCanvasMouseMove($event)" #paintCanvas></canvas>
     </div>
   </div>
 </div>
