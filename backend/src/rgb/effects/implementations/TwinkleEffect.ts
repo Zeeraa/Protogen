@@ -22,7 +22,7 @@ export class TwinkleEffect extends AbstractRgbEffect {
     super(id, name, displayName, protogen);
     this._propColor = new RgbEffectColorProperty("Color", ProtoColors.white, "Color to use");
     this._propUseRandomColor = new RgbEffectBoolProperty("UseRandomColor", false, { inputType: BoolPropInputType.Switch }, "Use a random colors");
-    this._propFadeSpeed = new RgbEffectIntProperty("FadeSpeed", 5, { min: 1, max: 500, inputType: IntPropInputType.Slider }, "Speed of the fade effect");
+    this._propFadeSpeed = new RgbEffectIntProperty("FadeSpeed", 130, { min: 1, max: 500, inputType: IntPropInputType.Slider }, "Speed of the fade effect");
     this._propPixelSpawnSpeed = new RgbEffectIntProperty("PixelSpawnSpeed", 300, { min: 1, max: 1000, inputType: IntPropInputType.Slider }, "Speed that pixels will try to spawn at");
     this._propMaxPixelsSpawnedPerTick = new RgbEffectIntProperty("MaxPixelsPerSpawnTick", 1, { min: 1, max: 10 }, "Max amount of pixels to spawn during each spawn tick");
     this._propMaxPixelCount = new RgbEffectIntProperty("MaxPixels", 10, { min: 1, max: 1024 }, "Max pixels to show at the same time");
