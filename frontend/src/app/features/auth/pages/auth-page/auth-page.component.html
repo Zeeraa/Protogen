@@ -20,3 +20,24 @@
     </p>
   </div>
 </div>
+
+<ng-template #confirmScannedCodeModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Confirm signin</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.close()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <p>
+        Confirm that the code is matching the one on your other device.
+      </p>
+      <h1 class="text-info signin-key-auth-page">
+        {{code}}
+      </h1>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary me-1 mt-1" (click)="modal.close()">Cancel</button>
+    <button type="button" class="btn btn-danger me-1 mt-1" (click)="approveLogin()">Confirm</button>
+  </div>
+</ng-template>

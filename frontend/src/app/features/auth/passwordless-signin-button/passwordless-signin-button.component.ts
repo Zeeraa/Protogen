@@ -7,6 +7,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClipboardService } from 'ngx-clipboard';
 import { ActivatedRoute, Router } from '@angular/router';
+import { toDataURL } from 'qrcode';
+
+const BlankImage = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 
 @Component({
   selector: 'app-passwordless-signin-button',
@@ -19,6 +22,8 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
   private activeRequest: PasswordlessSigninRequest | null = null;
   private pollRequestStatus = false;
   private checkInterval: any;
+
+  protected qrCode = BlankImage;
 
   @ViewChild("passwordlessSigninPrompt") private passwordlessSigninPromptTemplate!: TemplateRef<any>;
   private passwordlessSigninPrompt?: NgbModalRef;
@@ -39,6 +44,10 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
 
   get signinKey() {
     return this.activeRequest?.signinKey || "";
+  }
+
+  get qrCodeUrl() {
+    return this.authUrl + "?signinKey=" + this.signinKey;
   }
 
   ngOnDestroy(): void {
@@ -105,6 +114,7 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
 
   beginPasswordlessSignIn() {
     this.disableButton = true;
+    this.qrCode = BlankImage;
     this.authApi.beginPasswordlessSignIn().pipe(
       catchError(err => {
         this.disableButton = false;
@@ -115,6 +125,14 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
       this.disableButton = false;
       this.pollRequestStatus = true;
       this.activeRequest = request;
+      toDataURL(this.qrCodeUrl, { errorCorrectionLevel: 'L', margin: 1 }, (err, url) => {
+        if (err) {
+          console.error(err);
+          this.toastr.error("Failed to generate QR code");
+          return;
+        }
+        this.qrCode = url;
+      });
       this.passwordlessSigninPrompt = this.modal.open(this.passwordlessSigninPromptTemplate, {
         backdrop: "static",
         keyboard: false,
