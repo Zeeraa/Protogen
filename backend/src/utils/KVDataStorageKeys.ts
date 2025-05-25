@@ -23,3 +23,7 @@ export const KV_RemoteInvertX = "Remote_InvertX";
 export const KV_RemoteInvertY = "Remote_InvertY";
 export const KV_RemoteFlipAxis = "Remote_FlipAxis";
 //#endregion
+
+//#region Boop sensor
+export const KV_BoopSensorProfile = "BoopSensorProfile";
+//#region

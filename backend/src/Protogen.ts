@@ -23,35 +23,37 @@ import { red } from "colors";
 import { JoystickRemoteManager } from "./remote/RemoteManager";
 import { AppManager } from "./apps/AppManager";
 import { PaintApp } from "./apps/paint/PaintApp";
+import { BoopSensorManager } from "./boop-sensor/BoopSensorManager";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
 
 export class Protogen {
-  private _config: Configuration;
-  private _database: Database;
-  private _webServer: ProtogenWebServer;
-  private _logger: Logger;
-  private _visor: ProtogenVisor;
-  private _flaschenTaschen: FlaschenTaschen;
-  private _remoteWorker: ProtogenRemoteWorker;
-  private _videoPlaybackManager: ProtogenVideoPlaybackManager;
-  private _serial: SerialManager;
-  private _rgb: RgbManager;
-  private _networkManager: NetworkManager;
-  private _eventEmitter: EventEmitter;
-  private _userManager: UserManager;
-  private _apiKeyManager: ApiKeyManager;
-  private _joystickRemoteManager: JoystickRemoteManager;
-  private _sessionId: string;
-  private _imageDirectory: string;
-  private _tempDirectory: string;
-  private _builtInAssets: BuiltInAsset[] = [];
-  private _actionManager: ActionManager;
-  private _audioVisualiser: AudioVisualiser;
-  private _versionNumber: string;
-  private _integrationStateReportingKey: string;
-  private _appManager: AppManager;
+  private readonly _config: Configuration;
+  private readonly _database: Database;
+  private readonly _webServer: ProtogenWebServer;
+  private readonly _logger: Logger;
+  private readonly _visor: ProtogenVisor;
+  private readonly _flaschenTaschen: FlaschenTaschen;
+  private readonly _remoteWorker: ProtogenRemoteWorker;
+  private readonly _videoPlaybackManager: ProtogenVideoPlaybackManager;
+  private readonly _serial: SerialManager;
+  private readonly _rgb: RgbManager;
+  private readonly _networkManager: NetworkManager;
+  private readonly _eventEmitter: EventEmitter;
+  private readonly _userManager: UserManager;
+  private readonly _apiKeyManager: ApiKeyManager;
+  private readonly _joystickRemoteManager: JoystickRemoteManager;
+  private readonly _sessionId: string;
+  private readonly _imageDirectory: string;
+  private readonly _tempDirectory: string;
+  private readonly _builtInAssets: BuiltInAsset[] = [];
+  private readonly _actionManager: ActionManager;
+  private readonly _audioVisualiser: AudioVisualiser;
+  private readonly _versionNumber: string;
+  private readonly _integrationStateReportingKey: string;
+  private readonly _appManager: AppManager;
+  private readonly _boopSensorManager: BoopSensorManager;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -141,6 +143,7 @@ export class Protogen {
     this._joystickRemoteManager = new JoystickRemoteManager(this);
     this._actionManager = new ActionManager(this);
     this._appManager = new AppManager(this);
+    this._boopSensorManager = new BoopSensorManager(this);
   }
 
   public async init() {
@@ -168,6 +171,9 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit VISOR", BootMessageColor);
     await this.visor.loadActiveRendererFromDatabase();
     await this.visor.init();
+
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit sensors", BootMessageColor);
+    await this.boopSensorManager.init();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit serial\nconnection", BootMessageColor);
     await this.serial.init();
@@ -265,15 +271,15 @@ export class Protogen {
     return this._apiKeyManager;
   }
 
-  get joystickRemoteManager() {
+  public get joystickRemoteManager() {
     return this._joystickRemoteManager;
   }
 
-  get builtInAssets() {
+  public get builtInAssets() {
     return this._builtInAssets;
   }
 
-  get actionManager() {
+  public get actionManager() {
     return this._actionManager;
   }
 
@@ -285,12 +291,16 @@ export class Protogen {
     return this._versionNumber;
   }
 
-  get integrationStateReportingKey() {
+  public get integrationStateReportingKey() {
     return this._integrationStateReportingKey;
   }
 
-  get appManager() {
+  public get appManager() {
     return this._appManager;
+  }
+
+  public get boopSensorManager() {
+    return this._boopSensorManager;
   }
   //#endregion
 }
