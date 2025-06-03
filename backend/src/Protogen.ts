@@ -19,10 +19,13 @@ import { BuiltInAsset, BuiltInAssetSchema } from "./assets/BuiltInAsset";
 import { z } from "zod";
 import { ActionManager } from "./actions/ActionManager";
 import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
-import { red } from "colors";
+import { magenta, red } from "colors";
 import { JoystickRemoteManager } from "./remote/RemoteManager";
 import { AppManager } from "./apps/AppManager";
 import { PaintApp } from "./apps/paint/PaintApp";
+import { HardwareAbstractionLayer } from "./hardware/HardwareAbstractionLayer";
+import { Hardware } from "./hardware/Hardware";
+import { StandardHardwareImplementation } from "./hardware/implementations/StandardHardwareImplementation";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
@@ -52,6 +55,7 @@ export class Protogen {
   private _versionNumber: string;
   private _integrationStateReportingKey: string;
   private _appManager: AppManager;
+  private readonly _hardwareAbstractionLayer: HardwareAbstractionLayer;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -102,6 +106,16 @@ export class Protogen {
       mkdirSync(this.tempDirectory);
     }
 
+    this.logger.info("Protogen", "Setting up hardware abstraction layer. Selected hardware type: " + magenta(config.hardware));
+    switch (config.hardware) {
+      case Hardware.STANDARD:
+        this._hardwareAbstractionLayer = new StandardHardwareImplementation(this, config.serial.port, config.serial.baudRate);
+        break;
+
+      default:
+        throw new Error("Unimplemented hardware type: " + config.hardware);
+    }
+
     this.logger.info("Protogen", "Reading built-in assets");
 
     const raw = JSON.parse(readFileSync("assets/AssetManifest.json").toString());
@@ -149,6 +163,9 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit database", BootMessageColor);
     await this.database.init();
     await this.joystickRemoteManager.loadConfig();
+
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit hardware", BootMessageColor);
+    await this.hardwareAbstractionLayer.init();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit auth", BootMessageColor);
     await this.userManager.init();
@@ -291,6 +308,10 @@ export class Protogen {
 
   get appManager() {
     return this._appManager;
+  }
+
+  get hardwareAbstractionLayer() {
+    return this._hardwareAbstractionLayer;
   }
   //#endregion
 }

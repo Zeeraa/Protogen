@@ -1,3 +1,4 @@
+import { Hardware } from "../hardware/Hardware";
 import { Configuration } from "./objects/Configurations";
 import { DatabaseConfiguration } from "./objects/DatabaseConfiguration";
 import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfiguration";
@@ -9,6 +10,17 @@ import { SerialConfiguration } from "./objects/SerialConfiguration";
 import { WebConfiguration } from "./objects/WebConfiguration";
 
 export function loadConfiguration(): Configuration {
+  //#region Hardware
+  const hardware = process.env["HARDWARE"] as Hardware;
+  if (hardware == null || hardware.trim().length == 0) {
+    throw new Error("Missing or invalid: HARDWARE");
+  }
+
+  if (!Object.values(Hardware).includes(hardware)) {
+    throw new Error("Unknown hardware type: " + hardware + ". Valid values: " + Object.values(Hardware).join(", "));
+  }
+  //#endregion
+
   //#region Web
   const webPort = parseInt(String(process.env["PORT"]));
   let webLocalHttpsPort: number | null = null;
@@ -201,6 +213,7 @@ export function loadConfiguration(): Configuration {
     dataDirectory: dataDirectory,
     logDirectory: logDirectory,
     misc: misc,
+    hardware: hardware,
   }
 }
 
