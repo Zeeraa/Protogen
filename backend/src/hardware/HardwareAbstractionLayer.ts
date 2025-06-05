@@ -1,3 +1,4 @@
+import { Observable } from "rxjs";
 import { Protogen } from "../Protogen";
 
 /**
@@ -62,4 +63,6 @@ export abstract class HardwareAbstractionLayer {
    * @param values Array of RGB values, each value is a 24-bit integer (0xRRGGBB).
    */
   public abstract writeLedData(values: number[]): Promise<void>;
+
+  public abstract get rawBoopSensorObservable(): Observable<boolean>;
 }

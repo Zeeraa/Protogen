@@ -7,7 +7,6 @@ import { ProtogenVideoPlaybackManager } from "./video-playback-manager/ProtogenV
 import { FlaschenTaschen } from "./visor/flaschen-taschen/FlaschenTaschen";
 import { ProtogenVisor } from "./visor/ProtogenVisor";
 import { ProtogenWebServer } from "./webserver/ProtogenWebServer";
-import { SerialManager } from "./serial/SerialManager";
 import { RgbManager } from "./rgb/RgbManager";
 import { NetworkManager } from "./network-manager/NetworkManager";
 import EventEmitter from "events";
@@ -26,6 +25,8 @@ import { PaintApp } from "./apps/paint/PaintApp";
 import { HardwareAbstractionLayer } from "./hardware/HardwareAbstractionLayer";
 import { Hardware } from "./hardware/Hardware";
 import { StandardHardwareImplementation } from "./hardware/implementations/StandardHardwareImplementation";
+import { HUDManager } from "./hud/HUDManager";
+import { SensorManager } from "./sensors/SensorManager";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
@@ -39,7 +40,6 @@ export class Protogen {
   private _flaschenTaschen: FlaschenTaschen;
   private _remoteWorker: ProtogenRemoteWorker;
   private _videoPlaybackManager: ProtogenVideoPlaybackManager;
-  private _serial: SerialManager;
   private _rgb: RgbManager;
   private _networkManager: NetworkManager;
   private _eventEmitter: EventEmitter;
@@ -55,7 +55,10 @@ export class Protogen {
   private _versionNumber: string;
   private _integrationStateReportingKey: string;
   private _appManager: AppManager;
+  private _hudManager: HUDManager;
   private readonly _hardwareAbstractionLayer: HardwareAbstractionLayer;
+  private readonly _sensorManager: SensorManager;
+  public interuptLoops = false;
 
   constructor(config: Configuration) {
     this._sessionId = uuidv7();
@@ -140,15 +143,16 @@ export class Protogen {
     Object.freeze(this._versionNumber);
     Object.freeze(this._builtInAssets);
 
+    this._sensorManager = new SensorManager(this);
     this._database = new Database(this);
     this._userManager = new UserManager(this);
     this._apiKeyManager = new ApiKeyManager(this);
     this._webServer = new ProtogenWebServer(this);
     this._flaschenTaschen = new FlaschenTaschen(this);
     this._visor = new ProtogenVisor(this);
+    this._hudManager = new HUDManager(this);
     this._remoteWorker = new ProtogenRemoteWorker(this);
     this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
-    this._serial = new SerialManager(this);
     this._rgb = new RgbManager(this);
     this._audioVisualiser = new AudioVisualiser(this);
     this._networkManager = new NetworkManager(this);
@@ -166,6 +170,9 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit hardware", BootMessageColor);
     await this.hardwareAbstractionLayer.init();
+
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit HUD", BootMessageColor);
+    await this.hudManager.init();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit auth", BootMessageColor);
     await this.userManager.init();
@@ -186,9 +193,6 @@ export class Protogen {
     await this.visor.loadActiveRendererFromDatabase();
     await this.visor.init();
 
-    await this.visor.tryRenderTextFrame("BOOTING...\nInit serial\nconnection", BootMessageColor);
-    await this.serial.init();
-
     await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
     await this.audioVisualiser.init();
 
@@ -198,8 +202,8 @@ export class Protogen {
     // Custom crash handler
     process.on('uncaughtException', (err) => {
       this.visor.appendRenderLock("Crash");
-      this.serial.stopUpdateLoop = true;
-      this.serial.writeToHUD(["Protogen OS", "Has crashed :(", "Please reboot"]);
+      this.interuptLoops = true;
+      this.hardwareAbstractionLayer?.writeToHUD(["Protogen OS", "Has crashed :(", "Please reboot"]);
       console.error(red("Uncaught exception: "), err);
       console.log("Showing crash message and shutting down");
       this.visor.tryRenderTextFrame("Protogen OS\nHas crashed :(\nPlease reboot", "#FF0000").then(() => {
@@ -244,10 +248,6 @@ export class Protogen {
 
   public get videoPlaybackManager() {
     return this._videoPlaybackManager;
-  }
-
-  public get serial() {
-    return this._serial;
   }
 
   public get rgb() {
@@ -312,6 +312,14 @@ export class Protogen {
 
   get hardwareAbstractionLayer() {
     return this._hardwareAbstractionLayer;
+  }
+
+  get hudManager() {
+    return this._hudManager;
+  }
+
+  get sensorManager() {
+    return this._sensorManager;
   }
   //#endregion
 }

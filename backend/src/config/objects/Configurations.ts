@@ -7,6 +7,7 @@ import { WebConfiguration } from "./WebConfiguration";
 import { RgbConfiguration } from "./RgbConfiguration";
 import { MiscConfiguration } from "./MiscConfiguration";
 import { Hardware } from "../../hardware/Hardware";
+import { HUDConfiguration } from "./HUDConfiguration";
 
 export interface Configuration {
   web: WebConfiguration;
@@ -20,4 +21,5 @@ export interface Configuration {
   logDirectory: string;
   misc: MiscConfiguration;
   hardware: Hardware;
+  hud: HUDConfiguration;
 }

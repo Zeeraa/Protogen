@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { Protogen } from '../../Protogen';
 import { ReadlineParser, SerialPort } from 'serialport';
 import { cyan, magenta } from 'colors';
+import { Observable, Subject } from 'rxjs';
 
 export const execAsync = promisify(exec);
 
@@ -12,6 +13,7 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   private serialPort: string;
   private serialBaudRate: number;
   private serial: SerialPort | null = null;
+  private boopSensorSubject = new Subject<boolean>();
 
   constructor(protogen: Protogen, serialPort: string, serialBaudRate: number) {
     super(protogen);
@@ -48,7 +50,7 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
       if (string.startsWith("BOOP:")) {
         //console.debug("Raw boop state value: " + string.split(":")[1].toLowerCase().trim());
         const state = string.split(":")[1].toLowerCase().trim() == "true";
-        //TODO: write
+        this.boopSensorSubject.next(state);
         return;
       }
 
@@ -204,6 +206,10 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
       return;
     }
     const data = "RGB:" + values.join(",");
-    this.protogen.serial.write(data);
+    this.serialWrite(data);
+  }
+
+  public get rawBoopSensorObservable(): Observable<boolean> {
+    return this.boopSensorSubject.asObservable();
   }
 }
