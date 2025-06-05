@@ -6,7 +6,7 @@ import { RemoteWorkerConfiguration } from "./RemoteWorkerConfiguration";
 import { WebConfiguration } from "./WebConfiguration";
 import { RgbConfiguration } from "./RgbConfiguration";
 import { MiscConfiguration } from "./MiscConfiguration";
-import { Hardware } from "../../hardware/Hardware";
+import { HardwareType } from "../../hardware/HardwareType";
 import { HUDConfiguration } from "./HUDConfiguration";
 
 export interface Configuration {
@@ -20,6 +20,6 @@ export interface Configuration {
   dataDirectory: string;
   logDirectory: string;
   misc: MiscConfiguration;
-  hardware: Hardware;
+  hardware: HardwareType;
   hud: HUDConfiguration;
 }

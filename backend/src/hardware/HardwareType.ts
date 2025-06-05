@@ -1,3 +1,3 @@
-export enum Hardware {
+export enum HardwareType {
   STANDARD = "STANDARD",
 }

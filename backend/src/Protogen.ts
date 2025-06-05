@@ -23,7 +23,7 @@ import { JoystickRemoteManager } from "./remote/RemoteManager";
 import { AppManager } from "./apps/AppManager";
 import { PaintApp } from "./apps/paint/PaintApp";
 import { HardwareAbstractionLayer } from "./hardware/HardwareAbstractionLayer";
-import { Hardware } from "./hardware/Hardware";
+import { HardwareType } from "./hardware/HardwareType";
 import { StandardHardwareImplementation } from "./hardware/implementations/StandardHardwareImplementation";
 import { HUDManager } from "./hud/HUDManager";
 import { SensorManager } from "./sensors/SensorManager";
@@ -111,7 +111,7 @@ export class Protogen {
 
     this.logger.info("Protogen", "Setting up hardware abstraction layer. Selected hardware type: " + magenta(config.hardware));
     switch (config.hardware) {
-      case Hardware.STANDARD:
+      case HardwareType.STANDARD:
         this._hardwareAbstractionLayer = new StandardHardwareImplementation(this, config.serial.port, config.serial.baudRate);
         break;
 

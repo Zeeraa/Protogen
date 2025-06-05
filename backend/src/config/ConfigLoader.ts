@@ -1,4 +1,4 @@
-import { Hardware } from "../hardware/Hardware";
+import { HardwareType } from "../hardware/HardwareType";
 import { Configuration } from "./objects/Configurations";
 import { DatabaseConfiguration } from "./objects/DatabaseConfiguration";
 import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfiguration";
@@ -12,13 +12,13 @@ import { WebConfiguration } from "./objects/WebConfiguration";
 
 export function loadConfiguration(): Configuration {
   //#region Hardware
-  const hardware = process.env["HARDWARE"] as Hardware;
+  const hardware = process.env["HARDWARE"] as HardwareType;
   if (hardware == null || hardware.trim().length == 0) {
     throw new Error("Missing or invalid: HARDWARE");
   }
 
-  if (!Object.values(Hardware).includes(hardware)) {
-    throw new Error("Unknown hardware type: " + hardware + ". Valid values: " + Object.values(Hardware).join(", "));
+  if (!Object.values(HardwareType).includes(hardware)) {
+    throw new Error("Unknown hardware type: " + hardware + ". Valid values: " + Object.values(HardwareType).join(", "));
   }
   //#endregion
 
