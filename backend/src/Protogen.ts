@@ -27,6 +27,7 @@ import { HardwareType } from "./hardware/HardwareType";
 import { StandardHardwareImplementation } from "./hardware/implementations/StandardHardwareImplementation";
 import { HUDManager } from "./hud/HUDManager";
 import { SensorManager } from "./sensors/SensorManager";
+import { EmulatedHardwareImplementation } from "./hardware/emulated/EmulatedHardwareImplementation";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
@@ -113,6 +114,10 @@ export class Protogen {
     switch (config.hardware) {
       case HardwareType.STANDARD:
         this._hardwareAbstractionLayer = new StandardHardwareImplementation(this, config.serial.port, config.serial.baudRate);
+        break;
+
+      case HardwareType.EMULATED:
+        this._hardwareAbstractionLayer = new EmulatedHardwareImplementation(this);
         break;
 
       default:
