@@ -1,5 +1,6 @@
 import { Observable } from "rxjs";
 import { Protogen } from "../Protogen";
+import { Hardware } from "./Hardware";
 
 /**
  * This class is used to interact with the hardware allowing us to run this on different platforms.
@@ -10,6 +11,11 @@ export abstract class HardwareAbstractionLayer {
   constructor(protogen: Protogen) {
     this.protogen = protogen;
   }
+
+  /**
+   * Get the implementation enum value of the hardware.
+   */
+  public abstract get hardwareType(): Hardware;
 
   /**
    * This method is called when the HAL is initialized.

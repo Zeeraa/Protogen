@@ -6,6 +6,7 @@ import { Protogen } from '../../Protogen';
 import { ReadlineParser, SerialPort } from 'serialport';
 import { cyan, magenta } from 'colors';
 import { Observable, Subject } from 'rxjs';
+import { Hardware } from '../Hardware';
 
 export const execAsync = promisify(exec);
 
@@ -19,6 +20,10 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
     super(protogen);
     this.serialPort = serialPort;
     this.serialBaudRate = serialBaudRate;
+  }
+
+  public get hardwareType(): Hardware {
+    return Hardware.STANDARD;
   }
 
   public connectSerial() {
