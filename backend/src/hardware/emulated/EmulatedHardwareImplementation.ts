@@ -9,6 +9,7 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
   private _boopSensorSubject: Subject<boolean> = new Subject<boolean>();
   private _ledData: number[] = [];
   private _hudLines: string[] = [];
+  private _emulatedVolume: number = 50;
 
   constructor(protogen: Protogen) {
     super(protogen);
@@ -46,11 +47,21 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
 
   public async setVolume(level: number) {
     this.protogen.logger.info("EmulatedHardware", `Setting volume to ${level}`);
-    await setVolume(level);
+    try {
+      await setVolume(level);
+    } catch (error) {
+      console.error("Failed to set volume:", error);
+      this._emulatedVolume = level;
+    }
   }
 
   public async getVolume(): Promise<number> {
-    return getVolume();
+    try {
+      return getVolume();
+    } catch (error) {
+      console.error("Failed to get volume:", error);
+      return this._emulatedVolume;
+    }
   }
 
   public async writeLedData(values: number[]) {
