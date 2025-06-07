@@ -5,6 +5,7 @@ import { Protogen } from "../../Protogen";
 import { getVolume, setVolume } from "loudness";
 import { getPlatform } from "../../utils/Utils";
 import { cyan } from "colors";
+import { SocketMessageType } from "../../webserver/socket/SocketMessageType";
 
 export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
   private _emulatedBoopSensorState: boolean = false;
@@ -63,6 +64,7 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
     } catch (error) {
       console.error("Failed to set volume:", error);
     }
+    this.sendStateChange({ volume: level });
   }
 
   public async getVolume(): Promise<number> {
@@ -76,10 +78,12 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
 
   public async writeLedData(values: number[]) {
     this._ledData = values;
+    this.sendStateChange({ ledData: values });
   }
 
   public async writeToHUD(lines: string[]) {
     this._hudLines = lines;
+    this.sendStateChange({ hudLines: lines });
   }
 
   public get rawBoopSensorObservable(): Observable<boolean> {
@@ -93,6 +97,7 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
   public set emulatedBoopSensorState(state: boolean) {
     this._emulatedBoopSensorState = state;
     this._boopSensorSubject.next(state);
+    this.sendStateChange({ boopSensorState: state });
   }
 
   public getEmulatedState() {
@@ -103,6 +108,16 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
       volume: this._emulatedVolume,
     };
   }
+
+  public async restartFlaschenTaschen() {
+    this.sendStateChange({ messages: ["Requested restart of flaschen-taschen service"] });
+  }
+
+  private sendStateChange(state: EmulatedHardwareChange) {
+    this.protogen.webServer.socketSessions.filter(session => session.enableDevData).forEach(session => {
+      session.sendMessage(SocketMessageType.S2C_DevHardwareEmulationState, state);
+    });
+  }
 }
 
 export interface EmulatedHardwareState {
@@ -110,4 +125,12 @@ export interface EmulatedHardwareState {
   ledData: number[];
   hudLines: string[];
   volume: number;
+}
+
+export interface EmulatedHardwareChange {
+  boopSensorState?: boolean;
+  ledData?: number[];
+  hudLines?: string[];
+  volume?: number;
+  messages?: string[];
 }

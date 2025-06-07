@@ -217,4 +217,8 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   public get rawBoopSensorObservable(): Observable<boolean> {
     return this.boopSensorSubject.asObservable();
   }
+
+  public async restartFlaschenTaschen() {
+    await execAsync("sudo service flaschen-taschen restart");
+  }
 }

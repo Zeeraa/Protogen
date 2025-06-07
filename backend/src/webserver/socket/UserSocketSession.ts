@@ -17,6 +17,7 @@ export class UserSocketSession {
   private _enableVisorPreview = false;
   private _enableRemotePreview = false;
   private _enableAudioPreview = false;
+  private _enableDevData = false;
   private _auth: AuthData;
 
   constructor(protogen: Protogen, socket: Socket, auth: AuthData) {
@@ -75,6 +76,10 @@ export class UserSocketSession {
 
   get enableRemotePreview() {
     return this._enableRemotePreview;
+  }
+
+  get enableDevData() {
+    return this._enableDevData;
   }
 
   sendMessage(type: SocketMessageType, data: any) {
@@ -136,6 +141,9 @@ export class UserSocketSession {
       const state = constructJoystickRemoteStateFromSensorData(message.data);
       this.protogen.joystickRemoteManager.state = state;
     } else if (type == SocketMessageType.C2S_EnableAudioPreview) {
+      const enable = message.data === true;
+      this._enableAudioPreview = enable;
+    } else if (type == SocketMessageType.C2S_EnableDevData) {
       const enable = message.data === true;
       this._enableAudioPreview = enable;
     } else if (type == SocketMessageType.C2S_AudioVisualiserSettings) {

@@ -6,6 +6,8 @@ import { HardwareType } from "./HardwareType";
  * This class is used to interact with the hardware allowing us to run this on different platforms.
  */
 export abstract class HardwareAbstractionLayer {
+  public abstract restartFlaschenTaschen(): Promise<void>;
+
   protected readonly protogen;
 
   constructor(protogen: Protogen) {
