@@ -37,6 +37,19 @@ export class AuthApiService extends ApiBaseService {
     );
   }
 
+  checkAuth() {
+    return this.http.get<any>(this.apiBaseUrl + "/auth/check-auth").pipe(
+      map(() => true),
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          return of(false);
+        } else {
+          throw error;
+        }
+      }),
+    );
+  }
+
   getUsers() {
     return this.http.get<ProtogenUser[]>(this.apiBaseUrl + "/users").pipe(catchError(this.defaultErrorHandler));
   }
