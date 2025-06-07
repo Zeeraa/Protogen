@@ -64,6 +64,27 @@ export class AuthRouter extends AbstractRouter {
       }
     });
 
+    this.router.get("/check-auth", [this.authMiddleware], async (_: Request, res: Response) => {
+      /*
+      #swagger.path = '/auth/check-auth'
+      #swagger.tags = ['Auth'],
+      #swagger.description = "Check if our token is valid"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[401] = { description: "Invalid token" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'User credentials',
+        schema: {
+          username: "admin",
+          password: "123qwe",
+        }
+      }
+      */
+      res.send({});
+    });
+
     this.router.post("/refresh-token", [this.authMiddleware], async (req: Request, res: Response) => {
       /*
       #swagger.path = '/auth/refresh-token'
