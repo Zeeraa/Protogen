@@ -35,6 +35,7 @@ import { JoystickRemoteRouter } from "./routes/remote/JoystickRemoteRouter";
 import { AppRouter } from "./routes/apps/AppRouter";
 import { AppSocketPacket, AppUserSocketSession } from "./socket/AppUserSocketSession";
 import { AbstractApp } from "../apps/AbstractApp";
+import { DevRouter } from "./routes/dev/DevRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 export const AppSocketPath = "/protogen-app-websocket.io";
@@ -149,6 +150,7 @@ export class ProtogenWebServer {
     new ActionsRouter(this).register();
     new AudioVisualiserRouter(this).register();
     new AppRouter(this).register({ noAuth: true });
+    new DevRouter(this).register();
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
