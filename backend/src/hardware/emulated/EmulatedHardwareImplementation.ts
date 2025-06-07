@@ -3,6 +3,8 @@ import { HardwareAbstractionLayer } from "../HardwareAbstractionLayer";
 import { HardwareType } from "../HardwareType";
 import { Protogen } from "../../Protogen";
 import { getVolume, setVolume } from "loudness";
+import { getPlatform } from "../../utils/Utils";
+import { cyan } from "colors";
 
 export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
   private _emulatedBoopSensorState: boolean = false;
@@ -10,10 +12,12 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
   private _ledData: number[] = [];
   private _hudLines: string[] = [];
   private _emulatedVolume: number = 50;
+  private readonly platform: string;
 
   constructor(protogen: Protogen) {
     super(protogen);
-    this.protogen.logger.warn("EmulatedHardware", "Using emulated hardware implementation");
+    this.platform = getPlatform();
+    this.protogen.logger.warn("EmulatedHardware", "Using emulated hardware implementation. Platform: " + cyan(this.platform));
   }
 
   public get hardwareType() {
@@ -22,6 +26,12 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
 
   public async init() {
     this.protogen.logger.info("EmulatedHardware", "EmulatedHardwareImplementation::init() called");
+    try {
+      this._emulatedVolume = await getVolume();
+    } catch (err) {
+      this.protogen.logger.error("EmulatedHardware", "Failed to get initial volume");
+      console.error("Error getting initial volume:", err);
+    }
   }
 
   public async shutdown(): Promise<void> {
@@ -42,16 +52,16 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
   }
 
   public async getOSVersion(): Promise<string> {
-    return "Emulated OS v1.0"; // Placeholder value for emulated hardware
+    return "Emulated hardware on platform: " + this.platform;
   }
 
   public async setVolume(level: number) {
     this.protogen.logger.info("EmulatedHardware", `Setting volume to ${level}`);
+    this._emulatedVolume = level;
     try {
       await setVolume(level);
     } catch (error) {
       console.error("Failed to set volume:", error);
-      this._emulatedVolume = level;
     }
   }
 
@@ -90,6 +100,14 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
       boopSensorState: this._emulatedBoopSensorState,
       ledData: this._ledData,
       hudLines: this._hudLines,
+      volume: this._emulatedVolume,
     };
   }
+}
+
+export interface EmulatedHardwareState {
+  boopSensorState: boolean;
+  ledData: number[];
+  hudLines: string[];
+  volume: number;
 }

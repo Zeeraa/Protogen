@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import crypto from 'crypto';
 import { RGBColor } from './ProtoColors';
+import * as os from 'os';
 
 export function sleep(milliseconds: number) {
   return new Promise<void>(resolve => {
@@ -90,4 +91,19 @@ export function generateNewCertificate(privateKeyPath: string, publicKeyPath: st
   execSync(
     `openssl req -x509 -new -key ${privateKeyPath} -out ${publicKeyPath} -days ${validDays} -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:192.168.1.67"`
   );
+}
+
+
+export function getPlatform() {
+  const platform = os.platform();
+  switch (platform) {
+    case 'win32':
+      return 'windows';
+    case 'darwin':
+      return 'mac';
+    case 'linux':
+      return 'linux';
+    default:
+      return platform; // returns the raw platform name for less common OSes
+  }
 }
