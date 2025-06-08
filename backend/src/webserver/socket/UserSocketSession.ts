@@ -145,7 +145,7 @@ export class UserSocketSession {
       this._enableAudioPreview = enable;
     } else if (type == SocketMessageType.C2S_EnableDevData) {
       const enable = message.data === true;
-      this._enableAudioPreview = enable;
+      this._enableDevData = enable;
     } else if (type == SocketMessageType.C2S_AudioVisualiserSettings) {
       const settings = AudioVisualiserSettingsModel.safeParse(message.data);
       if (!settings.success) {
