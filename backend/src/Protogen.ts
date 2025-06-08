@@ -42,7 +42,6 @@ export class Protogen {
   private readonly _flaschenTaschen: FlaschenTaschen;
   private readonly _remoteWorker: ProtogenRemoteWorker;
   private readonly _videoPlaybackManager: ProtogenVideoPlaybackManager;
-  private readonly _serial: SerialManager;
   private readonly _rgb: RgbManager;
   private readonly _networkManager: NetworkManager;
   private readonly _eventEmitter: EventEmitter;
@@ -204,9 +203,6 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit sensors", BootMessageColor);
     await this.boopSensorManager.init();
-
-    await this.visor.tryRenderTextFrame("BOOTING...\nInit serial\nconnection", BootMessageColor);
-    await this.serial.init();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
     await this.audioVisualiser.init();
