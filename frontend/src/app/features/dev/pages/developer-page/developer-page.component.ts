@@ -5,6 +5,7 @@ import { catchError, Subscription } from 'rxjs';
 import { DevApi, HardwareEmulationState } from '../../../../core/services/api/dev-api.service';
 import { typeAssert } from '../../../../core/services/utils/Utils';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-developer-page',
@@ -24,6 +25,7 @@ export class DeveloperPageComponent implements OnInit, OnDestroy {
     protected socket: SocketService,
     private devApi: DevApi,
     private sanitizer: DomSanitizer,
+    private toastr: ToastrService,
   ) { }
 
   get hardwareEmulationStatusString() {
@@ -32,6 +34,20 @@ export class DeveloperPageComponent implements OnInit, OnDestroy {
 
   get hardwareState(): HardwareEmulationState {
     return this._hardwareState;
+  }
+
+  toggleBoopSensor() {
+    this.devApi.toggleEmulatedBoopSensor().pipe(catchError((error) => {
+      this.toastr.error("Failed to toggle sensor state");
+      console.error(error);
+      throw error;
+    })).subscribe(result => {
+      if (result.success) {
+        this._hardwareState.boopSensorState = this._hardwareState.boopSensorState || false;
+      } else {
+        this.toastr.error("Emulated sensor unavailable");
+      }
+    });
   }
 
   private processHardwareEmulationChange(change: EmulatedHardwareChange) {

@@ -53,6 +53,17 @@
       <app-dev-led-preview [index]="$index" [color]="led" />
       }
     </div>
+
+    <div class="col-12 mt-2">
+      Boop sensor state:
+      @if(hardwareState.boopSensorState) {
+      <span class="badge bg-success">High</span>
+      } @else {
+      <span class="badge bg-danger">Low</span>
+      }
+      <br>
+      <button class="btn btn-primary mt-2" (click)="toggleBoopSensor()">Toggle</button>
+    </div>
     }
   </div>
   }

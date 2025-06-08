@@ -17,6 +17,10 @@ export class DevApi extends ApiBaseService {
   getEmulatedHardwareStatus() {
     return this.http.get<HardwareEmulationStatus>(this.apiBaseUrl + "/dev/hw-emulation");
   }
+
+  toggleEmulatedBoopSensor() {
+    return this.http.post<ToggleEmulatedBoopSensorStatus>(this.apiBaseUrl + "/dev/hw-emulation/toggle-boop-sensor-state", {});
+  }
 }
 
 export interface HardwareEmulationStatus {
@@ -29,4 +33,9 @@ export interface HardwareEmulationState {
   ledData: number[];
   hudLines: string[];
   volume: number;
+}
+
+export interface ToggleEmulatedBoopSensorStatus {
+  success: boolean;
+  state?: boolean;
 }
