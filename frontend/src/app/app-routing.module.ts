@@ -19,6 +19,7 @@ import { AuthGuard } from './core/guards/auth-guard.guard';
 import { LoginPageComponent } from './features/auth/pages/login-page/login-page.component';
 import { AppsPageComponent } from './features/apps/pages/apps-page/apps-page.component';
 import { PaintAppPageComponent } from './features/apps/ui/paint/paint-app-page/paint-app-page.component';
+import { DeveloperPageComponent } from './features/dev/pages/developer-page/developer-page.component';
 
 export const routes: Routes = [
   {
@@ -122,8 +123,11 @@ export const routes: Routes = [
         component: PaintAppPageComponent,
       }
     ]
-  }
-
+  },
+  {
+    path: "dev",
+    component: DeveloperPageComponent,
+  },
 ];
 
 @NgModule({

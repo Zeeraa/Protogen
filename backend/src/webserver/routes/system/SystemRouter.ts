@@ -103,7 +103,7 @@ export class SystemRouter extends AbstractRouter {
             ip: this.protogen.networkManager.ip,
             isp: this.protogen.networkManager.isp,
           },
-          hudEnabled: this.protogen.serial.enableHud,
+          hudEnabled: this.protogen.hudManager.enableHud,
           swaggerEnabled: swaggerEnabled,
           backendVersion: this.protogen.versionNumber,
         });

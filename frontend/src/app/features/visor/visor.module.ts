@@ -39,7 +39,8 @@ import { RgbModule } from "../rgb/rgb.module";
     RgbModule
   ],
   exports: [
-    VisorPageComponent
+    VisorPageComponent,
+    VisorLivePreviewComponent,
   ]
 })
 export class VisorModule { }

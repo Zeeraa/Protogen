@@ -7,6 +7,7 @@ export enum SocketMessageType {
   S2C_LogMessage = "S2C_LogMessage",
   S2C_JoystickRemoteState = "S2C_JoystickRemoteState",
   S2C_RemoteAudioLevel = "S2C_RemoteAudioLevel",
+  S2C_DevHardwareEmulationState = "S2C_DevHardwareEmulationState",
 
   // ===== C2S (Client to Server) =====
   C2S_EnableRgbPreview = "C2S_EnableRgbPreview",
@@ -15,6 +16,7 @@ export enum SocketMessageType {
   C2S_Ping = "C2S_Ping",
   C2S_EnableRemotePreview = "C2S_EnableRemotePreview",
   C2S_AudioVisualiserSettings = "C2S_AudioVisualizerSettings",
+  C2S_EnableDevData = "C2S_EnableDevData",
 
   // ===== E2S (External to Server) =====
   E2S_JoystickRemoteState = "E2S_JoystickRemoteState",

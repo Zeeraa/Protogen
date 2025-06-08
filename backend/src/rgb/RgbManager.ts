@@ -121,8 +121,7 @@ export class RgbManager {
       });
     })
 
-    const data = "RGB:" + this._ledBuffer.join(",");
-    this.protogen.serial.write(data);
+    this.protogen.hardwareAbstractionLayer.writeLedData(this._ledBuffer);
   }
 
   public async loadScenes() {

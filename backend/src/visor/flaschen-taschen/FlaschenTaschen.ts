@@ -2,7 +2,6 @@ import * as dgram from 'dgram';
 import sharp from 'sharp';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import yargsParser from 'yargs-parser';
-import { execAsync } from '../../utils/SystemUtils';
 import { Protogen } from '../../Protogen';
 
 const DefaultFlaschenTaschenParameters = "--led-cols=64 --led-rows=32 --led-chain=2 --led-gpio-mapping=adafruit-hat";
@@ -100,7 +99,7 @@ export class FlaschenTaschen {
 
   public async restart() {
     this.protogen.logger.info("FlaschenTaschen", "Restarting service");
-    await execAsync("sudo service flaschen-taschen restart");
+    this.protogen.hardwareAbstractionLayer.restartFlaschenTaschen();
   }
 
   get settings(): FlaschenTaschenActiveSettings {

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { getVolume, setVolume } from "../../../utils/VolumeUtils";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 
@@ -14,14 +13,14 @@ export class AudioRouter extends AbstractRouter {
       #swagger.description = "Get the volume"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "Failed to get volume" }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
       ]
       */
       try {
-        const volume = await getVolume();
+        const volume = await this.protogen.hardwareAbstractionLayer.getVolume();
         res.json({
           volume: volume
         });
@@ -46,7 +45,7 @@ export class AudioRouter extends AbstractRouter {
           volume: 50
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -61,8 +60,8 @@ export class AudioRouter extends AbstractRouter {
 
         const data = parsed.data;
 
-        await setVolume(data.volume);
-        const newVolume = await getVolume();
+        await this.protogen.hardwareAbstractionLayer.setVolume(data.volume);
+        const newVolume = await this.protogen.hardwareAbstractionLayer.getVolume();
 
         res.json({
           volume: newVolume

@@ -1,0 +1,71 @@
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Developer tools</h1>
+    </div>
+  </div>
+
+  @if(!socket.connected) {
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-danger">
+        Socket is not connected. Some fetures migth not work.
+      </div>
+    </div>
+  </div>
+  }
+
+  <div class="row">
+    <div class="col">
+      <h3>Visor</h3>
+      <app-visor-live-preview />
+    </div>
+  </div>
+
+  @if(hardwareEmulationStatusString == "loading") {
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-info">
+        Loading hardware emulation status...
+      </div>
+    </div>
+  </div>
+  } @else {
+  <div class="row mt-2">
+    <div class="col-12 mb-2">
+      <h3>Hardware emulation</h3>
+    </div>
+    @if(hardwareEmulationStatusString == "unavailable") {
+    <div class="col-12">
+      <p>Hardware emulation is not enabled.</p>
+    </div>
+    } @else {
+    <div class="col-12 mt-2">
+      HUD:<br>
+      <code>
+        <span [innerHTML]="hudLinesDisplay"></span>
+      </code>
+    </div>
+
+    <div class="col-12 mt-2">
+      LEDs:<br>
+      @for (led of hardwareState.ledData; track $index) {
+      <app-dev-led-preview [index]="$index" [color]="led" />
+      }
+    </div>
+
+    <div class="col-12 mt-2">
+      Boop sensor state:
+      @if(hardwareState.boopSensorState) {
+      <span class="badge bg-success">High</span>
+      } @else {
+      <span class="badge bg-danger">Low</span>
+      }
+      <br>
+      <button class="btn btn-primary mt-2" (click)="toggleBoopSensor()">Toggle</button>
+    </div>
+    }
+  </div>
+  }
+
+</div>
