@@ -23,6 +23,7 @@ import { ActionsModule } from './features/actions/actions.module';
 import { AuthModule } from './features/auth/auth.module';
 import { AudioVisualizerModule } from './features/audio-visualizer/audio-visualizer.module';
 import { AppsModule } from './features/apps/apps.module';
+import { DevModule } from './features/dev/dev.module';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { AppsModule } from './features/apps/apps.module';
     AuthModule,
     AudioVisualizerModule,
     AppsModule,
+    DevModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),

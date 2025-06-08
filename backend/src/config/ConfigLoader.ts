@@ -1,6 +1,8 @@
+import { HardwareType } from "../hardware/HardwareType";
 import { Configuration } from "./objects/Configurations";
 import { DatabaseConfiguration } from "./objects/DatabaseConfiguration";
 import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfiguration";
+import { HUDConfiguration } from "./objects/HUDConfiguration";
 import { LedMatrixConfiguration } from "./objects/LedMatrixConfiguration";
 import { MiscConfiguration } from "./objects/MiscConfiguration";
 import { RemoteWorkerConfiguration } from "./objects/RemoteWorkerConfiguration";
@@ -9,6 +11,17 @@ import { SerialConfiguration } from "./objects/SerialConfiguration";
 import { WebConfiguration } from "./objects/WebConfiguration";
 
 export function loadConfiguration(): Configuration {
+  //#region Hardware
+  const hardware = process.env["HARDWARE"] as HardwareType;
+  if (hardware == null || hardware.trim().length == 0) {
+    throw new Error("Missing or invalid: HARDWARE");
+  }
+
+  if (!Object.values(HardwareType).includes(hardware)) {
+    throw new Error("Unknown hardware type: " + hardware + ". Valid values: " + Object.values(HardwareType).join(", "));
+  }
+  //#endregion
+
   //#region Web
   const webPort = parseInt(String(process.env["PORT"]));
   let webLocalHttpsPort: number | null = null;
@@ -135,17 +148,12 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
-  //#region Arduino
+  //#region Serial
   const serialPort = process.env["SERIAL_PORT"];
   const serialBaudRate = parseInt(String(process.env["SERIAL_BAUD_RATE"]));
-  const oledTextLines = parseInt(String(process.env["OLED_TEXT_LINES"]));
 
   if (isNaN(serialBaudRate) || serialBaudRate <= 0) {
     throw new Error("Missing or invalid: SERIAL_BAUD_RATE");
-  }
-
-  if (isNaN(oledTextLines) || oledTextLines <= 0) {
-    throw new Error("Missing or invalid: OLED_TEXT_LINES");
   }
 
   if (serialPort == null) {
@@ -155,7 +163,18 @@ export function loadConfiguration(): Configuration {
   const serialConfig: SerialConfiguration = {
     port: serialPort,
     baudRate: serialBaudRate,
-    oledTextLines: oledTextLines,
+  }
+  //#endregion
+
+  //#region HUD
+  const oledTextLines = parseInt(String(process.env["OLED_TEXT_LINES"]));
+
+  if (isNaN(oledTextLines) || oledTextLines <= 0) {
+    throw new Error("Missing or invalid: OLED_TEXT_LINES");
+  }
+
+  const hudConfig: HUDConfiguration = {
+    lines: oledTextLines,
   }
   //#endregion
 
@@ -201,6 +220,8 @@ export function loadConfiguration(): Configuration {
     dataDirectory: dataDirectory,
     logDirectory: logDirectory,
     misc: misc,
+    hardware: hardware,
+    hud: hudConfig,
   }
 }
 

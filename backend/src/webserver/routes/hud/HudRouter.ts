@@ -21,7 +21,7 @@ export class HudRouter extends AbstractRouter {
           enabled: true
         }
       }
-      
+
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -36,7 +36,7 @@ export class HudRouter extends AbstractRouter {
 
         const data = parsed.data;
 
-        await this.protogen.serial.setPersistentHUDState(data.enabled);
+        await this.protogen.hudManager.setPersistentHUDState(data.enabled);
 
         res.json({
           enabled: data.enabled
