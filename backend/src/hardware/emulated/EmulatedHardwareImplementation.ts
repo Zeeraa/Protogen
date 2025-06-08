@@ -100,6 +100,10 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
     this.sendStateChange({ boopSensorState: state });
   }
 
+  public toggleBoopSensorState() {
+    this.emulatedBoopSensorState = !this.emulatedBoopSensorState;
+  }
+
   public getEmulatedState() {
     return {
       boopSensorState: this._emulatedBoopSensorState,
