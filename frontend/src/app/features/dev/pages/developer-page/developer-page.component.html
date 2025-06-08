@@ -42,7 +42,9 @@
 
     <div class="col-12 mt-2">
       LEDs:<br>
-      <code>{{hardwareState.ledData.join(", ")}}</code>
+      @for (led of hardwareState.ledData; track $index) {
+      <app-dev-led-preview [index]="$index" [color]="led" />
+      }
     </div>
     }
   </div>
