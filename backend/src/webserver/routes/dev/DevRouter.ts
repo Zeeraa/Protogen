@@ -27,5 +27,28 @@ export class DevRouter extends AbstractRouter {
         state: emulatedHardwareState,
       });
     });
+
+    this.router.post("/hw-emulation/toggle-boop-sensor-state", async (_, res) => {
+      /*
+      #swagger.path = '/dev/hw-emulation/toggle-boop-sensor-state'
+      #swagger.tags = ['Development'],
+      #swagger.description = "Toggle the boop sensor state in emulated hardware"
+      #swagger.responses[200] = { description: "Ok" }
+      */
+      const emulationEnabled = this.protogen.hardwareAbstractionLayer.hardwareType == HardwareType.EMULATED;
+      if (!emulationEnabled) {
+        res.json({ success: false });
+        return;
+      }
+
+      const emulatedHardware = this.protogen.hardwareAbstractionLayer as EmulatedHardwareImplementation;
+
+      emulatedHardware.toggleBoopSensorState();
+
+      res.json({
+        success: true,
+        state: emulatedHardware.emulatedBoopSensorState,
+      });
+    });
   }
 }
