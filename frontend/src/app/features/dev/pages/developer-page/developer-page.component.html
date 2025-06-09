@@ -19,11 +19,12 @@
     <div class="col">
       <h3>Visor</h3>
       <app-visor-live-preview />
+      <hr>
     </div>
   </div>
 
   @if(hardwareEmulationStatusString == "loading") {
-  <div class="row">
+  <div class="row mt-2">
     <div class="col">
       <div class="alert alert-info">
         Loading hardware emulation status...
@@ -68,4 +69,14 @@
   </div>
   }
 
+  <div class="row mt-2">
+    <div class="col-12">
+      <hr>
+      <h3>Misc</h3>
+    </div>
+
+    <div class="col-12">
+      <button class="btn btn-secondary mt-1 me-1" (click)="copyAuthToken()">Copy auth token</button>
+    </div>
+  </div>
 </div>
