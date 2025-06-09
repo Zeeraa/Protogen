@@ -71,3 +71,19 @@ export class BoopSensorManager {
     return this._activeProfile;
   }
 }
+
+export function serializeProfile(profile: BoopProfile) {
+  return {
+    id: profile.id,
+    name: profile.name,
+    resetsAfter: profile.resetsAfter,
+    actions: profile.actions.map(action => ({
+      id: action.id,
+      triggerAtValue: action.triggerAtValue,
+      actionType: action.actionType,
+      action: action.action,
+      triggerMultipleTimes: action.triggerMultipleTimes,
+      incrementCounterOnFailedCondition: action.incrementCounterOnFailedCondition
+    })),
+  };
+}

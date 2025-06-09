@@ -36,6 +36,7 @@ import { AppRouter } from "./routes/apps/AppRouter";
 import { AppSocketPacket, AppUserSocketSession } from "./socket/AppUserSocketSession";
 import { AbstractApp } from "../apps/AbstractApp";
 import { DevRouter } from "./routes/dev/DevRouter";
+import { BoopSensorRouter } from "./routes/boop-sensor/BoopSensorRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 export const AppSocketPath = "/protogen-app-websocket.io";
@@ -151,6 +152,7 @@ export class ProtogenWebServer {
     new AudioVisualiserRouter(this).register();
     new AppRouter(this).register({ noAuth: true });
     new DevRouter(this).register();
+    new BoopSensorRouter(this).register();
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);

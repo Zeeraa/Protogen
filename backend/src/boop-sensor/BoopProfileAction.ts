@@ -7,6 +7,7 @@ export class BoopProfileAction {
   public action: string | null;
   public triggerMultipleTimes: boolean;
   public incrementCounterOnFailedCondition: boolean;
+  //TODO: implement condition handling
 
   constructor(
     id: string,
