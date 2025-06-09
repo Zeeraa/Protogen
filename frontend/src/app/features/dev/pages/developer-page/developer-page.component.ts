@@ -6,6 +6,8 @@ import { DevApi, HardwareEmulationState } from '../../../../core/services/api/de
 import { typeAssert } from '../../../../core/services/utils/Utils';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
+import { ClipboardService } from 'ngx-clipboard';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-developer-page',
@@ -26,6 +28,8 @@ export class DeveloperPageComponent implements OnInit, OnDestroy {
     private devApi: DevApi,
     private sanitizer: DomSanitizer,
     private toastr: ToastrService,
+    private clipboard: ClipboardService,
+    private auth: AuthService,
   ) { }
 
   get hardwareEmulationStatusString() {
@@ -34,6 +38,16 @@ export class DeveloperPageComponent implements OnInit, OnDestroy {
 
   get hardwareState(): HardwareEmulationState {
     return this._hardwareState;
+  }
+
+  copyAuthToken() {
+    const token = this.auth.token;
+    if (token) {
+      this.clipboard.copy(token);
+      this.toastr.success("Copied auth token to clipboard");
+    } else {
+      this.toastr.error("Not authenticated");
+    }
   }
 
   toggleBoopSensor() {
