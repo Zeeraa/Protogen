@@ -28,16 +28,16 @@ jobs:
         working-directory: frontend
         run: |
           npm install
-          npm audit
+          npm audit --audit-level=high
 
       - name: Audit Backend
         working-directory: backend
         run: |
           npm install
-          npm audit
+          npm audit --audit-level=high
 
       - name: Audit Remote Worker
         working-directory: remote_worker
         run: |
           npm install
-          npm audit
+          npm audit --audit-level=high
