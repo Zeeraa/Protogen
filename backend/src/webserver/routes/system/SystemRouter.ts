@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getCPUUsage, getOSVersion, getRAMUsage, getTemperature, shutdown } from "../../../utils/SystemUtils";
+
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
@@ -86,10 +86,10 @@ export class SystemRouter extends AbstractRouter {
       ]
       */
       try {
-        const cpuTemperature = await getTemperature();
-        const osVersion = await getOSVersion();
-        const cpuUsage = await getCPUUsage();
-        const ramUsage = await getRAMUsage();
+        const cpuTemperature = await this.protogen.hardwareAbstractionLayer.getCPUTemperature();
+        const osVersion = await this.protogen.hardwareAbstractionLayer.getOSVersion();
+        const cpuUsage = await this.protogen.hardwareAbstractionLayer.getCPUUsage();
+        const ramUsage = await this.protogen.hardwareAbstractionLayer.getRAMUsage();
 
         const swaggerEnabled = (await this.protogen.database.getData(KV_EnableSwagger)) == "true";
 
@@ -126,7 +126,7 @@ export class SystemRouter extends AbstractRouter {
       ]
       */
       try {
-        await shutdown();
+        await this.protogen.hardwareAbstractionLayer.shutdown();
         res.json({});
       } catch (err) {
         return this.handleError(err, req, res);
