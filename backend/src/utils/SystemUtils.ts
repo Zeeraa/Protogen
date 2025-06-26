@@ -1,4 +1,3 @@
-import * as os from 'os';
 import axios from 'axios';
 import { exec } from 'child_process';
 import { promisify } from 'util';
