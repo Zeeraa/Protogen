@@ -1,4 +1,4 @@
-import { serializeProfile } from "../../../boop-sensor/BoopSensorManager";
+import { boopProfileToDTO } from "../../../boop-sensor/BoopSensorManager";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 
@@ -20,7 +20,7 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
-        res.json(this.protogen.boopSensorManager.profiles.map(profile => serializeProfile(profile)));
+        res.json(this.protogen.boopSensorManager.profiles.map(profile => boopProfileToDTO(profile)));
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -46,7 +46,7 @@ export class BoopSensorRouter extends AbstractRouter {
           res.status(404).send({ message: "No active profile found" });
           return;
         }
-        res.json(serializeProfile(active));
+        res.json(boopProfileToDTO(active));
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -94,7 +94,7 @@ export class BoopSensorRouter extends AbstractRouter {
           res.status(404).send({ message: "Profile not found" });
           return;
         }
-        res.json(serializeProfile(profile));
+        res.json(boopProfileToDTO(profile));
       } catch (err) {
         this.handleError(err, req, res);
       }

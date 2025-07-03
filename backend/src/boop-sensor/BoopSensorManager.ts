@@ -72,7 +72,7 @@ export class BoopSensorManager {
   }
 }
 
-export function serializeProfile(profile: BoopProfile) {
+export function boopProfileToDTO(profile: BoopProfile) {
   return {
     id: profile.id,
     name: profile.name,
