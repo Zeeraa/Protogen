@@ -52,12 +52,13 @@ export class BoopSensorRouter extends AbstractRouter {
       }
     });
 
-    this.router.delete("/profiles/active", async (req, res) => {
+    this.router.post("/profiles/:profileId/activate", async (req, res) => {
       /*
-      #swagger.path = '/boop-sensor/profiles/active'
+      #swagger.path = '/boop-sensor/profiles/:profileId/activate'
       #swagger.tags = ['Boop sensor'],
-      #swagger.description = "Disables the active profile"
+      #swagger.description = "Activate profile"
       #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Profile not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
 
       #swagger.security = [
@@ -66,6 +67,38 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        const prodile = this.protogen.boopSensorManager.profiles.find(p => p.id === req.params.profileId);
+        if (prodile == null) {
+          res.status(404).send({ message: "Profile not found" });
+          return;
+        }
+        await this.protogen.boopSensorManager.setActiveProfile(prodile);
+        res.json(boopProfileToDTO(prodile));
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.delete("/profiles/active", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/profiles/active'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Disables the active profile"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "No active profile to deactivate" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        if (this.protogen.boopSensorManager.activeProfile == null) {
+          res.status(404).send({ message: "No active profile found" });
+          return;
+        }
+
         await this.protogen.boopSensorManager.setActiveProfile(null);
         res.json({});
       } catch (err) {
