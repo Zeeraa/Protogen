@@ -1,4 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
+import { catchError, of } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-boop-sensor-page',
@@ -6,6 +10,62 @@ import { Component } from '@angular/core';
   templateUrl: './boop-sensor-page.component.html',
   styleUrl: './boop-sensor-page.component.scss'
 })
-export class BoopSensorPageComponent {
+export class BoopSensorPageComponent implements OnInit, OnDestroy {
+  protected profiles: BoopSensorProfile[] = [];
+  protected activeProfileId: string | null = null;
 
+  private updateInterval?: any;
+
+  constructor(
+    private boopSensorApi: BoopSensorApiService,
+    private toastr: ToastrService,
+  ) { }
+
+  protected profileActivated(profile: BoopSensorProfile) {
+    this.activeProfileId = profile.id;
+  }
+
+  deactivate() {
+    this.boopSensorApi.deactivateProfile().pipe(catchError((err: HttpErrorResponse) => {
+      if (err.status === 404) {
+        this.toastr.info("No active profile to deactivate");
+        return of(null);
+      }
+      console.error('Failed to deactivate profile', err);
+      this.toastr.error("Failed to deactivate profile");
+      return [];
+    })).subscribe(() => {
+      this.toastr.success("Profile deactivated");
+      this.activeProfileId = null;
+    });
+  }
+
+  ngOnInit(): void {
+    this.boopSensorApi.getProfiles().pipe(catchError((err) => {
+      console.error('Failed to load Boop Sensor profiles', err);
+      this.toastr.error("Failed to load profiles");
+      return [];
+    })).subscribe(profiles => {
+      this.profiles = profiles;
+    });
+
+    this.fetchActiveProfile();
+
+    this.updateInterval = setInterval(() => {
+      this.fetchActiveProfile();
+    }, 5000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.updateInterval);
+  }
+
+  fetchActiveProfile() {
+    this.boopSensorApi.getActiveProfile().pipe(catchError(err => {
+      console.error('Failed to fetch active profile', err);
+      return [];
+    })).subscribe(profile => {
+      this.activeProfileId = profile ? profile.id : null;
+    })
+  }
 }

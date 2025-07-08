@@ -1,0 +1,41 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>Boop sensor profile editor</h1>
+    </div>
+  </div>
+
+  @if(loading) {
+  <div class="row">
+    <div class="col-12">
+      <h4>Loading profile...</h4>
+      <a routerLink="/boop-sensor" class="btn btn-primary">Back</a>
+    </div>
+  </div>
+  } @else {
+  @if(profile == null) {
+  <div class="row">
+    <div class="col-12">
+      <h4>
+        @if(loadError) {
+        Failed to load profile. Please try again later
+        } @else {
+        Profile not found
+        }
+      </h4>
+      <a routerLink="/boop-sensor" class="btn btn-primary">Back</a>
+    </div>
+  </div>
+  } @else {
+  <div class="row">
+    <div class="col-12">
+      <label for="profile_name">Profile name</label>
+      <input type="text" class="form-control" maxlength="64" id="profile_name" placeholder="Profile name"
+        [(ngModel)]="profile.name" />
+    </div>
+  </div>
+
+  <div class="row mt-2"></div>
+  }
+  }
+</div>

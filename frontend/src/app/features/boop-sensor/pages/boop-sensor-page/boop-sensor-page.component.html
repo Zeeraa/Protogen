@@ -4,4 +4,20 @@
       <h1>Boop sensor config</h1>
     </div>
   </div>
+
+  <div class="row mt-2">
+    @for (profile of profiles; track $index) {
+    <div class="col-sm-12 col-md-6">
+      <app-boop-sensor-profile-card [active]="profile.id == activeProfileId" [profile]="profile"
+        (profileActivated)="profileActivated($event)" />
+    </div>
+    }
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <button class="btn btn-danger mb-1 me-1" (click)="deactivate()">Deactivate</button>
+      <button class="btn btn-primary mb-1 me-1">New profile</button>
+    </div>
+  </div>
 </div>

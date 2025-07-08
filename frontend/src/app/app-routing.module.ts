@@ -21,6 +21,7 @@ import { AppsPageComponent } from './features/apps/pages/apps-page/apps-page.com
 import { PaintAppPageComponent } from './features/apps/ui/paint/paint-app-page/paint-app-page.component';
 import { DeveloperPageComponent } from './features/dev/pages/developer-page/developer-page.component';
 import { BoopSensorPageComponent } from './features/boop-sensor/pages/boop-sensor-page/boop-sensor-page.component';
+import { BoopSensorProfileEditorPageComponent } from './features/boop-sensor/pages/boop-sensor-profile-editor-page/boop-sensor-profile-editor-page.component';
 
 export const routes: Routes = [
   {
@@ -110,6 +111,7 @@ export const routes: Routes = [
   {
     path: "audio-visualizer",
     component: AudioVisualizerSettingsPageComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: "apps",
@@ -128,10 +130,21 @@ export const routes: Routes = [
   {
     path: "dev",
     component: DeveloperPageComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: "boop-sensor",
-    component: BoopSensorPageComponent,
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: "",
+        component: BoopSensorPageComponent,
+      },
+      {
+        path: "profile/:id",
+        component: BoopSensorProfileEditorPageComponent,
+      }
+    ]
   },
 ];
 
