@@ -24,6 +24,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
 
   protected loading = true;
   protected loadError = false;
+  protected isSaving = false;
   protected profile: BoopSensorProfile | null = null;
 
   protected actionDataSet: ActionDataSet = {
@@ -72,6 +73,43 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
         console.error('Error occurred:', err);
       },
     });
+  }
+
+  private sortActions() {
+    if (this.profile == null) {
+      return;
+    }
+
+    // Actions are initially sorted by triggerAtValue then the id
+    this.profile.actions.sort((a, b) => {
+      if (a.triggerAtValue !== b.triggerAtValue) {
+        return a.triggerAtValue - b.triggerAtValue;
+      }
+      if (a.id && b.id) {
+        return a.id.localeCompare(b.id);
+      }
+      return 0;
+    });
+  }
+
+  protected saveChanges() {
+    if (this.profile == null) {
+      console.error("Profile is null, cannot save changes");
+      return;
+    }
+
+    this.isSaving = true;
+    this.boopSensorApi.updateProfile(this.profile).pipe(catchError((err: HttpErrorResponse) => {
+      this.toastr.error("Failed to save profile changes");
+      console.error('Failed to save profile changes', err);
+      this.isSaving = false;
+      return [];
+    })).subscribe(profile => {
+      this.profile = profile;
+      this.sortActions();
+      this.isSaving = false;
+      this.toastr.success("Profile saved successfully");
+    })
   }
 
   protected deleteAction(action: BoopSensorAction) {
@@ -123,6 +161,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       })).subscribe(profile => {
         this.loading = false;
         this.profile = profile;
+        this.sortActions();
       });
     });
   }
