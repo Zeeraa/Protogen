@@ -95,7 +95,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     const newAction: BoopSensorAction = {
       id: undefined,
       virtualId: uuidv7(),
-      triggerAtValue: 0,
+      triggerAtValue: 1,
       actionType: ActionType.NONE,
       action: '',
       triggerMultipleTimes: false,
