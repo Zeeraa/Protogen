@@ -28,7 +28,7 @@ jobs:
           cache-dependency-path: ${{ matrix.folder }}/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: YOUTUBE_DL_SKIP_DOWNLOAD=true npm install
         working-directory: ${{ matrix.folder }}
 
       - name: Run security audit
