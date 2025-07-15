@@ -24,6 +24,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
 
   protected loading = true;
   protected loadError = false;
+  protected isSaving = false;
   protected profile: BoopSensorProfile | null = null;
 
   protected actionDataSet: ActionDataSet = {
@@ -72,6 +73,25 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
         console.error('Error occurred:', err);
       },
     });
+  }
+
+  protected saveChanges() {
+    if (this.profile == null) {
+      console.error("Profile is null, cannot save changes");
+      return;
+    }
+
+    this.isSaving = true;
+    this.boopSensorApi.updateProfile(this.profile).pipe(catchError((err: HttpErrorResponse) => {
+      this.toastr.error("Failed to save profile changes");
+      console.error('Failed to save profile changes', err);
+      this.isSaving = false;
+      return [];
+    })).subscribe(profile => {
+      this.profile = profile;
+      this.isSaving = false;
+      this.toastr.success("Profile changes saved successfully");
+    })
   }
 
   protected deleteAction(action: BoopSensorAction) {

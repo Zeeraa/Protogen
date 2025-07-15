@@ -28,6 +28,10 @@ export class BoopSensorApiService extends ApiBaseService {
     return this.http.delete(this.apiBaseUrl + "/boop-sensor/profiles/active").pipe(catchError(this.defaultErrorHandler));
   }
 
+  updateProfile(profile: BoopSensorProfile) {
+    return this.http.put<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles/" + profile.id, profile).pipe(catchError(this.defaultErrorHandler));
+  }
+
   getProfileById(id: string) {
     return this.http.get<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles/" + id).pipe(catchError((err: HttpErrorResponse) => {
       if (err.status === 404) {
