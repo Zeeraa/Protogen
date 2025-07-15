@@ -80,7 +80,7 @@ export class BoopSensorManager {
     dbProfile.resetsAfter = profile.resetsAfter;
 
     // Filter out deleted actions
-    dbProfile.actions = dbProfile.actions.filter(a => !profile.actions.some(pa => pa.id === a.id));
+    dbProfile.actions = dbProfile.actions.filter(a => profile.actions.some(pa => pa.id === a.id));
 
     for (const action of profile.actions) {
       let dbAction = dbProfile.actions.find(a => a.id === action.id);

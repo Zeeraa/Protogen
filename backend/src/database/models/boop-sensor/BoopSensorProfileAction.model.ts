@@ -52,6 +52,7 @@ export class BoopSensorProfileAction {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
     nullable: false,
+    orphanedRowAction: "delete",
   })
   @JoinColumn({
     name: "profile_id",
