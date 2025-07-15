@@ -75,6 +75,23 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  private sortActions() {
+    if (this.profile == null) {
+      return;
+    }
+
+    // Actions are initially sorted by triggerAtValue then the id
+    this.profile.actions.sort((a, b) => {
+      if (a.triggerAtValue !== b.triggerAtValue) {
+        return a.triggerAtValue - b.triggerAtValue;
+      }
+      if (a.id && b.id) {
+        return a.id.localeCompare(b.id);
+      }
+      return 0;
+    });
+  }
+
   protected saveChanges() {
     if (this.profile == null) {
       console.error("Profile is null, cannot save changes");
@@ -89,8 +106,9 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       return [];
     })).subscribe(profile => {
       this.profile = profile;
+      this.sortActions();
       this.isSaving = false;
-      this.toastr.success("Profile changes saved successfully");
+      this.toastr.success("Profile saved successfully");
     })
   }
 
@@ -143,6 +161,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       })).subscribe(profile => {
         this.loading = false;
         this.profile = profile;
+        this.sortActions();
       });
     });
   }
