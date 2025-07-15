@@ -1,4 +1,5 @@
 import { BoopSensorProfile } from "../database/models/boop-sensor/BoopSensorProfile.model";
+import { BoopSensorProfileAction } from "../database/models/boop-sensor/BoopSensorProfileAction.model";
 import { Protogen } from "../Protogen";
 import { KV_BoopSensorProfile } from "../utils/KVDataStorageKeys";
 import { BoopProfile } from "./BoopProfile";
@@ -56,6 +57,40 @@ export class BoopSensorManager {
         this.protogen.logger.warn("BoopSensor", "Last active profile not found");
       }
     }
+  }
+
+  public async saveProfile(profile: BoopProfile) {
+    const repo = this._protogen.database.dataSource.getRepository(BoopSensorProfile);
+    let dbProfile = await repo.findOne({
+      where: { id: profile.id },
+      relations: { actions: true }
+    });
+
+    if (dbProfile == null) {
+      dbProfile = new BoopSensorProfile();
+      dbProfile.id = profile.id;
+    }
+
+    dbProfile.name = profile.name;
+    dbProfile.resetsAfter = profile.resetsAfter;
+
+    // Filter out deleted actions
+    dbProfile.actions = dbProfile.actions.filter(a => !profile.actions.some(pa => pa.id === a.id));
+    for (const action of profile.actions) {
+      let dbAction = dbProfile.actions.find(a => a.id === action.id);
+      if (dbAction == null) {
+        dbAction = new BoopSensorProfileAction();
+        dbAction.id = action.id;
+        dbProfile.actions.push(dbAction);
+      }
+      dbAction.triggerAtValue = action.triggerAtValue;
+      dbAction.actionType = action.actionType;
+      dbAction.action = action.action;
+      dbAction.triggerMultipleTimes = action.triggerMultipleTimes;
+      dbAction.incrementCounterOnFailedCondition = action.incrementCounterOnFailedCondition;
+    }
+
+    return await repo.save(dbProfile);
   }
 
   public async setActiveProfile(profile: BoopProfile | null) {

@@ -1,6 +1,10 @@
+import { z } from "zod";
 import { boopProfileToDTO } from "../../../boop-sensor/BoopSensorManager";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
+import { ActionType } from "../../../actions/ActionType";
+import { BoopProfileAction } from "../../../boop-sensor/BoopProfileAction";
+import { uuidv7 } from "uuidv7";
 
 export class BoopSensorRouter extends AbstractRouter {
   constructor(server: ProtogenWebServer) {
@@ -132,5 +136,87 @@ export class BoopSensorRouter extends AbstractRouter {
         this.handleError(err, req, res);
       }
     });
+
+    this.router.put("/profiles/:id", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/profiles/{id}'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Update profile"
+
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See console for more info" }
+      #swagger.responses[404] = { description: "Profile not found" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = ProfileModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const data = parsed.data;
+
+
+        const profileId = req.params.id;
+        const profile = this.protogen.boopSensorManager.profiles.find(p => p.id === profileId);
+        if (profile == null) {
+          res.status(404).send({ message: "Profile not found" });
+          return;
+        }
+
+        profile.name = data.name;
+        profile.resetsAfter = data.resetsAfter;
+
+        profile.actions = profile.actions.filter(a => !data.actions.some(da => da.id === a.id));
+        for (const actionData of data.actions) {
+          let action: BoopProfileAction | null = null;
+          if (actionData.id) {
+            action = profile.actions.find(a => a.id === actionData.id) ?? null;
+          }
+
+          if (action == null) {
+            action = new BoopProfileAction(
+              uuidv7(),
+              actionData.triggerAtValue,
+              actionData.actionType,
+              actionData.action,
+              actionData.triggerMultipleTimes,
+              actionData.incrementCounterOnFailedCondition
+            );
+            profile.actions.push(action);
+          } else {
+            action.triggerAtValue = actionData.triggerAtValue;
+            action.actionType = actionData.actionType;
+            action.action = actionData.action;
+            action.triggerMultipleTimes = actionData.triggerMultipleTimes;
+            action.incrementCounterOnFailedCondition = actionData.incrementCounterOnFailedCondition;
+          }
+        }
+
+        await this.protogen.boopSensorManager.saveProfile(profile);
+
+        res.json(boopProfileToDTO(profile));
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
   }
 }
+
+const ProfileModel = z.object({
+  name: z.string().max(64).trim().min(1),
+  resetsAfter: z.number().int().min(1).safe(),
+  actions: z.array(z.object({
+    id: z.string().uuid().optional(),
+    triggerAtValue: z.number().int().min(1).safe(),
+    actionType: z.nativeEnum(ActionType),
+    action: z.string().max(512),
+    triggerMultipleTimes: z.boolean(),
+    incrementCounterOnFailedCondition: z.boolean(),
+  })),
+});
