@@ -49,6 +49,12 @@
       <option value="{{colorEffect.id}}">{{colorEffect.name}}</option>
       }
     </select>
+    } @else if(actionTypeAsString == "RUN_ACTION_SET") {
+    <select class="form-select" id="action_set_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+      @for (actionSet of actionDataSet.actionSets; track $index) {
+      <option value="{{actionSet.id}}">{{actionSet.name}}</option>
+      }
+    </select>
     } @else if(actionTypeAsString == "DISABLE_RGB" ||actionTypeAsString == "STOP_VIDEO") {
     <!-- No parameters -->
     } @else if(actionTypeAsString != "NONE") {

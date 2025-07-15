@@ -5,6 +5,7 @@ import { BoopeSensorProfileCardComponent } from './components/boop-sensor-profil
 import { RouterLink } from '@angular/router';
 import { BoopSensorProfileEditorPageComponent } from './pages/boop-sensor-profile-editor-page/boop-sensor-profile-editor-page.component';
 import { FormsModule } from '@angular/forms';
+import { ProfileActionEntryComponent } from './components/profile-action-entry/profile-action-entry.component';
 
 
 
@@ -12,7 +13,8 @@ import { FormsModule } from '@angular/forms';
   declarations: [
     BoopSensorPageComponent,
     BoopeSensorProfileCardComponent,
-    BoopSensorProfileEditorPageComponent
+    BoopSensorProfileEditorPageComponent,
+    ProfileActionEntryComponent
   ],
   imports: [
     CommonModule,

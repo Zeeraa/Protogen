@@ -38,6 +38,7 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
     visorRenderers: [],
     expressions: [],
     faceColorEffects: [],
+    actionSets: [],
   }
 
   constructor(
@@ -96,15 +97,17 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
     const videosRequest = this.videoApi.getSavedVideos();
     const faceExpressionsRequest = this.faceApi.getExpressions();
     const faceColorEffectsRequest = this.faceApi.getFaceColorEffects();
+    const actionSetsRequest = this.actionApi.getActionSets();
 
-    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest]).subscribe({
-      next: ([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects]) => {
+    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).subscribe({
+      next: ([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects, actionSets]) => {
         this.actionDataSet = {
           rgbScenes: rgbScenes,
           savedVideos: videos,
           visorRenderers: visorRenderers,
           expressions: faceExpressions,
           faceColorEffects: faceColorEffects,
+          actionSets: actionSets,
         }
         console.log(this.actionDataSet);
         console.log("Related data loaded. Loading actions...");

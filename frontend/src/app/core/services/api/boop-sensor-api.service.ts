@@ -55,7 +55,8 @@ export interface BoopSensorProfile {
 }
 
 export interface BoopSensorAction {
-  id: string;
+  virtualId?: string; // Used for internal tracking of the object
+  id: string | undefined;
   triggerAtValue: number;
   actionType: ActionType;
   action: string;

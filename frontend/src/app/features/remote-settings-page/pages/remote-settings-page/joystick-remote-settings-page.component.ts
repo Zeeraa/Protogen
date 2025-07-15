@@ -15,6 +15,7 @@ import { typeAssert } from '../../../../core/services/utils/Utils';
 import { FaceApiService } from '../../../../core/services/api/face-api.service';
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
 import { blankJoystickRemoteState, JoystickRemoteState } from '../../../../core/interfaces/JoystickRemoteState';
+import { ActionApiService } from '../../../../core/services/api/action-api.service';
 
 @Component({
   selector: 'app-joystick-remote-settings-page',
@@ -30,6 +31,7 @@ export class JoystickRemoteSettingsPageComponent implements OnInit, OnDestroy {
     visorRenderers: [],
     expressions: [],
     faceColorEffects: [],
+    actionSets: [],
   }
 
   remoteState: JoystickRemoteState = blankJoystickRemoteState();
@@ -54,6 +56,7 @@ export class JoystickRemoteSettingsPageComponent implements OnInit, OnDestroy {
     private title: Title,
     private socket: SocketService,
     private faceApi: FaceApiService,
+    private actionApi: ActionApiService,
   ) { }
 
   loadData() {
@@ -62,22 +65,23 @@ export class JoystickRemoteSettingsPageComponent implements OnInit, OnDestroy {
     const videosRequest = this.videoApi.getSavedVideos();
     const faceExpressionsRequest = this.faceApi.getExpressions();
     const faceColorEffectsRequest = this.faceApi.getFaceColorEffects();
+    const actionSetsRequest = this.actionApi.getActionSets();
 
-    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest]).subscribe({
-      next: ([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects]) => {
+    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).subscribe({
+      next: ([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects, actionSets]) => {
         this.actionDataSet = {
           rgbScenes: rgbScenes,
           savedVideos: videos,
           visorRenderers: visorRenderers,
           expressions: faceExpressions,
           faceColorEffects: faceColorEffects,
+          actionSets: actionSets,
         }
         console.log(this.actionDataSet);
-        console.log("Related data loaded. Loading profiles...");
-        this.loadProfiles();
+        console.log("Action dataset loaded");
       },
       error: (err) => {
-        this.toastr.error("Failed fetch action target data");
+        this.toastr.error("Failed fetch action target data. Editor will not fully function");
         console.error('Error occurred:', err);
       },
     });
