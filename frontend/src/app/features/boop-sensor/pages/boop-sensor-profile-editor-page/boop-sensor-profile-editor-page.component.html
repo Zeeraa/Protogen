@@ -33,7 +33,19 @@
       <input type="text" class="form-control" maxlength="64" id="profile_name" placeholder="Profile name"
         [(ngModel)]="profile.name" />
     </div>
+
+    <div class="col-sm-12 col-md-6 mt-2">
+      <label for="profile_reset_time">
+        <abbr title="Time in seconds before the counter resets due to inactivity">
+          Resets after
+        </abbr>
+      </label>
+      <input type="number" class="form-control" min="1" max="2147483647" id="profile_reset_time"
+        placeholder="Resets after" [(ngModel)]="profile.resetsAfter" />
+    </div>
   </div>
+
+
 
   <div class="row mt-2">
     <div class="col-12">
