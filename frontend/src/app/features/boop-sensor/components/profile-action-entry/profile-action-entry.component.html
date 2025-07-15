@@ -1,11 +1,16 @@
 <td>
-  <select class="form-select" id="action_{{componentId}}" [(ngModel)]="action.type" [disabled]="disabled">
+  <input type="number" placeholder="Activate at" min="1" class="form-control" [(ngModel)]="action.triggerAtValue" />
+</td>
+
+<td class="col">
+  <select class="form-select" id="action_{{componentId}}" [(ngModel)]="action.actionType" [disabled]="disabled">
     @for (action of actionList; track $index) {
     <option [value]="action">{{translateActionName(action)}}</option>
     }
   </select>
 </td>
-<th>
+
+<td class="col">
   @if(actionTypeAsString == "PLAY_VIDEO") {
   <select class="form-select" id="video_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
     @for (video of actionDataSet.savedVideos; track $index) {
@@ -47,9 +52,10 @@
   } @else if(actionTypeAsString != "NONE") {
   <span class="text-danger">Unknown action type</span>
   }
-</th>
-<th>
-  <button class="btn btn-danger" (click)="deleteAction()">
+</td>
+
+<td class="t-fit">
+  <button class="btn btn-danger" (click)="deleteEntry()">
     <i class="bi bi-trash-fill"></i>
   </button>
-</th>
+</td>

@@ -7,7 +7,9 @@ export enum ActionType {
   ACTIVATE_FACE_RGB_EFFECT = "ACTIVATE_FACE_RGB_EFFECT",
   DISABLE_RGB = "DISABLE_RGB",
   STOP_VIDEO = "STOP_VIDEO",
+  RUN_ACTION_SET = "RUN_ACTION_SET",
 }
+
 
 export function translateActionType(type: ActionType) {
   switch (type) {
@@ -34,6 +36,9 @@ export function translateActionType(type: ActionType) {
 
     case ActionType.STOP_VIDEO:
       return "Stop video";
+
+    case ActionType.RUN_ACTION_SET:
+      return "Run action set";
 
     default:
       return "Unknown";
