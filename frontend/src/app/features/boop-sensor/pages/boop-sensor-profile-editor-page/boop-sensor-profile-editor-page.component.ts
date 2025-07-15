@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BoopSensorAction, BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
 import { catchError, forkJoin, Subscription } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
@@ -12,6 +12,7 @@ import { RgbApiService } from '../../../../core/services/api/rgb-api.service';
 import { uuidv7 } from 'uuidv7';
 import { ActionType } from '../../../../core/enum/ActionType';
 import { ActionApiService } from '../../../../core/services/api/action-api.service';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-boop-sensor-profile-editor-page',
@@ -24,7 +25,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
 
   protected loading = true;
   protected loadError = false;
-  protected isSaving = false;
+  protected isMakingRequest = false;
   protected profile: BoopSensorProfile | null = null;
 
   protected actionDataSet: ActionDataSet = {
@@ -36,6 +37,9 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     actionSets: [],
   }
 
+  private deleteProfilePrompt: NgbModalRef | null = null;
+  @ViewChild("deleteProfilePrompt") private deleteProfilePromptTemplate!: TemplateRef<any>;
+
   constructor(
     private boopSensorApi: BoopSensorApiService,
     private route: ActivatedRoute,
@@ -45,6 +49,8 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     private videoApi: VideoPlayerApiService,
     private faceApi: FaceApiService,
     private actionApi: ActionApiService,
+    private modal: NgbModal,
+    private router: Router,
   ) { }
 
   loadActionDataSet() {
@@ -98,16 +104,16 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isSaving = true;
+    this.isMakingRequest = true;
     this.boopSensorApi.updateProfile(this.profile).pipe(catchError((err: HttpErrorResponse) => {
       this.toastr.error("Failed to save profile changes");
       console.error('Failed to save profile changes', err);
-      this.isSaving = false;
+      this.isMakingRequest = false;
       return [];
     })).subscribe(profile => {
       this.profile = profile;
       this.sortActions();
-      this.isSaving = false;
+      this.isMakingRequest = false;
       this.toastr.success("Profile saved successfully");
     })
   }
@@ -142,6 +148,35 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     this.profile.actions.push(newAction);
   }
 
+  protected deletePrompt() {
+    this.deleteProfilePrompt?.close();
+    this.deleteProfilePrompt = this.modal.open(this.deleteProfilePromptTemplate, {});
+  }
+
+  protected confirmDelete() {
+    if (this.profile == null) {
+      console.error("Profile is null, cannot delete");
+      return;
+    }
+
+    this.isMakingRequest = true;
+    this.boopSensorApi.deleteProfile(this.profile.id).pipe(catchError((err: HttpErrorResponse) => {
+      this.isMakingRequest = false;
+      if (err.status === 404) {
+        this.toastr.error("Profile not found");
+        console.error('Profile not found');
+        return [];
+      }
+      console.error('Failed to delete profile', err);
+      this.toastr.error("Failed to delete profile");
+      return [];
+    })).subscribe(() => {
+      this.toastr.success("Profile deleted successfully");
+      this.deleteProfilePrompt?.close();
+      this.router.navigate(['/boop-sensor']);
+    });
+  }
+
   ngOnInit(): void {
     this.loadActionDataSet();
     this.route.params.subscribe(params => {
@@ -168,5 +203,6 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.fetchSubscription?.unsubscribe();
+    this.deleteProfilePrompt?.close();
   }
 }
