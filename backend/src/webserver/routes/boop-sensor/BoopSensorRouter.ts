@@ -212,7 +212,8 @@ export class BoopSensorRouter extends AbstractRouter {
         profile.name = data.name;
         profile.resetsAfter = data.resetsAfter;
 
-        profile.actions = profile.actions.filter(a => !data.actions.some(da => da.id === a.id));
+        profile.actions = profile.actions.filter(a => data.actions.some(a2 => a2.id == a.id));
+
         for (const actionData of data.actions) {
           let action: BoopProfileAction | null = null;
           if (actionData.id) {

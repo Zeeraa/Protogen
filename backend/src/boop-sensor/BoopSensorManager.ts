@@ -62,8 +62,12 @@ export class BoopSensorManager {
   public async saveProfile(profile: BoopProfile) {
     const repo = this._protogen.database.dataSource.getRepository(BoopSensorProfile);
     let dbProfile = await repo.findOne({
-      where: { id: profile.id },
-      relations: { actions: true }
+      where: {
+        id: profile.id
+      },
+      relations: {
+        actions: true,
+      },
     });
 
     if (dbProfile == null) {
@@ -77,6 +81,7 @@ export class BoopSensorManager {
 
     // Filter out deleted actions
     dbProfile.actions = dbProfile.actions.filter(a => !profile.actions.some(pa => pa.id === a.id));
+
     for (const action of profile.actions) {
       let dbAction = dbProfile.actions.find(a => a.id === action.id);
       if (dbAction == null) {
