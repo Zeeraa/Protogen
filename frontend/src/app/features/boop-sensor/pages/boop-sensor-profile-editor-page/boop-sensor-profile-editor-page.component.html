@@ -85,9 +85,27 @@
 
   <div class="row mt-1">
     <div class="col-12">
-      <button class="btn btn-primary" [disabled]="isSaving" (click)="saveChanges()">Save</button>
+      <button class="btn btn-primary mb-1 me-1" [disabled]="isMakingRequest" (click)="saveChanges()">Save</button>
+      <button class="btn btn-danger mb-1 me-1" [disabled]="isMakingRequest" (click)="deletePrompt()">Delete</button>
     </div>
   </div>
   }
   }
 </div>
+
+<ng-template #deleteProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Delete profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>
+      Please confirm that you want to delete the profile <strong>{{profile?.name ?? "Unknown"}}</strong>.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="isMakingRequest">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="isMakingRequest">Delete</button>
+  </div>
+</ng-template>
