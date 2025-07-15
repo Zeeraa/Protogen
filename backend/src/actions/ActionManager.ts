@@ -5,6 +5,8 @@ import { SavedVideo } from "../database/models/video-player/SavedVideos.model";
 import { ActionSet } from "../database/models/actions/ActionSet.model";
 import { cyan } from "colors";
 
+const MaxReqursionDept = 10;
+
 export class ActionManager {
   private _protogen;
 
@@ -16,7 +18,7 @@ export class ActionManager {
     return this._protogen;
   }
 
-  public async runActionSet(id: number) {
+  public async runActionSet(id: number, reqursionProtectionCounter = 0): Promise<boolean> {
     const repo = this.protogen.database.dataSource.getRepository(ActionSet);
     const set = await repo.findOne({
       where: {
@@ -33,13 +35,13 @@ export class ActionManager {
     }
 
     for (const action of set.actions) {
-      await this.performAction(action.type, action.action);
+      await this.performAction(action.type, action.action, reqursionProtectionCounter);
     }
 
     return true;
   }
 
-  public async performAction(type: ActionType, action: string | null): Promise<boolean> {
+  public async performAction(type: ActionType, action: string | null, reqursionProtectionCounter = 0): Promise<boolean> {
     //#region Start video playback
     if (type == ActionType.PLAY_VIDEO) {
       const id = parseInt(action || "");
@@ -131,6 +133,23 @@ export class ActionManager {
 
       this.protogen.visor.faceRenderer.activeColorEffect = effect;
       return true;
+    }
+    //#endregion
+
+    //#region Run action set
+    if (type == ActionType.RUN_ACTION_SET) {
+      const id = parseInt(action || "");
+      if (isNaN(id)) {
+        this.protogen.logger.error("ActionManager", "Invalid action set id passed");
+        return false;
+      }
+
+      if (reqursionProtectionCounter > MaxReqursionDept) {
+        this.protogen.logger.warn("ActionManager", "Reqursion dept exceeded " + cyan(String(MaxReqursionDept)) + " for action set " + cyan(String(id)) + ", aborting");
+        return false;
+      }
+
+      return await this.runActionSet(id, reqursionProtectionCounter + 1);
     }
     //#endregion
 
