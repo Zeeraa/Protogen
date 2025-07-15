@@ -17,7 +17,36 @@
   <div class="row mt-2">
     <div class="col-12">
       <button class="btn btn-danger mb-1 me-1" (click)="deactivate()">Deactivate</button>
-      <button class="btn btn-primary mb-1 me-1">New profile</button>
+      <button class="btn btn-primary mb-1 me-1" (click)="openNewDialog()">New profile</button>
     </div>
   </div>
 </div>
+
+<ng-template #newProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Create profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newProfileForm">
+      <div class="mb-2">
+        <label for="newProfileName" class="form-label">Profile name</label>
+        <input type="text" name="name" id="newProfileName" class="form-control" formControlName="name"
+          placeholder="Profile name" maxlength="64" [class.is-invalid]="nameEmpty" [disabled]="newProfileSaving"
+          aria-labelledby="newProfileNameError">
+
+        <div id="newProfileNameError" class="invalid-feedback">
+          @if(nameEmpty) {
+          Name can not be empty
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="newProfileSaving">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="createNewProfile()" [disabled]="newProfileSaving">Create
+      profile</button>
+  </div>
+</ng-template>

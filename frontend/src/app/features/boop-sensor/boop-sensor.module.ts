@@ -4,7 +4,7 @@ import { BoopSensorPageComponent } from './pages/boop-sensor-page/boop-sensor-pa
 import { BoopeSensorProfileCardComponent } from './components/boop-sensor-profile-card/boop-sensor-profile-card.component';
 import { RouterLink } from '@angular/router';
 import { BoopSensorProfileEditorPageComponent } from './pages/boop-sensor-profile-editor-page/boop-sensor-profile-editor-page.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProfileActionEntryComponent } from './components/profile-action-entry/profile-action-entry.component';
 
 
@@ -20,6 +20,7 @@ import { ProfileActionEntryComponent } from './components/profile-action-entry/p
     CommonModule,
     RouterLink,
     FormsModule,
+    ReactiveFormsModule,
   ]
 })
 export class BoopSensorModule { }

@@ -20,6 +20,10 @@ export class BoopSensorApiService extends ApiBaseService {
     return this.http.get<BoopSensorProfile[]>(this.apiBaseUrl + "/boop-sensor/profiles").pipe(catchError(this.defaultErrorHandler));
   }
 
+  createNewProfile(profile: NewBoopSensorProfile) {
+    return this.http.post<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles", profile).pipe(catchError(this.defaultErrorHandler));
+  }
+
   activateProfile(profileId: string) {
     return this.http.post<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles/" + profileId + "/activate", {}).pipe(catchError(this.defaultErrorHandler));
   }
@@ -49,6 +53,10 @@ export class BoopSensorApiService extends ApiBaseService {
       throw err;
     }), catchError(this.defaultErrorHandler));
   }
+}
+
+export interface NewBoopSensorProfile {
+  name: string;
 }
 
 export interface BoopSensorProfile {
