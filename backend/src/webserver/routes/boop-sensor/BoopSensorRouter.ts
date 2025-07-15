@@ -5,6 +5,7 @@ import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { ActionType } from "../../../actions/ActionType";
 import { BoopProfileAction } from "../../../boop-sensor/BoopProfileAction";
 import { uuidv7 } from "uuidv7";
+import { BoopProfile } from "../../../boop-sensor/BoopProfile";
 
 export class BoopSensorRouter extends AbstractRouter {
   constructor(server: ProtogenWebServer) {
@@ -25,6 +26,45 @@ export class BoopSensorRouter extends AbstractRouter {
       */
       try {
         res.json(this.protogen.boopSensorManager.profiles.map(profile => boopProfileToDTO(profile)));
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.post("/profiles", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/profiles'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Create a new boop sensor profile"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See console for more info" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = CreateNewProfileModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const data = parsed.data;
+
+        const newProfile = new BoopProfile(
+          uuidv7(),
+          data.name,
+          [],
+          30,
+        );
+
+        this.protogen.boopSensorManager.profiles.push(newProfile);
+        await this.protogen.boopSensorManager.saveProfile(newProfile);
+
+        res.json(boopProfileToDTO(newProfile));
+
       } catch (err) {
         this.handleError(err, req, res);
       }
@@ -207,6 +247,10 @@ export class BoopSensorRouter extends AbstractRouter {
     });
   }
 }
+
+const CreateNewProfileModel = z.object({
+  name: z.string().max(64).trim().min(1),
+});
 
 const ProfileModel = z.object({
   name: z.string().max(64).trim().min(1),

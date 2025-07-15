@@ -69,6 +69,7 @@ export class BoopSensorManager {
     if (dbProfile == null) {
       dbProfile = new BoopSensorProfile();
       dbProfile.id = profile.id;
+      dbProfile.actions = [];
     }
 
     dbProfile.name = profile.name;
