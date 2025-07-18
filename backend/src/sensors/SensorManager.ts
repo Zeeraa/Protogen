@@ -1,9 +1,8 @@
 import { Subject } from "rxjs";
 import { Protogen } from "../Protogen";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
-import { sub } from "date-fns";
 
-const BoopDebounceTime = 3;
+const BoopDebounceTime = 3; // 300 ms
 
 export class SensorManager {
   private protogen: Protogen;

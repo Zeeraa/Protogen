@@ -38,6 +38,7 @@ export class BoopSensorManager {
   }
 
   protected handleBoopState(state: boolean) {
+    // No need to check the enabled value here since its checked by the sensor manager class
     this._lastTriggerTimestamp = new Date().getTime();
     this._state = state;
   }
