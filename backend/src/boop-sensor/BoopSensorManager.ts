@@ -104,6 +104,16 @@ export class BoopSensorManager {
     this.protogen.database.setData(KV_BoopSensorProfile, profile?.id ?? null);
   }
 
+  public deleteProfile(profile: BoopProfile) {
+    if (this.activeProfile && this.activeProfile.id === profile.id) {
+      this.setActiveProfile(null);
+    }
+
+    this._profiles = this._profiles.filter(p => p.id !== profile.id);
+    const repo = this._protogen.database.dataSource.getRepository(BoopSensorProfile);
+    return repo.delete({ id: profile.id });
+  }
+
   public get profiles(): BoopProfile[] {
     return this._profiles;
   }

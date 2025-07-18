@@ -246,6 +246,37 @@ export class BoopSensorRouter extends AbstractRouter {
         this.handleError(err, req, res);
       }
     });
+
+    this.router.delete("/profiles/:id", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/profiles/{id}'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Update profile"
+
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Profile not found" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const profileId = req.params.id;
+        const profile = this.protogen.boopSensorManager.profiles.find(p => p.id === profileId);
+        if (profile == null) {
+          res.status(404).send({ message: "Profile not found" });
+          return;
+        }
+
+        await this.protogen.boopSensorManager.deleteProfile(profile);
+
+        res.json({});
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
   }
 }
 
