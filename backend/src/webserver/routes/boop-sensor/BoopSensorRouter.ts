@@ -11,6 +11,26 @@ export class BoopSensorRouter extends AbstractRouter {
   constructor(server: ProtogenWebServer) {
     super(server, "/boop-sensor");
 
+    this.router.get("/", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Get boop sensor data"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        res.json(this.protogen.boopSensorManager.data);
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/profiles", async (req, res) => {
       /*
       #swagger.path = '/boop-sensor/profiles'

@@ -1,6 +1,7 @@
 import { Subject } from "rxjs";
 import { Protogen } from "../Protogen";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
+import { sub } from "date-fns";
 
 const BoopDebounceTime = 3;
 
@@ -19,7 +20,7 @@ export class SensorManager {
     this.protogen.hardwareAbstractionLayer.rawBoopSensorObservable.subscribe(val => { this._boopSensorReportedState = val });
 
     setInterval(() => {
-      if (this.protogen.interuptLoops) {
+      if (this.protogen.interuptLoops || !this.protogen.boopSensorManager.enabled) {
         return;
       }
       if (this._boopSensorDebounceTime > 0) {
@@ -31,9 +32,19 @@ export class SensorManager {
           this.protogen.logger.info("Sensors", "Boop sensor triggered");
         }
         //this.protogen.logger.info("Serial", "Boop state change to " + this._boopSensorReportedState);
+        this.boopSensorSubject.next(this._boopSensorReportedState);
         this.protogen.eventEmitter.emit(ProtogenEvents.Booped, this._boopSensorReportedState);
       }
     }, 100);
+  }
+
+  public onBoopSensorDisabled() {
+    this._boopSensorDebounceTime = 0;
+    if (this._boopSensorLastState) {
+      this.boopSensorSubject.next(this._boopSensorReportedState);
+      this.protogen.eventEmitter.emit(ProtogenEvents.Booped, this._boopSensorReportedState);
+    }
+    this._boopSensorLastState = false;
   }
 
   public get boopSensorObservable() {

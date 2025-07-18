@@ -2,6 +2,7 @@ import { BoopSensorProfile } from "../database/models/boop-sensor/BoopSensorProf
 import { BoopSensorProfileAction } from "../database/models/boop-sensor/BoopSensorProfileAction.model";
 import { Protogen } from "../Protogen";
 import { KV_BoopSensorProfile } from "../utils/KVDataStorageKeys";
+import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { BoopProfile } from "./BoopProfile";
 import { BoopProfileAction } from "./BoopProfileAction";
 
@@ -9,13 +10,40 @@ export class BoopSensorManager {
   private readonly _protogen: Protogen;
   private _profiles: BoopProfile[] = [];
   private _activeProfile: BoopProfile | null = null;
+  private _lastTriggerTimestamp: number | null = null;
+  private _state = false;
+  private _enabled = true;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
+
+    this.protogen.eventEmitter.on(ProtogenEvents.Booped, (state: boolean) => {
+      this.handleBoopState(state);
+    });
   }
 
   public get protogen() {
     return this._protogen;
+  }
+
+  public get enabled() {
+    return this._enabled;
+  }
+
+  public set enabled(value: boolean) {
+    this._enabled = value;
+    if (!value) {
+      this.protogen.sensorManager.onBoopSensorDisabled();
+    }
+  }
+
+  protected handleBoopState(state: boolean) {
+    this._lastTriggerTimestamp = new Date().getTime();
+    this._state = state;
+  }
+
+  public get state() {
+    return this._state;
   }
 
   public async init() {
@@ -120,6 +148,15 @@ export class BoopSensorManager {
 
   public get activeProfile(): BoopProfile | null {
     return this._activeProfile;
+  }
+
+  public get data() {
+    return {
+      lastTrigger: this._lastTriggerTimestamp,
+      activeProfileId: this._activeProfile?.id ?? null,
+      state: this._state,
+      enabled: this.enabled,
+    }
   }
 }
 
