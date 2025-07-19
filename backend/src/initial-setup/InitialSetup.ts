@@ -1,9 +1,12 @@
 import { uuidv7 } from "uuidv7";
 import { FaceExpressionData } from "../database/models/visor/FaceExpression.model";
 import { Protogen } from "../Protogen";
-import { KV_ActiveRendererKey, KV_DefaultExpression, KV_DidRunInitialSetup } from "../utils/KVDataStorageKeys";
+import { KV_ActiveRendererKey, KV_ActiveVisorColorEffect, KV_DefaultExpression, KV_DidRunInitialSetup } from "../utils/KVDataStorageKeys";
 import { cyan } from "colors";
 import { FaceRendererId } from "../visor/rendering/renderers/special/face/VisorFaceRender";
+import { FaceColorEffect } from "../database/models/visor/FaceColorEffect";
+import { StaticFaceColorEffectName } from "../visor/rendering/renderers/special/face/colormod/VisorColorEffects";
+import { FaceColorEffectProperty } from "../database/models/visor/FaceColorEffectProperty";
 
 export class InitialSetup {
   private protogen;
@@ -36,6 +39,7 @@ export class InitialSetup {
       expressionData.flipLeftSide = false;
       expressionData.replaceColors = expression.replaceColors;
 
+      // If its the default set the default expression key in database
       if (expression.isDefault) {
         this.protogen.database.setData(KV_DefaultExpression, id);
       }
@@ -45,6 +49,55 @@ export class InitialSetup {
 
     // Set default visor renderer
     this.protogen.database.setData(KV_ActiveRendererKey, FaceRendererId)
+
+    // Create color effects
+    // Static
+    {
+      const colorEffect = new FaceColorEffect();
+      colorEffect.uuid = uuidv7();
+      colorEffect.name = "Default color";
+      colorEffect.effect = StaticFaceColorEffectName;
+      colorEffect.properties = [];
+
+      const colorProp = new FaceColorEffectProperty();
+      colorProp.key = "Color";
+      colorProp.value = "44799";
+
+      colorEffect.properties.push(colorProp);
+
+      this.protogen.logger.info("InitialSetup", `Creating default color effect: ${cyan(colorEffect.name)}`);
+      await this.protogen.database.dataSource.getRepository(FaceColorEffect).save(colorEffect);
+
+      // Set it as active
+      await this.protogen.database.setData(KV_ActiveVisorColorEffect, colorEffect.uuid);
+    }
+
+    // RGB
+    {
+      const colorEffect = new FaceColorEffect();
+      colorEffect.uuid = uuidv7();
+      colorEffect.name = "RGB";
+      colorEffect.effect = "ColorCycle";
+      colorEffect.properties = [];
+
+      const propSpeed = new FaceColorEffectProperty();
+      propSpeed.key = "Speed";
+      propSpeed.value = "30";
+      colorEffect.properties.push(propSpeed);
+
+      const propOffset = new FaceColorEffectProperty();
+      propOffset.key = "Offset";
+      propOffset.value = "0";
+      colorEffect.properties.push(propOffset);
+
+      const PropReverse = new FaceColorEffectProperty();
+      PropReverse.key = "Reverse";
+      PropReverse.value = "false";
+      colorEffect.properties.push(PropReverse);
+
+      this.protogen.logger.info("InitialSetup", `Creating default color effect: ${cyan(colorEffect.name)}`);
+      await this.protogen.database.dataSource.getRepository(FaceColorEffect).save(colorEffect);
+    }
 
     this.protogen.logger.info("InitialSetup", "Initial setup completed.");
     await this.protogen.database.setData(KV_DidRunInitialSetup, "true");
