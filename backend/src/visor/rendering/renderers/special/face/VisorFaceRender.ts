@@ -150,9 +150,9 @@ export class VisorFaceRenderer extends VisorRenderer {
       dbProp.value = prop.stringifyValue();
     });
 
-    return await repo.save(dbEffect);
-
     this.reloadForcedRgbEffect();
+
+    return await repo.save(dbEffect);
   }
 
   async loadColorEffects() {

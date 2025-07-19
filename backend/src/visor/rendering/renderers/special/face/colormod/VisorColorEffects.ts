@@ -3,14 +3,17 @@ import { AbstractVisorColorEffect } from "./AbstractVisorColorEffect";
 import { StaticVisorColorEffect } from "./effects/StaticVisorColorEffect";
 import { VisorColorCycleEffect } from "./effects/VisorColorCycleEffect";
 
+export const StaticFaceColorEffectName = "Static";
+export const ColorCycleFaceColorEffectName = "ColorCycle";
+
 export const VisorColorEffects: VisorColorEffectMetadata[] = [
   {
-    name: "Static",
+    name: StaticFaceColorEffectName,
     description: "Static non animated color",
     class: StaticVisorColorEffect,
   },
   {
-    name: "ColorCycle",
+    name: ColorCycleFaceColorEffectName,
     description: "Animated color cycle effect",
     class: VisorColorCycleEffect,
   }
