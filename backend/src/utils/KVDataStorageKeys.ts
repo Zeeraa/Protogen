@@ -23,3 +23,7 @@ export const KV_RemoteInvertX = "Remote_InvertX";
 export const KV_RemoteInvertY = "Remote_InvertY";
 export const KV_RemoteFlipAxis = "Remote_FlipAxis";
 //#endregion
+
+//#region Initial setup
+export const KV_DidRunInitialSetup = "DidRunInitialSetup";
+//#endregion

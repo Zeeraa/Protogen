@@ -28,6 +28,7 @@ import { StandardHardwareImplementation } from "./hardware/implementations/Stand
 import { HUDManager } from "./hud/HUDManager";
 import { SensorManager } from "./sensors/SensorManager";
 import { EmulatedHardwareImplementation } from "./hardware/emulated/EmulatedHardwareImplementation";
+import { InitialSetup } from "./initial-setup/InitialSetup";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
@@ -171,6 +172,10 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit database", BootMessageColor);
     await this.database.init();
+
+    const initialSetup = new InitialSetup(this);
+    await initialSetup.checkInitialSetup();
+
     await this.joystickRemoteManager.loadConfig();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit hardware", BootMessageColor);
