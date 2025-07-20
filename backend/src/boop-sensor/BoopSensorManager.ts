@@ -20,6 +20,11 @@ export class BoopSensorManager {
     this.protogen.eventEmitter.on(ProtogenEvents.Booped, (state: boolean) => {
       this.handleBoopState(state);
     });
+
+    // Check if the profile should reset
+    setInterval(() => {
+      this.activeProfile?.tick();
+    }, 100);
   }
 
   public get protogen() {
@@ -41,6 +46,9 @@ export class BoopSensorManager {
     // No need to check the enabled value here since its checked by the sensor manager class
     this._lastTriggerTimestamp = new Date().getTime();
     this._state = state;
+    if (state == true && this.activeProfile != null) {
+      this.activeProfile.onBooped();
+    }
   }
 
   public get state() {
@@ -72,7 +80,7 @@ export class BoopSensorManager {
         actions.push(action);
       });
 
-      const profile = new BoopProfile(data.id, data.name, actions, data.resetsAfter);
+      const profile = new BoopProfile(this, data.id, data.name, actions, data.resetsAfter);
       this._profiles.push(profile);
     });
     this.protogen.logger.info("BoopSensor", this.profiles.length + " profiles loaded");
@@ -129,7 +137,9 @@ export class BoopSensorManager {
   }
 
   public async setActiveProfile(profile: BoopProfile | null) {
+    this._activeProfile?.onDeactivate();
     this._activeProfile = profile;
+    this._activeProfile?.onActivate();
     this.protogen.database.setData(KV_BoopSensorProfile, profile?.id ?? null);
   }
 

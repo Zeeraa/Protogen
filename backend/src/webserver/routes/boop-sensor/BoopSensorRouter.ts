@@ -74,6 +74,7 @@ export class BoopSensorRouter extends AbstractRouter {
         const data = parsed.data;
 
         const newProfile = new BoopProfile(
+          this.protogen.boopSensorManager,
           uuidv7(),
           data.name,
           [],
