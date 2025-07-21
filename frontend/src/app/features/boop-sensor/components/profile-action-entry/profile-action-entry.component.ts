@@ -5,7 +5,7 @@ import { ActionType, translateActionType } from '../../../../core/enum/ActionTyp
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
 
 @Component({
-  selector: '[appProfileActionEntry]',
+  selector: 'tr[appProfileActionEntry]',
   standalone: false,
   templateUrl: './profile-action-entry.component.html',
   styleUrl: './profile-action-entry.component.scss'
