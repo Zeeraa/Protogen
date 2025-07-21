@@ -16,6 +16,18 @@ export class BoopSensorApiService extends ApiBaseService {
     super(http, toastr);
   }
 
+  resetCounter() {
+    return this.http.delete(this.apiBaseUrl + "/boop-sensor/counter").pipe(catchError(this.defaultErrorHandler));
+  }
+
+  setEnabled(enabled: boolean) {
+    return this.http.post<{ enabled: boolean }>(this.apiBaseUrl + "/boop-sensor/enabled", { enabled }).pipe(catchError(this.defaultErrorHandler));
+  }
+
+  getData() {
+    return this.http.get<BoopSensorInfo>(this.apiBaseUrl + "/boop-sensor").pipe(catchError(this.defaultErrorHandler));
+  }
+
   getProfiles() {
     return this.http.get<BoopSensorProfile[]>(this.apiBaseUrl + "/boop-sensor/profiles").pipe(catchError(this.defaultErrorHandler));
   }
@@ -77,5 +89,12 @@ export interface BoopSensorAction {
   actionType: ActionType;
   action: string;
   triggerMultipleTimes: boolean;
-  incrementCounterOnFailedCondition: boolean;
+}
+
+export interface BoopSensorInfo {
+  lastTrigger: number;
+  activeProfileId: string;
+  state: boolean;
+  enabled: boolean;
+  boopCounter: number;
 }

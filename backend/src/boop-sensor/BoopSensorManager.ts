@@ -1,7 +1,7 @@
 import { BoopSensorProfile } from "../database/models/boop-sensor/BoopSensorProfile.model";
 import { BoopSensorProfileAction } from "../database/models/boop-sensor/BoopSensorProfileAction.model";
 import { Protogen } from "../Protogen";
-import { KV_BoopSensorProfile } from "../utils/KVDataStorageKeys";
+import { KV_BoopCounter, KV_BoopSensorEnabled, KV_BoopSensorProfile } from "../utils/KVDataStorageKeys";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { BoopProfile } from "./BoopProfile";
 import { BoopProfileAction } from "./BoopProfileAction";
@@ -13,12 +13,16 @@ export class BoopSensorManager {
   private _lastTriggerTimestamp: number | null = null;
   private _state = false;
   private _enabled = true;
+  private _boopCounter = 0;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
 
     this.protogen.eventEmitter.on(ProtogenEvents.Booped, (state: boolean) => {
-      this.handleBoopState(state);
+      this.handleBoopState(state).then().catch(err => {
+        console.error(err);
+        this.protogen.logger.error("BoopSensor", "Error handling boop state");
+      });
     });
 
     // Check if the profile should reset
@@ -42,12 +46,21 @@ export class BoopSensorManager {
     }
   }
 
-  protected handleBoopState(state: boolean) {
+  public async setEnabledPersistently(value: boolean) {
+    this.enabled = value;
+    await this.protogen.database.setData(KV_BoopSensorEnabled, String(value));
+  }
+
+  protected async handleBoopState(state: boolean) {
     // No need to check the enabled value here since its checked by the sensor manager class
     this._lastTriggerTimestamp = new Date().getTime();
     this._state = state;
-    if (state == true && this.activeProfile != null) {
-      this.activeProfile.onBooped();
+    if (state == true) {
+      this._boopCounter++;
+      await this.saveBoopCounter();
+      if (this.activeProfile != null) {
+        this.activeProfile.onBooped();
+      }
     }
   }
 
@@ -65,6 +78,7 @@ export class BoopSensorManager {
         actions: true,
       }
     });
+
     profileData.forEach(data => {
       const actions: BoopProfileAction[] = [];
 
@@ -75,7 +89,6 @@ export class BoopSensorManager {
           actionData.actionType,
           actionData.action,
           actionData.triggerMultipleTimes,
-          actionData.incrementCounterOnFailedCondition
         );
         actions.push(action);
       });
@@ -93,6 +106,26 @@ export class BoopSensorManager {
       } else {
         this.protogen.logger.warn("BoopSensor", "Last active profile not found");
       }
+    }
+
+    this.protogen.logger.info("BoopSensor", "Loading persistent data...");
+    const boopCounterStr = await this.protogen.database.getData(KV_BoopCounter);
+    if (boopCounterStr != null) {
+      const value = parseInt(boopCounterStr);
+      if (isNaN(value)) {
+        this.protogen.logger.warn("BoopSensor", "Invalid boop counter value in persistent data, resetting to 0");
+        await this.resetBoopCounter();
+      } else {
+        this._boopCounter = value;
+      }
+    }
+
+    const enabled = await this.protogen.database.getData(KV_BoopSensorEnabled);
+    if (enabled != null) {
+      this._enabled = enabled == "true";
+    } else {
+      // Create the key if it does not exist
+      await this.setEnabledPersistently(true);
     }
   }
 
@@ -130,7 +163,6 @@ export class BoopSensorManager {
       dbAction.actionType = action.actionType;
       dbAction.action = action.action;
       dbAction.triggerMultipleTimes = action.triggerMultipleTimes;
-      dbAction.incrementCounterOnFailedCondition = action.incrementCounterOnFailedCondition;
     }
 
     return await repo.save(dbProfile);
@@ -161,12 +193,26 @@ export class BoopSensorManager {
     return this._activeProfile;
   }
 
+  public get boopCounter(): number {
+    return this._boopCounter;
+  }
+
+  public async resetBoopCounter() {
+    this._boopCounter = 0;
+    await this.saveBoopCounter();
+  }
+
+  protected async saveBoopCounter() {
+    this.protogen.database.setData(KV_BoopCounter, String(this._boopCounter));
+  }
+
   public get data() {
     return {
       lastTrigger: this._lastTriggerTimestamp,
       activeProfileId: this._activeProfile?.id ?? null,
       state: this._state,
       enabled: this.enabled,
+      boopCounter: this.boopCounter,
     }
   }
 }
@@ -182,7 +228,6 @@ export function boopProfileToDTO(profile: BoopProfile) {
       actionType: action.actionType,
       action: action.action,
       triggerMultipleTimes: action.triggerMultipleTimes,
-      incrementCounterOnFailedCondition: action.incrementCounterOnFailedCondition
     })),
   };
 }

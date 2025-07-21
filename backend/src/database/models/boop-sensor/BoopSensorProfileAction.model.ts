@@ -42,12 +42,6 @@ export class BoopSensorProfileAction {
   })
   triggerMultipleTimes: boolean;
 
-  @Column({
-    name: "increment_counter_on_failed_condition",
-    type: "boolean",
-  })
-  incrementCounterOnFailedCondition: boolean;
-
   @ManyToOne(() => BoopSensorProfile, (profile) => profile.actions, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",

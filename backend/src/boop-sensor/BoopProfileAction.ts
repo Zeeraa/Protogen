@@ -6,8 +6,7 @@ export class BoopProfileAction {
   public actionType: ActionType;
   public action: string | null;
   public triggerMultipleTimes: boolean;
-  public incrementCounterOnFailedCondition: boolean;
-  //TODO: implement condition handling
+  public didRun = false;
 
   constructor(
     id: string,
@@ -15,14 +14,12 @@ export class BoopProfileAction {
     actionType: ActionType,
     action: string | null,
     triggerMultipleTimes: boolean,
-    incrementCounterOnFailedCondition: boolean
   ) {
     this._id = id;
     this.triggerAtValue = triggerAtValue;
     this.actionType = actionType;
     this.action = action;
     this.triggerMultipleTimes = triggerMultipleTimes;
-    this.incrementCounterOnFailedCondition = incrementCounterOnFailedCondition;
   }
 
   public get id(): string {

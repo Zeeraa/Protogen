@@ -30,4 +30,6 @@ export const KV_DidRunInitialSetup = "DidRunInitialSetup";
 
 //#region Boop sensor
 export const KV_BoopSensorProfile = "BoopSensorProfile";
+export const KV_BoopCounter = "BoopCounter";
+export const KV_BoopSensorEnabled = "BoopSensorEnabled";
 //#endregion

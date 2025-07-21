@@ -31,6 +31,94 @@ export class BoopSensorRouter extends AbstractRouter {
       }
     });
 
+    this.router.get("/counter", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/counter'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Get boop counter"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        res.json({ counter: this.protogen.boopSensorManager.boopCounter });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.delete("/counter", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/counter'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Reset boop counter"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        await this.protogen.boopSensorManager.resetBoopCounter();
+        res.json({ counter: this.protogen.boopSensorManager.boopCounter });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.get("/enabled", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/enabled'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Get boop sensor enabled state"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        res.json({ enabled: this.protogen.boopSensorManager.enabled });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.post("/enabled", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/enabled'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Enable or disable the boop sensor"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = SetEnabledModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const { enabled } = parsed.data;
+
+        await this.protogen.boopSensorManager.setEnabledPersistently(enabled);
+        res.json({ enabled });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/profiles", async (req, res) => {
       /*
       #swagger.path = '/boop-sensor/profiles'
@@ -248,7 +336,6 @@ export class BoopSensorRouter extends AbstractRouter {
               actionData.actionType,
               actionData.action,
               actionData.triggerMultipleTimes,
-              actionData.incrementCounterOnFailedCondition
             );
             profile.actions.push(action);
           } else {
@@ -256,7 +343,6 @@ export class BoopSensorRouter extends AbstractRouter {
             action.actionType = actionData.actionType;
             action.action = actionData.action;
             action.triggerMultipleTimes = actionData.triggerMultipleTimes;
-            action.incrementCounterOnFailedCondition = actionData.incrementCounterOnFailedCondition;
           }
         }
 
@@ -305,6 +391,10 @@ const CreateNewProfileModel = z.object({
   name: z.string().max(64).trim().min(1),
 });
 
+const SetEnabledModel = z.object({
+  enabled: z.boolean(),
+});
+
 const ProfileModel = z.object({
   name: z.string().max(64).trim().min(1),
   resetsAfter: z.number().int().min(1).safe(),
@@ -314,6 +404,5 @@ const ProfileModel = z.object({
     actionType: z.nativeEnum(ActionType),
     action: z.string().max(512),
     triggerMultipleTimes: z.boolean(),
-    incrementCounterOnFailedCondition: z.boolean(),
   })),
 });

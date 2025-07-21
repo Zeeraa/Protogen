@@ -1,11 +1,36 @@
 <div class="container mt-4">
   <div class="row">
     <div class="col-12">
-      <h1>Boop sensor config</h1>
+      <h1>Boop sensor</h1>
+    </div>
+
+    <div class="col-12 col-sm-6 mb-2">
+      <p>
+        Status:
+        @if(enabled) {
+        <span class="badge bg-success">Enabled</span>
+        } @else {
+        <span class="badge bg-danger">Disabled</span>
+        }
+      </p>
+      <button class="btn btn-primary" (click)="setEnabled(!enabled)">
+        {{enabled ? "Disable" : "Enable"}} sensor
+      </button>
+    </div>
+
+    <div class="col-12 col-sm-6 mb-2">
+      <p>
+        Boop count: {{boopCount}}
+      </p>
+      <button class="btn btn-warning" (click)="resetCounter()">Reset counter</button>
     </div>
   </div>
 
   <div class="row mt-2">
+    <div class="col-12">
+      <h3>Profiles</h3>
+    </div>
+
     @for (profile of profiles; track $index) {
     <div class="col-sm-12 col-md-6 mt-2">
       <app-boop-sensor-profile-card [active]="profile.id == activeProfileId" [profile]="profile"

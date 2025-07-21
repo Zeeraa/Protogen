@@ -27,6 +27,9 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   protected newProfileSaving = false;
   protected nameEmpty = false;
 
+  protected boopCount = 0;
+  protected enabled = false;
+
   constructor(
     private boopSensorApi: BoopSensorApiService,
     private toastr: ToastrService,
@@ -36,6 +39,27 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
 
   protected profileActivated(profile: BoopSensorProfile) {
     this.activeProfileId = profile.id;
+  }
+
+  protected setEnabled(enabled: boolean) {
+    this.boopSensorApi.setEnabled(enabled).pipe(catchError((err: HttpErrorResponse) => {
+      console.error('Failed to set enabled state', err);
+      this.toastr.error("Failed to " + (enabled ? "enable" : "disable") + " sensor");
+      return [];
+    })).subscribe(result => {
+      this.enabled = result.enabled;
+    });
+  }
+
+  protected resetCounter() {
+    this.boopSensorApi.resetCounter().pipe(catchError((err: HttpErrorResponse) => {
+      console.error('Failed to reset counter', err);
+      this.toastr.error("Failed to reset counter");
+      return [];
+    })).subscribe(() => {
+      this.toastr.success("Counter reset");
+      this.boopCount = 0;
+    });
   }
 
   protected deactivate() {
@@ -91,10 +115,10 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
       this.profiles = profiles;
     });
 
-    this.fetchActiveProfile();
+    this.fetchData();
 
     this.updateInterval = setInterval(() => {
-      this.fetchActiveProfile();
+      this.fetchData();
     }, 5000);
   }
 
@@ -103,12 +127,14 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
     this.newProfilePrompt?.close();
   }
 
-  protected fetchActiveProfile() {
-    this.boopSensorApi.getActiveProfile().pipe(catchError(err => {
-      console.error('Failed to fetch active profile', err);
+  protected fetchData() {
+    this.boopSensorApi.getData().pipe(catchError((err: HttpErrorResponse) => {
+      console.error('Failed to fetch data', err);
       return [];
-    })).subscribe(profile => {
-      this.activeProfileId = profile ? profile.id : null;
-    })
+    })).subscribe(data => {
+      this.boopCount = data.boopCounter;
+      this.enabled = data.enabled;
+      this.activeProfileId = data.activeProfileId ?? null;
+    });
   }
 }
