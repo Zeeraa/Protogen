@@ -29,6 +29,7 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
 
   protected boopCount = 0;
   protected enabled = false;
+  protected showOnHud = false;
 
   constructor(
     private boopSensorApi: BoopSensorApiService,
@@ -106,6 +107,16 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected setShowOnHud(state: boolean) {
+    this.boopSensorApi.setShowOnHud(state).pipe(catchError((err: HttpErrorResponse) => {
+      console.error('Failed to set show on HUD', err);
+      this.toastr.error("Failed to set show on HUD state");
+      return [];
+    })).subscribe(result => {
+      this.showOnHud = result.showOnHud;
+    });
+  }
+
   ngOnInit(): void {
     this.boopSensorApi.getProfiles().pipe(catchError((err) => {
       console.error('Failed to load Boop Sensor profiles', err);
@@ -135,6 +146,7 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
       this.boopCount = data.boopCounter;
       this.enabled = data.enabled;
       this.activeProfileId = data.activeProfileId ?? null;
+      this.showOnHud = data.showOnHud;
     });
   }
 }

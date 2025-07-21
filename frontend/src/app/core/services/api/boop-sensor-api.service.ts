@@ -24,6 +24,10 @@ export class BoopSensorApiService extends ApiBaseService {
     return this.http.post<{ enabled: boolean }>(this.apiBaseUrl + "/boop-sensor/enabled", { enabled }).pipe(catchError(this.defaultErrorHandler));
   }
 
+  setShowOnHud(showOnHud: boolean) {
+    return this.http.post<{ showOnHud: boolean }>(this.apiBaseUrl + "/boop-sensor/show-on-hud", { enabled: showOnHud }).pipe(catchError(this.defaultErrorHandler));
+  }
+
   getData() {
     return this.http.get<BoopSensorInfo>(this.apiBaseUrl + "/boop-sensor").pipe(catchError(this.defaultErrorHandler));
   }
@@ -97,4 +101,5 @@ export interface BoopSensorInfo {
   state: boolean;
   enabled: boolean;
   boopCounter: number;
+  showOnHud: boolean;
 }

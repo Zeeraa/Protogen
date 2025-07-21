@@ -16,6 +16,14 @@
       <button class="btn btn-primary" (click)="setEnabled(!enabled)">
         {{enabled ? "Disable" : "Enable"}} sensor
       </button>
+
+      <div class="mt-2">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="showBoopSensorOnHud" [(ngModel)]="showOnHud"
+            (ngModelChange)="setShowOnHud($event)">
+          <label class="form-check-label" for="showBoopSensorOnHud">Show on HUD</label>
+        </div>
+      </div>
     </div>
 
     <div class="col-12 col-sm-6 mb-2">

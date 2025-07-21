@@ -1,7 +1,7 @@
 import { BoopSensorProfile } from "../database/models/boop-sensor/BoopSensorProfile.model";
 import { BoopSensorProfileAction } from "../database/models/boop-sensor/BoopSensorProfileAction.model";
 import { Protogen } from "../Protogen";
-import { KV_BoopCounter, KV_BoopSensorEnabled, KV_BoopSensorProfile } from "../utils/KVDataStorageKeys";
+import { KV_BoopCounter, KV_BoopSensorEnabled, KV_BoopSensorProfile, KV_BoopSensorShowOnHud } from "../utils/KVDataStorageKeys";
 import { ProtogenEvents } from "../utils/ProtogenEvents";
 import { BoopProfile } from "./BoopProfile";
 import { BoopProfileAction } from "./BoopProfileAction";
@@ -14,6 +14,7 @@ export class BoopSensorManager {
   private _state = false;
   private _enabled = true;
   private _boopCounter = 0;
+  private _showOnHud = false;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
@@ -49,6 +50,11 @@ export class BoopSensorManager {
   public async setEnabledPersistently(value: boolean) {
     this.enabled = value;
     await this.protogen.database.setData(KV_BoopSensorEnabled, String(value));
+  }
+
+  public async toggleEnabled() {
+    this.enabled = !this.enabled;
+    await this.setEnabledPersistently(this.enabled);
   }
 
   protected async handleBoopState(state: boolean) {
@@ -127,6 +133,15 @@ export class BoopSensorManager {
       // Create the key if it does not exist
       await this.setEnabledPersistently(true);
     }
+
+    const showOnHud = await this.protogen.database.getData(KV_BoopSensorShowOnHud);
+    if (showOnHud != null) {
+      this._showOnHud = showOnHud == "true";
+    }
+    else {
+      // Create the key if it does not exist
+      await this.setShowOnHud(true);
+    }
   }
 
   public async saveProfile(profile: BoopProfile) {
@@ -197,6 +212,15 @@ export class BoopSensorManager {
     return this._boopCounter;
   }
 
+  public get showOnHud(): boolean {
+    return this._showOnHud;
+  }
+
+  public async setShowOnHud(value: boolean) {
+    this._showOnHud = value;
+    await this.protogen.database.setData(KV_BoopSensorShowOnHud, String(value));
+  }
+
   public async resetBoopCounter() {
     this._boopCounter = 0;
     await this.saveBoopCounter();
@@ -213,6 +237,7 @@ export class BoopSensorManager {
       state: this._state,
       enabled: this.enabled,
       boopCounter: this.boopCounter,
+      showOnHud: this.showOnHud,
     }
   }
 }

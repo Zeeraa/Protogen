@@ -119,6 +119,55 @@ export class BoopSensorRouter extends AbstractRouter {
       }
     });
 
+    this.router.get("/show-on-hud", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/show-on-hud'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Get boop sensor show on hud state"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        res.json({ showOnHud: this.protogen.boopSensorManager.showOnHud });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
+    this.router.post("/show-on-hud", async (req, res) => {
+      /*
+      #swagger.path = '/boop-sensor/show-on-hud'
+      #swagger.tags = ['Boop sensor'],
+      #swagger.description = "Enable or disable the boop sensor on hud"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = SetEnabledModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const { enabled } = parsed.data;
+
+        await this.protogen.boopSensorManager.setShowOnHud(enabled);
+        res.json({ showOnHud: enabled });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/profiles", async (req, res) => {
       /*
       #swagger.path = '/boop-sensor/profiles'
