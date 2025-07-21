@@ -104,6 +104,16 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validate that there are no actions with the same trigger at value
+    const triggerValues = new Set<number>();
+    for (const action of this.profile.actions) {
+      if (triggerValues.has(action.triggerAtValue)) {
+        this.toastr.error(`Duplicate trigger value found: ${action.triggerAtValue}. Use Action Sets to execute multiple actions at the same time.`);
+        return;
+      }
+      triggerValues.add(action.triggerAtValue);
+    }
+
     this.isMakingRequest = true;
     this.boopSensorApi.updateProfile(this.profile).pipe(catchError((err: HttpErrorResponse) => {
       this.toastr.error("Failed to save profile changes");
