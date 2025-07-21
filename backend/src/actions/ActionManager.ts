@@ -153,6 +153,19 @@ export class ActionManager {
     }
     //#endregion
 
+    //#region Boop sensor
+
+    if (type == ActionType.RESET_BOOP_SENSOR_COUNTER) {
+      await this.protogen.boopSensorManager.resetBoopCounter();
+      return true;
+    }
+
+    if (type == ActionType.TOGGLE_BOOP_SENSOR) {
+      await this.protogen.boopSensorManager.toggleEnabled();
+      return true;
+    }
+    //#endregion
+
     return false;
   }
 }
