@@ -13,6 +13,7 @@ import { uuidv7 } from 'uuidv7';
 import { ActionType } from '../../../../core/enum/ActionType';
 import { ActionApiService } from '../../../../core/services/api/action-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-boop-sensor-profile-editor-page',
@@ -51,6 +52,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     private actionApi: ActionApiService,
     private modal: NgbModal,
     private router: Router,
+    private title: Title,
   ) { }
 
   loadActionDataSet() {
@@ -187,6 +189,8 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("Boop Sensor editor - Protogen");
+
     this.loadActionDataSet();
     this.route.params.subscribe(params => {
       const id = String(params['id']);

@@ -6,6 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-boop-sensor-page',
@@ -36,6 +37,7 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private modal: NgbModal,
     private router: Router,
+    private title: Title,
   ) { }
 
   protected profileActivated(profile: BoopSensorProfile) {
@@ -118,6 +120,8 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("Boop Sensor - Protogen");
+
     this.boopSensorApi.getProfiles().pipe(catchError((err) => {
       console.error('Failed to load Boop Sensor profiles', err);
       this.toastr.error("Failed to load profiles");
