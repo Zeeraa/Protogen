@@ -88,6 +88,28 @@
     }
   },
   {
+    "group": "Face",
+    "name": "proto_face_surprised",
+    "display_name": "Face Surprised",
+    "type": "VISOR_TEXTURE",
+    "path": "assets/builtin/face/face_surprised.png",
+    "author": {
+      "name": "risabucolic",
+      "links": [
+        {
+          "service": "Reddit",
+          "text": "u/risabucolic",
+          "url": "https://www.reddit.com/user/risabucolic"
+        },
+        {
+          "service": "Fur Affinity",
+          "text": "Brila",
+          "url": "https://www.furaffinity.net/user/Brila/"
+        }
+      ]
+    }
+  },
+  {
     "group": "Misc",
     "name": "proto_face_bsod",
     "display_name": "BSOD",
