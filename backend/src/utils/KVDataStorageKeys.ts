@@ -27,3 +27,10 @@ export const KV_RemoteFlipAxis = "Remote_FlipAxis";
 //#region Initial setup
 export const KV_DidRunInitialSetup = "DidRunInitialSetup";
 //#endregion
+
+//#region Boop sensor
+export const KV_BoopSensorProfile = "BoopSensorProfile";
+export const KV_BoopCounter = "BoopCounter";
+export const KV_BoopSensorEnabled = "BoopSensorEnabled";
+export const KV_BoopSensorShowOnHud = "BoopSensorShowOnHud";
+//#endregion

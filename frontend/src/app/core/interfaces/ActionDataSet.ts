@@ -1,3 +1,4 @@
+import { ActionSet } from "../services/api/action-api.service";
 import { FaceColorEffect, FaceExpression } from "../services/api/face-api.service";
 import { RgbScene } from "../services/api/rgb-api.service";
 import { SavedVideo } from "../services/api/video-player-api.service";
@@ -9,4 +10,5 @@ export interface ActionDataSet {
   savedVideos: SavedVideo[];
   expressions: FaceExpression[];
   faceColorEffects: FaceColorEffect[];
+  actionSets: ActionSet[];
 }

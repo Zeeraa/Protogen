@@ -7,7 +7,11 @@ export enum ActionType {
   ACTIVATE_FACE_RGB_EFFECT = "ACTIVATE_FACE_RGB_EFFECT",
   DISABLE_RGB = "DISABLE_RGB",
   STOP_VIDEO = "STOP_VIDEO",
+  RUN_ACTION_SET = "RUN_ACTION_SET",
+  RESET_BOOP_SENSOR_COUNTER = "RESET_BOOP_SENSOR_COUNTER",
+  TOGGLE_BOOP_SENSOR = "TOGGLE_BOOP_SENSOR",
 }
+
 
 export function translateActionType(type: ActionType) {
   switch (type) {
@@ -34,6 +38,15 @@ export function translateActionType(type: ActionType) {
 
     case ActionType.STOP_VIDEO:
       return "Stop video";
+
+    case ActionType.RUN_ACTION_SET:
+      return "Run action set";
+
+    case ActionType.RESET_BOOP_SENSOR_COUNTER:
+      return "Reset boop counter";
+
+    case ActionType.TOGGLE_BOOP_SENSOR:
+      return "Toggle boop sensor";
 
     default:
       return "Unknown";

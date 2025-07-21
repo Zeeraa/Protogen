@@ -1,0 +1,85 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>Boop sensor</h1>
+    </div>
+
+    <div class="col-12 col-sm-6 mb-2">
+      <p>
+        Status:
+        @if(enabled) {
+        <span class="badge bg-success">Enabled</span>
+        } @else {
+        <span class="badge bg-danger">Disabled</span>
+        }
+      </p>
+      <button class="btn btn-primary" (click)="setEnabled(!enabled)">
+        {{enabled ? "Disable" : "Enable"}} sensor
+      </button>
+
+      <div class="mt-2">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="showBoopSensorOnHud" [(ngModel)]="showOnHud"
+            (ngModelChange)="setShowOnHud($event)">
+          <label class="form-check-label" for="showBoopSensorOnHud">Show on HUD</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 mb-2">
+      <p>
+        Boop count: {{boopCount}}
+      </p>
+      <button class="btn btn-warning" (click)="resetCounter()">Reset counter</button>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <h3>Profiles</h3>
+    </div>
+
+    @for (profile of profiles; track $index) {
+    <div class="col-sm-12 col-md-6 mt-2">
+      <app-boop-sensor-profile-card [active]="profile.id == activeProfileId" [profile]="profile"
+        (profileActivated)="profileActivated($event)" />
+    </div>
+    }
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <button class="btn btn-danger mb-1 me-1" (click)="deactivate()">Deactivate</button>
+      <button class="btn btn-primary mb-1 me-1" (click)="openNewDialog()">New profile</button>
+    </div>
+  </div>
+</div>
+
+<ng-template #newProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Create profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="newProfileForm">
+      <div class="mb-2">
+        <label for="newProfileName" class="form-label">Profile name</label>
+        <input type="text" name="name" id="newProfileName" class="form-control" formControlName="name"
+          placeholder="Profile name" maxlength="64" [class.is-invalid]="nameEmpty" [disabled]="newProfileSaving"
+          aria-labelledby="newProfileNameError">
+
+        <div id="newProfileNameError" class="invalid-feedback">
+          @if(nameEmpty) {
+          Name can not be empty
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="newProfileSaving">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="createNewProfile()" [disabled]="newProfileSaving">Create
+      profile</button>
+  </div>
+</ng-template>

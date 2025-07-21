@@ -76,6 +76,10 @@ export class HUDManager {
       additionalInfo.push("Video DL: " + this.protogen.videoPlaybackManager.status);
     }
 
+    if (this.protogen.boopSensorManager.enabled && this.protogen.boopSensorManager.showOnHud) {
+      additionalInfo.push("Boops: " + this.protogen.boopSensorManager.boopCounter);
+    }
+
     const lineArray = [visorStatus, rgbStatus];
     while (lineArray.length < this.config.lines) {
       if (additionalInfo.length > 0) {

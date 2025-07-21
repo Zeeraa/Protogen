@@ -1,0 +1,114 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1>Boop sensor profile editor</h1>
+    </div>
+  </div>
+
+  @if(loading) {
+  <div class="row">
+    <div class="col-12">
+      <h4>Loading profile...</h4>
+      <a routerLink="/boop-sensor" class="btn btn-primary">Back</a>
+    </div>
+  </div>
+  } @else {
+  @if(profile == null) {
+  <div class="row">
+    <div class="col-12">
+      <h4>
+        @if(loadError) {
+        Failed to load profile. Please try again later
+        } @else {
+        Profile not found
+        }
+      </h4>
+      <a routerLink="/boop-sensor" class="btn btn-primary">Back</a>
+    </div>
+  </div>
+  } @else {
+  <div class="row">
+    <div class="col-12">
+      <label for="profile_name">Profile name</label>
+      <input type="text" class="form-control" maxlength="64" id="profile_name" placeholder="Profile name"
+        [(ngModel)]="profile.name" />
+    </div>
+
+    <div class="col-sm-12 col-md-6 mt-2">
+      <label for="profile_reset_time">
+        <abbr title="Time in seconds before the counter resets due to inactivity">
+          Resets after
+        </abbr>
+      </label>
+      <input type="number" class="form-control" min="1" max="2147483647" id="profile_reset_time"
+        placeholder="Resets after" [(ngModel)]="profile.resetsAfter" />
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      Actions
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Activate at</th>
+            <th colspan="2">Action</th>
+            <th>
+              <abbr title="Trigger multiple times each time the counter increments">
+                Multi
+              </abbr>
+            </th>
+            <th class="t-fit"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if(profile.actions.length == 0) {
+          <tr>
+            <td colspan="5" class="text-center">No actions specified</td>
+          </tr>
+          }
+
+          @for (action of profile.actions; track $index) {
+          <tr appProfileActionEntry [action]="action" [actionDataSet]="actionDataSet"
+            (deleteAction)="deleteAction($event)"></tr>
+          }
+        </tbody>
+
+        <tbody>
+          <tr>
+            <td colspan="5">
+              <button class="btn btn-primary float-end" (click)="addBlankAction()">Add action</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row mt-1">
+    <div class="col-12">
+      <button class="btn btn-primary mb-1 me-1" [disabled]="isMakingRequest" (click)="saveChanges()">Save</button>
+      <button class="btn btn-danger mb-1 me-1" [disabled]="isMakingRequest" (click)="deletePrompt()">Delete</button>
+    </div>
+  </div>
+  }
+  }
+</div>
+
+<ng-template #deleteProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="create-group-modal-title">Delete profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <p>
+      Please confirm that you want to delete the profile <strong>{{profile?.name ?? "Unknown"}}</strong>.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')"
+      [disabled]="isMakingRequest">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="isMakingRequest">Delete</button>
+  </div>
+</ng-template>

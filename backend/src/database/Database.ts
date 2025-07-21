@@ -20,6 +20,8 @@ import { PasswordlessSignInRequest } from "./models/auth/PasswordlessSignInReque
 import { JoystickRemoteAction } from "./models/remote/joystick/JoystickRemoteAction.model";
 import { JoystickRemoteProfile } from "./models/remote/joystick/JoystickRemoteProfile.model";
 import { VideoCache } from "./models/video-player/VideoCache.model";
+import { BoopSensorProfile } from "./models/boop-sensor/BoopSensorProfile.model";
+import { BoopSensorProfileAction } from "./models/boop-sensor/BoopSensorProfileAction.model";
 
 export class Database {
   private _protogen;
@@ -70,6 +72,10 @@ export class Database {
         // ---------- Actions ----------
         ActionSet,
         ActionSetAction,
+
+        // ---------- Boop sensor ----------
+        BoopSensorProfile,
+        BoopSensorProfileAction,
       ]
     });
   }
