@@ -93,6 +93,7 @@ export interface BoopSensorAction {
   actionType: ActionType;
   action: string;
   triggerMultipleTimes: boolean;
+  metadata: string | null;
 }
 
 export interface BoopSensorInfo {

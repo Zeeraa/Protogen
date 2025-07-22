@@ -70,6 +70,7 @@ export interface JoystickRemoteAction {
   inputType: JoystickRemoteControlInputType;
   actionType: ActionType;
   action: any;
+  metadata: string | null;
 }
 
 export enum JoystickRemoteControlInputType {

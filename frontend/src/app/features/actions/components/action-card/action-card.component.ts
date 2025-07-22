@@ -73,6 +73,7 @@ export class ActionCardComponent implements OnDestroy {
       virtualId: this._virtualIdCounter,
       action: "",
       type: ActionType.NONE,
+      metadata: null,
     });
     this._virtualIdCounter++;
   }

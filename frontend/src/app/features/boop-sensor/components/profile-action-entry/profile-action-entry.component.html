@@ -47,6 +47,14 @@
     <option value="{{actionSet.id}}">{{actionSet.name}}</option>
     }
   </select>
+  } @else if(actionTypeAsString == "TEMPORARY_EXPRESSION") {
+  <select class="form-select" id="expression_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+    @for (expression of actionDataSet.expressions; track $index) {
+    <option value="{{expression.data.uuid}}">{{expression.data.name}}</option>
+    }
+  </select>
+  <input type="number" id="duration_{{componentId}}" [(ngModel)]="action.metadata" class="form-control mt-1"
+    placeholder="Duration in seconds" [disabled]="disabled" />
   } @else if(
   actionTypeAsString == "DISABLE_RGB" ||
   actionTypeAsString == "STOP_VIDEO" ||

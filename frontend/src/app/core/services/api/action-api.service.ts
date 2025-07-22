@@ -46,4 +46,5 @@ export interface Action {
   virtualId?: number;
   type: ActionType;
   action: string;
+  metadata: string | null;
 }
