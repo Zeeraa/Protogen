@@ -13,8 +13,15 @@ import { AbstractVisorColorEffect } from "./colormod/AbstractVisorColorEffect";
 import { Equal } from "typeorm";
 import { FaceColorEffectProperty } from "../../../../../database/models/visor/FaceColorEffectProperty";
 
+/**
+ * Renderer ID for VisorFaceRenderer
+ */
 export const FaceRendererId = "PROTOGEN_FACE";
 
+/**
+ * Renderer that renders images to use as a face for the visor.
+ * It supports expressions, color effects, and temporary expressions.
+ */
 export class VisorFaceRenderer extends VisorRenderer {
   private _expressions: FaceExpression[];
   private _activeExpression: FaceExpression | null;
@@ -24,6 +31,8 @@ export class VisorFaceRenderer extends VisorRenderer {
   private _activeColorEffect: AbstractVisorColorEffect | null;
   private _forcedColorEffect: AbstractVisorColorEffect | null;
   private _availableColorEffects: AbstractVisorColorEffect[];
+  private _temporaryExpressionExpiresAt: number | null = null;
+  private _temporaryExpressionResetTo: string | null = null;
 
   constructor(visor: ProtogenVisor) {
     super(visor, FaceRendererId, "Protogen Face");
@@ -33,17 +42,32 @@ export class VisorFaceRenderer extends VisorRenderer {
     this._colorAdjustmentCanvasDimensions = { width: 0, height: 0 };
     this._activeColorEffect = null;
     this._availableColorEffects = [];
+
+    setInterval(() => {
+      this.tick();
+    }, 100);
   }
 
-  get availableColorEffects() {
+  /**
+   * Get all available color effects for the face renderer.
+   */
+  public get availableColorEffects() {
     return this._availableColorEffects;
   }
 
-  get activeColorEffect() {
+  /**
+   * Get the currently active color effect for the face renderer.
+   */
+  public get activeColorEffect() {
     return this._activeColorEffect;
   }
 
-  set activeColorEffect(effect: AbstractVisorColorEffect | null) {
+  /**
+   * Set the active color effect for the face renderer.
+   * This will also persist the effect to the database.
+   * @param effect The color effect to set as active. If null, it will clear the active color effect.
+   */
+  public set activeColorEffect(effect: AbstractVisorColorEffect | null) {
     this._activeColorEffect = effect;
     this.protogen.database.setData(KV_ActiveVisorColorEffect, effect?.id || null).then().catch(err => {
       this.protogen.logger.error("VisorFaceRenderer", "Failed to save active color effect");
@@ -51,15 +75,22 @@ export class VisorFaceRenderer extends VisorRenderer {
     });
   }
 
-  get forcedColorEffect() {
+  public get forcedColorEffect() {
     return this._forcedColorEffect;
   }
 
-  get expressions() {
+  /**
+   * Get all expressions available in the face renderer.
+   */
+  public get expressions() {
     return this._expressions;
   }
 
-  removeRenderer(uuid: string) {
+  /**
+   * Remove a face renderer by its UUID.
+   * @param uuid The UUID of the face renderer to remove.
+   */
+  public removeRenderer(uuid: string) {
     const index = this.expressions.findIndex(e => e.data.uuid == uuid);
     if (index != -1) {
       this.expressions.splice(index, 1);
@@ -78,7 +109,11 @@ export class VisorFaceRenderer extends VisorRenderer {
     }
   }
 
-  async deleteColorEffect(effect: AbstractVisorColorEffect) {
+  /**
+   * Delete a color effect from the database and remove it from the available effects.
+   * @param effect The color effect to delete.
+   */
+  public async deleteColorEffect(effect: AbstractVisorColorEffect) {
     const repo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
     await repo.delete(effect.id);
 
@@ -89,20 +124,77 @@ export class VisorFaceRenderer extends VisorRenderer {
     this.reloadForcedRgbEffect();
   }
 
-  setActiveExpression(expression: FaceExpression | null) {
+  /**
+   * Activate a temporary expression for a duration.
+   * After the duration, it will reset to the previous active expression.
+   * If no previous expression was active, it will reset to the default expression.
+   *
+   * @param expression The expression to activate temporarily.
+   * @param duration Duration in milliseconds for how long the expression should be active.
+   */
+  public activateTemporaryExpression(expression: FaceExpression, duration: number) {
+    this._temporaryExpressionExpiresAt = new Date().getTime() + duration;
+    // Only update reset to expression if we are not already on a temporary one
+    if (this._temporaryExpressionResetTo == null) {
+      this._temporaryExpressionResetTo = this.activeExpression?.data.uuid || null;
+    }
+    this.setActiveExpression(expression, false);
+  }
+
+  /**
+   * Called on a 100ms interval to perform scheduled actions
+   */
+  private tick() {
+    if (this._temporaryExpressionExpiresAt != null && this._temporaryExpressionResetTo != null) {
+      const now = new Date().getTime();
+      if (now >= this._temporaryExpressionExpiresAt) {
+        const resetTo = this.expressions.find(e => e.data.uuid == this._temporaryExpressionResetTo);
+        if (resetTo != null) {
+          this.setActiveExpression(resetTo);
+        } else {
+          this.protogen.logger.warn("VisorFaceRenderer", "Failed to find expression to reset to after temporary expression");
+          this.activateDefaultExpression();
+        }
+        this._temporaryExpressionExpiresAt = null;
+        this._temporaryExpressionResetTo = null;
+      }
+    }
+  }
+
+  /**
+   * Set the active expression for the face renderer.
+   * This will also clear any temporary expression state.
+   * @param expression The expression to set as active. If null, it will clear the active expression.
+   * @param clearTemporary If true, it will clear any temporary expression state. by default true.
+   */
+  public setActiveExpression(expression: FaceExpression | null, clearTemporary = true) {
     this._activeExpression = expression;
+    if (clearTemporary) {
+      this._temporaryExpressionExpiresAt = null;
+      this._temporaryExpressionResetTo = null;
+    }
     this.reloadForcedRgbEffect();
   }
 
-  get activeExpression() {
+  /**
+   * Get the currently active expression for the face renderer.
+   */
+  public get activeExpression() {
     return this._activeExpression;
   }
 
-  get defaultExpression() {
+  /**
+   * Get the default expression for the face renderer.
+   */
+  public get defaultExpression() {
     return this._defaultExpression;
   }
 
-  set defaultExpression(value: string | null) {
+  /**
+   * Set the default expression for the face renderer.
+   * This will also persist the default expression to the database.
+   */
+  public set defaultExpression(value: string | null) {
     this._defaultExpression = value;
     this.protogen.database.setData(KV_DefaultExpression, value).then().catch(err => {
       this.protogen.logger.error("VisorFaceRenderer", "Failed to save default expression");
@@ -110,7 +202,10 @@ export class VisorFaceRenderer extends VisorRenderer {
     });
   }
 
-  activateDefaultExpression() {
+  /**
+   * Activate the default expression for the face renderer.
+   */
+  public activateDefaultExpression() {
     this._activeExpression = null;
     const defaultExpression = this.expressions.find(e => e.data.uuid == this.defaultExpression);
     if (defaultExpression != null) {
@@ -118,7 +213,14 @@ export class VisorFaceRenderer extends VisorRenderer {
     }
   }
 
-  async saveColorEffect(effect: AbstractVisorColorEffect) {
+  /**
+   * Save a color effect to the database.
+   * If the effect already exists, it will update it.
+   * If it does not exist, it will create a new one.
+   * @param effect The color effect to save.
+   * @returns The saved color effect.
+   */
+  public async saveColorEffect(effect: AbstractVisorColorEffect) {
     const repo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
     let dbEffect = await repo.findOne({
       where: {
@@ -155,7 +257,12 @@ export class VisorFaceRenderer extends VisorRenderer {
     return await repo.save(dbEffect);
   }
 
-  async loadColorEffects() {
+  /**
+   * Load all color effects from the database and set them as available.
+   * It will also activate the last used color effect if it exists.
+   * If the last used effect does not exist, it will set the active color effect to null.
+   */
+  public async loadColorEffects() {
     const repo = this.protogen.database.dataSource.getRepository(FaceColorEffect);
     this._availableColorEffects = [];
 
@@ -193,7 +300,7 @@ export class VisorFaceRenderer extends VisorRenderer {
     }
   }
 
-  reloadForcedRgbEffect() {
+  public reloadForcedRgbEffect() {
     this._forcedColorEffect = null;
     const linkedEffect = this.activeExpression?.data.linkedColorEffect;
     if (linkedEffect != null) {
@@ -204,10 +311,16 @@ export class VisorFaceRenderer extends VisorRenderer {
     }
   }
 
-  get colorEffectToUse() {
+  /**
+   * Get the color effect to use for rendering.
+   */
+  public get colorEffectToUse() {
     return this.forcedColorEffect || this.activeColorEffect || null;
   }
 
+  /**
+   * Initialize the face renderer.
+   */
   public async onInit() {
     const repo = this.protogen.database.dataSource.getRepository(FaceExpressionData);
     const expressions = await repo.find({
@@ -238,6 +351,11 @@ export class VisorFaceRenderer extends VisorRenderer {
     }, 1000 / 20);
   }
 
+  /**
+   * Called by the VisorRenderer to render the face.
+   * It will render the active expression or a black background if no expression is active.
+   * If a color effect is active and it has color mod enabled, it will apply the color adjustments to the image data.
+   */
   public onRender(ctx: CanvasRenderingContext2D, width: number, height: number) {
     const time = new Date().getTime();
 
@@ -272,10 +390,18 @@ export class VisorFaceRenderer extends VisorRenderer {
     }
   }
 
+  /**
+   * Get the preview image to use in the web ui
+   */
   public getPreviewImage(): string | null {
+    // TODO: Render preview
     return null;
   }
 
+  /**
+   * Get the metadate. This renderer does not have any metadata so it returns an empty object.
+   * @returns An empty object.
+   */
   public get metadata(): any {
     return {};
   }
@@ -284,7 +410,10 @@ export class VisorFaceRenderer extends VisorRenderer {
     return RendererType.Face;
   }
 
-  onActivate(): void {
+  /**
+   * Called when the renderer is activated.
+   */
+  public onActivate(): void {
     console.debug("VisorFace::onActivate()");
     this.activateDefaultExpression();
   }
