@@ -79,7 +79,7 @@
   @if(actionTypeAsString == "TEMPORARY_EXPRESSION") {
   <div class="col">
     <label for="duration_{{componentId}}" class="form-label">Duration</label>
-    <input type="number" id="duration_{{componentId}}" [(ngModel)]="action.metadata" class="form-control mt-1"
+    <input type="number" id="duration_{{componentId}}" [(ngModel)]="action.metadata" class="form-control"
       placeholder="Duration in seconds" [disabled]="disabled" />
   </div>
   }
