@@ -37,6 +37,14 @@ export class BoopSensorProfileAction {
   action: string | null;
 
   @Column({
+    name: "metadata",
+    type: "text",
+    nullable: true,
+    default: null,
+  })
+  metadata: string | null;
+
+  @Column({
     name: "trigger_multiple_times",
     type: "boolean",
   })

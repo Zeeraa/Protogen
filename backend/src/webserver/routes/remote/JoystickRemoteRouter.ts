@@ -214,6 +214,7 @@ export class JoystickRemoteRouter extends AbstractRouter {
           actionObj.action = action.action;
           actionObj.actionType = action.actionType;
           actionObj.inputType = action.inputType;
+          actionObj.metadata = action.metadata;
 
           profile.actions.push(actionObj);
         });
@@ -226,6 +227,7 @@ export class JoystickRemoteRouter extends AbstractRouter {
             actionObj.action = null;
             actionObj.actionType = ActionType.NONE;
             actionObj.inputType = type;
+            actionObj.metadata = null;
 
             profile.actions.push(actionObj);
           }
@@ -321,6 +323,7 @@ export class JoystickRemoteRouter extends AbstractRouter {
           actionObj.action = action.action;
           actionObj.actionType = action.actionType;
           actionObj.inputType = action.inputType;
+          actionObj.metadata = action.metadata;
 
           profile.actions.push(actionObj);
         });
@@ -333,6 +336,7 @@ export class JoystickRemoteRouter extends AbstractRouter {
             actionObj.action = null;
             actionObj.actionType = ActionType.NONE;
             actionObj.inputType = type;
+            actionObj.metadata = null;
 
             profile.actions.push(actionObj);
           }
@@ -435,7 +439,7 @@ export class JoystickRemoteRouter extends AbstractRouter {
           this.sequenceIdMap[data.sessionId] = data.sequenceId;
         }
 
-        const status = await this.protogen.actionManager.performAction(data.type, data.action);
+        const status = await this.protogen.actionManager.performAction(data.type, data.action, data.metadata ?? null);
 
         if (status && data.type == ActionType.ACTIVATE_VISOR_RENDERER) {
           // If a video is playing stop playback
@@ -459,6 +463,7 @@ const PerformActionDTO = z.object({
   action: z.string().max(512).nullable(),
   sessionId: z.string().uuid(),
   sequenceId: z.number().int().safe().optional(),
+  metadata: z.string().nullable().optional(),
 });
 
 const AlterProfileActions = z.object({
@@ -466,6 +471,7 @@ const AlterProfileActions = z.object({
   actionType: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
   inputType: z.nativeEnum(JoystickRemoteControlInputType),
+  metadata: z.string().nullable(),
 });
 
 const AlterProfileModel = z.object({

@@ -74,6 +74,7 @@ export class ActionsRouter extends AbstractRouter {
           const actionObj = new ActionSetAction();
           actionObj.type = action.type;
           actionObj.action = action.action;
+          actionObj.metadata = action.metadata;
           set.actions.push(actionObj);
         }
 
@@ -151,6 +152,7 @@ export class ActionsRouter extends AbstractRouter {
           }
           actionObj.action = actionData.action;
           actionObj.type = actionData.type;
+          actionObj.metadata = actionData.metadata;
         }
 
         const result = await repo.save(action);
@@ -246,6 +248,7 @@ const ActionModel = z.object({
   id: z.number().int().safe().positive().optional(),
   type: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
+  metadata: z.string().nullable(),
 });
 
 const AlterActionModel = z.object({

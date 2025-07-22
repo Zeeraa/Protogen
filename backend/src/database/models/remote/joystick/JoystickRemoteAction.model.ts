@@ -38,6 +38,14 @@ export class JoystickRemoteAction {
   })
   action: string | null;
 
+  @Column({
+    name: "metadata",
+    type: "text",
+    nullable: true,
+    default: null,
+  })
+  metadata: string | null;
+
   @ManyToOne(() => JoystickRemoteProfile, p => p.actions, { onDelete: "CASCADE", onUpdate: "CASCADE", nullable: false })
   @JoinColumn({ name: "profile_id" })
   profile: JoystickRemoteProfile;

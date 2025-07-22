@@ -35,13 +35,13 @@ export class ActionManager {
     }
 
     for (const action of set.actions) {
-      await this.performAction(action.type, action.action, reqursionProtectionCounter);
+      await this.performAction(action.type, action.action, action.metadata, reqursionProtectionCounter);
     }
 
     return true;
   }
 
-  public async performAction(type: ActionType, action: string | null, reqursionProtectionCounter = 0): Promise<boolean> {
+  public async performAction(type: ActionType, action: string | null, metadata: string | null, reqursionProtectionCounter = 0): Promise<boolean> {
     //#region Start video playback
     if (type == ActionType.PLAY_VIDEO) {
       const id = parseInt(action || "");
@@ -123,6 +123,23 @@ export class ActionManager {
     }
     //#endregion
 
+    //#region Temporary expression
+    if (type == ActionType.TEMPORARY_EXPRESSION) {
+      const expression = this.protogen.visor.faceRenderer.expressions.find(e => e.data.uuid == action);
+      if (expression == null) {
+        return false;
+      }
+
+      let time = parseInt(String(metadata));
+      if (isNaN(time) || time < 0) {
+        time = 2000; // Default to 2 seconds if invalid
+
+        this.protogen.visor.faceRenderer.activateTemporaryExpression(expression, time);
+        return true;
+      }
+    }
+    //#endregion
+
     //#region Expression RGB
     if (type == ActionType.ACTIVATE_FACE_RGB_EFFECT) {
       const effect = this.protogen.visor.faceRenderer.availableColorEffects.find(e => e.id == action);
@@ -154,7 +171,6 @@ export class ActionManager {
     //#endregion
 
     //#region Boop sensor
-
     if (type == ActionType.RESET_BOOP_SENSOR_COUNTER) {
       await this.protogen.boopSensorManager.resetBoopCounter();
       return true;

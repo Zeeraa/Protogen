@@ -94,6 +94,7 @@ export class BoopSensorManager {
           actionData.triggerAtValue,
           actionData.actionType,
           actionData.action,
+          actionData.metadata,
           actionData.triggerMultipleTimes,
         );
         actions.push(action);
