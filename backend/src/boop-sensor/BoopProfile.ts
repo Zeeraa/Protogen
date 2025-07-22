@@ -45,7 +45,7 @@ export class BoopProfile {
       }
 
       this.boopSensorManager.protogen.logger.info("BoopSensor", `Boop profile ${cyan(this.name)} triggered action ${cyan(action.actionType)} with data ${cyan(action.action ?? "null")} at value ${cyan(String(this._counter))}`);
-      await this.boopSensorManager.protogen.actionManager.performAction(action.actionType, action.action);
+      await this.boopSensorManager.protogen.actionManager.performAction(action.actionType, action.action, action.metadata);
       action.didRun = true;
     }
 

@@ -384,6 +384,7 @@ export class BoopSensorRouter extends AbstractRouter {
               actionData.triggerAtValue,
               actionData.actionType,
               actionData.action,
+              actionData.metadata,
               actionData.triggerMultipleTimes,
             );
             profile.actions.push(action);
@@ -392,6 +393,7 @@ export class BoopSensorRouter extends AbstractRouter {
             action.actionType = actionData.actionType;
             action.action = actionData.action;
             action.triggerMultipleTimes = actionData.triggerMultipleTimes;
+            action.metadata = actionData.metadata;
           }
         }
 
@@ -453,5 +455,6 @@ const ProfileModel = z.object({
     actionType: z.nativeEnum(ActionType),
     action: z.string().max(512),
     triggerMultipleTimes: z.boolean(),
+    metadata: z.coerce.string().nullable(),
   })),
 });

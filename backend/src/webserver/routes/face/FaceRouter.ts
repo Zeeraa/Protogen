@@ -328,6 +328,56 @@ export class FaceRouter extends AbstractRouter {
       }
     });
 
+    this.router.post("/expressions/:id/activate-temporary", async (req, res) => {
+      /*
+      #swagger.path = '/face/expressions/{id}/activate-temporary'
+      #swagger.tags = ['Face'],
+      #swagger.description = "Activate expression for a specified duration"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[404] = { description: "Expression not found" }
+
+      #swagger.parameters['activateRenderer'] = {
+        in: 'query',
+        description: 'If true also activate the face renderer',
+        type: 'boolean'
+      }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = ActivateTemporaryModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+        const data = parsed.data;
+
+        const expression = this.protogen.visor.faceRenderer.expressions.find(e => e.data.uuid == req.params.id);
+        if (expression == null) {
+          res.status(404).send({ message: "Expression not found" });
+          return;
+        }
+
+        if (String(req.query["activateRenderer"]).toLowerCase() == "true") {
+          if (this.protogen.visor.activeRenderer?.id != FaceRendererId) {
+            this.protogen.visor.activateRenderer(FaceRendererId, true);
+          }
+        }
+
+        this.protogen.visor.faceRenderer.activateTemporaryExpression(expression, data.duration);
+
+        res.json({
+          data: expression.data,
+          preview: expression.preview,
+        });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.delete("/expressions/:id", async (req, res) => {
       /*
       #swagger.path = '/face/expressions/{id}'
@@ -712,20 +762,24 @@ function effectToDTO(effect: AbstractVisorColorEffect) {
   }
 }
 
-export const SetActiveEffectModel = z.object({
-  id: z.string().nullable(),
-})
+const ActivateTemporaryModel = z.object({
+  duration: z.number().int().positive().safe(),
+});
 
-export const NewEffectModel = z.object({
+const SetActiveEffectModel = z.object({
+  id: z.string().nullable(),
+});
+
+const NewEffectModel = z.object({
   name: z.string().max(255).trim().min(1),
   effect: z.string(),
-})
+});
 
-export const AlterEffectModel = z.object({
+const AlterEffectModel = z.object({
   name: z.string().max(255).trim().min(1),
 });
 
-export const AlterFaceSettingsModel = z.object({
+const AlterFaceSettingsModel = z.object({
   defaultExpressionId: z.string().uuid().nullable().optional(),
 });
 
@@ -734,7 +788,7 @@ const SetPropertyModel = z.object({
 });
 
 
-export const AlterFaceExpressionModel = z.object({
+const AlterFaceExpressionModel = z.object({
   name: z.string().max(255).trim().min(1),
   image: z.string().max(255).trim().min(1),
   mirrorImage: z.boolean(),

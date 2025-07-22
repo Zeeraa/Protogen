@@ -10,6 +10,7 @@ export enum ActionType {
   RUN_ACTION_SET = "RUN_ACTION_SET",
   RESET_BOOP_SENSOR_COUNTER = "RESET_BOOP_SENSOR_COUNTER",
   TOGGLE_BOOP_SENSOR = "TOGGLE_BOOP_SENSOR",
+  TEMPORARY_EXPRESSION = "TEMPORARY_EXPRESSION",
 }
 
 
@@ -47,6 +48,9 @@ export function translateActionType(type: ActionType) {
 
     case ActionType.TOGGLE_BOOP_SENSOR:
       return "Toggle boop sensor";
+
+    case ActionType.TEMPORARY_EXPRESSION:
+      return "Activate temporary expression";
 
     default:
       return "Unknown";

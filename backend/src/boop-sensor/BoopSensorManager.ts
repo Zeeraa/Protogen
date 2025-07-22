@@ -94,6 +94,7 @@ export class BoopSensorManager {
           actionData.triggerAtValue,
           actionData.actionType,
           actionData.action,
+          actionData.metadata,
           actionData.triggerMultipleTimes,
         );
         actions.push(action);
@@ -178,6 +179,7 @@ export class BoopSensorManager {
       dbAction.actionType = action.actionType;
       dbAction.action = action.action;
       dbAction.triggerMultipleTimes = action.triggerMultipleTimes;
+      dbAction.metadata = action.metadata;
     }
 
     return await repo.save(dbProfile);
@@ -253,6 +255,7 @@ export function boopProfileToDTO(profile: BoopProfile) {
       actionType: action.actionType,
       action: action.action,
       triggerMultipleTimes: action.triggerMultipleTimes,
+      metadata: action.metadata,
     })),
   };
 }

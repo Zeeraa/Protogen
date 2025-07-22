@@ -48,6 +48,7 @@ export interface JoystickAlterProfileActions {
   id: number | undefined;
   actionType: ActionType;
   action: string | null;
+  metadata: string | null;
   inputType: JoystickRemoteControlInputType;
 }
 
@@ -70,6 +71,7 @@ export interface JoystickRemoteAction {
   inputType: JoystickRemoteControlInputType;
   actionType: ActionType;
   action: any;
+  metadata: string | null;
 }
 
 export enum JoystickRemoteControlInputType {

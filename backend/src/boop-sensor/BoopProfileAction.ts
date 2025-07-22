@@ -6,6 +6,7 @@ export class BoopProfileAction {
   public actionType: ActionType;
   public action: string | null;
   public triggerMultipleTimes: boolean;
+  public metadata: string | null;
   public didRun = false;
 
   constructor(
@@ -13,12 +14,14 @@ export class BoopProfileAction {
     triggerAtValue: number,
     actionType: ActionType,
     action: string | null,
+    metadata: string | null,
     triggerMultipleTimes: boolean,
   ) {
     this._id = id;
     this.triggerAtValue = triggerAtValue;
     this.actionType = actionType;
     this.action = action;
+    this.metadata = metadata;
     this.triggerMultipleTimes = triggerMultipleTimes;
   }
 

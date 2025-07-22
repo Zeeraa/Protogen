@@ -155,6 +155,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       actionType: ActionType.NONE,
       action: '',
       triggerMultipleTimes: false,
+      metadata: null,
     };
     this.profile.actions.push(newAction);
   }

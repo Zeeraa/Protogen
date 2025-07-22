@@ -29,4 +29,12 @@ export class ActionSetAction {
     default: null,
   })
   action: string | null;
+
+  @Column({
+    name: "metadata",
+    type: "text",
+    nullable: true,
+    default: null,
+  })
+  metadata: string | null;
 }

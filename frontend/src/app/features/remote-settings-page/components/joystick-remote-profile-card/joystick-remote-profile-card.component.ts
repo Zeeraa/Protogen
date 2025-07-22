@@ -99,6 +99,7 @@ export class JoystickRemoteProfileCardComponent implements OnDestroy {
         action: action.action,
         actionType: action.actionType,
         inputType: action.inputType,
+        metadata: action.metadata,
         id: action.id,
       });
     });

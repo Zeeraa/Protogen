@@ -50,9 +50,17 @@
       }
     </select>
     } @else if(actionTypeAsString == "RUN_ACTION_SET") {
+    <label for="action_set_{{componentId}}" class="form-label">Action set</label>
     <select class="form-select" id="action_set_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
       @for (actionSet of actionDataSet.actionSets; track $index) {
       <option value="{{actionSet.id}}">{{actionSet.name}}</option>
+      }
+    </select>
+    } @else if(actionTypeAsString == "TEMPORARY_EXPRESSION") {
+    <label for="expression_{{componentId}}" class="form-label">Expression</label>
+    <select class="form-select" id="expression_{{componentId}}" [(ngModel)]="action.action" [disabled]="disabled">
+      @for (expression of actionDataSet.expressions; track $index) {
+      <option value="{{expression.data.uuid}}">{{expression.data.name}}</option>
       }
     </select>
     } @else if(
@@ -66,4 +74,13 @@
     <span class="text-danger">Unknown action type</span>
     }
   </div>
+
+  <!-- Special case when duration is needed -->
+  @if(actionTypeAsString == "TEMPORARY_EXPRESSION") {
+  <div class="col">
+    <label for="duration_{{componentId}}" class="form-label">Duration</label>
+    <input type="number" id="duration_{{componentId}}" [(ngModel)]="action.metadata" class="form-control"
+      placeholder="Duration in seconds" [disabled]="disabled" />
+  </div>
+  }
 </div>
