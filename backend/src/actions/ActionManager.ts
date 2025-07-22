@@ -130,9 +130,9 @@ export class ActionManager {
         return false;
       }
 
-      let time = parseInt(String(metadata));
+      let time = parseFloat(String(metadata));
       if (isNaN(time) || time < 0) {
-        time = 2000; // Default to 2 seconds if invalid
+        time = 2.0; // Default to 2 seconds if invalid
       }
 
       this.protogen.visor.faceRenderer.activateTemporaryExpression(expression, time);
