@@ -48,6 +48,7 @@ export interface JoystickAlterProfileActions {
   id: number | undefined;
   actionType: ActionType;
   action: string | null;
+  metadata: string | null;
   inputType: JoystickRemoteControlInputType;
 }
 

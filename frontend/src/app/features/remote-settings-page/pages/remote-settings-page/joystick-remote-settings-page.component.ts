@@ -93,6 +93,7 @@ export class JoystickRemoteSettingsPageComponent implements OnInit, OnDestroy {
       throw err;
     })).subscribe(profiles => {
       this.profiles = profiles;
+      console.debug("Loaded profiles:", this.profiles);
     });
   }
 
