@@ -130,10 +130,11 @@ export class VisorFaceRenderer extends VisorRenderer {
    * If no previous expression was active, it will reset to the default expression.
    *
    * @param expression The expression to activate temporarily.
-   * @param duration Duration in milliseconds for how long the expression should be active.
+   * @param duration Duration in seconds for how long the expression should be active.
    */
   public activateTemporaryExpression(expression: FaceExpression, duration: number) {
-    this._temporaryExpressionExpiresAt = new Date().getTime() + duration;
+    this._temporaryExpressionExpiresAt = new Date().getTime() + duration * 1000;
+
     // Only update reset to expression if we are not already on a temporary one
     if (this._temporaryExpressionResetTo == null) {
       this._temporaryExpressionResetTo = this.activeExpression?.data.uuid || null;
