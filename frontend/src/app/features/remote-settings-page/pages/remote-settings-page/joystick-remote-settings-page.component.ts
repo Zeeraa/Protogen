@@ -151,6 +151,7 @@ export class JoystickRemoteSettingsPageComponent implements OnInit, OnDestroy {
         this.remoteState = typeAssert<JoystickRemoteState>(msg.data);
       }
     });
+    this.loadProfiles();
   }
 
   ngOnDestroy(): void {
