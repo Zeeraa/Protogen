@@ -463,7 +463,7 @@ const PerformActionDTO = z.object({
   action: z.string().max(512).nullable(),
   sessionId: z.string().uuid(),
   sequenceId: z.number().int().safe().optional(),
-  metadata: z.string().nullable().optional(),
+  metadata: z.coerce.string().nullable().optional(),
 });
 
 const AlterProfileActions = z.object({
@@ -471,7 +471,7 @@ const AlterProfileActions = z.object({
   actionType: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
   inputType: z.nativeEnum(JoystickRemoteControlInputType),
-  metadata: z.string().nullable(),
+  metadata: z.coerce.string().nullable(),
 });
 
 const AlterProfileModel = z.object({

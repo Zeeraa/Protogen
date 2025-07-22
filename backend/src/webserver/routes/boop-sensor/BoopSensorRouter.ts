@@ -455,6 +455,6 @@ const ProfileModel = z.object({
     actionType: z.nativeEnum(ActionType),
     action: z.string().max(512),
     triggerMultipleTimes: z.boolean(),
-    metadata: z.string().nullable(),
+    metadata: z.coerce.string().nullable(),
   })),
 });

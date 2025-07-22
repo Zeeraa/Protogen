@@ -248,7 +248,7 @@ const ActionModel = z.object({
   id: z.number().int().safe().positive().optional(),
   type: z.nativeEnum(ActionType),
   action: z.string().max(512).nullable(),
-  metadata: z.string().nullable(),
+  metadata: z.coerce.string().nullable(),
 });
 
 const AlterActionModel = z.object({

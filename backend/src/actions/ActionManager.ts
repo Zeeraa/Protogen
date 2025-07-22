@@ -133,10 +133,10 @@ export class ActionManager {
       let time = parseInt(String(metadata));
       if (isNaN(time) || time < 0) {
         time = 2000; // Default to 2 seconds if invalid
-
-        this.protogen.visor.faceRenderer.activateTemporaryExpression(expression, time);
-        return true;
       }
+
+      this.protogen.visor.faceRenderer.activateTemporaryExpression(expression, time);
+      return true;
     }
     //#endregion
 
