@@ -1,12 +1,15 @@
 import { uuidv7 } from "uuidv7";
 import { FaceExpressionData } from "../database/models/visor/FaceExpression.model";
 import { Protogen } from "../Protogen";
-import { KV_ActiveRendererKey, KV_ActiveVisorColorEffect, KV_DefaultExpression, KV_DidRunInitialSetup } from "../utils/KVDataStorageKeys";
+import { KV_ActiveRendererKey, KV_ActiveVisorColorEffect, KV_BoopSensorProfile, KV_DefaultExpression, KV_DidRunInitialSetup, KV_EnableHUD, KV_EnableSwagger, KV_RbgPreviewWidth, KV_RgbPreviewHeigth } from "../utils/KVDataStorageKeys";
 import { cyan } from "colors";
 import { FaceRendererId } from "../visor/rendering/renderers/special/face/VisorFaceRender";
 import { FaceColorEffect } from "../database/models/visor/FaceColorEffect";
 import { StaticFaceColorEffectName } from "../visor/rendering/renderers/special/face/colormod/VisorColorEffects";
 import { FaceColorEffectProperty } from "../database/models/visor/FaceColorEffectProperty";
+import { BoopSensorProfile } from "../database/models/boop-sensor/BoopSensorProfile.model";
+import { ActionType } from "../actions/ActionType";
+import { BoopSensorProfileAction } from "../database/models/boop-sensor/BoopSensorProfileAction.model";
 
 export class InitialSetup {
   private protogen;
@@ -26,6 +29,7 @@ export class InitialSetup {
     }
     this.protogen.logger.info("InitialSetup", "Running initial setup...");
 
+    const expressions: FaceExpressionData[] = [];
     // Create default expressions
     for (const expression of DefaultExpressions) {
       const id = uuidv7();
@@ -44,11 +48,9 @@ export class InitialSetup {
         this.protogen.database.setData(KV_DefaultExpression, id);
       }
 
-      await this.protogen.database.dataSource.getRepository(FaceExpressionData).save(expressionData);
+      const created = await this.protogen.database.dataSource.getRepository(FaceExpressionData).save(expressionData);
+      expressions.push(created);
     }
-
-    // Set default visor renderer
-    this.protogen.database.setData(KV_ActiveRendererKey, FaceRendererId)
 
     // Create color effects
     // Static
@@ -99,8 +101,38 @@ export class InitialSetup {
       await this.protogen.database.dataSource.getRepository(FaceColorEffect).save(colorEffect);
     }
 
-    this.protogen.logger.info("InitialSetup", "Initial setup completed.");
-    await this.protogen.database.setData(KV_DidRunInitialSetup, "true");
+    this.protogen.logger.info("InitialSetup", "Creating boop sensor profile");
+    const surprisedExpression = expressions.find(e => e.name === "Surprised");
+    if (!surprisedExpression) {
+      this.protogen.logger.error("InitialSetup", "Could not find surprised expression for boop sensor profile");
+    } else {
+      const profile = new BoopSensorProfile();
+      profile.id = uuidv7();
+      profile.name = "Default";
+      profile.resetsAfter = 30; // 30 seconds
+      profile.actions = [];
+
+      const action = new BoopSensorProfileAction();
+      action.id = uuidv7();
+      action.triggerAtValue = 1;
+      action.actionType = ActionType.TEMPORARY_EXPRESSION;
+      action.action = surprisedExpression.uuid;
+      action.metadata = String(2); // 2 seconds duration
+      action.triggerMultipleTimes = true;
+
+      profile.actions.push(action);
+
+      const created = await this.protogen.database.dataSource.getRepository(BoopSensorProfile).save(profile);
+      this.protogen.database.setData(KV_BoopSensorProfile, created.id)
+    }
+
+    this.protogen.logger.info("InitialSetup", "Setting key store values");
+    for (const [key, value] of Object.entries(KeyStoreValues)) {
+      this.protogen.logger.info("InitialSetup", `Setting key ${key} with value ${value}`);
+      await this.protogen.database.setData(key, value);
+    }
+
+    this.protogen.logger.info(KV_BoopSensorProfile, "Initial setup completed.");
   }
 }
 
@@ -109,4 +141,15 @@ const DefaultExpressions: { name: string, image: string, replaceColors: boolean,
   { name: "Happy", image: "asset://proto_face_happy", replaceColors: true, isDefault: false },
   { name: "Sad", image: "asset://proto_face_sad", replaceColors: true, isDefault: false },
   { name: "Angry", image: "asset://proto_face_angry", replaceColors: true, isDefault: false },
+  { name: "Surprised", image: "asset://proto_face_surprised", replaceColors: true, isDefault: false },
 ];
+
+// Record containing the default values to use
+const KeyStoreValues: Record<string, string> = {
+  [KV_ActiveRendererKey]: FaceRendererId,
+  [KV_RbgPreviewWidth]: "1280",
+  [KV_RgbPreviewHeigth]: "720",
+  [KV_DidRunInitialSetup]: "true",
+  [KV_EnableHUD]: "true",
+  [KV_EnableSwagger]: "false",
+}
