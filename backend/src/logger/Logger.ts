@@ -3,6 +3,9 @@ import { Protogen } from "../Protogen";
 import { appendFileSync } from "fs";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 
+/**
+ * Logger that prints to the node console and the web console
+ */
 export class Logger {
   private _protogen;
 
@@ -14,6 +17,11 @@ export class Logger {
     return this._protogen;
   }
 
+  /**
+   * Print message with info log level.
+   * @param system The name of the subsystem or null if its a generic message.
+   * @param message The message to send.
+   */
   public info(system: string | null, message: string) {
     let msg = "";
     if (system != null) {
@@ -25,6 +33,11 @@ export class Logger {
     this.handleMessage("log", msg);
   }
 
+  /**
+     * Print message with warning log level.
+     * @param system The name of the subsystem or null if its a generic message.
+     * @param message The message to send.
+     */
   public warn(system: string | null, message: string) {
     let msg = "";
     if (system != null) {
@@ -36,6 +49,11 @@ export class Logger {
     this.handleMessage("warning", msg);
   }
 
+  /**
+   * Print message with info error level.
+   * @param system The name of the subsystem or null if its a generic message.
+   * @param message The message to send.
+   */
   public error(system: string | null, message: string) {
     let msg = "";
     if (system != null) {
@@ -47,11 +65,20 @@ export class Logger {
     this.handleMessage("error", msg);
   }
 
+  /**
+   * Get the path to the session log file.
+   * @returns Log file path.
+   */
   public get sessionLogFile() {
     return this.protogen.config.logDirectory + "/session.log";
   }
 
-  private handleMessage(type: string, data: string) {
+  /**
+   * Internal function that handles logging to file and console.
+   * @param type The log type
+   * @param data The log message
+   */
+  private handleMessage(type: LogType, data: string) {
     const path = this.sessionLogFile;
     appendFileSync(path, type + "," + data + "\n");
 
@@ -61,3 +88,5 @@ export class Logger {
     }
   }
 }
+
+type LogType = "log" | "warning" | "error";

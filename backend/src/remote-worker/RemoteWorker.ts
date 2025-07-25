@@ -3,6 +3,9 @@ import { Protogen } from "../Protogen";
 import { createReadStream, createWriteStream } from "fs";
 import { AnimationCacheEntry } from "../visor/rendering/images/AnimatedRenderableImage";
 
+/**
+ * Handles communication with the remote worker for processing tasks like GIF processing and video downloading.
+ */
 export class ProtogenRemoteWorker {
   private _protogen;
 
@@ -10,6 +13,9 @@ export class ProtogenRemoteWorker {
     this._protogen = protogen;
   }
 
+  /**
+   * Get headers to use for each request to the remote worker.
+   */
   private get headers(): any {
     const headers: any = {};
 
@@ -20,6 +26,13 @@ export class ProtogenRemoteWorker {
     return headers;
   }
 
+  /**
+   * Process a GIF file asynchronously on the remote worker.
+   * @param file The path of the file to process.
+   * @param width The desired width of the output GIF.
+   * @param height The desired height of the output GIF.
+   * @returns A promise that resolves to an array of AnimationCacheEntry objects.
+   */
   public async processGifAsync(file: string, width: number, height: number): Promise<AnimationCacheEntry[]> {
     const stream = createReadStream(file);
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -39,6 +52,13 @@ export class ProtogenRemoteWorker {
     return response.data as AnimationCacheEntry[];
   }
 
+  /**
+   * Creates a new video download job on the remote worker.
+   * @param url The URL of the video to download.
+   * @param mirror Whether to mirror the video.
+   * @param flip Whether to flip the video.
+   * @returns A promise that resolves to the created video download job.
+   */
   public async createJob(url: string, mirror: boolean, flip: boolean): Promise<VideoDownloadJob> {
     const result = await axios.post(this.config.url + "/video_downloader/job", {
       url: url,
@@ -48,6 +68,11 @@ export class ProtogenRemoteWorker {
     return result.data as VideoDownloadJob;
   }
 
+  /**
+   * Get a video download job by its ID.
+   * @param jobId The ID of the job to retrieve.
+   * @returns A promise that resolves to the VideoDownloadJob or null if not found.
+   */
   public async getJob(jobId: string): Promise<VideoDownloadJob | null> {
     try {
       const result = await axios.get(this.config.url + "/video_downloader/job/" + jobId, { headers: this.headers });

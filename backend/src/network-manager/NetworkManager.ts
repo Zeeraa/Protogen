@@ -1,6 +1,9 @@
 import axios from "axios";
 import { Protogen } from "../Protogen";
 
+/**
+ * Manages network connectivity status
+ */
 export class NetworkManager {
   private _protogen: Protogen;
   private _hasConnectivity: boolean = false;
@@ -18,6 +21,9 @@ export class NetworkManager {
     return this._protogen;
   }
 
+  /**
+   * Checks the network connectivity and update isp info.
+   */
   public async runConnectivityCheck() {
     try {
       const response = await axios.get("https://wtfismyip.com/json", { timeout: 20 * 1000 });
@@ -45,14 +51,26 @@ export class NetworkManager {
     }
   }
 
+  /**
+   * Check if the device has network connectivity.
+   * @returns True if the device has network connectivity, false otherwise.
+   */
   public get hasConnectivity() {
     return this._hasConnectivity;
   }
 
+  /**
+   * Get the current public IP address.
+   * @return The public IP address or null if not available.
+   */
   public get ip() {
     return this._ip;
   }
 
+  /**
+   * Get the current ISP information.
+   * @return The ISP name or null if not available.
+   */
   public get isp() {
     return this._isp;
   }

@@ -11,31 +11,55 @@ export class RgbScene {
     this._effects = [];
   }
 
+  /**
+   * Id of the scene.
+   */
   public get id() {
     return this._id;
   }
 
+  /**
+   * Name of the scene.
+   */
   public get name() {
     return this._name;
   }
 
+  /**
+   * Sets the name of the scene.
+   */
   public set name(name: string) {
     this._name = name;
   }
 
+  /**
+   * Gets all available effects.
+   * @return An array of AbstractRgbEffect objects.
+   */
   public get effects() {
     return this._effects;
   }
 
+  /**
+   * Sorts the effects by the render order
+   */
   public updateRenderOrder() {
     this.effects.sort((a, b) => a.renderOrder - b.renderOrder);
   }
 
-  removeEffect(effect: AbstractRgbEffect) {
+  /**
+   * Remove an effect from the scene.
+   * @param effect The effect to remove.
+   */
+  public removeEffect(effect: AbstractRgbEffect) {
     this._effects = this.effects.filter(e => e.id != effect.id);
   }
 
-  addEffect(effect: AbstractRgbEffect) {
+  /**
+   * Add a new effect to the scene.
+   * @param effect The effect to add to the scene.
+   */
+  public addEffect(effect: AbstractRgbEffect) {
     this.effects.push(effect);
   }
 

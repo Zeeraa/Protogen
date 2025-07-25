@@ -11,6 +11,9 @@ import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { KV_LastUsedRgbScene, KV_RbgPreviewWidth, KV_RgbPreviewFullSizeOnLargeViewports, KV_RgbPreviewHeigth } from "../utils/KVDataStorageKeys";
 import { cyan } from "colors";
 
+/**
+ * Manages RGB scenes and effects.
+ */
 export class RgbManager {
   private _protogen;
   private _ledBuffer: number[];
@@ -42,16 +45,26 @@ export class RgbManager {
     return this.protogen.config.rgb;
   }
 
+  /**
+   * Initializes the RGB manager and fetches data from the database.
+   */
   public async init() {
     this.protogen.database.initMissingData(KV_RbgPreviewWidth, "720");
     this.protogen.database.initMissingData(KV_RgbPreviewHeigth, "400");
     this.protogen.database.initMissingData(KV_RgbPreviewFullSizeOnLargeViewports, "false");
   }
 
+  /**
+   * Get the led count for the addressable RGB strip.
+   * @returns The number of LEDs in the RGB strip.
+   */
   public get ledCount() {
     return this.config.ledCount;
   }
 
+  /**
+   * Called on a schedule to update the RGB strip.
+   */
   public tick() {
     for (let i = 0; i < this._ledBuffer.length; i++) {
       this._ledBuffer[i] = ProtoColors.black;
@@ -63,10 +76,18 @@ export class RgbManager {
     this.send();
   }
 
+  /**
+   * Get the active rgb scene.
+   */
   public get activeScene() {
     return this._activeScene;
   }
 
+  /**
+   * Apply the last used RGB scene from the database.
+   * If no last used scene is found, it will return true without applying anything.
+   * @returns true if a scene was applied or false if an error occurred.
+   */
   public async applyLastScene() {
     this.protogen.logger.info("RGB", "Fetching last used RGB scene");
     try {
@@ -87,6 +108,10 @@ export class RgbManager {
     return false;
   }
 
+  /**
+   * Saves the last used RGB scene to the database.
+   * @returns true if the scene was saved successfully, false if an error occurred.
+   */
   public async saveLastUsedScene() {
     try {
       const value = this.activeScene == null ? null : this.activeScene.id;
@@ -98,6 +123,12 @@ export class RgbManager {
     }
   }
 
+  /**
+   * Sets the active RGB scene.
+   * If the scene is null, it will disable the RGB scene.
+   * @param scene The scene to activate.
+   * @param updateDatabase Whether to update the database with the last used scene.
+   */
   public setActiveScene(scene: RgbScene | null, updateDatabase = true) {
     if (scene != null) {
       this.protogen.logger.info("RGB", "Activating RGB scene " + cyan(scene.name));
@@ -110,6 +141,9 @@ export class RgbManager {
     }
   }
 
+  /**
+   * Send the led frame buffer to the RGB strip and all connected clients.
+   */
   private send() {
     if (this._ledBuffer.length == 0) {
       return; // Cant send an empty rgb packet
@@ -124,6 +158,9 @@ export class RgbManager {
     this.protogen.hardwareAbstractionLayer.writeLedData(this._ledBuffer);
   }
 
+  /**
+   * Loads all RGB scenes from the database and constructs them.
+   */
   public async loadScenes() {
     this.protogen.logger.info("RgbManager", "Loading scenes...")
     this._scenes = [];
@@ -159,6 +196,11 @@ export class RgbManager {
     this.protogen.logger.info("RgbManager", this.scenes.length + " scenes loaded");
   }
 
+  /**
+   * Saves the RGB scene to the database.
+   * @param scene The scene to save.
+   * @returns true if the scene was saved successfully, false if an error occurred.
+   */
   public async saveScene(scene: RgbScene) {
     const repo = this.protogen.database.dataSource.getRepository(StoredRgbScene);
     const existing = await repo.findOne({
@@ -208,6 +250,11 @@ export class RgbManager {
     return await repo.save(dbScene);
   }
 
+  /**
+   * Create a new blank RGB scene.
+   * @param name The name of the scene.
+   * @returns The created scene.
+   */
   public async createBlankScene(name: string) {
     const scene = new RgbScene(uuidv7(), name);
     await this.saveScene(scene);
@@ -215,6 +262,10 @@ export class RgbManager {
     return scene;
   }
 
+  /**
+   * Deletes an RGB scene.
+   * @param scene The scene to delete.
+   */
   public async deleteScene(scene: RgbScene) {
     if (this.activeScene?.id == scene.id) {
       this._activeScene = null;
@@ -233,6 +284,10 @@ export class RgbManager {
     this._scenes = this._scenes.filter(s => s.id != scene.id);
   }
 
+  /**
+   * Get all available RGB scenes.
+   * @returns An array of RgbScene objects.
+   */
   public get scenes() {
     return this._scenes;
   }
