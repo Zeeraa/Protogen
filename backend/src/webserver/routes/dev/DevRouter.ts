@@ -1,4 +1,4 @@
-import { EmulatedHardwareImplementation, EmulatedHardwareState } from "../../../hardware/emulated/EmulatedHardwareImplementation";
+import { EmulatedHardwareImplementation, EmulatedHardwareState } from "../../../hardware/implementations/EmulatedHardwareImplementation";
 import { HardwareType } from "../../../hardware/HardwareType";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";

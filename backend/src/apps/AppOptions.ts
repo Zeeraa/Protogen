@@ -1,3 +1,6 @@
+/**
+ * Additional option for apps
+ */
 export interface AppOptions {
   /**
    * If true the app will lock rendering by other visor renderers and draw the content of the app canvas to the visor

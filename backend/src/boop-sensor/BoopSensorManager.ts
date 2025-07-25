@@ -36,10 +36,18 @@ export class BoopSensorManager {
     return this._protogen;
   }
 
+  /**
+   * Check if the boop sensor is enabled.
+   * @returns True if the boop sensor is enabled, false otherwise.
+   */
   public get enabled() {
     return this._enabled;
   }
 
+  /**
+   * Set the enabled state of the boop sensor.
+   * @param value True to enable the boop sensor, false to disable it.
+   */
   public set enabled(value: boolean) {
     this._enabled = value;
     if (!value) {
@@ -47,16 +55,29 @@ export class BoopSensorManager {
     }
   }
 
+  /**
+   * Set the enabled state of the boop sensor.
+   * This method persists the enabled state in the database.
+   * @param value True to enable the boop sensor, false to disable it.
+   */
   public async setEnabledPersistently(value: boolean) {
     this.enabled = value;
     await this.protogen.database.setData(KV_BoopSensorEnabled, String(value));
   }
 
+  /**
+   * Toggles the enabled state of the boop sensor.
+   * This method persists the new state in the database.
+   */
   public async toggleEnabled() {
     this.enabled = !this.enabled;
     await this.setEnabledPersistently(this.enabled);
   }
 
+  /**
+   * Called when the state of the sensor changes
+   * @param state The new state of the sensor
+   */
   protected async handleBoopState(state: boolean) {
     // No need to check the enabled value here since its checked by the sensor manager class
     this._lastTriggerTimestamp = new Date().getTime();
@@ -70,10 +91,17 @@ export class BoopSensorManager {
     }
   }
 
+  /**
+   * Get the state of the sensor.
+   * @returns True if the sensor is pressed and false otherwise.
+   */
   public get state() {
     return this._state;
   }
 
+  /**
+   * Initialize the boop sensor manager and load data from the database.
+   */
   public async init() {
     this._profiles = [];
     this._activeProfile = null;
@@ -145,6 +173,11 @@ export class BoopSensorManager {
     }
   }
 
+  /**
+   * Save changes to a profile.
+   * @param profile The profile to save.
+   * @returns The saved profile.
+   */
   public async saveProfile(profile: BoopProfile) {
     const repo = this._protogen.database.dataSource.getRepository(BoopSensorProfile);
     let dbProfile = await repo.findOne({
@@ -185,6 +218,11 @@ export class BoopSensorManager {
     return await repo.save(dbProfile);
   }
 
+  /**
+   * Set the active profile.
+   * This can also be used to deactivate the current profile by passing null.
+   * @param profile The profile to set as active or null.
+   */
   public async setActiveProfile(profile: BoopProfile | null) {
     this._activeProfile?.onDeactivate();
     this._activeProfile = profile;
@@ -192,6 +230,11 @@ export class BoopSensorManager {
     this.protogen.database.setData(KV_BoopSensorProfile, profile?.id ?? null);
   }
 
+  /**
+   * Delete a profile from the database.
+   * @param profile The profile to delete.
+   * @returns The result of the delete operation.
+   */
   public deleteProfile(profile: BoopProfile) {
     if (this.activeProfile && this.activeProfile.id === profile.id) {
       this.setActiveProfile(null);
@@ -202,36 +245,69 @@ export class BoopSensorManager {
     return repo.delete({ id: profile.id });
   }
 
+  /**
+   * Get all registered profiles.
+   * @returns An array of BoopProfile instances.
+   */
   public get profiles(): BoopProfile[] {
     return this._profiles;
   }
 
+  /**
+   * Get the currently active profile.
+   * @returns The active BoopProfile or null if no profile is active.
+   */
   public get activeProfile(): BoopProfile | null {
     return this._activeProfile;
   }
 
+  /**
+   * Get the total amount of times the sensor has been triggered.
+   * @returns The total sensor count.
+   */
   public get boopCounter(): number {
     return this._boopCounter;
   }
 
+  /**
+   * Check if the counter should show on the HUD.
+   * @returns True if the counter should show on the HUD, false otherwise.
+   */
   public get showOnHud(): boolean {
     return this._showOnHud;
   }
 
+  /**
+   * Set if the counter should show on the HUD.
+   * This method persists the value in the database.
+   * @param value True to show the counter on the HUD, false to hide it.
+   */
   public async setShowOnHud(value: boolean) {
     this._showOnHud = value;
     await this.protogen.database.setData(KV_BoopSensorShowOnHud, String(value));
   }
 
+  /**
+   * Reset the trigger count for the sensor.
+   */
   public async resetBoopCounter() {
     this._boopCounter = 0;
     await this.saveBoopCounter();
   }
 
+  /**
+   * Saves the current boop counter to the database.
+   * This method is called automatically when the boop counter changes.
+   */
   protected async saveBoopCounter() {
     this.protogen.database.setData(KV_BoopCounter, String(this._boopCounter));
   }
 
+  /**
+   * Get data from the boop sensor manager.
+   * This method returns the current state, active profile, and boop counter.
+   * @returns An object containing the current state.
+   */
   public get data() {
     return {
       lastTrigger: this._lastTriggerTimestamp,
@@ -244,6 +320,11 @@ export class BoopSensorManager {
   }
 }
 
+/**
+ * Serializes a BoopProfile to json to be sent to the client.
+ * @param profile The profile to serialize.
+ * @returns The serialized profile.
+ */
 export function boopProfileToDTO(profile: BoopProfile) {
   return {
     id: profile.id,

@@ -10,6 +10,10 @@ import { RgbConfiguration } from "./objects/RgbConfiguration";
 import { SerialConfiguration } from "./objects/SerialConfiguration";
 import { WebConfiguration } from "./objects/WebConfiguration";
 
+/**
+ * Reads configuration from environment variables and returns a Configuration object.
+ * @returns The loaded configuration.
+ */
 export function loadConfiguration(): Configuration {
   //#region Hardware
   const hardware = process.env["HARDWARE"] as HardwareType;

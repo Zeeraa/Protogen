@@ -10,6 +10,9 @@ import { HardwareType } from '../HardwareType';
 
 export const execAsync = promisify(exec);
 
+/**
+ * The standard hardware implementation using a Raspberry PI 4, Raspberry pi Pico and FlaschenTaschen.
+ */
 export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   private serialPort: string;
   private serialBaudRate: number;

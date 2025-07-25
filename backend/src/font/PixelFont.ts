@@ -1,3 +1,7 @@
+/**
+ * Contains a pixel font representation for characters A-Z, 0-9, and some special characters.
+ * Each character is represented as a 2D array of pixels, where 1 represents a filled pixel and 0 represents an empty pixel.
+ */
 export const PixelFont: { [key: string]: any[][] | undefined } = {
   'A': [
     [0, 1, 0],

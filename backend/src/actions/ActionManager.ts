@@ -5,8 +5,14 @@ import { SavedVideo } from "../database/models/video-player/SavedVideos.model";
 import { ActionSet } from "../database/models/actions/ActionSet.model";
 import { cyan } from "colors";
 
+/**
+ * Max recursion depth for running action sets.
+ */
 const MaxReqursionDept = 10;
 
+/**
+ * ActionManager is responsible for managing and executing actions in other parts of the application.
+ */
 export class ActionManager {
   private _protogen;
 
@@ -18,6 +24,14 @@ export class ActionManager {
     return this._protogen;
   }
 
+  /**
+   * Executes an action set by its ID.
+   * This method retrieves the action set from the database and performs each action in the set.
+   * If the action set is not found, it logs a warning and returns false.
+   * @param id The ID of the action set to run.
+   * @param reqursionProtectionCounter A counter to prevent infinite recursion if the action set contains nested actions.
+   * @returns A promise that resolves to true if the action set was run successfully, or false otherwise.
+   */
   public async runActionSet(id: number, reqursionProtectionCounter = 0): Promise<boolean> {
     const repo = this.protogen.database.dataSource.getRepository(ActionSet);
     const set = await repo.findOne({
@@ -41,6 +55,17 @@ export class ActionManager {
     return true;
   }
 
+  /**
+   * Performs action based on the provided type, action, and metadata.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
+   * This method handles various action types such as playing videos, activating RGB scenes, and more.
+   * It also includes recursion protection to prevent infinite loops in case an action triggers another action.
+   *
+   * @param type The type of action to perform.
+   * @param action The action to perform.
+   * @param metadata Additional metadata for the action.
+   * @param reqursionProtectionCounter A counter to prevent infinite recursion in case that the action triggers another action.
+   * @returns A promise that resolves to true if the action was performed successfully, or false otherwise.
+   */
   public async performAction(type: ActionType, action: string | null, metadata: string | null, reqursionProtectionCounter = 0): Promise<boolean> {
     //#region Start video playback
     if (type == ActionType.PLAY_VIDEO) {

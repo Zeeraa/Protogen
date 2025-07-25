@@ -23,6 +23,9 @@ import { VideoCache } from "./models/video-player/VideoCache.model";
 import { BoopSensorProfile } from "./models/boop-sensor/BoopSensorProfile.model";
 import { BoopSensorProfileAction } from "./models/boop-sensor/BoopSensorProfileAction.model";
 
+/**
+ * Database class for connecting to the MariaDB database and managing data.
+ */
 export class Database {
   private _protogen;
   private _dataSource;
@@ -88,10 +91,17 @@ export class Database {
     return this.protogen.config.database;
   }
 
+  /**
+   * Get the TypeORM data source.
+   * @returns The TypeORM data source instance.
+   */
   public get dataSource() {
     return this._dataSource;
   }
 
+  /**
+   * Initializes the database connection.
+   */
   public async init() {
     this.protogen.logger.info("Database", "Initializing");
     await this._dataSource.initialize();
@@ -99,6 +109,13 @@ export class Database {
     this.protogen.logger.info("Database", "Init complete");
   }
 
+  /**
+   * Sets a key-value pair in the database.
+   * @param key The key to set.
+   * @param value The value to set.
+   * @param transaction The transaction to use (optional).
+   * @returns The created or updated KVDataStoreEntry.
+   */
   public async setData(key: string, value: string | null, transaction: EntityManager | undefined = undefined): Promise<KVDataStoreEntry> {
     const repo = transaction ? transaction.getRepository(KVDataStoreEntry) : this._dataSource.getRepository(KVDataStoreEntry);
     let entry = await repo.findOne({
@@ -117,12 +134,24 @@ export class Database {
     return await repo.save(entry);
   }
 
+  /**
+   * Initializes a key with a default value if it doesn't exist.
+   * @param key The key to initialize.
+   * @param defaultValue The default value to set.
+   * @param transaction The transaction to use (optional).
+   */
   public async initMissingData(key: string, defaultValue: string, transaction: EntityManager | undefined = undefined) {
     if (!await this.hasData(key, transaction)) {
       await this.setData(key, defaultValue, transaction);
     }
   }
 
+  /**
+   * Gets the value for a key from the database.
+   * @param key The key to get data for.
+   * @param transaction The transaction to use (optional).
+   * @returns The value for the key, or null if not found.
+   */
   public async getData(key: string, transaction: EntityManager | undefined = undefined): Promise<string | null> {
     const repo = transaction ? transaction.getRepository(KVDataStoreEntry) : this._dataSource.getRepository(KVDataStoreEntry);
     const entry = await repo.findOne({
@@ -134,6 +163,12 @@ export class Database {
     return entry == null ? null : entry.value;
   }
 
+  /**
+   * Checks if a key exists in the database.
+   * @param key The key to check.
+   * @param transaction The transaction to use (optional).
+   * @returns True if the key exists, false otherwise.
+   */
   public async hasData(key: string, transaction: EntityManager | undefined = undefined): Promise<boolean> {
     const repo = transaction ? transaction.getRepository(KVDataStoreEntry) : this._dataSource.getRepository(KVDataStoreEntry);
     const entry = await repo.findOne({
@@ -145,6 +180,12 @@ export class Database {
     return entry != null;
   }
 
+  /**
+   * Deletes a key-value pair from the database.
+   * @param key The key to delete.
+   * @param transaction The transaction to use (optional).
+   * @returns True if the key was deleted, false otherwise.
+   */
   public async deleteData(key: string, transaction: EntityManager | undefined = undefined): Promise<boolean> {
     const repo = transaction ? transaction.getRepository(KVDataStoreEntry) : this._dataSource.getRepository(KVDataStoreEntry);
     const result = await repo.delete({

@@ -7,6 +7,9 @@ import { getPlatform } from "../../utils/Utils";
 import { cyan } from "colors";
 import { SocketMessageType } from "../../webserver/socket/SocketMessageType";
 
+/**
+ * Emulated implementation of the hardware used for local development.
+ */
 export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
   private _emulatedBoopSensorState: boolean = false;
   private _boopSensorSubject: Subject<boolean> = new Subject<boolean>();

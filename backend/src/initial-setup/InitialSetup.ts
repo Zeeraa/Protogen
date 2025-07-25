@@ -11,6 +11,9 @@ import { BoopSensorProfile } from "../database/models/boop-sensor/BoopSensorProf
 import { ActionType } from "../actions/ActionType";
 import { BoopSensorProfileAction } from "../database/models/boop-sensor/BoopSensorProfileAction.model";
 
+/**
+ * Handels initial setup of the application
+ */
 export class InitialSetup {
   private protogen;
 
@@ -18,6 +21,10 @@ export class InitialSetup {
     this.protogen = protogen;
   }
 
+  /**
+   * Checks if the initial setup has been run.
+   * If not, it runs the initial setup to create default data.
+   */
   public async checkInitialSetup() {
     if (process.env["NO_INITIAL_SETUP"] === "true") {
       return;

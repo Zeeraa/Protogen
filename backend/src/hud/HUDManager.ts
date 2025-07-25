@@ -3,6 +3,10 @@ import { Protogen } from "../Protogen";
 import { KV_EnableHUD } from "../utils/KVDataStorageKeys";
 import { compareStringArrays } from "../utils/Utils";
 
+/**
+ * Manages the HUD (Heads-Up Display) for displaying system information.
+ * It updates the display periodically and allows enabling/disabling the HUD.
+ */
 export class HUDManager {
   private readonly protogen;
   private _enableHud = true;
@@ -23,10 +27,18 @@ export class HUDManager {
     return this.protogen.config.hud;
   }
 
+  /**
+   * Check if the HUD is enabled.
+   * @returns True if the HUD is enabled, false otherwise.
+   */
   public get enableHud() {
     return this._enableHud;
   }
 
+  /**
+   * Enable or disable the HUD.
+   * When disabled, the HUD will not display any information.
+   */
   public set enableHud(enabled: boolean) {
     this.protogen.logger.info("HUD", (enabled ? "Enabling" : "Disabling") + " HUD display");
     this._enableHud = enabled;
@@ -38,11 +50,18 @@ export class HUDManager {
     }
   }
 
+  /**
+   * Initializes the HUD manager and fetch from database.
+   */
   public async init() {
     await this.protogen.database.initMissingData(KV_EnableHUD, "true");
     this.enableHud = await this.protogen.database.getData(KV_EnableHUD) == "true";
   }
 
+  /**
+   * Sets the persistent HUD state in the database.
+   * @param state The state to set (true for enabled, false for disabled).
+   */
   public async setPersistentHUDState(state: boolean) {
     this.enableHud = state;
     const stateStr = String(state);
@@ -50,6 +69,9 @@ export class HUDManager {
     await this.protogen.database.setData(KV_EnableHUD, stateStr);
   }
 
+  /**
+   * Updates the HUD display with the current system status.
+   */
   public updateDisplay() {
     if (!this.enableHud) {
       return;
@@ -97,11 +119,20 @@ export class HUDManager {
     this.writeToHUD(lineArray);
   }
 
+  /**
+   * Write text to the display
+   * @param lines Array of lines to write
+   */
   public writeToHUD(lines: string[]) {
     this.protogen.hardwareAbstractionLayer.writeToHUD(lines);
   }
 }
 
+/**
+ * Cleans the text so that it can be displayed on the HUD
+ * @param input The text to clean
+ * @returns Clean version that we can send
+ */
 function cleanText(input: string) {
   return input.replace(/[^a-zA-Z0-9 .,!\-_]/g, '');
 }

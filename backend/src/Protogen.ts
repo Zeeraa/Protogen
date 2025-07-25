@@ -27,7 +27,7 @@ import { HardwareType } from "./hardware/HardwareType";
 import { StandardHardwareImplementation } from "./hardware/implementations/StandardHardwareImplementation";
 import { HUDManager } from "./hud/HUDManager";
 import { SensorManager } from "./sensors/SensorManager";
-import { EmulatedHardwareImplementation } from "./hardware/emulated/EmulatedHardwareImplementation";
+import { EmulatedHardwareImplementation } from "./hardware/implementations/EmulatedHardwareImplementation";
 import { BoopSensorManager } from "./boop-sensor/BoopSensorManager";
 import { InitialSetup } from "./initial-setup/InitialSetup";
 

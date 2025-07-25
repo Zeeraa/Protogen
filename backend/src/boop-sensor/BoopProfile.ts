@@ -19,18 +19,30 @@ export class BoopProfile {
     this.resetsAfter = resetsAfter;
   }
 
+  /**
+   * Called when the profile is activated.
+   */
   public onActivate() {
     this.reset();
   }
 
+  /**
+   * Called when the profile is deactivated.
+   */
   public onDeactivate() {
     this.reset();
   }
 
+  /**
+   * Returns the current value of the profile's counter.
+   */
   public get counter() {
     return this._counter;
   }
 
+  /**
+   * Called when the touch sensor is activated
+   */
   public async onBooped() {
     this._counter++;
     this._resetAt = new Date().getTime() + this.resetsAfter * 1000;
@@ -48,9 +60,11 @@ export class BoopProfile {
       await this.boopSensorManager.protogen.actionManager.performAction(action.actionType, action.action, action.metadata);
       action.didRun = true;
     }
-
   }
 
+  /**
+   * Resets the profile's counter and actions.
+   */
   public reset() {
     this._counter = 0;
     this._resetAt = 0;
@@ -59,6 +73,9 @@ export class BoopProfile {
     });
   }
 
+  /**
+   * Called on a schedule to reset the profile if the reset time has passed.
+   */
   public tick() {
     if (this._counter > 0 && new Date().getTime() >= this._resetAt) {
       this.reset();

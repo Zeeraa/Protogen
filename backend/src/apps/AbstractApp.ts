@@ -4,6 +4,9 @@ import { AppManager } from "./AppManager";
 import { AppOptions } from "./AppOptions";
 import { createCanvas } from "canvas";
 
+/**
+ * Apps can be used to implement functions like games and activities.
+ */
 export abstract class AbstractApp {
   private readonly _appManager;
   private readonly _name;

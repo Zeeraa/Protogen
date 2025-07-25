@@ -28,6 +28,11 @@ export class AppManager {
     }
   }
 
+  /**
+   * Validate JWT token for interactions with the app.
+   * @param token JWT token to validate
+   * @returns AppJwtPayload if the token is valid, null otherwise
+   */
   public async validateJWTToken(token: string): Promise<AppJwtPayload | null> {
     if (this._appJwtKey == null) {
       throw new Error("JWT Key not defined");
@@ -51,6 +56,12 @@ export class AppManager {
     return payload;
   }
 
+  /**
+   * Generate a JWT token for interacting with an app.
+   * @param user The user that generated the token
+   * @param app The app the token is used for
+   * @returns The generated JWT token
+   */
   public async generateJwtToken(user: User, app: AbstractApp): Promise<string> {
     const payload: AppJwtPayload = {
       issuerUserId: user.id,
@@ -73,23 +84,45 @@ export class AppManager {
     return this._protogen;
   }
 
+  /**
+   * Returns all registered apps.
+   * @return An array of AbstractApp instances
+   */
   public get apps() {
     return this._apps;
   }
 
+  /**
+   * Returns the currently active app.
+   * @return The currently active AbstractApp instance or null if no app is active
+   */
   public get activeApp() {
     return this._activeApp;
   }
 
+  /**
+   * Returns true if an app is currently running.
+   * @return True if an app is active, false otherwise
+   */
   public get appRunning() {
     return this._activeApp !== null;
   }
 
+  /**
+   * Returns the app by its name.
+   * @param name The name of the app to find
+   * @return The AbstractApp instance if found, null otherwise
+   */
   public getAppByName(name: string): AbstractApp | null {
     const app = this._apps.find((app) => app.name == name);
     return app || null;
   }
 
+  /**
+   * Registers a new app.
+   * @param app The AbstractApp instance to register
+   * @throws Error if the app is already registered or the name is invalid
+   */
   public async registerApp(app: AbstractApp) {
     if (this.getAppByName(app.name) != null) {
       throw new Error(`App ${app.name} already registered`);
@@ -136,6 +169,10 @@ export class AppManager {
     return false;
   }
 
+  /**
+   * Deactivates the currently active app.
+   * @returns True if the app was deactivated successfully, false otherwise
+   */
   public async deactivateApp() {
     this.protogen.visor.removeRenderLock(AppRenderLockName);
 
