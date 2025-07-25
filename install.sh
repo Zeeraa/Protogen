@@ -42,7 +42,7 @@ sudo apt install -y vlc ffmpeg btop git build-essential libcairo2-dev libpango1.
 if ! command -v node &>/dev/null; then
     echo "Node.js is not installed. Installing..."
     
-    curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
+    curl -fsSL https://deb.nodesource.com/setup_24.x -o nodesource_setup.sh
     bash nodesource_setup.sh
     rm nodesource_setup.sh
 
