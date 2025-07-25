@@ -11,4 +11,4 @@ TODO list before version 1 release:
 * [ ] Write documentation
 * [ ] Create circuit diagrams
 * [ ] Create parts list
-* [ ] Make a system allowing for easy initial setup and configuration
+* [X] Make a system allowing for easy initial setup and configuration
