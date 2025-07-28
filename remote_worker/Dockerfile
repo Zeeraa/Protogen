@@ -1,4 +1,4 @@
-FROM node:20.14-bookworm
+FROM node:24-bookworm
 
 # Install FFMPEG
 RUN apt update
