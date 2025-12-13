@@ -22,6 +22,7 @@ import { JoystickRemoteProfile } from "./models/remote/joystick/JoystickRemotePr
 import { VideoCache } from "./models/video-player/VideoCache.model";
 import { BoopSensorProfile } from "./models/boop-sensor/BoopSensorProfile.model";
 import { BoopSensorProfileAction } from "./models/boop-sensor/BoopSensorProfileAction.model";
+import { cyan } from "colors";
 
 /**
  * Database class for connecting to the MariaDB database and managing data.
@@ -142,6 +143,7 @@ export class Database {
    */
   public async initMissingData(key: string, defaultValue: string, transaction: EntityManager | undefined = undefined) {
     if (!await this.hasData(key, transaction)) {
+      this.protogen.logger.info("Database", `Initializing missing key "${cyan(key)}" with default value "${cyan(defaultValue)}"`);
       await this.setData(key, defaultValue, transaction);
     }
   }

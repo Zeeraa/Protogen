@@ -34,3 +34,11 @@ export const KV_BoopCounter = "BoopCounter";
 export const KV_BoopSensorEnabled = "BoopSensorEnabled";
 export const KV_BoopSensorShowOnHud = "BoopSensorShowOnHud";
 //#endregion
+
+//#region Clock settings
+export const KV_Clock24HourFormat = "Clock24HourFormat";
+export const KV_ClockShowSeconds = "ClockShowSeconds";
+export const KV_ClockShowDate = "ClockShowDate";
+export const KV_ClockTimeColor = "ClockTimeColor";
+export const KV_ClockDateColor = "ClockDateColor";
+//#endregion

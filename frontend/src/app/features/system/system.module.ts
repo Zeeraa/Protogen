@@ -4,6 +4,7 @@ import { SystemPageComponent } from './pages/system-page/system-page.component';
 import { NgbProgressbarModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Field } from '@angular/forms/signals';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { RouterLink } from '@angular/router';
     FormsModule,
     ReactiveFormsModule,
     RouterLink,
+    Field,
   ]
 })
 export class SystemModule { }
