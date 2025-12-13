@@ -93,7 +93,6 @@ export function generateNewCertificate(privateKeyPath: string, publicKeyPath: st
   );
 }
 
-
 export function getPlatform() {
   const platform = os.platform();
   switch (platform) {

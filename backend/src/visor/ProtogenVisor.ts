@@ -15,6 +15,7 @@ import { CustomFace } from "../database/models/visor/CustomFace.model";
 import { existsSync } from "fs";
 import { FileImageSourceProvider } from "./image/FileImageSourceProvider";
 import { AppRenderLockName } from "../apps/AppManager";
+import { ClockRenderer } from "./rendering/renderers/special/ClockRenderer";
 
 export class ProtogenVisor {
   private _protogen;
@@ -47,6 +48,7 @@ export class ProtogenVisor {
     this._availableRenderers.push(this._faceRenderer);
     this._availableRenderers.push(new BSODRenderer(this));
     this._availableRenderers.push(new StaticPictureRenderer(this, "ProtoBlank", "Blank", new FileImageSourceProvider("assets/blank.png")));
+    this._availableRenderers.push(new ClockRenderer(this));
 
     // Default to the face renderer
     this.activateRenderer(FaceRendererId, false);
@@ -65,6 +67,10 @@ export class ProtogenVisor {
 
   public get initCalled() {
     return this._initCalled;
+  }
+
+  public getRenderer(id: string): VisorRenderer | null {
+    return this.availableRenderers.find(r => r.id == id) || null;
   }
 
   public sendVisorPreview() {
@@ -347,6 +353,9 @@ export class ProtogenVisor {
   public activateRenderer(id: string, updateDatabase = true): boolean {
     const renderer = this.availableRenderers.find(r => r.id == id);
     if (renderer != null) {
+      if (this._activeRenderer && this._activeRenderer.id !== id) {
+        this._activeRenderer.onDeactivate();
+      }
       renderer.onActivate();
       this._activeRenderer = renderer;
       if (updateDatabase) {
