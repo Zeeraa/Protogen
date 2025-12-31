@@ -172,7 +172,9 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
         return reject(new Error('Volume level must be between 0 and 100'));
       }
 
-      const command = `amixer set Master ${level}%`;
+      // Convert percentage to decimal (0-100 -> 0.0-1.0)
+      const volumeDecimal = (level / 100).toFixed(2);
+      const command = `wpctl set-volume @DEFAULT_SINK@ ${volumeDecimal}`;
 
       exec(command, (error, _stdout, stderr) => {
         if (error) {
@@ -185,18 +187,20 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
 
   public getVolume(): Promise<number> {
     return new Promise((resolve, reject) => {
-      const command = `amixer get Master`;
+      const command = `wpctl get-volume @DEFAULT_SINK@`;
 
       exec(command, (error, stdout, stderr) => {
         if (error) {
           return reject(`Error getting volume: ${stderr}`);
         }
 
-        // Extract the volume percentage from stdout
-        const matches = stdout.match(/(\d+)%/);
+        // Extract the volume decimal from stdout (e.g., "Volume: 0.40")
+        const matches = stdout.match(/Volume:\s+([0-9.]+)/);
 
         if (matches && matches[1]) {
-          const volume = parseInt(matches[1], 10);
+          // Convert decimal to percentage (0.0-1.0 -> 0-100)
+          const volumeDecimal = parseFloat(matches[1]);
+          const volume = Math.round(volumeDecimal * 100);
           resolve(volume);
         } else {
           reject(new Error('Could not parse volume level'));
