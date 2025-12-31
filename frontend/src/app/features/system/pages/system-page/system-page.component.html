@@ -201,6 +201,61 @@
         <div class="row mt-2">
           <div class="col-12">
             <h5>
+              Clock Settings
+              <i class="bi bi-clock-fill"></i>
+            </h5>
+          </div>
+
+          <div class="col-12 mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="clock24Hour"
+                [field]="clockSettingsForm.is24HourFormat">
+              <label class="form-check-label" for="clock24Hour">24-hour format</label>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="clockShowSeconds"
+                [field]="clockSettingsForm.showSeconds">
+              <label class="form-check-label" for="clockShowSeconds">Show seconds</label>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="clockShowDate"
+                [field]="clockSettingsForm.showDate">
+              <label class="form-check-label" for="clockShowDate">Show date</label>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-12 mt-2">
+            <div class="form-group">
+              <label for="clockTimeColor">Time color</label>
+              <input type="color" class="form-control" id="clockTimeColor" [field]="clockSettingsForm.timeColor">
+            </div>
+          </div>
+
+          <div class="col-md-6 col-12 mt-2">
+            <div class="form-group">
+              <label for="clockDateColor">Date color</label>
+              <input type="color" class="form-control" id="clockDateColor" [field]="clockSettingsForm.dateColor">
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <button class="btn btn-primary mb-1 me-1" (click)="saveClockSettings()">Save clock settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
+      <div class="container-fluid">
+        <div class="row mt-2">
+          <div class="col-12">
+            <h5>
               Misc
               <i class="bi bi-gear-fill"></i>
             </h5>

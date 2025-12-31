@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiBaseService } from '../api-base.service';
 import { catchError, map, Observable, of } from 'rxjs';
+import { RGBColor } from '../utils/Utils';
 
 @Injectable({
   providedIn: 'root'
@@ -54,6 +55,14 @@ export class SystemApiService extends ApiBaseService {
   setSwaggerEnabled(enabled: boolean): Observable<any> {
     return this.http.put(this.apiBaseUrl + "/system/swagger", { enabled }).pipe(catchError(this.defaultErrorHandler));
   }
+
+  getClockSettings(): Observable<ClockSettings> {
+    return this.http.get<ClockSettings>(this.apiBaseUrl + "/system/clock-settings");
+  }
+
+  updateClockSettings(settings: ClockSettings): Observable<any> {
+    return this.http.put(this.apiBaseUrl + "/system/clock-settings", settings);
+  }
 }
 
 interface ISessionIdObject {
@@ -80,4 +89,12 @@ export interface Network {
 export interface FlaschenTaschenSettings {
   ledSlowdownGpio: number;
   ledLimitRefresh: number;
+}
+
+export interface ClockSettings {
+  is24HourFormat: boolean;
+  showSeconds: boolean;
+  showDate: boolean;
+  timeColor: RGBColor;
+  dateColor: RGBColor;
 }

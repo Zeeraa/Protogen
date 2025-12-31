@@ -25,7 +25,7 @@ export class NavbarComponent implements AfterViewInit {
     this.navbarService.sizeChanged();
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onWindowResize() {
     this.checkTogglerVisibility();
   }

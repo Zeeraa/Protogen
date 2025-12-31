@@ -74,3 +74,11 @@ export function hexToRgb(hex: string): RGBColor | null {
 
   return { r, g, b };
 }
+
+export const RGBColors = {
+  Red: { r: 255, g: 0, b: 0 } as RGBColor,
+  Green: { r: 0, g: 255, b: 0 } as RGBColor,
+  Blue: { r: 0, g: 0, b: 255 } as RGBColor,
+  White: { r: 255, g: 255, b: 255 } as RGBColor,
+  Black: { r: 0, g: 0, b: 0 } as RGBColor,
+}

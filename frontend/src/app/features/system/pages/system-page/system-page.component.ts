@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FlaschenTaschenSettings, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
+import { Component, OnDestroy, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { ClockSettings, FlaschenTaschenSettings, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -8,6 +8,8 @@ import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/se
 import { HudApiService } from '../../../../core/services/api/hud-api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
+import { form } from '@angular/forms/signals'
+import { hexToRgb, RGBColors, rgbToHex } from '../../../../core/services/utils/Utils';
 
 @Component({
   selector: 'app-system-page',
@@ -22,6 +24,16 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   shutdownModalRef: null | NgbModalRef = null;
   showSensitiveNetworkingData = false;
   flaschenTaschenSettings: FlaschenTaschenSettings = { ledLimitRefresh: 100, ledSlowdownGpio: 3 }
+
+  private clockSettingsModel = signal({
+    is24HourFormat: true,
+    showSeconds: true,
+    showDate: true,
+    timeColor: "#FFFFFF",
+    dateColor: "#FFFFFF"
+  });
+
+  protected clockSettingsForm = form(this.clockSettingsModel);
 
   get hasConnectivity() {
     return this.overview?.network.hasConnectivity || false;
@@ -193,6 +205,24 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     return this.auth.authDetails?.isSuperUser || false;
   }
 
+  protected saveClockSettings() {
+    const settings: ClockSettings = {
+      is24HourFormat: this.clockSettingsModel().is24HourFormat,
+      showSeconds: this.clockSettingsModel().showSeconds,
+      showDate: this.clockSettingsModel().showDate,
+      timeColor: hexToRgb(this.clockSettingsModel().timeColor) ?? RGBColors.White,
+      dateColor: hexToRgb(this.clockSettingsModel().dateColor) ?? RGBColors.White,
+    };
+
+    this.api.updateClockSettings(settings).pipe(catchError(err => {
+      this.toastr.error("Failed to save clock settings");
+      console.error("Failed to save clock settings", err);
+      return [];
+    })).subscribe(() => {
+      this.toastr.success("Clock settings saved");
+    });
+  }
+
   constructor(
     private toastr: ToastrService,
     private api: SystemApiService,
@@ -218,7 +248,24 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       })
     ).subscribe(settings => {
       this.flaschenTaschenSettings = settings;
-    })
+    });
+
+    this.api.getClockSettings().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch clock settings");
+        console.error("Failed to fetch clock settings", err);
+        throw [];
+      })
+    ).subscribe(settings => {
+      console.debug("Fetched clock settings", settings);
+      this.clockSettingsModel.set({
+        is24HourFormat: settings.is24HourFormat,
+        showSeconds: settings.showSeconds,
+        showDate: settings.showDate,
+        timeColor: rgbToHex(settings.timeColor),
+        dateColor: rgbToHex(settings.dateColor)
+      });
+    });
   }
 
   ngOnDestroy(): void {
