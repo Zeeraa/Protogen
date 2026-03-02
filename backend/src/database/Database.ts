@@ -17,8 +17,6 @@ import { ActionSetAction } from "./models/actions/ActionSetEntry.model";
 import { ActionSet } from "./models/actions/ActionSet.model";
 import { User } from "./models/auth/User.model";
 import { PasswordlessSignInRequest } from "./models/auth/PasswordlessSignInRequest.model";
-import { JoystickRemoteAction } from "./models/remote/joystick/JoystickRemoteAction.model";
-import { JoystickRemoteProfile } from "./models/remote/joystick/JoystickRemoteProfile.model";
 import { VideoCache } from "./models/video-player/VideoCache.model";
 import { BoopSensorProfile } from "./models/boop-sensor/BoopSensorProfile.model";
 import { BoopSensorProfileAction } from "./models/boop-sensor/BoopSensorProfileAction.model";
@@ -68,10 +66,6 @@ export class Database {
         User,
         PasswordlessSignInRequest,
         ApiKey,
-
-        // ---------- Remote ----------
-        JoystickRemoteProfile,
-        JoystickRemoteAction,
 
         // ---------- Actions ----------
         ActionSet,

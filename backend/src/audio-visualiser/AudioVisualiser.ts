@@ -31,7 +31,7 @@ export class AudioVisualiser {
     this._rawValue = value;
     this._cachedValue = null;
     this.protogen.webServer.socketSessions.filter(s => s.enableAudioPreview).forEach(subscriber => {
-      subscriber.sendMessage(SocketMessageType.S2C_RemoteAudioLevel, value);
+      subscriber.sendMessage(SocketMessageType.S2C_AudioLevel, value);
     })
   }
 

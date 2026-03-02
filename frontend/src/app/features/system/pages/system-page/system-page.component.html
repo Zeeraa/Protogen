@@ -209,7 +209,7 @@
           <div class="col-12 mt-2">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="clock24Hour"
-                [field]="clockSettingsForm.is24HourFormat">
+                [formField]="clockSettingsForm.is24HourFormat">
               <label class="form-check-label" for="clock24Hour">24-hour format</label>
             </div>
           </div>
@@ -217,7 +217,7 @@
           <div class="col-12 mt-2">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="clockShowSeconds"
-                [field]="clockSettingsForm.showSeconds">
+                [formField]="clockSettingsForm.showSeconds">
               <label class="form-check-label" for="clockShowSeconds">Show seconds</label>
             </div>
           </div>
@@ -225,7 +225,7 @@
           <div class="col-12 mt-2">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="clockShowDate"
-                [field]="clockSettingsForm.showDate">
+                [formField]="clockSettingsForm.showDate">
               <label class="form-check-label" for="clockShowDate">Show date</label>
             </div>
           </div>
@@ -233,14 +233,14 @@
           <div class="col-md-6 col-12 mt-2">
             <div class="form-group">
               <label for="clockTimeColor">Time color</label>
-              <input type="color" class="form-control" id="clockTimeColor" [field]="clockSettingsForm.timeColor">
+              <input type="color" class="form-control" id="clockTimeColor" [formField]="clockSettingsForm.timeColor">
             </div>
           </div>
 
           <div class="col-md-6 col-12 mt-2">
             <div class="form-group">
               <label for="clockDateColor">Date color</label>
-              <input type="color" class="form-control" id="clockDateColor" [field]="clockSettingsForm.dateColor">
+              <input type="color" class="form-control" id="clockDateColor" [formField]="clockSettingsForm.dateColor">
             </div>
           </div>
 

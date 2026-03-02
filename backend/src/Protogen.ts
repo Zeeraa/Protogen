@@ -19,7 +19,6 @@ import { z } from "zod";
 import { ActionManager } from "./actions/ActionManager";
 import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
 import { magenta, red } from "colors";
-import { JoystickRemoteManager } from "./remote/RemoteManager";
 import { AppManager } from "./apps/AppManager";
 import { PaintApp } from "./apps/paint/PaintApp";
 import { HardwareAbstractionLayer } from "./hardware/HardwareAbstractionLayer";
@@ -48,7 +47,6 @@ export class Protogen {
   private readonly _eventEmitter: EventEmitter;
   private readonly _userManager: UserManager;
   private readonly _apiKeyManager: ApiKeyManager;
-  private readonly _joystickRemoteManager: JoystickRemoteManager;
   private readonly _sessionId: string;
   private readonly _imageDirectory: string;
   private readonly _tempDirectory: string;
@@ -164,7 +162,6 @@ export class Protogen {
     this._rgb = new RgbManager(this);
     this._audioVisualiser = new AudioVisualiser(this);
     this._networkManager = new NetworkManager(this);
-    this._joystickRemoteManager = new JoystickRemoteManager(this);
     this._actionManager = new ActionManager(this);
     this._appManager = new AppManager(this);
     this._boopSensorManager = new BoopSensorManager(this);
@@ -178,8 +175,6 @@ export class Protogen {
 
     const initialSetup = new InitialSetup(this);
     await initialSetup.checkInitialSetup();
-
-    await this.joystickRemoteManager.loadConfig();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit hardware", BootMessageColor);
     await this.hardwareAbstractionLayer.init();
@@ -296,10 +291,6 @@ export class Protogen {
 
   public get apiKeyManager() {
     return this._apiKeyManager;
-  }
-
-  public get joystickRemoteManager() {
-    return this._joystickRemoteManager;
   }
 
   public get builtInAssets() {

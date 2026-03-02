@@ -31,7 +31,6 @@ import { generateNewCertificate, getCertificateExpiry } from "../utils/Utils";
 import { ActionsRouter } from "./routes/actions/ActionsRouter";
 import morgan from 'morgan';
 import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualizerRouter";
-import { JoystickRemoteRouter } from "./routes/remote/JoystickRemoteRouter";
 import { AppRouter } from "./routes/apps/AppRouter";
 import { AppSocketPacket, AppUserSocketSession } from "./socket/AppUserSocketSession";
 import { AbstractApp } from "../apps/AbstractApp";
@@ -145,7 +144,6 @@ export class ProtogenWebServer {
     new AuthRouter(this).register({ noAuth: true });
     new DiscoveryRouter(this).register({ noAuth: true });
     new ApiKeyRouter(this).register();
-    new JoystickRemoteRouter(this).register();
     new FaceRouter(this).register();
     new AssetsRouter(this).register({ noAuth: true });
     new ActionsRouter(this).register();
@@ -340,7 +338,8 @@ export class ProtogenWebServer {
   }
 
   public broadcastMessage(type: SocketMessageType, data: any) {
-    this.socketSessions.filter(s => !s.auth.onlyRemotePermissions || (type == SocketMessageType.S2E_JoystickRemoteConfigChange || type == SocketMessageType.S2E_JoystickRemoteProfileChange)).forEach(s => s.sendMessage(type, data));
+    // Only broadcast to sessions that are not remote-only, since remote sessions are meant for integrations and should not receive normal preview data etc.
+    this.socketSessions.filter(s => !s.auth.onlyRemotePermissions).forEach(s => s.sendMessage(type, data));
   }
 
   public broadcastAppMessage(app: AbstractApp, data: AppSocketPacket<any>) {

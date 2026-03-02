@@ -164,7 +164,7 @@ export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, 
     this.socket.sendMessage(SocketMessageType.C2S_EnableAudioPreview, true);
 
     this.audioSubscription = this.socket.messageObservable.subscribe(message => {
-      if (message.type == SocketMessageType.S2C_RemoteAudioLevel) {
+      if (message.type == SocketMessageType.S2C_AudioLevel) {
         this.rawValue = parseFloat(message.data) * this.rawAmplification;
         if (this.rawValue > 100) {
           this.rawValue = 100;

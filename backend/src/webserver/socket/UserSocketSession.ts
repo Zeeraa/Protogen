@@ -5,8 +5,6 @@ import { SocketMessageType } from "./SocketMessageType";
 import { SocketMessage } from "./SocketMessage";
 import { AuthData } from "../middleware/AuthMiddleware";
 import { z } from "zod";
-import { constructJoystickRemoteStateFromSensorData } from "../../remote/JoystickRemoteState";
-import { JoystickRemoteControlInputType } from "../../database/models/remote/joystick/JoystickRemoteControlInputType";
 
 export class UserSocketSession {
   private _protogen;
@@ -15,7 +13,6 @@ export class UserSocketSession {
   private _disconnected = false;
   private _enableRgbPreview = false;
   private _enableVisorPreview = false;
-  private _enableRemotePreview = false;
   private _enableAudioPreview = false;
   private _enableDevData = false;
   private _auth: AuthData;
@@ -74,10 +71,6 @@ export class UserSocketSession {
     return this._enableVisorPreview;
   }
 
-  get enableRemotePreview() {
-    return this._enableRemotePreview;
-  }
-
   get enableDevData() {
     return this._enableDevData;
   }
@@ -103,43 +96,12 @@ export class UserSocketSession {
 
     const type = message.type;
 
-    if (this.auth.onlyRemotePermissions) {
-      if (type == SocketMessageType.E2S_JoystickRemoteState) {
-        // Parse it as RemoteStateModel using safe parse
-        const remoteState = RemoteStateModel.safeParse(message.data);
-        if (!remoteState.success) {
-          console.error("Rejecting invalid remote state message from socket: ", message);
-          return;
-        }
-
-        const state = constructJoystickRemoteStateFromSensorData(remoteState.data);
-        this.protogen.joystickRemoteManager.state = state;
-      } else if (type == SocketMessageType.E2S_AudioLevel) {
-        const audioLevel = AudioLevelModel.safeParse(message.data);
-        if (!audioLevel.success) {
-          console.error("Rejecting invalid remote audio level message from socket: ", message);
-          return;
-        }
-
-        this.protogen.audioVisualiser.rawValue = audioLevel.data.level;
-      } else {
-        console.error("Received unauthorized message from remote: ", message);
-        return;
-      }
-    }
-
     if (type == SocketMessageType.C2S_EnableRgbPreview) {
       const enable = message.data === true;
       this._enableRgbPreview = enable;
     } else if (type == SocketMessageType.C2S_EnableVisorPreview) {
       const enable = message.data === true;
       this._enableVisorPreview = enable;
-    } else if (type == SocketMessageType.C2S_EnableRemotePreview) {
-      const enable = message.data === true;
-      this._enableRemotePreview = enable;
-    } else if (type == SocketMessageType.E2S_JoystickRemoteState) {
-      const state = constructJoystickRemoteStateFromSensorData(message.data);
-      this.protogen.joystickRemoteManager.state = state;
     } else if (type == SocketMessageType.C2S_EnableAudioPreview) {
       const enable = message.data === true;
       this._enableAudioPreview = enable;
@@ -174,7 +136,6 @@ const RemoteStateModel = z.object({
   joystick_x: z.number().min(0).max(1),
   joystick_y: z.number().min(0).max(1),
   joystick_pressed: z.boolean(),
-  joystick_state: z.nativeEnum(JoystickRemoteControlInputType),
   button_a: z.boolean(),
   button_left: z.boolean(),
   button_right: z.boolean(),
