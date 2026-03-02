@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -8,10 +8,7 @@ import { Title } from '@angular/platform-browser';
   standalone: false
 })
 export class LogsPageComponent implements OnInit {
-
-  constructor(
-    private title: Title,
-  ) { }
+  private readonly title = inject(Title);
 
   ngOnInit(): void {
     this.title.setTitle("Logs - Protogen");

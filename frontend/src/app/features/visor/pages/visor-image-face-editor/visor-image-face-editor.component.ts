@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -9,12 +9,20 @@ import { catchError } from 'rxjs';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'app-visor-image-face-editor',
-    templateUrl: './visor-image-face-editor.component.html',
-    styleUrl: './visor-image-face-editor.component.scss',
-    standalone: false
+  selector: 'app-visor-image-face-editor',
+  templateUrl: './visor-image-face-editor.component.html',
+  styleUrl: './visor-image-face-editor.component.scss',
+  standalone: false
 })
 export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
+  private readonly toastr = inject(ToastrService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly title = inject(Title);
+  private readonly visor = inject(VisorApiService);
+  private readonly fileApi = inject(FilesApiService);
+  private readonly modal = inject(NgbModal);
+
   @ViewChild("filePicker")
   private filePicker!: ElementRef<any>;
 
@@ -32,16 +40,6 @@ export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
     flipRightSide: new FormControl<boolean>(false),
     flipLeftSide: new FormControl<boolean>(false),
   });
-
-  constructor(
-    private toastr: ToastrService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private title: Title,
-    private visor: VisorApiService,
-    private fileApi: FilesApiService,
-    private modal: NgbModal,
-  ) { }
 
   public get data(): CustomImageRendererData | null {
     return (this.renderer?.metadata.data as CustomImageRendererData) || null;

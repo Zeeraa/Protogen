@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { SocketMessage } from './data/SocketMessage';
 import { SocketMessageType } from './data/SocketMessageType';
@@ -10,16 +10,14 @@ import { AuthService } from '../auth.service';
   providedIn: 'root'
 })
 export class SocketService {
+  private readonly auth = inject(AuthService);
+
   private _socket: Socket | null = null;
   private _connected = false;
   private _disconnectedTimer = 15;
   private _messageSubject = new Subject<SocketMessage>();
   private _eventSubject = new Subject<SocketEventType>();
   private _initCalled = false;
-
-  constructor(
-    private auth: AuthService,
-  ) { }
 
   init() {
     if (this.initCalled) {

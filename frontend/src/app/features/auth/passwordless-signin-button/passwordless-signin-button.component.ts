@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AuthApiService, PasswordlessSigninRequest } from '../../../core/services/api/auth-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -18,6 +18,14 @@ const BlankImage = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
   styleUrl: './passwordless-signin-button.component.scss'
 })
 export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
+  private readonly authApi = inject(AuthApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+  private readonly auth = inject(AuthService);
+  private readonly clipboard = inject(ClipboardService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   protected disableButton = false;
   private activeRequest: PasswordlessSigninRequest | null = null;
   private pollRequestStatus = false;
@@ -27,16 +35,6 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
 
   @ViewChild("passwordlessSigninPrompt") private passwordlessSigninPromptTemplate!: TemplateRef<any>;
   private passwordlessSigninPrompt?: NgbModalRef;
-
-  constructor(
-    private authApi: AuthApiService,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-    private auth: AuthService,
-    private clipboard: ClipboardService,
-    private router: Router,
-    private route: ActivatedRoute,
-  ) { }
 
   get authUrl() {
     return window.location.origin + "/auth";

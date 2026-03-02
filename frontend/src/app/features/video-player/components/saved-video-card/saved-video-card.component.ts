@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
 import { SavedVideo, SaveVideoPayload, VideoGroup, VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
 import { extractYouTubeVideoId, UrlPattern } from '../../../../core/services/utils/Utils';
 import { ToastrService } from 'ngx-toastr';
@@ -13,6 +13,10 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
   standalone: false
 })
 export class SavedVideoCardComponent implements OnDestroy {
+  private readonly api = inject(VideoPlayerApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+
   @Input({ required: true }) video!: SavedVideo;
   @Input({ required: true }) showEditOptions!: boolean;
   @Input({ required: true }) groups!: VideoGroup[];
@@ -127,12 +131,6 @@ export class SavedVideoCardComponent implements OnDestroy {
       this.savedVideoChanged.emit();
     })
   }
-
-  constructor(
-    private api: VideoPlayerApiService,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-  ) { }
 
   ngOnDestroy(): void {
     this.editFormRef?.close();

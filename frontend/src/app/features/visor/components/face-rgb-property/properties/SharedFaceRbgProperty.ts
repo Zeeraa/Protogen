@@ -1,13 +1,14 @@
-import { Component, Input } from "@angular/core";
+import { Directive, inject, Input } from "@angular/core";
 import { FaceApiService, FaceColorEffect, FaceColorEffectProperty } from "../../../../../core/services/api/face-api.service";
 import { ToastrService } from "ngx-toastr";
 
-@Component({
-  template: '',
+@Directive({
   standalone: false
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export abstract class SharedFaceRbgProperty {
+  protected readonly faceApi = inject(FaceApiService);
+  protected readonly toastr = inject(ToastrService);
+
   @Input({ required: true }) effect!: FaceColorEffect;
   @Input({ required: true }) property!: FaceColorEffectProperty;
   @Input({ required: true }) inputId!: string;
@@ -20,11 +21,6 @@ export abstract class SharedFaceRbgProperty {
   public getMetadata(key: string) {
     return this.property.metadata[key];
   }
-
-  constructor(
-    protected faceApi: FaceApiService,
-    protected toastr: ToastrService,
-  ) { }
 
   public get hasDescription() {
     return this.property.description != null;

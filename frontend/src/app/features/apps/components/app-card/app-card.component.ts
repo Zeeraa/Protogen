@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
 import { App, AppsApi } from '../../../../core/services/api/apps-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -12,6 +12,10 @@ import { toDataURL } from 'qrcode';
   styleUrl: './app-card.component.scss'
 })
 export class AppCardComponent implements OnDestroy {
+  private readonly appApi = inject(AppsApi);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+
   @Input({ required: true }) app!: App;
   @Input() isActive = false;
   @Output() activated = new EventEmitter<App>();
@@ -21,12 +25,6 @@ export class AppCardComponent implements OnDestroy {
 
   protected qrCode = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
   protected appLink = "";
-
-  constructor(
-    private appApi: AppsApi,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-  ) { }
 
   public startApp() {
     this.appApi.activateApp(this.app.name).pipe(

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
 import { catchError, forkJoin } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -19,6 +19,15 @@ import { Title } from '@angular/platform-browser';
   styleUrl: './actions-page.component.scss'
 })
 export class ActionsPageComponent implements OnInit, OnDestroy {
+  private readonly actionApi = inject(ActionApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+  private readonly videoApi = inject(VideoPlayerApiService);
+  private readonly visorApi = inject(VisorApiService);
+  private readonly rgbApi = inject(RgbApiService);
+  private readonly faceApi = inject(FaceApiService);
+  private readonly title = inject(Title);
+
   actionSets: ActionSet[] = [];
 
   protected newActionForm = new FormGroup({
@@ -40,17 +49,6 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
     faceColorEffects: [],
     actionSets: [],
   }
-
-  constructor(
-    private actionApi: ActionApiService,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-    private videoApi: VideoPlayerApiService,
-    private visorApi: VisorApiService,
-    private rgbApi: RgbApiService,
-    private faceApi: FaceApiService,
-    private title: Title,
-  ) { }
 
   openNewModal() {
     this.newActionForm.reset();

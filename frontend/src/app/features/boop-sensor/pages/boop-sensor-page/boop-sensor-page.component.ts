@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
 import { catchError, of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -15,6 +15,12 @@ import { Title } from '@angular/platform-browser';
   styleUrl: './boop-sensor-page.component.scss'
 })
 export class BoopSensorPageComponent implements OnInit, OnDestroy {
+  private readonly boopSensorApi = inject(BoopSensorApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+  private readonly router = inject(Router);
+  private readonly title = inject(Title);
+
   protected profiles: BoopSensorProfile[] = [];
   protected activeProfileId: string | null = null;
 
@@ -31,14 +37,6 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   protected boopCount = 0;
   protected enabled = false;
   protected showOnHud = false;
-
-  constructor(
-    private boopSensorApi: BoopSensorApiService,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-    private router: Router,
-    private title: Title,
-  ) { }
 
   protected profileActivated(profile: BoopSensorProfile) {
     this.activeProfileId = profile.id;

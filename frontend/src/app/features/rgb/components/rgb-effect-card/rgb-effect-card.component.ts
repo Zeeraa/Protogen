@@ -1,15 +1,18 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { RgbApiService, RgbEffect, RgbEffectInfo, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 
 @Component({
-    selector: 'app-rgb-effect-card',
-    templateUrl: './rgb-effect-card.component.html',
-    styleUrl: './rgb-effect-card.component.scss',
-    standalone: false
+  selector: 'app-rgb-effect-card',
+  templateUrl: './rgb-effect-card.component.html',
+  styleUrl: './rgb-effect-card.component.scss',
+  standalone: false
 })
 export class RgbEffectCardComponent {
+  private readonly rgbApi = inject(RgbApiService);
+  private readonly toastr = inject(ToastrService);
+
   @Input({ required: true }) effectList!: RgbEffectInfo[];
   @Input({ required: true }) scene!: RgbScene;
   @Input({ required: true }) effect!: RgbEffect;
@@ -42,9 +45,4 @@ export class RgbEffectCardComponent {
       this.majorChange.emit();
     });
   }
-
-  constructor(
-    private rgbApi: RgbApiService,
-    private toastr: ToastrService,
-  ) { }
 }

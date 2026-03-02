@@ -1,16 +1,20 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FaceApiService, FaceColorEffect, FaceColorEffectType } from '../../../../core/services/api/face-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 
 @Component({
-    selector: 'app-face-color-effect-card',
-    templateUrl: './face-color-effect-card.component.html',
-    styleUrl: './face-color-effect-card.component.scss',
-    standalone: false
+  selector: 'app-face-color-effect-card',
+  templateUrl: './face-color-effect-card.component.html',
+  styleUrl: './face-color-effect-card.component.scss',
+  standalone: false
 })
 export class FaceColorEffectCardComponent implements OnDestroy {
+  private readonly api = inject(FaceApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+
   @Input({ required: true }) effect!: FaceColorEffect;
   @Input({ required: true }) effectTypes!: FaceColorEffectType[];
   @Input() showEdit = false;
@@ -20,12 +24,6 @@ export class FaceColorEffectCardComponent implements OnDestroy {
 
   @ViewChild('deletePrompt') deletePromptTemplate!: TemplateRef<any>;
   private deletePromptModa?: NgbModalRef;
-
-  constructor(
-    private api: FaceApiService,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-  ) { }
 
   get effectTypeDescription() {
     return this.effectTypes.find(t => t.name == this.effect.type)?.description || "Unknown type";

@@ -1,23 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-    selector: 'app-rgb-dashboard-page',
-    templateUrl: './rgb-dashboard-page.component.html',
-    styleUrl: './rgb-dashboard-page.component.scss',
-    standalone: false
+  selector: 'app-rgb-dashboard-page',
+  templateUrl: './rgb-dashboard-page.component.html',
+  styleUrl: './rgb-dashboard-page.component.scss',
+  standalone: false
 })
 export class RgbDashboardPageComponent implements OnInit {
-  scenes: RgbScene[] = [];
+  private readonly toastr = inject(ToastrService);
+  private readonly rgbApi = inject(RgbApiService);
+  private readonly title = inject(Title);
 
-  constructor(
-    private toastr: ToastrService,
-    private rgbApi: RgbApiService,
-    private title: Title,
-  ) { }
+  scenes: RgbScene[] = [];
 
   addBlank() {
     this.rgbApi.createNewScene("New scene").pipe(catchError(err => {

@@ -1,4 +1,4 @@
-import { Component, ElementRef, forwardRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, forwardRef, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AssetsApiService, BuiltInAsset } from '../../../../core/services/api/assets-api.service';
 import { ToastrService } from 'ngx-toastr';
@@ -8,19 +8,24 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { uuidv7 } from 'uuidv7';
 
 @Component({
-    selector: 'app-visor-asset-picker',
-    templateUrl: './visor-asset-picker.component.html',
-    styleUrl: './visor-asset-picker.component.scss',
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => VisorAssetPickerComponent),
-            multi: true
-        }
-    ],
-    standalone: false
+  selector: 'app-visor-asset-picker',
+  templateUrl: './visor-asset-picker.component.html',
+  styleUrl: './visor-asset-picker.component.scss',
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => VisorAssetPickerComponent),
+      multi: true
+    }
+  ],
+  standalone: false
 })
 export class VisorAssetPickerComponent implements ControlValueAccessor, OnInit, OnDestroy {
+  private readonly assetApi = inject(AssetsApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly fileApi = inject(FilesApiService);
+  private readonly modal = inject(NgbModal);
+
   //#region ControlValueAccessor
   private _image: string | null = null;
   private _disabled = false;
@@ -150,12 +155,6 @@ export class VisorAssetPickerComponent implements ControlValueAccessor, OnInit, 
     return this.assetApi.getAssetUrl(asset);
   }
 
-  constructor(
-    private assetApi: AssetsApiService,
-    private toastr: ToastrService,
-    private fileApi: FilesApiService,
-    private modal: NgbModal,
-  ) { }
 }
 
 interface GroupedAssets {

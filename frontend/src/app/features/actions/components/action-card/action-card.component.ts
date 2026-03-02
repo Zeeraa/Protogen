@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Action, ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
 import { uuidv7 } from 'uuidv7';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -15,6 +15,10 @@ import { ActionType } from '../../../../core/enum/ActionType';
   styleUrl: './action-card.component.scss'
 })
 export class ActionCardComponent implements OnDestroy {
+  private readonly modal = inject(NgbModal);
+  private readonly actionApi = inject(ActionApiService);
+  private readonly toastr = inject(ToastrService);
+
   @Input({ required: true }) actionSet!: ActionSet;
   @Input({ required: true }) actionDataSet!: ActionDataSet;
   @Input() editEnabled = false;
@@ -34,12 +38,6 @@ export class ActionCardComponent implements OnDestroy {
   protected lockInputs = false;
   protected nameEmpty = false;
   protected nameTaken = false;
-
-  constructor(
-    private modal: NgbModal,
-    private actionApi: ActionApiService,
-    private toastr: ToastrService,
-  ) { }
 
   ngOnDestroy(): void {
     this.deletePrompt?.close();

@@ -1,13 +1,14 @@
-import { Component, Input } from "@angular/core";
+import { Directive, inject, Input } from "@angular/core";
 import { RgbApiService, RgbEffect, RgbEffectProperty, RgbScene } from "../../../../core/services/api/rgb-api.service";
 import { ToastrService } from "ngx-toastr";
 
-@Component({
-  template: '',
+@Directive({
   standalone: false
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export abstract class RgbPropertySharedClass {
+  protected readonly api = inject(RgbApiService);
+  protected readonly toastr = inject(ToastrService);
+
   @Input({ required: true }) scene!: RgbScene;
   @Input({ required: true }) effect!: RgbEffect;
   @Input({ required: true }) property!: RgbEffectProperty;
@@ -28,9 +29,4 @@ export abstract class RgbPropertySharedClass {
   public get description() {
     return this.property.description || undefined;
   }
-
-  constructor(
-    protected api: RgbApiService,
-    protected toastr: ToastrService,
-  ) { }
 }

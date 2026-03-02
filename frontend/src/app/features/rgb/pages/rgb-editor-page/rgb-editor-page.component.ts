@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { RgbApiService, RgbEffectInfo, RgbScene } from '../../../../core/services/api/rgb-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +13,13 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
   standalone: false
 })
 export class RgbEditorPageComponent implements OnInit, OnDestroy {
+  private readonly rgbApi = inject(RgbApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly modal = inject(NgbModal);
+  private readonly title = inject(Title);
+
   scene: RgbScene | null = null;
   sceneName = "";
   availableEffects: RgbEffectInfo[] = [];
@@ -41,15 +48,6 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
         this.refresh();
       });
   }
-
-  constructor(
-    private rgbApi: RgbApiService,
-    private toastr: ToastrService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private modal: NgbModal,
-    private title: Title,
-  ) { }
 
   get effects() {
     if (this.scene == null) {

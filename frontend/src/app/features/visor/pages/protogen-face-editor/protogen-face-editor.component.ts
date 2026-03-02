@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FaceApiService, FaceColorEffect, FaceColorEffectType, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { catchError } from 'rxjs';
@@ -18,6 +18,13 @@ export const FaceRendererId = "PROTOGEN_FACE";
   standalone: false
 })
 export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
+  private readonly faceApi = inject(FaceApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+  private readonly assetsApi = inject(AssetsApiService);
+  private readonly visorApi = inject(VisorApiService);
+  private readonly title = inject(Title);
+
   faceExpressions: FaceExpression[] = [];
   assets: BuiltInAsset[] = [];
   faceColorEffectTypes: FaceColorEffectType[] = [];
@@ -53,15 +60,6 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
   nameInUse = false;
 
   imageMissing = false;
-
-  constructor(
-    private faceApi: FaceApiService,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-    private assetsApi: AssetsApiService,
-    private visorApi: VisorApiService,
-    private title: Title,
-  ) { }
 
   isDefault(expression: FaceExpression) {
     return expression.data.uuid == this.defaultExpression;

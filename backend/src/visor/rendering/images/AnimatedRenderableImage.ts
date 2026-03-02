@@ -1,15 +1,12 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { AbstractRenderableImage, DrawMode, Type } from "./AbstractRenderableImage";
-import { CanvasRenderingContext2D, Image } from "canvas";
-import sharp from "sharp";
+import { Canvas, CanvasRenderingContext2D, createCanvas } from "canvas";
 import { GifReader } from "omggif";
-import { PNG } from "pngjs";
-import { createHash } from "crypto";
 
 export class AnimatedRenderableImage extends AbstractRenderableImage {
   private _totalLength: number = 0;
   private _frames: AnimationFrame[] = [];
-  private _loading = false;
+  private _loaded = false;
 
   public get type(): Type {
     return Type.Animated;
@@ -18,131 +15,89 @@ export class AnimatedRenderableImage extends AbstractRenderableImage {
   public async loadImage(imageSource: string) {
     this._totalLength = 0;
     this._frames = [];
+    this._loaded = false;
+
+    this.protogen.logger.info("AnimatedImage", "Loading GIF from: " + imageSource);
 
     if (!existsSync(imageSource)) {
+      this.protogen.logger.error("AnimatedImage", "Image source file not found: " + imageSource);
       throw new Error("Image source file not found");
     }
 
-    const maxScale = this.protogen.visor.scale;
-    const buffer = readFileSync(imageSource);
-
-    const digest = createHash('sha256');
-    digest.update(buffer);
-    const hash = digest.digest('hex');
-
-    const dimStr = maxScale.width + "x" + maxScale.height;
-
-    const folder = this.protogen.config.dataDirectory + "/animcache/" + hash.substring(0, 2);
-    const cacheFile = folder + "/" + hash + "_" + dimStr + ".json";
-    if (!existsSync(cacheFile)) {
-      this._loading = true;
-      const cache: AnimationCacheEntry[] = [];
+    try {
+      const buffer = readFileSync(imageSource);
+      this.protogen.logger.info("AnimatedImage", "Read " + buffer.length + " bytes from file");
 
       const reader = new GifReader(buffer);
 
-      const frames = reader.numFrames();
-      const width = reader.width;
-      const height = reader.height;
+      const numFrames = reader.numFrames();
+      const gifWidth = reader.width;
+      const gifHeight = reader.height;
 
-      // Buffer to store the "current full frame"
-      const fullFrame = Buffer.alloc(width * height * 4, 0); // Initialize full frame with black
+      // Composite canvas accumulates frames across the animation
+      const compositeCanvas = createCanvas(gifWidth, gifHeight);
+      const compositeCtx = compositeCanvas.getContext('2d');
+
+      // Used to restore previous state for disposal mode 3
+      const previousCanvas = createCanvas(gifWidth, gifHeight);
+      const previousCtx = previousCanvas.getContext('2d');
+
       let frameTimer = 0;
-      for (let i = 0; i < frames; i++) {
-        const currentFrame = Buffer.alloc(width * height * 4);
-        reader.decodeAndBlitFrameRGBA(i, currentFrame);
 
+      for (let i = 0; i < numFrames; i++) {
         const info = reader.frameInfo(i);
-        const delay = info.delay * 10; // convert to ms
+        const delay = Math.max(info.delay * 10, 20); // convert to ms, min 20ms for 0-delay frames
+
+        // Save composite state before applying this frame (needed for disposal mode 3)
+        previousCtx.clearRect(0, 0, gifWidth, gifHeight);
+        previousCtx.drawImage(compositeCanvas, 0, 0);
+
+        // Decode frame RGBA pixels
+        const framePixels = new Uint8Array(gifWidth * gifHeight * 4);
+        reader.decodeAndBlitFrameRGBA(i, framePixels);
+
+        // Paint decoded pixels onto a temp canvas
+        const tempCanvas = createCanvas(gifWidth, gifHeight);
+        const tempCtx = tempCanvas.getContext('2d');
+        const imageData = tempCtx.createImageData(gifWidth, gifHeight);
+        imageData.data.set(framePixels);
+        tempCtx.putImageData(imageData, 0, 0);
+
+        // Composite this frame on top
+        compositeCtx.drawImage(tempCanvas, 0, 0);
+
+        // Snapshot the current composite as this animation frame
+        const frameCanvas = createCanvas(gifWidth, gifHeight);
+        frameCanvas.getContext('2d').drawImage(compositeCanvas, 0, 0);
+
+        this._frames.push({
+          canvas: frameCanvas,
+          delay: delay,
+          startAt: frameTimer,
+        });
 
         this._totalLength += delay;
-
-        // Combine the partial frame with the previous full frame
-        for (let j = 0; j < currentFrame.length; j += 4) {
-          if (currentFrame[j + 3] > 0) { // Check if pixel is not fully transparent
-            fullFrame[j] = currentFrame[j];     // R
-            fullFrame[j + 1] = currentFrame[j + 1]; // G
-            fullFrame[j + 2] = currentFrame[j + 2]; // B
-            fullFrame[j + 3] = currentFrame[j + 3]; // A
-          }
-        }
-
-        // Create a PNG instance for the full frame
-        const png = new PNG({ width, height });
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4; // RGBA index
-            png.data[idx] = fullFrame[idx];       // R
-            png.data[idx + 1] = fullFrame[idx + 1]; // G
-            png.data[idx + 2] = fullFrame[idx + 2]; // B
-            png.data[idx + 3] = fullFrame[idx + 3]; // A
-          }
-        }
-
-        const resized = await sharp(PNG.sync.write(png))
-          .resize({
-            width: maxScale.width,
-            height: maxScale.height,
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
-          .png()
-          .toBuffer();
-
-        const image = new Image();
-        image.src = resized;
-
-        const flippedBuffer = await sharp(resized)
-          .flop()
-          .png()
-          .toBuffer();
-
-        const invertedImage = new Image();
-        invertedImage.src = flippedBuffer;
-
-        this.frames.push({
-          image: image,
-          invertedImage: invertedImage,
-          delay: delay,
-          startAt: frameTimer,
-        });
-
-        cache.push({
-          delay: delay,
-          startAt: frameTimer,
-          image: resized.toString("base64"),
-          invertedImage: flippedBuffer.toString("base64"),
-        });
-
         frameTimer += delay;
+
+        // Handle GIF disposal methods
+        const disposal = info.disposal || 0;
+        if (disposal === 2) {
+          // Restore to background: clear the frame region
+          compositeCtx.clearRect(info.x, info.y, info.width, info.height);
+        } else if (disposal === 3) {
+          // Restore to previous state
+          compositeCtx.clearRect(0, 0, gifWidth, gifHeight);
+          compositeCtx.drawImage(previousCanvas, 0, 0);
+        }
+        // disposal 0 & 1: leave composite as-is
       }
 
-      if (!existsSync(folder)) {
-        mkdirSync(folder);
-      }
-      writeFileSync(cacheFile, JSON.stringify(cache));
-
-      this._loading = false;
-    } else {
-      this._loading = true;
-      const textContent = readFileSync(cacheFile).toString();
-      const cached = JSON.parse(textContent) as AnimationCacheEntry[];
-      cached.forEach(frame => {
-        this._totalLength += frame.delay;
-
-        const image = new Image();
-        const invertedImage = new Image();
-
-        image.src = "data:image/png;base64," + frame.image;
-        invertedImage.src = "data:image/png;base64," + frame.invertedImage;
-
-        this.frames.push({
-          delay: frame.delay,
-          startAt: frame.startAt,
-          image: image,
-          invertedImage: invertedImage,
-        });
-      });
-      this._loading = false;
+      this._loaded = true;
+      this.protogen.logger.info("AnimatedImage", "Loaded " + this._frames.length + " frames, total duration: " + this._totalLength + "ms");
+    } catch (err: any) {
+      this.protogen.logger.error("AnimatedImage", "Failed to load GIF: " + String(err?.message || err));
+      console.error(err);
+      this._loaded = false;
     }
   }
 
@@ -155,41 +110,44 @@ export class AnimatedRenderableImage extends AbstractRenderableImage {
   }
 
   public draw(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, mode: DrawMode, time: number): void {
-    if (this.frames.length == 0 || this.totalLength == 0) {
+    if (this._frames.length === 0 || this._totalLength === 0) {
       ctx.fillStyle = "#FF00FF";
       ctx.fillRect(x, y, width, height);
       return;
     }
 
-    if (this._loading) {
+    if (!this._loaded) {
       ctx.fillStyle = "#4D4D4D";
       ctx.fillRect(x, y, width, height);
       return;
     }
 
-    const animationTime = time % this.totalLength;
-    const frame = this.frames.find(frame => frame.startAt >= animationTime || frame.startAt + frame.delay >= animationTime);
-    if (frame == null) {
-      this.protogen.logger.warn("AnimatedRenderableImage", "Got null when trying to read frame at " + animationTime + "ms");
-      return;
+    const animationTime = time % this._totalLength;
+
+    // Find the active frame (frames are sorted by startAt)
+    let frame = this._frames[0];
+    for (let i = this._frames.length - 1; i >= 0; i--) {
+      if (animationTime >= this._frames[i].startAt) {
+        frame = this._frames[i];
+        break;
+      }
     }
 
-    const image = mode == DrawMode.Inverted ? frame.invertedImage : frame.image;
-
-    ctx.drawImage(image, x, y, width, height);
+    // Draw with canvas transform for flipping instead of storing a flipped copy
+    if (mode === DrawMode.Inverted) {
+      ctx.save();
+      ctx.translate(x + width, y);
+      ctx.scale(-1, 1);
+      ctx.drawImage(frame.canvas, 0, 0, width, height);
+      ctx.restore();
+    } else {
+      ctx.drawImage(frame.canvas, x, y, width, height);
+    }
   }
 }
 
 interface AnimationFrame {
-  image: Image;
-  invertedImage: Image;
-  delay: number;
-  startAt: number;
-}
-
-export interface AnimationCacheEntry {
-  image: string;
-  invertedImage: string;
+  canvas: Canvas;
   delay: number;
   startAt: number;
 }

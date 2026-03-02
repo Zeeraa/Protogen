@@ -37,7 +37,7 @@ export class VideoDownloadManager {
 
     this._dbFile = this._dataDirectory + "/db.sqlite";
     this._dataSource = new DataSource({
-      type: "sqlite",
+      type: "better-sqlite3",
       database: this._dbFile,
       entities: [
         VideoDownloaderJob

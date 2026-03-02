@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { SocketService } from './core/services/socket/socket.service';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
@@ -10,11 +10,9 @@ import { ThemeService } from './core/services/theme.service';
   standalone: false
 })
 export class AppComponent implements OnInit {
-  constructor(
-    protected auth: AuthService,
-    private socket: SocketService,
-    private theme: ThemeService,
-  ) { }
+  protected readonly auth = inject(AuthService);
+  private readonly socket = inject(SocketService);
+  private readonly theme = inject(ThemeService);
 
   ngOnInit(): void {
     this.init();

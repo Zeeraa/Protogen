@@ -1,6 +1,5 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { ApiBaseService } from '../api-base.service';
 import { catchError, of } from 'rxjs';
 
@@ -8,13 +7,6 @@ import { catchError, of } from 'rxjs';
   providedIn: 'root'
 })
 export class VisorApiService extends ApiBaseService {
-  constructor(
-    http: HttpClient,
-    toastr: ToastrService,
-  ) {
-    super(http, toastr);
-  }
-
   getStatus() {
     return this.http.get<VisorStatus>(this.apiBaseUrl + "/visor/status").pipe(catchError(this.defaultErrorHandler));
   }

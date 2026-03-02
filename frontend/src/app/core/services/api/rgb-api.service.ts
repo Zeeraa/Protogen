@@ -1,20 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { HttpClient } from '@angular/common/http';
-import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RgbApiService extends ApiBaseService {
-  constructor(
-    http: HttpClient,
-    toastr: ToastrService,
-  ) {
-    super(http, toastr);
-  }
-
   getEffects() {
     return this.http.get<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/effects").pipe(catchError(this.defaultErrorHandler));
   }

@@ -1,15 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { VisorApiService, VisorRenderer, VisorRendererType } from '../../../../core/services/api/visor-api.service';
 import { catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-    selector: 'app-renderer-card',
-    templateUrl: './renderer-card.component.html',
-    styleUrl: './renderer-card.component.scss',
-    standalone: false
+  selector: 'app-renderer-card',
+  templateUrl: './renderer-card.component.html',
+  styleUrl: './renderer-card.component.scss',
+  standalone: false
 })
 export class RendererCardComponent {
+  private readonly toastr = inject(ToastrService);
+  private readonly api = inject(VisorApiService);
+
   @Input({ required: true }) renderer!: VisorRenderer;
 
   activate() {
@@ -40,8 +43,4 @@ export class RendererCardComponent {
     return this.renderer.type == VisorRendererType.CustomisableImage;
   }
 
-  constructor(
-    private toastr: ToastrService,
-    private api: VisorApiService,
-  ) { }
 }

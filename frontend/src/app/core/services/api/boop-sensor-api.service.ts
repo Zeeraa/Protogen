@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ToastrService } from 'ngx-toastr';
+import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { ActionType } from '../../enum/ActionType';
 
@@ -9,13 +8,6 @@ import { ActionType } from '../../enum/ActionType';
   providedIn: 'root'
 })
 export class BoopSensorApiService extends ApiBaseService {
-  constructor(
-    http: HttpClient,
-    toastr: ToastrService,
-  ) {
-    super(http, toastr);
-  }
-
   resetCounter() {
     return this.http.delete(this.apiBaseUrl + "/boop-sensor/counter").pipe(catchError(this.defaultErrorHandler));
   }

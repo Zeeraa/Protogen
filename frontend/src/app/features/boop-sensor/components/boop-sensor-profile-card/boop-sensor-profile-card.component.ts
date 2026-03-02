@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -10,14 +10,12 @@ import { catchError } from 'rxjs';
   styleUrl: './boop-sensor-profile-card.component.scss'
 })
 export class BoopeSensorProfileCardComponent {
+  private readonly boopSensorApi = inject(BoopSensorApiService);
+  private readonly toastr = inject(ToastrService);
+
   @Input({ required: true }) profile!: BoopSensorProfile;
   @Input() active = false;
   @Output() profileActivated = new EventEmitter<BoopSensorProfile>();
-
-  constructor(
-    private boopSensorApi: BoopSensorApiService,
-    private toastr: ToastrService,
-  ) { }
 
   activate() {
     this.boopSensorApi.activateProfile(this.profile.id).pipe(catchError((err) => {

@@ -89,11 +89,6 @@ export class Protogen {
       mkdirSync(this.config.dataDirectory);
     }
 
-    const animationCacheDirectory = this.config.dataDirectory + "/animcache";
-    if (!existsSync(animationCacheDirectory)) {
-      mkdirSync(animationCacheDirectory);
-    }
-
     const videoTempDirectory = this.config.dataDirectory + "/videos";
     if (!existsSync(videoTempDirectory)) {
       mkdirSync(videoTempDirectory);

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiKey, ApiKeyApi } from '../../../../core/services/api/api-key-api.service';
@@ -9,12 +9,18 @@ import { ClipboardService } from 'ngx-clipboard'
 import { Title } from '@angular/platform-browser';
 
 @Component({
-    selector: 'app-api-key-manager-page',
-    templateUrl: './api-key-manager-page.component.html',
-    styleUrl: './api-key-manager-page.component.scss',
-    standalone: false
+  selector: 'app-api-key-manager-page',
+  templateUrl: './api-key-manager-page.component.html',
+  styleUrl: './api-key-manager-page.component.scss',
+  standalone: false
 })
 export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
+  private readonly toastr = inject(ToastrService);
+  private readonly api = inject(ApiKeyApi);
+  private readonly modal = inject(NgbModal);
+  private readonly clipboard = inject(ClipboardService);
+  private readonly title = inject(Title);
+
   protected apiKeys: ApiKey[] = [];
 
   private deleteKeyPrompt: NgbModalRef | null = null;
@@ -40,14 +46,6 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
     }
     return "************************************";
   }
-
-  constructor(
-    private toastr: ToastrService,
-    private api: ApiKeyApi,
-    private modal: NgbModal,
-    private clipboard: ClipboardService,
-    private title: Title,
-  ) { }
 
   fetchData() {
     this.api.getAllKeys().pipe(

@@ -4,7 +4,6 @@ import { ProtogenWebServer } from "../../ProtogenWebServer";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
 import { createHash } from "crypto";
-import { red } from "colors";
 import { Request, Response } from "express";
 import { resolve } from "path";
 
@@ -25,13 +24,6 @@ export class ImageRouter extends AbstractRouter {
       #swagger.description = "Upload image"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See console for more info" }
-      #swagger.parameters['externalGifProcessing'] = {
-        in: 'query',
-        description: 'Use external worker to process gifs for less load on the integrated cpu',
-        type: 'boolean',
-        required: false
-      }
-
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
@@ -63,35 +55,6 @@ export class ImageRouter extends AbstractRouter {
             }
 
             writeFileSync(path, dataBuffer);
-          }
-
-          if (String(req.query.externalGifProcessing).toLowerCase() == "true") {
-            const size = this.protogen.visor.scale;
-
-            const animationCacheFolder = this.protogen.config.dataDirectory + "/animcache/" + hash.substring(0, 2);
-            const cacheFile = animationCacheFolder + "/" + hash + "_" + size.width + "x" + size.height + ".json";
-
-            if (!existsSync(cacheFile)) {
-              response["alreadyCached"] = false;
-              try {
-                this.protogen.logger.info("Image", "Begin remote image processing");
-                const cached = await this.protogen.remoteWorker.processGifAsync(path, size.width, size.height);
-                this.protogen.logger.info("Image", "Remote image processing done");
-                if (!existsSync(animationCacheFolder)) {
-                  mkdirSync(animationCacheFolder);
-                }
-                writeFileSync(cacheFile, JSON.stringify(cached));
-
-                response["externalProcessingOk"] = true;
-              } catch (err: any) {
-                this.protogen.logger.error("Image", "Processing gif externally failed with error " + red(String(err.message)));
-                console.error(err);
-                response["externalProcessingOk"] = false;
-              }
-            } else {
-              response["externalProcessingOk"] = true;
-              response["alreadyCached"] = true;
-            }
           }
 
           response["resource"] = name;

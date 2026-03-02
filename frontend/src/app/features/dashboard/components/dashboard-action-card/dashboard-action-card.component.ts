@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -10,12 +10,10 @@ import { catchError } from 'rxjs';
   styleUrl: './dashboard-action-card.component.scss'
 })
 export class DashboardActionCardComponent {
-  @Input({ required: true }) action!: ActionSet;
+  private readonly actionApi = inject(ActionApiService);
+  private readonly toastr = inject(ToastrService);
 
-  constructor(
-    private actionApi: ActionApiService,
-    private toastr: ToastrService,
-  ) { }
+  @Input({ required: true }) action!: ActionSet;
 
   activate() {
     this.actionApi.activateActionSet(this.action.id).pipe(

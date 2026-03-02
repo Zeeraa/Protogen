@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { FaceApiService, FaceColorEffect } from '../../../../core/services/api/face-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -10,12 +10,10 @@ import { catchError } from 'rxjs';
   styleUrl: './dashboard-face-rgb-card.component.scss'
 })
 export class DashboardFaceRgbCardComponent {
-  @Input({ required: true }) effect!: FaceColorEffect;
+  private readonly faceApi = inject(FaceApiService);
+  private readonly toastr = inject(ToastrService);
 
-  constructor(
-    private faceApi: FaceApiService,
-    private toastr: ToastrService,
-  ) { }
+  @Input({ required: true }) effect!: FaceColorEffect;
 
   activate() {
     this.faceApi.activateColorEffect(this.effect.id).pipe(

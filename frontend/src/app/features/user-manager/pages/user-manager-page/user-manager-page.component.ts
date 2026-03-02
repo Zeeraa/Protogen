@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuthApiService, ProtogenUser } from '../../../../core/services/api/auth-api.service';
 import { catchError, of } from 'rxjs';
@@ -9,12 +9,18 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 
 @Component({
-    selector: 'app-user-manager-page',
-    templateUrl: './user-manager-page.component.html',
-    styleUrl: './user-manager-page.component.scss',
-    standalone: false
+  selector: 'app-user-manager-page',
+  templateUrl: './user-manager-page.component.html',
+  styleUrl: './user-manager-page.component.scss',
+  standalone: false
 })
 export class UserManagerPageComponent implements OnInit, OnDestroy {
+  private readonly auth = inject(AuthService);
+  private readonly authApi = inject(AuthApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modal = inject(NgbModal);
+  private readonly title = inject(Title);
+
   users: ProtogenUser[] = [];
   deleteUserName = "MissingNo";
   deleteUserId = -1;
@@ -47,14 +53,6 @@ export class UserManagerPageComponent implements OnInit, OnDestroy {
   passwordChangeUserName = "MissingNo";
   oldPasswordMissing = false;
   oldPasswordWrong = false;
-
-  constructor(
-    private auth: AuthService,
-    private authApi: AuthApiService,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-    private title: Title,
-  ) { }
 
   loadUserList() {
     this.authApi.getUsers().pipe(catchError(err => {

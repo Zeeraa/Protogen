@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
 import { FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
@@ -13,18 +13,16 @@ import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.s
   standalone: false
 })
 export class DashboardPageComponent implements OnInit {
+  private readonly title = inject(Title);
+  private readonly toastr = inject(ToastrService);
+  private readonly actionApi = inject(ActionApiService);
+  private readonly faceApi = inject(FaceApiService);
+  private readonly rgbApi = inject(RgbApiService);
+
   actions: ActionSet[] = [];
   expressions: FaceExpression[] = [];
   rgbScenes: RgbScene[] = [];
   faceRgbEffects: FaceColorEffect[] = [];
-
-  constructor(
-    private title: Title,
-    private toastr: ToastrService,
-    private actionApi: ActionApiService,
-    private faceApi: FaceApiService,
-    private rgbApi: RgbApiService,
-  ) { }
 
   ngOnInit(): void {
     this.title.setTitle("Dashboard - Protogen");

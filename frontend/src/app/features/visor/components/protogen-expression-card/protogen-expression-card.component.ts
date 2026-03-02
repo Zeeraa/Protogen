@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
 import { colorEffectToLinkedColorEffect, FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { catchError } from 'rxjs';
@@ -12,6 +12,11 @@ import { uuidv7 } from 'uuidv7';
   standalone: false
 })
 export class ProtogenExpressionCardComponent implements OnDestroy {
+  private readonly modal = inject(NgbModal);
+  private readonly api = inject(FaceApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly faceApi = inject(FaceApiService);
+
   @Input({ required: true }) expression!: FaceExpression;
   @Input({ required: true }) faceColorEffects!: FaceColorEffect[];
   @Input() isDefault = false;
@@ -89,10 +94,4 @@ export class ProtogenExpressionCardComponent implements OnDestroy {
     this.deletePrompt?.close();
   }
 
-  constructor(
-    private modal: NgbModal,
-    private api: FaceApiService,
-    private toastr: ToastrService,
-    private faceApi: FaceApiService,
-  ) { }
 }

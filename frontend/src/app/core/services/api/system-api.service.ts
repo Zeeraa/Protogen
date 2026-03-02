@@ -1,6 +1,4 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { ApiBaseService } from '../api-base.service';
 import { catchError, map, Observable, of } from 'rxjs';
 import { RGBColor } from '../utils/Utils';
@@ -9,13 +7,6 @@ import { RGBColor } from '../utils/Utils';
   providedIn: 'root'
 })
 export class SystemApiService extends ApiBaseService {
-  constructor(
-    http: HttpClient,
-    toastr: ToastrService,
-  ) {
-    super(http, toastr);
-  }
-
   getOverview(): Observable<SystemOverview> {
     return this.http.get<SystemOverview>(this.apiBaseUrl + "/system/overview").pipe(catchError(this.defaultErrorHandler));
   }
