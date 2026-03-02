@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BoopSensorAction, BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
 import { catchError, forkJoin, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -22,6 +22,18 @@ import { Title } from '@angular/platform-browser';
   styleUrl: './boop-sensor-profile-editor-page.component.scss'
 })
 export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
+  private readonly boopSensorApi = inject(BoopSensorApiService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly toastr = inject(ToastrService);
+  private readonly rgbApi = inject(RgbApiService);
+  private readonly visorApi = inject(VisorApiService);
+  private readonly videoApi = inject(VideoPlayerApiService);
+  private readonly faceApi = inject(FaceApiService);
+  private readonly actionApi = inject(ActionApiService);
+  private readonly modal = inject(NgbModal);
+  private readonly router = inject(Router);
+  private readonly title = inject(Title);
+
   private fetchSubscription?: Subscription;
 
   protected loading = true;
@@ -40,20 +52,6 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
 
   private deleteProfilePrompt: NgbModalRef | null = null;
   @ViewChild("deleteProfilePrompt") private deleteProfilePromptTemplate!: TemplateRef<any>;
-
-  constructor(
-    private boopSensorApi: BoopSensorApiService,
-    private route: ActivatedRoute,
-    private toastr: ToastrService,
-    private rgbApi: RgbApiService,
-    private visorApi: VisorApiService,
-    private videoApi: VideoPlayerApiService,
-    private faceApi: FaceApiService,
-    private actionApi: ActionApiService,
-    private modal: NgbModal,
-    private router: Router,
-    private title: Title,
-  ) { }
 
   loadActionDataSet() {
     const rgbScenesRequest = this.rgbApi.getScenes();

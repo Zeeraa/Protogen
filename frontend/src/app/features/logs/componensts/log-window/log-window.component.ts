@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, inject, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Terminal } from '@xterm/xterm';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { WebglAddon } from '@xterm/addon-webgl';
@@ -12,13 +12,17 @@ import { SocketMessageType } from '../../../../core/services/socket/data/SocketM
 import { SocketEventType } from '../../../../core/services/socket/data/SocketEventType';
 
 @Component({
-    selector: 'app-log-window',
-    templateUrl: './log-window.component.html',
-    styleUrl: './log-window.component.scss',
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: 'app-log-window',
+  templateUrl: './log-window.component.html',
+  styleUrl: './log-window.component.scss',
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class LogWindowComponent implements AfterViewInit, OnDestroy {
+  private readonly system = inject(SystemApiService);
+  private readonly navbarService = inject(NavbarService);
+  private readonly socketService = inject(SocketService);
+
   private terminal!: Terminal;
   private fitAddon!: FitAddon;
   private navbarChangeSubscription: Subscription | null = null;
@@ -30,12 +34,6 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('terminal')
   private terminalDiv!: ElementRef<HTMLElement>;
-
-  constructor(
-    private system: SystemApiService,
-    private navbarService: NavbarService,
-    private socketService: SocketService,
-  ) { }
 
   ngAfterViewInit(): void {
     this.fitAddon = new FitAddon();

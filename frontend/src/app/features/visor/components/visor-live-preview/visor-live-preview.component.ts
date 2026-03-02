@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { ToastrService } from 'ngx-toastr';
 import { VisorApiService } from '../../../../core/services/api/visor-api.service';
@@ -6,22 +6,20 @@ import { Subscription } from 'rxjs';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 
 @Component({
-    selector: 'app-visor-live-preview',
-    templateUrl: './visor-live-preview.component.html',
-    styleUrl: './visor-live-preview.component.scss',
-    standalone: false
+  selector: 'app-visor-live-preview',
+  templateUrl: './visor-live-preview.component.html',
+  styleUrl: './visor-live-preview.component.scss',
+  standalone: false
 })
 export class VisorLivePreviewComponent implements OnInit, OnDestroy {
+  private readonly api = inject(VisorApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly socket = inject(SocketService);
+
   private socketSubscription: Subscription | null = null;
   private updatePreviewInterval: any = null;
 
   previewImage = "/visor_blank.png";
-
-  constructor(
-    private api: VisorApiService,
-    private toastr: ToastrService,
-    private socket: SocketService,
-  ) { }
 
   async updatePreviewHttp() {
     try {

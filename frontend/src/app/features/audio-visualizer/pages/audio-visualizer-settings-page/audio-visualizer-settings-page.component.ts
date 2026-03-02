@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
@@ -13,6 +13,11 @@ import { Title } from '@angular/platform-browser';
   styleUrl: './audio-visualizer-settings-page.component.scss'
 })
 export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, AfterViewInit {
+  private readonly socket = inject(SocketService);
+  private readonly audioVisualizerApi = inject(AudioVisualizerApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly title = inject(Title);
+
   private interval?: any;
   private audioSubscription?: Subscription;
 
@@ -120,13 +125,6 @@ export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, 
       highThreshold: this.highThreshold,
     });
   }
-
-  constructor(
-    private socket: SocketService,
-    private audioVisualizerApi: AudioVisualizerApiService,
-    private toastr: ToastrService,
-    private title: Title,
-  ) { }
 
   rollback() {
     this.audioVisualizerApi.getSettings().pipe(

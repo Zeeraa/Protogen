@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { AuthApiService } from '../../../../core/services/api/auth-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, Subscription } from 'rxjs';
@@ -12,19 +12,17 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
   styleUrl: './auth-page.component.scss'
 })
 export class AuthPageComponent implements AfterViewInit, OnDestroy {
+  private readonly authApi = inject(AuthApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly modal = inject(NgbModal);
+
   code = "";
 
   @ViewChild("confirmScannedCodeModal") private confirmScannedCodeModalTemplate!: TemplateRef<any>;
   private confirmScannedCodeModal?: NgbModalRef;
   private confirmScannedCodeModalClosedSubscription?: Subscription;
-
-  constructor(
-    private authApi: AuthApiService,
-    private toastr: ToastrService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private modal: NgbModal,
-  ) { }
 
   approveLogin() {
     if (this.code.trim().length != 8) {

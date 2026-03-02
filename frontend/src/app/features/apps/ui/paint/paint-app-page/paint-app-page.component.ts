@@ -1,4 +1,4 @@
-import { AfterViewInit, ApplicationRef, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, ApplicationRef, Component, ElementRef, HostListener, inject, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AppSocketConnection, AppSocketPacket } from '../../../../../core/apps/AppSocketConnection';
@@ -15,6 +15,11 @@ import { hexToRgb, RGBColor, rgbToHex } from '../../../../../core/services/utils
   styleUrl: './paint-app-page.component.scss'
 })
 export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
+  private readonly toastr = inject(ToastrService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly appsApi = inject(AppsApi);
+  private readonly appRef = inject(ApplicationRef);
+
   private socket: AppSocketConnection | null = null;
   private connectSubscriptsion?: Subscription;
   private socketSubscriptsion?: Subscription;
@@ -36,12 +41,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   @ViewChild("paintCanvas") private canvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
 
-  constructor(
-    private toastr: ToastrService,
-    private route: ActivatedRoute,
-    private appsApi: AppsApi,
-    private appRef: ApplicationRef,
-  ) {
+  constructor() {
     this.onCanvasMouseDown = this.onCanvasMouseDown.bind(this);
     this.onCanvasMouseMove = this.onCanvasMouseMove.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);

@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { throwError } from 'rxjs';
@@ -8,14 +8,12 @@ import { throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class ApiBaseService {
+  protected readonly http = inject(HttpClient);
+  protected readonly toastr = inject(ToastrService);
+
   get apiBaseUrl() {
     return environment.apiUrl;
   }
-
-  constructor(
-    protected http: HttpClient,
-    protected toastr: ToastrService,
-  ) { }
 
   protected defaultErrorHandler = (err: HttpErrorResponse) => {
     if (err.status == 0) {

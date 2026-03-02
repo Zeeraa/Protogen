@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
@@ -13,16 +13,16 @@ import { catchError, of } from 'rxjs';
   styleUrl: './login-page.component.scss'
 })
 export class LoginPageComponent implements AfterViewInit {
+  protected readonly auth = inject(AuthService);
+  private readonly authApi = inject(AuthApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   protected loginForm: FormGroup;
   wrongUsernameOrPassword = false;
 
-  constructor(
-    protected auth: AuthService,
-    private authApi: AuthApiService,
-    private toastr: ToastrService,
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {
+  constructor() {
     this.loginForm = new FormGroup({
       username: new FormControl(""),
       password: new FormControl(""),

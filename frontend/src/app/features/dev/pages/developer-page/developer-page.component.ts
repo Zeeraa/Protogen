@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
@@ -16,21 +16,19 @@ import { AuthService } from '../../../../core/services/auth.service';
   styleUrl: './developer-page.component.scss'
 })
 export class DeveloperPageComponent implements OnInit, OnDestroy {
+  protected readonly socket = inject(SocketService);
+  private readonly devApi = inject(DevApi);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly toastr = inject(ToastrService);
+  private readonly clipboard = inject(ClipboardService);
+  private readonly auth = inject(AuthService);
+
   private subscribeToSocketInterval?: any;
   private socketSubscription?: Subscription;
 
   private hardwareEmulationStatus = HardwareEmulationStatus.Loading;
   private hardwareEmulationChangeBuffer: EmulatedHardwareChange[] = [];
   private _hardwareState: HardwareEmulationState = { boopSensorState: false, ledData: [], hudLines: [], volume: 0 };
-
-  constructor(
-    protected socket: SocketService,
-    private devApi: DevApi,
-    private sanitizer: DomSanitizer,
-    private toastr: ToastrService,
-    private clipboard: ClipboardService,
-    private auth: AuthService,
-  ) { }
 
   get hardwareEmulationStatusString() {
     return this.hardwareEmulationStatus as string;

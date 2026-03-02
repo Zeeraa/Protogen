@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { LocalStorageKey_AuthToken } from './utils/LocalStorageKeys';
 import { jwtDecode } from 'jwt-decode';
 import { AuthApiService } from './api/auth-api.service';
@@ -9,6 +9,8 @@ import { typeAssert } from './utils/Utils';
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly authApi = inject(AuthApiService);
+
   private authStateSubject = new BehaviorSubject<'loading' | 'authenticated' | 'unauthenticated'>('loading');
 
   private _loggedIn = false;
@@ -154,9 +156,7 @@ export class AuthService {
     });
   }
 
-  constructor(
-    private authApi: AuthApiService,
-  ) {
+  constructor() {
     setInterval(async () => {
       if (this.loggedIn) {
         try {

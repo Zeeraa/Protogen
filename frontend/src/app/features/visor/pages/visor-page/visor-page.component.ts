@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { VisorApiService, VisorRenderer, VisorStatus } from '../../../../core/services/api/visor-api.service';
 import { catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -6,12 +6,17 @@ import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
 @Component({
-    selector: 'app-visor-page',
-    templateUrl: './visor-page.component.html',
-    styleUrl: './visor-page.component.scss',
-    standalone: false
+  selector: 'app-visor-page',
+  templateUrl: './visor-page.component.html',
+  styleUrl: './visor-page.component.scss',
+  standalone: false
 })
 export class VisorPageComponent implements OnInit, OnDestroy {
+  private readonly api = inject(VisorApiService);
+  private readonly toastr = inject(ToastrService);
+  private readonly title = inject(Title);
+  private readonly router = inject(Router);
+
   status: VisorStatus | null = null;
   renderers: VisorRenderer[] = [];
   updateInterval: any = null;
@@ -51,13 +56,6 @@ export class VisorPageComponent implements OnInit, OnDestroy {
       this.router.navigate(["/visor/image/" + result.id]);
     })
   }
-
-  constructor(
-    private api: VisorApiService,
-    private toastr: ToastrService,
-    private title: Title,
-    private router: Router,
-  ) { }
 
   ngOnInit(): void {
     this.update();

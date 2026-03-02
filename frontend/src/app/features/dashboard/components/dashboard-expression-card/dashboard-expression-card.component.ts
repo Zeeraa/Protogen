@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { FaceApiService, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -10,12 +10,10 @@ import { catchError } from 'rxjs';
   styleUrl: './dashboard-expression-card.component.scss'
 })
 export class DashboardExpressionCardComponent {
-  @Input({ required: true }) expression!: FaceExpression;
+  private readonly faceApi = inject(FaceApiService);
+  private readonly toastr = inject(ToastrService);
 
-  constructor(
-    private faceApi: FaceApiService,
-    private toastr: ToastrService,
-  ) { }
+  @Input({ required: true }) expression!: FaceExpression;
 
   get previewB64() {
     return this.expression.preview;

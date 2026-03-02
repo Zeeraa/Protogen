@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { HttpClient } from '@angular/common/http';
-import { ToastrService } from 'ngx-toastr';
 import { catchError, of, tap } from 'rxjs';
 
 @Injectable({
@@ -9,13 +7,6 @@ import { catchError, of, tap } from 'rxjs';
 })
 export class FaceApiService extends ApiBaseService {
   private faceColorEffectTypeCache: FaceColorEffectType[] | null = null;
-
-  constructor(
-    http: HttpClient,
-    toastr: ToastrService,
-  ) {
-    super(http, toastr);
-  }
 
   getData() {
     return this.http.get<FaceData>(this.apiBaseUrl + "/face/data").pipe(catchError(this.defaultErrorHandler));

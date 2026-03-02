@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, inject, ViewChild } from '@angular/core';
 import { NavbarService } from '../../../../core/services/navbar.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ThemeService } from '../../../../core/services/theme.service';
@@ -10,6 +10,10 @@ import { ThemeService } from '../../../../core/services/theme.service';
   standalone: false
 })
 export class NavbarComponent implements AfterViewInit {
+  private readonly navbarService = inject(NavbarService);
+  private readonly auth = inject(AuthService);
+  private readonly theme = inject(ThemeService);
+
   isTogglerVisible = false;
 
   @ViewChild("protogen_navbar")
@@ -65,10 +69,4 @@ export class NavbarComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.navbarService.setup(this.navbarElement.nativeElement);
   }
-
-  constructor(
-    private navbarService: NavbarService,
-    private auth: AuthService,
-    private theme: ThemeService,
-  ) { }
 }

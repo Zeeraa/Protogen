@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { SavedVideo, SaveVideoPayload, VideoDownloaderJobStatus, VideoGroup, VideoPlayerApiService, VideoPlayerStatus } from '../../../../core/services/api/video-player-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { AudioApiService } from '../../../../core/services/api/audio-api.service';
@@ -15,6 +15,12 @@ import { Title } from '@angular/platform-browser';
   standalone: false
 })
 export class VideoPlayerPageComponent implements OnInit, OnDestroy {
+  private readonly toastr = inject(ToastrService);
+  private readonly api = inject(VideoPlayerApiService);
+  private readonly volumeApi = inject(AudioApiService);
+  private readonly modal = inject(NgbModal);
+  private readonly title = inject(Title);
+
   videoInputUrl = "";
   mirrorVideo = true;
   flipVideo = false;
@@ -258,14 +264,6 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
       this.fetchSavedVideos();
     })
   }
-
-  constructor(
-    private toastr: ToastrService,
-    private api: VideoPlayerApiService,
-    private volumeApi: AudioApiService,
-    private modal: NgbModal,
-    private title: Title,
-  ) { }
 
   ngOnInit(): void {
     this.update();

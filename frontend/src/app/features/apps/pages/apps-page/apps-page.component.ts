@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { App, AppsApi } from '../../../../core/services/api/apps-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -11,15 +11,13 @@ import { Title } from '@angular/platform-browser';
   styleUrl: './apps-page.component.scss'
 })
 export class AppsPageComponent implements OnInit, OnDestroy {
+  private readonly appsApi = inject(AppsApi);
+  private readonly toastr = inject(ToastrService);
+  private readonly title = inject(Title);
+
   protected apps: App[] = [];
   protected activeApp: App | null = null;
   private interval: any = null;
-
-  constructor(
-    private appsApi: AppsApi,
-    private toastr: ToastrService,
-    private title: Title,
-  ) { }
 
   ngOnInit(): void {
     this.title.setTitle("Apps - Protogen");

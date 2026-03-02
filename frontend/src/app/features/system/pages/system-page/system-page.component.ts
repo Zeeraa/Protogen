@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { ClockSettings, FlaschenTaschenSettings, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -18,6 +18,13 @@ import { hexToRgb, RGBColors, rgbToHex } from '../../../../core/services/utils/U
   standalone: false
 })
 export class SystemPageComponent implements OnInit, OnDestroy {
+  private readonly toastr = inject(ToastrService);
+  private readonly api = inject(SystemApiService);
+  private readonly hudApi = inject(HudApiService);
+  private readonly modal = inject(NgbModal);
+  private readonly title = inject(Title);
+  private readonly auth = inject(AuthService);
+
   @ViewChild("shutdownModal") shutdownModalTemplate!: TemplateRef<any>;
   overview: SystemOverview | null = null;
   updateInterval: any = null;
@@ -222,15 +229,6 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       this.toastr.success("Clock settings saved");
     });
   }
-
-  constructor(
-    private toastr: ToastrService,
-    private api: SystemApiService,
-    private hudApi: HudApiService,
-    private modal: NgbModal,
-    private title: Title,
-    private auth: AuthService,
-  ) { }
 
   ngOnInit(): void {
     this.update();

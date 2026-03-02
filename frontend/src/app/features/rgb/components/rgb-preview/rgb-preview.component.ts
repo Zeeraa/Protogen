@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
@@ -8,12 +8,16 @@ import { ToastrService } from 'ngx-toastr';
 import { uuidv7 } from 'uuidv7';
 
 @Component({
-    selector: 'app-rgb-preview',
-    templateUrl: './rgb-preview.component.html',
-    styleUrl: './rgb-preview.component.scss',
-    standalone: false
+  selector: 'app-rgb-preview',
+  templateUrl: './rgb-preview.component.html',
+  styleUrl: './rgb-preview.component.scss',
+  standalone: false
 })
 export class RgbPreviewComponent implements OnInit, OnDestroy, AfterViewInit {
+  private readonly socket = inject(SocketService);
+  private readonly api = inject(RgbApiService);
+  private readonly toastr = inject(ToastrService);
+
   private interval: any;
   private subscription: Subscription | null = null;
   config: RgbPreviewConfiguration = {
@@ -33,12 +37,6 @@ export class RgbPreviewComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild("rbgPreviewCanvas") canvas!: ElementRef<HTMLCanvasElement>;
   ctx!: CanvasRenderingContext2D;
   ledStates: number[] = [];
-
-  constructor(
-    private socket: SocketService,
-    private api: RgbApiService,
-    private toastr: ToastrService,
-  ) { }
 
   get fullOnLargeViewports() {
     return this.config.largeViewportFullSize;
