@@ -5,7 +5,7 @@ Requires=mariadb.service
 
 [Service]
 Type=simple
-ExecStart=npm run dev
+ExecStart=npm start
 WorkingDirectory=/home/pi/protogen/backend
 Restart=no
 User=pi
