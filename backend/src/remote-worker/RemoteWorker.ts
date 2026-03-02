@@ -1,7 +1,6 @@
 import axios, { isAxiosError } from "axios";
 import { Protogen } from "../Protogen";
 import { createReadStream, createWriteStream } from "fs";
-import { AnimationCacheEntry } from "../visor/rendering/images/AnimatedRenderableImage";
 
 /**
  * Handles communication with the remote worker for processing tasks like GIF processing and video downloading.
@@ -24,32 +23,6 @@ export class ProtogenRemoteWorker {
     }
 
     return headers;
-  }
-
-  /**
-   * Process a GIF file asynchronously on the remote worker.
-   * @param file The path of the file to process.
-   * @param width The desired width of the output GIF.
-   * @param height The desired height of the output GIF.
-   * @returns A promise that resolves to an array of AnimationCacheEntry objects.
-   */
-  public async processGifAsync(file: string, width: number, height: number): Promise<AnimationCacheEntry[]> {
-    const stream = createReadStream(file);
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const FormData = require('form-data'); // require needed here
-
-    const form = new FormData();
-    form.append('file', stream);
-
-    const response = await axios.post(this.config.url + "/gif_processor/submit?width=" + width + "&height=" + height, form, {
-      timeout: 1000 * 60 * 1,
-      headers: {
-        ...this.headers,
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-
-    return response.data as AnimationCacheEntry[];
   }
 
   /**

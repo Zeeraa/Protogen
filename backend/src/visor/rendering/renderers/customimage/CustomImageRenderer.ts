@@ -81,6 +81,7 @@ export class CustomImageRenderer extends VisorRenderer {
   }
 
   public async loadImage() {
+    console.log("loadImage()");
     if (this.image != null) {
       if (this.image.toLowerCase().endsWith(".gif")) {
         if (this._renderer?.type !== Type.Animated) {
