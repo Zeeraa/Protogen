@@ -36,7 +36,7 @@ echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | sudo debconf-set-se
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $(pwgen -s -1 128)" | sudo debconf-set-selections
 
-sudo apt install -y vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2
+sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2
 
 # Check if Node.js is installed
 if ! command -v node &>/dev/null; then
@@ -145,9 +145,33 @@ else
     systemctl enable protogen.service
 fi
 
+# ========== Better gamepad support ==========
+# Install xpadneo for better Xbox controller support
+if [[ -d "/home/pi/xpadneo" ]]; then
+    echo "xpadneo directory already exists. Checking installation..."
+    if lsmod | grep -q "hid_xpadneo"; then
+        echo "xpadneo driver already loaded"
+    else
+        echo "xpadneo directory exists but driver not loaded. Reinstalling..."
+        cd /home/pi/xpadneo
+        sudo ./install.sh
+    fi
+else
+    echo "Installing xpadneo for better Xbox controller support..."
+    git clone https://github.com/atar-axis/xpadneo.git /home/pi/xpadneo
+    cd /home/pi/xpadneo
+    sudo ./install.sh
+    echo "xpadneo installed successfully"
+fi
+sudo chown -R pi:pi /home/pi/xpadneo
+
+
 # ========== Final ==========
 echo "--led-cols=64 --led-rows=32 --led-chain=2 --led-gpio-mapping=adafruit-hat --led-slowdown-gpio=3 --led-limit-refresh=100" > /home/pi/ft_config.txt
 sudo chown pi:pi /home/pi/ft_config.txt
+
+# Enable bluetooth
+sudo systemctl enable bluetooth
 
 # Apache2
 a2enmod rewrite
