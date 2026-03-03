@@ -19,7 +19,7 @@
           <div class="col-12 mt-2">
             <span>
               OS Name:
-              <span class="text-info">{{osName}}</span>
+              <span class="text-info">{{osName()}}</span>
             </span>
           </div>
 
@@ -63,19 +63,19 @@
 
             <div class="col-12 mt-1">
               <h6>Temperature</h6>
-              <ngb-progressbar class="mt-1" [type]="temperatureColor" [value]="tempBarValue" [max]="100">
-                {{realTemperature}} &deg;C
+              <ngb-progressbar class="mt-1" [type]="temperatureColor()" [value]="tempBarValue()" [max]="100">
+                {{realTemperature()}} &deg;C
               </ngb-progressbar>
             </div>
 
             <div class="col-12 mt-1">
               <h6>CPU</h6>
-              <ngb-progressbar class="mt-1" type="info" [value]="cpuUsage" [max]="100" [showValue]="true" />
+              <ngb-progressbar class="mt-1" [type]="cpuColor()" [value]="cpuUsage()" [max]="100" [showValue]="true" />
             </div>
 
             <div class="col-12 mt-1">
               <h6>RAM</h6>
-              <ngb-progressbar class="mt-1" type="info" [value]="ramUsage" [max]="100" [showValue]="true" />
+              <ngb-progressbar class="mt-1" [type]="ramColor()" [value]="ramUsage()" [max]="100" [showValue]="true" />
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@
             <div class="form-check form-switch"
               title="Enabling this will show potentially sensitive information like the name of your ISP and your public ip address">
               <input class="form-check-input" type="checkbox" role="switch" id="showNetworkingData"
-                [(ngModel)]="showSensitiveNetworkingData" (click)="showNetworkDataChanged($event)">
+                [ngModel]="showSensitiveNetworkingData()" (ngModelChange)="showNetworkDataChanged($event)">
               <label class="form-check-label" for="showNetworkingData">Show sensitive data</label>
             </div>
           </div>
@@ -104,7 +104,7 @@
           <div class="col-12 mt-2">
             <span>
               Connectivity:
-              @if(hasConnectivity) {
+              @if(hasConnectivity()) {
               <span class="badge bg-success">Yes</span>
               } @else {
               <span class="badge bg-danger">No</span>
@@ -114,8 +114,8 @@
 
           <div class="col-12 mt-2">
             ISP:
-            @if(showSensitiveNetworkingData) {
-            <span class="text-info">{{isp}}</span>
+            @if(showSensitiveNetworkingData()) {
+            <span class="text-info">{{isp()}}</span>
             } @else {
             <span class="text-danger" title="Turn on 'Show sensitive data' to display networking info">[Hidden]</span>
             }
@@ -123,12 +123,50 @@
 
           <div class="col-12 mt-2">
             IP:
-            @if(showSensitiveNetworkingData) {
-            <span class="text-info">{{ip}}</span>
+            @if(showSensitiveNetworkingData()) {
+            <span class="text-info">{{ip()}}</span>
             } @else {
             <span class="text-danger" title="Turn on 'Show sensitive data' to display networking info">[Hidden]</span>
             }
           </div>
+
+          @if(networkInterfaces().length > 0) {
+          <div class="col-12 mt-3">
+            <h6>Network Interfaces</h6>
+            <table class="table table-sm table-dark table-bordered mb-0">
+              <thead>
+                <tr>
+                  <th>Interface</th>
+                  <th>IPv4</th>
+                  <th>IPv6</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(iface of networkInterfaces(); track iface.name) {
+                <tr>
+                  <td><code>{{iface.name}}</code></td>
+                  <td>
+                    @if(showSensitiveNetworkingData()) {
+                    <span class="text-info">{{iface.ipv4 ?? '—'}}</span>
+                    } @else {
+                    <span class="text-danger"
+                      title="Turn on 'Show sensitive data' to display networking info">[Hidden]</span>
+                    }
+                  </td>
+                  <td>
+                    @if(showSensitiveNetworkingData()) {
+                    <span class="text-secondary">{{iface.ipv6 ?? '—'}}</span>
+                    } @else {
+                    <span class="text-danger"
+                      title="Turn on 'Show sensitive data' to display networking info">[Hidden]</span>
+                    }
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          }
         </div>
       </div>
     </div>
@@ -153,7 +191,8 @@
             <div class="form-group">
               <label for="ft_led-slowdown-gpio">Slowdown GPIO</label>
               <input type="text" min="0" max="4" class="form-control" id="ft_led-slowdown-gpio"
-                placeholder="Slowdown GPIO" [(ngModel)]="flaschenTaschenSettings.ledSlowdownGpio">
+                placeholder="Slowdown GPIO" [ngModel]="flaschenTaschenSettings().ledSlowdownGpio"
+                (ngModelChange)="updateFlaschenTaschenSetting('ledSlowdownGpio', $event)">
             </div>
           </div>
 
@@ -161,7 +200,8 @@
             <div class="form-group">
               <label for="ft_led-limit-refresh">Limit refresh</label>
               <input type="text" min="1" max="1000" class="form-control" id="ft_led-limit-refresh"
-                placeholder="Limit refresh" [(ngModel)]="flaschenTaschenSettings.ledLimitRefresh">
+                placeholder="Limit refresh" [ngModel]="flaschenTaschenSettings().ledLimitRefresh"
+                (ngModelChange)="updateFlaschenTaschenSetting('ledLimitRefresh', $event)">
             </div>
           </div>
 
@@ -185,7 +225,7 @@
 
           <div class="col-12 mt-2">
             <a class="btn btn-primary mb-1 me-1" routerLink="/users">User manager</a>
-            @if(isSuperUser) {
+            @if(isSuperUser()) {
             <a class="btn btn-primary mb-1 me-1" routerLink="/keys">API key manager</a>
             } @else {
             <button class="btn btn-primary mb-1 me-1" disabled>API key manager</button>
@@ -264,7 +304,7 @@
           <div class="col-12 mt-2">
             <span>
               Backend version:
-              <span class="text-info">{{backendVersion}}</span>
+              <span class="text-info">{{backendVersion()}}</span>
             </span>
           </div>
 

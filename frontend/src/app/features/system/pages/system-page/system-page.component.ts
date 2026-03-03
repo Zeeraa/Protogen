@@ -1,5 +1,5 @@
-import { Component, inject, OnDestroy, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
-import { ClockSettings, FlaschenTaschenSettings, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
+import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
+import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -25,14 +25,17 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
 
-  @ViewChild("shutdownModal") shutdownModalTemplate!: TemplateRef<any>;
-  overview: SystemOverview | null = null;
-  updateInterval: any = null;
-  shutdownModalRef: null | NgbModalRef = null;
-  showSensitiveNetworkingData = false;
-  flaschenTaschenSettings: FlaschenTaschenSettings = { ledLimitRefresh: 100, ledSlowdownGpio: 3 }
+  protected readonly shutdownModalTemplate = viewChild<TemplateRef<any>>("shutdownModal");
 
-  private clockSettingsModel = signal({
+  private readonly overview = signal<SystemOverview | null>(null);
+  private updateInterval: any = null;
+  private shutdownModalRef: null | NgbModalRef = null;
+
+  readonly showSensitiveNetworkingData = signal<boolean>(false);
+  readonly flaschenTaschenSettings = signal<FlaschenTaschenSettings>({ ledLimitRefresh: 100, ledSlowdownGpio: 3 });
+  readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
+
+  private readonly clockSettingsModel = signal({
     is24HourFormat: true,
     showSeconds: true,
     showDate: true,
@@ -40,15 +43,51 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     dateColor: "#FFFFFF"
   });
 
-  protected clockSettingsForm = form(this.clockSettingsModel);
+  protected readonly clockSettingsForm = form(this.clockSettingsModel);
 
-  get hasConnectivity() {
-    return this.overview?.network.hasConnectivity || false;
-  }
+  readonly hasConnectivity = computed(() => this.overview()?.network.hasConnectivity ?? false);
+  readonly ip = computed(() => this.overview()?.network.ip ?? "Unknown");
+  readonly isp = computed(() => this.overview()?.network.isp ?? "Unknown");
+  readonly backendVersion = computed(() => this.overview()?.backendVersion ?? "Unknown");
+  readonly osName = computed(() => this.overview()?.osVersion ?? "Unknown");
+  readonly realTemperature = computed(() => this.overview()?.cpuTemperature ?? 0);
+  readonly cpuUsage = computed(() => this.overview()?.cpuUsage ?? 0);
+  readonly ramUsage = computed(() => this.overview()?.ramUsage ?? 0);
+  readonly isSuperUser = computed(() => this.auth.authDetails?.isSuperUser ?? false);
+
+  readonly tempBarValue = computed(() => {
+    const temp = this.overview()?.cpuTemperature;
+    if (temp == null || temp < 0) return 0;
+    if (temp > 100) return 100;
+    return temp;
+  });
+
+  readonly temperatureColor = computed(() => {
+    const temp = this.overview()?.cpuTemperature;
+    if (temp == null) return "success";
+    if (temp > 80) return "danger";
+    if (temp > 60) return "warning";
+    return "success";
+  });
+
+  readonly cpuColor = computed(() => {
+    const usage = this.overview()?.cpuUsage;
+    if (usage == null) return "success";
+    if (usage > 90) return "danger";
+    if (usage > 70) return "warning";
+    return "success";
+  });
+
+  readonly ramColor = computed(() => {
+    const usage = this.overview()?.ramUsage;
+    if (usage == null) return "success";
+    if (usage > 90) return "danger";
+    if (usage > 70) return "warning";
+    return "success";
+  });
 
   get swaggerUrl() {
     const apiBase = this.api.apiBaseUrl;
-
     return apiBase + (apiBase.endsWith("/") ? "" : "/");
   }
 
@@ -56,33 +95,20 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     return environment.phpMyAdminLink;
   }
 
-  get ip() {
-    if (this.overview?.network.ip != null) {
-      return this.overview?.network.ip;
-    }
-    return "Unknown";
-  }
-
   get hudEnabled() {
-    return this.overview?.hudEnabled || false;
+    return this.overview()?.hudEnabled ?? false;
   }
 
   set hudEnabled(enabled: boolean) {
-    if (this.overview != null) {
-      this.overview.hudEnabled = enabled;
-    }
+    this.overview.update(o => o ? { ...o, hudEnabled: enabled } : o);
     this.hudApi.setHudEnabled(enabled).pipe(catchError(err => {
       this.toastr.error("Failed to toggle hud");
       throw err;
     })).subscribe();
   }
 
-  get backendVersion() {
-    return this.overview?.backendVersion || "Unknown";
-  }
-
   get swaggerEnabled(): boolean {
-    return this.overview?.swaggerEnabled || false;
+    return this.overview()?.swaggerEnabled ?? false;
   }
 
   set swaggerEnabled(enabled: boolean) {
@@ -94,70 +120,12 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  get isp() {
-    if (this.overview?.network.isp != null) {
-      return this.overview?.network.isp;
-    }
-    return "Unknown";
-  }
-
-  get temperatureColor() {
-    if (this.overview != null) {
-      if (this.overview.cpuTemperature > 80) {
-        return "danger";
-      }
-
-      if (this.overview.cpuTemperature > 60) {
-        return "warning";
-      }
-    }
-    return "success";
-  }
-
-  get realTemperature() {
-    return this.overview?.cpuTemperature || 0;
-  }
-
-  get tempBarValue() {
-    if (this.overview == null || this.overview.cpuTemperature < 0) {
-      return 0;
-    }
-
-    if (this.overview.cpuTemperature > 100) {
-      return 100;
-    }
-
-    return this.overview.cpuTemperature;
-  }
-
-  get cpuUsage() {
-    if (this.overview?.cpuUsage !== undefined) {
-      return this.overview.cpuUsage;
-    }
-    return 0;
-  }
-
-  get ramUsage() {
-    if (this.overview?.ramUsage !== undefined) {
-      return this.overview.ramUsage;
-    }
-    return 0;
-  }
-
-  get getTemperature() {
-    if (this.overview?.cpuTemperature !== undefined) {
-      return this.overview.cpuTemperature;
-    }
-    return 0;
-  }
-
-  get osName() {
-    return this.overview?.osVersion || "Unknown";
-  }
-
   openShutdownModal() {
     this.shutdownModalRef?.close();
-    this.shutdownModalRef = this.modal.open(this.shutdownModalTemplate, { ariaLabelledBy: 'shutdown-modal-title' });
+    const template = this.shutdownModalTemplate();
+    if (template) {
+      this.shutdownModalRef = this.modal.open(template, { ariaLabelledBy: 'shutdown-modal-title' });
+    }
   }
 
   restartFlaschenTaschen() {
@@ -171,7 +139,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   }
 
   saveFlaschenTaschen() {
-    this.api.updateFlaschenTaschenSettings(this.flaschenTaschenSettings)
+    this.api.updateFlaschenTaschenSettings(this.flaschenTaschenSettings())
       .pipe(catchError(err => {
         console.error(err);
         this.toastr.error("Failed to update settings");
@@ -181,12 +149,16 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  updateFlaschenTaschenSetting<K extends keyof FlaschenTaschenSettings>(key: K, value: FlaschenTaschenSettings[K]) {
+    this.flaschenTaschenSettings.update(s => ({ ...s, [key]: value }));
+  }
+
   update() {
     this.api.getOverview().pipe(catchError(err => {
       this.toastr.error("Failed to get system overview");
       throw err;
     })).subscribe(overview => {
-      this.overview = overview;
+      this.overview.set(overview);
     });
   }
 
@@ -202,14 +174,9 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  showNetworkDataChanged(event: Event) {
-    const element = event.target as HTMLInputElement
-    const checked = element.checked;
+  showNetworkDataChanged(checked: boolean) {
+    this.showSensitiveNetworkingData.set(checked);
     localStorage.setItem(LocalStorageKey_ShowSentitiveNetworkingInfo, checked ? "true" : "false");
-  }
-
-  get isSuperUser() {
-    return this.auth.authDetails?.isSuperUser || false;
   }
 
   protected saveClockSettings() {
@@ -237,7 +204,17 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     }, 2000);
     this.title.setTitle("System - Protogen");
 
-    this.showSensitiveNetworkingData = localStorage.getItem(LocalStorageKey_ShowSentitiveNetworkingInfo) == "true";
+    this.showSensitiveNetworkingData.set(localStorage.getItem(LocalStorageKey_ShowSentitiveNetworkingInfo) == "true");
+
+    this.api.getNetworkInterfaces().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch network interfaces");
+        console.error("Failed to fetch network interfaces", err);
+        return [];
+      })
+    ).subscribe(interfaces => {
+      this.networkInterfaces.set(interfaces);
+    });
 
     this.api.getFlaschenTaschenSettings().pipe(
       catchError(err => {
@@ -245,7 +222,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
         throw err;
       })
     ).subscribe(settings => {
-      this.flaschenTaschenSettings = settings;
+      this.flaschenTaschenSettings.set(settings);
     });
 
     this.api.getClockSettings().pipe(

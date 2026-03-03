@@ -27,6 +27,10 @@ export class SystemApiService extends ApiBaseService {
     return this.http.put(this.apiBaseUrl + "/system/flaschen-taschen/settings", settings).pipe(catchError(this.defaultErrorHandler));
   }
 
+  getNetworkInterfaces() {
+    return this.http.get<NetworkInterfaceInfo[]>(this.apiBaseUrl + "/system/network-interfaces");
+  }
+
   getLogs() {
     return this.http.get(this.apiBaseUrl + "/system/logs", {
       responseType: 'text',
@@ -88,4 +92,10 @@ export interface ClockSettings {
   showDate: boolean;
   timeColor: RGBColor;
   dateColor: RGBColor;
+}
+
+export interface NetworkInterfaceInfo {
+  name: string;
+  ipv4: string | null;
+  ipv6: string | null;
 }

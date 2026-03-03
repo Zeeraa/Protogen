@@ -1,12 +1,10 @@
 import { z } from "zod";
-
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
 import { existsSync, readFileSync } from "fs";
 import { KV_Clock24HourFormat, KV_ClockDateColor, KV_ClockShowDate, KV_ClockShowSeconds, KV_ClockTimeColor, KV_EnableSwagger } from "../../../utils/KVDataStorageKeys";
 import { decodeRGB, encodeRGB, encodeRGBObject } from "../../../utils/Utils";
-import { encode } from "punycode";
 import { ClockRenderer, ClockRendererId } from "../../../visor/rendering/renderers/special/ClockRenderer";
 
 export class SystemRouter extends AbstractRouter {
@@ -36,6 +34,27 @@ export class SystemRouter extends AbstractRouter {
         }
       } catch (err) {
         this.handleError(err, req, res);
+      }
+    });
+
+    this.router.get("/network-interfaces", async (req, res) => {
+      /*
+      #swagger.path = '/system/network-interfaces'
+      #swagger.tags = ['System'],
+      #swagger.description = "Get network interfaces"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An error occured while gathering information" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const interfaceData = this.protogen.networkManager.getNetworkInterfaces();
+        res.json(interfaceData);
+      } catch (err) {
+        return this.handleError(err, req, res);
       }
     });
 
