@@ -24,6 +24,7 @@ import { AudioVisualizerModule } from './features/audio-visualizer/audio-visuali
 import { AppsModule } from './features/apps/apps.module';
 import { DevModule } from './features/dev/dev.module';
 import { BoopSensorModule } from './features/boop-sensor/boop-sensor.module';
+import { BluetoothModule } from './features/bluetooth/bluetooth.module';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { BoopSensorModule } from './features/boop-sensor/boop-sensor.module';
     AppsModule,
     DevModule,
     BoopSensorModule,
+    BluetoothModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),

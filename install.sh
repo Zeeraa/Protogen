@@ -173,6 +173,46 @@ sudo chown pi:pi /home/pi/ft_config.txt
 # Enable bluetooth
 sudo systemctl enable bluetooth
 
+# ========== Configure Bluetooth stack ==========
+echo "Configuring Bluetooth stack for controller support..."
+
+# Disable ERTM (required for Xbox controller pairing)
+if ! grep -q "disable_ertm" /etc/modprobe.d/bluetooth.conf 2>/dev/null; then
+    echo "options bluetooth disable_ertm=y" | sudo tee -a /etc/modprobe.d/bluetooth.conf
+    echo "ERTM disabled in /etc/modprobe.d/bluetooth.conf"
+else
+    echo "ERTM already disabled"
+fi
+
+# Also disable at runtime in case we don't reboot
+sudo bash -c 'echo 1 > /sys/module/bluetooth/parameters/disable_ertm' 2>/dev/null || true
+
+# Configure /etc/bluetooth/main.conf
+BTCONF="/etc/bluetooth/main.conf"
+if [[ -f "$BTCONF" ]]; then
+    # Enable dual controller mode (BR/EDR + LE)
+    sed -i 's/^#ControllerMode = dual/ControllerMode = dual/' "$BTCONF"
+    sed -i 's/^ControllerMode = .*/ControllerMode = dual/' "$BTCONF"
+
+    # Enable device privacy mode (needed for BLE devices like Xbox controllers)
+    sed -i 's/^#Privacy = off/Privacy = device/' "$BTCONF"
+    sed -i 's/^Privacy = off/Privacy = device/' "$BTCONF"
+
+    # Enable JustWorks pairing (no interactive PIN for headless pairing)
+    sed -i 's/^#JustWorksRepairing = never/JustWorksRepairing = always/' "$BTCONF"
+    sed -i 's/^JustWorksRepairing = never/JustWorksRepairing = always/' "$BTCONF"
+
+    # Enable fast connectable for quicker reconnection
+    sed -i 's/^#FastConnectable = false/FastConnectable = true/' "$BTCONF"
+    sed -i 's/^FastConnectable = false/FastConnectable = true/' "$BTCONF"
+
+    echo "Bluetooth main.conf configured"
+else
+    echo "Warning: $BTCONF not found, skipping Bluetooth config"
+fi
+
+sudo systemctl restart bluetooth
+
 # Apache2
 a2enmod rewrite
 a2enmod headers

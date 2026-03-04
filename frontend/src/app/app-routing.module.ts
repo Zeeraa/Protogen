@@ -21,6 +21,7 @@ import { PaintAppPageComponent } from './features/apps/ui/paint/paint-app-page/p
 import { DeveloperPageComponent } from './features/dev/pages/developer-page/developer-page.component';
 import { BoopSensorPageComponent } from './features/boop-sensor/pages/boop-sensor-page/boop-sensor-page.component';
 import { BoopSensorProfileEditorPageComponent } from './features/boop-sensor/pages/boop-sensor-profile-editor-page/boop-sensor-profile-editor-page.component';
+import { BluetoothPageComponent } from './features/bluetooth/pages/bluetooth-page/bluetooth-page.component';
 
 export const routes: Routes = [
   {
@@ -139,6 +140,11 @@ export const routes: Routes = [
         component: BoopSensorProfileEditorPageComponent,
       }
     ]
+  },
+  {
+    path: "bluetooth",
+    component: BluetoothPageComponent,
+    canActivate: [AuthGuard],
   },
 ];
 
