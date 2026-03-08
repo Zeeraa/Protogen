@@ -31,11 +31,11 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private updateInterval: any = null;
   private shutdownModalRef: null | NgbModalRef = null;
 
-  private readonly showSensitiveNetworkingData = signal<boolean>(false);
-  private readonly flaschenTaschenSettings = signal<FlaschenTaschenSettings>({ ledLimitRefresh: 100, ledSlowdownGpio: 3 });
-  private readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
-  private readonly audioDevices = signal<AudioDevice[]>([]);
-  private readonly selectedAudioDeviceId = signal<number | null>(null);
+  protected readonly showSensitiveNetworkingData = signal<boolean>(false);
+  protected readonly flaschenTaschenSettings = signal<FlaschenTaschenSettings>({ ledLimitRefresh: 100, ledSlowdownGpio: 3 });
+  protected readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
+  protected readonly audioDevices = signal<AudioDevice[]>([]);
+  protected readonly selectedAudioDeviceId = signal<number | null>(null);
 
   private readonly clockSettingsModel = signal({
     is24HourFormat: true,
