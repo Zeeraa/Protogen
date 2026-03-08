@@ -1,0 +1,84 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Lint: Frontend",
+      "type": "npm",
+      "script": "lint",
+      "path": "frontend/",
+      "group": "test",
+      "presentation": {
+        "group": "lint",
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [
+        "$eslint-stylish"
+      ]
+    },
+    {
+      "label": "Lint: Backend",
+      "type": "npm",
+      "script": "lint",
+      "path": "backend/",
+      "group": "test",
+      "presentation": {
+        "group": "lint",
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [
+        "$eslint-stylish"
+      ]
+    },
+    {
+      "label": "Lint: Both",
+      "dependsOn": [
+        "Lint: Frontend",
+        "Lint: Backend"
+      ],
+      "dependsOrder": "parallel",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Start: Frontend",
+      "type": "npm",
+      "script": "start",
+      "path": "frontend/",
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "group": "start",
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start: Backend",
+      "type": "npm",
+      "script": "dev",
+      "path": "backend/",
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "group": "start",
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start: Both",
+      "dependsOn": [
+        "Start: Frontend",
+        "Start: Backend"
+      ],
+      "dependsOrder": "parallel",
+      "isBackground": true,
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
