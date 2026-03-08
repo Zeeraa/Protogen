@@ -2,6 +2,8 @@ import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular
 import { BluetoothApiService, BluetoothDevice } from '../../../../core/services/api/bluetooth-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { Title } from '@angular/platform-browser';
+import { HttpErrorResponse } from '@angular/common/http';
+import { catchError } from 'rxjs';
 
 @Component({
   selector: 'app-bluetooth-page',
@@ -16,16 +18,16 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
 
   private pollInterval: any = null;
 
-  readonly pairedDevices = signal<BluetoothDevice[]>([]);
-  readonly discoveredDevices = signal<BluetoothDevice[]>([]);
-  readonly scanning = signal<boolean>(false);
-  readonly loading = signal<boolean>(true);
-  readonly busyDevices = signal<Set<string>>(new Set());
+  protected readonly pairedDevices = signal<BluetoothDevice[]>([]);
+  protected readonly discoveredDevices = signal<BluetoothDevice[]>([]);
+  protected readonly scanning = signal<boolean>(false);
+  protected readonly loading = signal<boolean>(true);
+  protected readonly busyDevices = signal<Set<string>>(new Set());
 
   /**
    * Discovered devices that are NOT already paired — avoids showing duplicates.
    */
-  readonly newDevices = computed(() => {
+  protected readonly newDevices = computed(() => {
     const pairedMacs = new Set(this.pairedDevices().map(d => d.macAddress));
     return this.discoveredDevices().filter(d => !pairedMacs.has(d.macAddress));
   });
@@ -42,97 +44,122 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  refresh(): void {
+  protected refresh(): void {
     this.loading.set(true);
-    this.api.getPairedDevices().subscribe({
-      next: (devices) => {
-        this.pairedDevices.set(devices);
+    this.api.getPairedDevices().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to get paired devices");
         this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
+        return [];
+      }),
+    ).subscribe((devices) => {
+      this.pairedDevices.set(devices);
+      this.loading.set(false);
     });
 
-    this.api.getDiscoveredDevices().subscribe({
-      next: (devices) => this.discoveredDevices.set(devices),
-    });
+    this.api.getDiscoveredDevices().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to get discovered devices");
+        return [];
+      }),
+    ).subscribe((devices) => this.discoveredDevices.set(devices));
 
-    this.api.getScanStatus().subscribe({
-      next: (status) => this.scanning.set(status.scanning),
-    });
+    this.api.getScanStatus().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to get scan status");
+        return [];
+      }),
+    ).subscribe((status) => this.scanning.set(status.scanning));
   }
 
-  startScan(): void {
+  protected startScan(): void {
     this.scanning.set(true);
-    this.api.startScan(15).subscribe({
-      next: () => {
-        this.toastr.info("Scanning for devices...");
-      },
-      error: () => this.scanning.set(false),
-    });
-  }
-
-  stopScan(): void {
-    this.api.stopScan().subscribe({
-      next: () => {
+    this.api.startScan(15).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to start scan");
         this.scanning.set(false);
-        this.refreshDiscovered();
-      },
+        return [];
+      }),
+    ).subscribe(() => this.toastr.info("Scanning for devices..."));
+  }
+
+  protected stopScan(): void {
+    this.api.stopScan().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to stop scan");
+        return [];
+      }),
+    ).subscribe(() => {
+      this.scanning.set(false);
+      this.refreshDiscovered();
     });
   }
 
-  connectDevice(device: BluetoothDevice): void {
+  protected connectDevice(device: BluetoothDevice): void {
     this.markBusy(device.macAddress);
-    this.api.connectDevice(device.macAddress).subscribe({
-      next: () => {
-        this.toastr.success("Connected to " + device.name);
+    this.api.connectDevice(device.macAddress).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to connect to device");
         this.unmarkBusy(device.macAddress);
-        this.refresh();
-      },
-      error: () => this.unmarkBusy(device.macAddress),
+        return [];
+      }),
+    ).subscribe(() => {
+      this.toastr.success("Connected to " + device.name);
+      this.unmarkBusy(device.macAddress);
+      this.refresh();
     });
   }
 
-  disconnectDevice(device: BluetoothDevice): void {
+  protected disconnectDevice(device: BluetoothDevice): void {
     this.markBusy(device.macAddress);
-    this.api.disconnectDevice(device.macAddress).subscribe({
-      next: () => {
-        this.toastr.success("Disconnected from " + device.name);
+    this.api.disconnectDevice(device.macAddress).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to disconnect from device");
         this.unmarkBusy(device.macAddress);
-        this.refresh();
-      },
-      error: () => this.unmarkBusy(device.macAddress),
+        return [];
+      }),
+    ).subscribe(() => {
+      this.toastr.success("Disconnected from " + device.name);
+      this.unmarkBusy(device.macAddress);
+      this.refresh();
     });
   }
 
-  pairDevice(device: BluetoothDevice): void {
+  protected pairDevice(device: BluetoothDevice): void {
     this.markBusy(device.macAddress);
-    this.api.pairDevice(device.macAddress).subscribe({
-      next: () => {
-        this.toastr.success("Paired with " + device.name);
+    this.api.pairDevice(device.macAddress).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to pair device");
         this.unmarkBusy(device.macAddress);
-        this.refresh();
-      },
-      error: () => this.unmarkBusy(device.macAddress),
+        return [];
+      }),
+    ).subscribe(() => {
+      this.toastr.success("Paired with " + device.name);
+      this.unmarkBusy(device.macAddress);
+      this.refresh();
     });
   }
 
-  unpairDevice(device: BluetoothDevice): void {
+  protected unpairDevice(device: BluetoothDevice): void {
     this.markBusy(device.macAddress);
-    this.api.unpairDevice(device.macAddress).subscribe({
-      next: () => {
-        this.toastr.success("Removed " + device.name);
+    this.api.unpairDevice(device.macAddress).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to unpair device");
         this.unmarkBusy(device.macAddress);
-        this.refresh();
-      },
-      error: () => this.unmarkBusy(device.macAddress),
+        return [];
+      }),
+    ).subscribe(() => {
+      this.toastr.success("Removed " + device.name);
+      this.unmarkBusy(device.macAddress);
+      this.refresh();
     });
   }
 
-  isDeviceBusy(mac: string): boolean {
+  protected isDeviceBusy(mac: string): boolean {
     return this.busyDevices().has(mac);
   }
 
-  private markBusy(mac: string): void {
+  protected markBusy(mac: string): void {
     this.busyDevices.update(set => {
       const next = new Set(set);
       next.add(mac);
@@ -140,7 +167,7 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private unmarkBusy(mac: string): void {
+  protected unmarkBusy(mac: string): void {
     this.busyDevices.update(set => {
       const next = new Set(set);
       next.delete(mac);
@@ -148,26 +175,27 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private pollScanStatus(): void {
-    this.api.getScanStatus().subscribe({
-      next: (status) => {
-        const wasScanningBefore = this.scanning();
-        this.scanning.set(status.scanning);
-        // When scan finishes, refresh the discovered list
-        if (wasScanningBefore && !status.scanning) {
-          this.refreshDiscovered();
-        }
-        // While scanning, refresh discovered devices periodically
-        if (status.scanning) {
-          this.refreshDiscovered();
-        }
-      },
+  protected pollScanStatus(): void {
+    this.api.getScanStatus().subscribe((status) => {
+      const wasScanningBefore = this.scanning();
+      this.scanning.set(status.scanning);
+      // When scan finishes, refresh the discovered list
+      if (wasScanningBefore && !status.scanning) {
+        this.refreshDiscovered();
+      }
+      // While scanning, refresh discovered devices periodically
+      if (status.scanning) {
+        this.refreshDiscovered();
+      }
     });
   }
 
-  private refreshDiscovered(): void {
-    this.api.getDiscoveredDevices().subscribe({
-      next: (devices) => this.discoveredDevices.set(devices),
-    });
+  protected refreshDiscovered(): void {
+    this.api.getDiscoveredDevices().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to get discovered devices");
+        return [];
+      }),
+    ).subscribe((devices) => this.discoveredDevices.set(devices));
   }
 }
