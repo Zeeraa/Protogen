@@ -46,6 +46,7 @@ module.exports = tseslint.config(
       "@angular-eslint/template/eqeqeq": "off",
       "@angular-eslint/template/interactive-supports-focus": "off",
       "@angular-eslint/template/click-events-have-key-events": "off",
+      "@angular-eslint/template/label-has-associated-control": "off",
     },
   }
 );

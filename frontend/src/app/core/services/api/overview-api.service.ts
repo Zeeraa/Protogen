@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
