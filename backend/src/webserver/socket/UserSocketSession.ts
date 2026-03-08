@@ -127,17 +127,3 @@ const AudioVisualiserSettingsModel = z.object({
   lowThreshold: z.number().min(0).max(100),
   highThreshold: z.number().min(0).max(100)
 });
-
-const AudioLevelModel = z.object({
-  level: z.number().min(0).max(100)
-});
-
-const RemoteStateModel = z.object({
-  joystick_x: z.number().min(0).max(1),
-  joystick_y: z.number().min(0).max(1),
-  joystick_pressed: z.boolean(),
-  button_a: z.boolean(),
-  button_left: z.boolean(),
-  button_right: z.boolean(),
-  active_profile_id: z.number().int().nullable().optional()
-});

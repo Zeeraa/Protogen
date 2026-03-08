@@ -4,7 +4,7 @@ import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
 import { existsSync, readFileSync } from "fs";
 import { KV_Clock24HourFormat, KV_ClockDateColor, KV_ClockShowDate, KV_ClockShowSeconds, KV_ClockTimeColor, KV_EnableSwagger } from "../../../utils/KVDataStorageKeys";
-import { decodeRGB, encodeRGB, encodeRGBObject } from "../../../utils/Utils";
+import { decodeRGB, encodeRGBObject } from "../../../utils/Utils";
 import { ClockRenderer, ClockRendererId } from "../../../visor/rendering/renderers/special/ClockRenderer";
 
 export class SystemRouter extends AbstractRouter {
