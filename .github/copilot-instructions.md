@@ -26,6 +26,10 @@
 - Always use the readonly keyword for signals and computed properties.
 - Use the private or protected keyword for component methods and properties that are not needed to be externally accessible.
 
+### Design
+- Use bootstrap for styling and layout.
+- Use bootstrap icons for icons.
+
 ---
 
 ## Backend (TypeScript/Node.js)
