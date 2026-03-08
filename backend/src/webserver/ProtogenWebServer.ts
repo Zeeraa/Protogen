@@ -37,6 +37,7 @@ import { AbstractApp } from "../apps/AbstractApp";
 import { DevRouter } from "./routes/dev/DevRouter";
 import { BoopSensorRouter } from "./routes/boop-sensor/BoopSensorRouter";
 import { BluetoothRouter } from "./routes/bluetooth/BluetoothRouter";
+import { OverviewRouter } from "./routes/overview/OverviewRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 export const AppSocketPath = "/protogen-app-websocket.io";
@@ -153,6 +154,7 @@ export class ProtogenWebServer {
     new DevRouter(this).register();
     new BoopSensorRouter(this).register();
     new BluetoothRouter(this).register();
+    new OverviewRouter(this).register();
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
@@ -248,6 +250,11 @@ export class ProtogenWebServer {
     setInterval(() => {
       this.broadcastMessage(SocketMessageType.S2C_Ping, {});
     }, 5000);
+
+    setInterval(() => {
+      const overview = this.getOverview();
+      this.broadcastMessage(SocketMessageType.S2C_Overview, overview);
+    }, 2500);
   }
 
   public disconnectAppSocket(session: AppUserSocketSession) {
@@ -347,4 +354,51 @@ export class ProtogenWebServer {
   public broadcastAppMessage(app: AbstractApp, data: AppSocketPacket<any>) {
     this.appSocketSessions.filter(s => s.app.name == app.name && s.interactionKey == app.interactionKey).forEach(s => s.sendMessage(data));
   }
+
+  public getOverview(): OverviewData {
+    const renderer = this.protogen.visor.activeRenderer ? {
+      id: this.protogen.visor.activeRenderer.id,
+      name: this.protogen.visor.activeRenderer.name,
+    } : null;
+
+    const expression = this.protogen.visor.faceRenderer.activeExpression ? {
+      id: this.protogen.visor.faceRenderer.activeExpression.data.uuid,
+      name: this.protogen.visor.faceRenderer.activeExpression.data.name,
+    } : null;
+
+    const faceRgbEffect = this.protogen.visor.faceRenderer.colorEffectToUse ? {
+      id: this.protogen.visor.faceRenderer.colorEffectToUse.id,
+      name: this.protogen.visor.faceRenderer.colorEffectToUse.displayName,
+    } : null;
+
+    const rgbEffect = this.protogen.rgb.activeScene ? {
+      id: this.protogen.rgb.activeScene.id,
+      name: this.protogen.rgb.activeScene.name,
+    } : null;
+
+    return {
+      renderer,
+      expression,
+      faceRgbEffect,
+      rgbEffect,
+      hudEnabled: this.protogen.hudManager.enableHud,
+      boopSensorEnabled: this.protogen.boopSensorManager.enabled,
+      hasRenderLock: this.protogen.visor.hasRenderLock,
+    }
+  }
+}
+
+export interface OverviewData {
+  renderer: OverviewNamedObjectData | null;
+  expression: OverviewNamedObjectData | null;
+  faceRgbEffect: OverviewNamedObjectData | null;
+  rgbEffect: OverviewNamedObjectData | null;
+  hudEnabled: boolean;
+  boopSensorEnabled: boolean;
+  hasRenderLock: boolean;
+}
+
+export interface OverviewNamedObjectData {
+  id: string;
+  name: string;
 }

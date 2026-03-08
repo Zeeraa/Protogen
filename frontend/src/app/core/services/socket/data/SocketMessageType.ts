@@ -7,6 +7,7 @@ export enum SocketMessageType {
   S2C_LogMessage = "S2C_LogMessage",
   S2C_AudioLevel = "S2C_AudioLevel",
   S2C_DevHardwareEmulationState = "S2C_DevHardwareEmulationState",
+  S2C_Overview = "S2C_Overview",
 
   // ===== C2S (Client to Server) =====
   C2S_EnableRgbPreview = "C2S_EnableRgbPreview",

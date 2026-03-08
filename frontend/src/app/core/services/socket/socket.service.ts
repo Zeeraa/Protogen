@@ -15,8 +15,8 @@ export class SocketService {
   private _socket: Socket | null = null;
   private _connected = false;
   private _disconnectedTimer = 15;
-  private _messageSubject = new Subject<SocketMessage>();
-  private _eventSubject = new Subject<SocketEventType>();
+  private readonly _messageSubject = new Subject<SocketMessage>();
+  private readonly _eventSubject = new Subject<SocketEventType>();
   private _initCalled = false;
 
   init() {
