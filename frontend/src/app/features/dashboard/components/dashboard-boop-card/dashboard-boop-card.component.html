@@ -1,0 +1,30 @@
+<div class="card">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-hand-index"></i>
+    <h5 class="mb-0">Boop Sensor</h5>
+  </div>
+  <div class="card-body">
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" id="boopEnabledToggle" [checked]="enabled()"
+        (change)="toggleEnabled.emit()">
+      <label class="form-check-label" for="boopEnabledToggle">Enabled</label>
+    </div>
+
+    <h6>Profiles</h6>
+    @if (profiles().length === 0) {
+    <p class="text-body-secondary mb-0">No boop profiles defined</p>
+    } @else {
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-sm btn-outline-secondary" (click)="deactivateProfile.emit()">
+        <i class="bi bi-x-circle"></i> None
+      </button>
+      @for (profile of profiles(); track profile.id) {
+      <button class="btn btn-sm" [class]="profile.id === activeProfileId() ? 'btn-primary' : 'btn-outline-primary'"
+        (click)="activateProfile.emit(profile)">
+        {{ profile.name }}
+      </button>
+      }
+    </div>
+    }
+  </div>
+</div>

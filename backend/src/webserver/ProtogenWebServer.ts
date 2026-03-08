@@ -376,11 +376,17 @@ export class ProtogenWebServer {
       name: this.protogen.rgb.activeScene.name,
     } : null;
 
+    const boopSensorProfile = this.protogen.boopSensorManager.activeProfile ? {
+      id: this.protogen.boopSensorManager.activeProfile.id,
+      name: this.protogen.boopSensorManager.activeProfile.name,
+    } : null;
+
     return {
       renderer,
       expression,
       faceRgbEffect,
       rgbEffect,
+      boopSensorProfile,
       hudEnabled: this.protogen.hudManager.enableHud,
       boopSensorEnabled: this.protogen.boopSensorManager.enabled,
       hasRenderLock: this.protogen.visor.hasRenderLock,
@@ -393,6 +399,7 @@ export interface OverviewData {
   expression: OverviewNamedObjectData | null;
   faceRgbEffect: OverviewNamedObjectData | null;
   rgbEffect: OverviewNamedObjectData | null;
+  boopSensorProfile: OverviewNamedObjectData | null;
   hudEnabled: boolean;
   boopSensorEnabled: boolean;
   hasRenderLock: boolean;

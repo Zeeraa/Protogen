@@ -28,6 +28,7 @@
     "@xterm/xterm": "^5.5.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "bootswatch": "^5.3.8",
     "jwt-decode": "^4.0.0",
     "ngx-clipboard": "^16.0.0",
     "ngx-toastr": "^20.0.5",

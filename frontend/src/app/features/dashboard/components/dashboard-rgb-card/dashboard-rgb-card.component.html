@@ -1,11 +1,23 @@
 <div class="card">
-  <div class="card-body">
-    <h5 class="card-title">
-      {{scene.name}}
-    </h5>
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-lightbulb"></i>
+    <h5 class="mb-0">RGB Scenes</h5>
   </div>
-
-  <div class="card-footer text-end">
-    <button class="btn btn-success me-1 mb-1" (click)="activate()">Activate</button>
+  <div class="card-body">
+    @if (scenes().length === 0) {
+    <p class="text-body-secondary mb-0">No RGB scenes defined</p>
+    } @else {
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-sm btn-outline-secondary" (click)="disable.emit()">
+        <i class="bi bi-x-circle"></i> Off
+      </button>
+      @for (scene of scenes(); track scene.id) {
+      <button class="btn btn-sm" [class]="scene.id === activeSceneId() ? 'btn-primary' : 'btn-outline-primary'"
+        (click)="activate.emit(scene)">
+        {{ scene.name }}
+      </button>
+      }
+    </div>
+    }
   </div>
 </div>

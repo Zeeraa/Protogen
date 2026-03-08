@@ -16,6 +16,7 @@ export interface OverviewData {
   expression: OverviewNamedObjectData | null;
   faceRgbEffect: OverviewNamedObjectData | null;
   rgbEffect: OverviewNamedObjectData | null;
+  boopSensorProfile: OverviewNamedObjectData | null;
   hudEnabled: boolean;
   boopSensorEnabled: boolean;
   hasRenderLock: boolean;

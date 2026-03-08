@@ -1,0 +1,56 @@
+<div class="card">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-emoji-smile"></i>
+    <h5 class="mb-0">Face</h5>
+  </div>
+  <div class="card-body">
+    <h6>Renderer</h6>
+    @if (renderers().length === 0) {
+    <p class="text-body-secondary">No renderers available</p>
+    } @else {
+    <div class="renderer-grid">
+      @for (renderer of renderers(); track renderer.id) {
+      <div class="renderer-tile" [class.active]="renderer.id === activeRendererId()"
+        (click)="activateRenderer.emit(renderer)">
+        @if (getRendererPreview(renderer); as preview) {
+        <img [src]="preview" [alt]="renderer.name">
+        } @else {
+        <div class="no-preview">
+          <i class="bi bi-display"></i>
+        </div>
+        }
+        <div class="name">{{ renderer.name }}</div>
+      </div>
+      }
+    </div>
+    }
+
+    <h6 class="mt-3">Expressions</h6>
+    @if (expressions().length === 0) {
+    <p class="text-body-secondary">No expressions defined</p>
+    } @else {
+    <div class="expression-grid">
+      @for (expr of expressions(); track expr.data.uuid) {
+      <div class="expression-tile" [class.active]="expr.data.uuid === activeExpressionId()"
+        (click)="activateExpression.emit(expr)">
+        <img [src]="expr.preview" [alt]="expr.data.name">
+        <div class="name">{{ expr.data.name }}</div>
+      </div>
+      }
+    </div>
+    }
+
+    <h6 class="mt-3">Face RGB Effects</h6>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-sm btn-outline-secondary" (click)="disableFaceRgb.emit()">
+        <i class="bi bi-x-circle"></i> Off
+      </button>
+      @for (effect of faceRgbEffects(); track effect.id) {
+      <button class="btn btn-sm" [class]="effect.id === activeFaceRgbId() ? 'btn-success' : 'btn-outline-success'"
+        (click)="activateFaceRgb.emit(effect)">
+        {{ effect.name }}
+      </button>
+      }
+    </div>
+  </div>
+</div>

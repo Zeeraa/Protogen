@@ -327,6 +327,54 @@
         <div class="row mt-2">
           <div class="col-12">
             <h5>
+              Appearance
+              <i class="bi bi-palette-fill"></i>
+            </h5>
+          </div>
+
+          <div class="col-12 mt-2">
+            <label>Color Mode</label>
+            <div class="btn-group d-flex" role="group">
+              <button type="button" class="btn" [class.btn-primary]="themeService.theme() === Theme.Light"
+                [class.btn-outline-primary]="themeService.theme() !== Theme.Light"
+                (click)="themeService.setTheme(Theme.Light)">
+                <i class="bi bi-sun-fill"></i> Light
+              </button>
+              <button type="button" class="btn" [class.btn-primary]="themeService.theme() === Theme.Dark"
+                [class.btn-outline-primary]="themeService.theme() !== Theme.Dark"
+                (click)="themeService.setTheme(Theme.Dark)">
+                <i class="bi bi-moon-fill"></i> Dark
+              </button>
+              <button type="button" class="btn" [class.btn-primary]="themeService.theme() === Theme.System"
+                [class.btn-outline-primary]="themeService.theme() !== Theme.System"
+                (click)="themeService.setTheme(Theme.System)">
+                <i class="bi bi-circle-half"></i> Auto
+              </button>
+            </div>
+          </div>
+
+          <div class="col-12 mt-3">
+            <div class="form-group">
+              <label for="bootswatchTheme">Bootswatch Theme</label>
+              <small class="text-secondary d-block mb-1">Not all themes may look good or support light/dark mode.</small>
+              <select class="form-select" id="bootswatchTheme" [ngModel]="themeService.bootswatchTheme()"
+                (ngModelChange)="themeService.setBootswatchTheme($event)">
+                <option [ngValue]="null">Default Bootstrap theme</option>
+                @for(theme of bootswatchThemes; track theme) {
+                <option [ngValue]="theme">{{theme[0].toUpperCase() + theme.slice(1)}}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
+      <div class="container-fluid">
+        <div class="row mt-2">
+          <div class="col-12">
+            <h5>
               Misc
               <i class="bi bi-gear-fill"></i>
             </h5>

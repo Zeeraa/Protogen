@@ -10,6 +10,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
 import { form } from '@angular/forms/signals'
 import { hexToRgb, RGBColors, rgbToHex } from '../../../../core/services/utils/Utils';
+import { BootswatchThemes, Theme, ThemeService } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-system-page',
@@ -24,6 +25,9 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
+  protected readonly themeService = inject(ThemeService);
+  protected readonly bootswatchThemes = BootswatchThemes;
+  protected readonly Theme = Theme;
 
   protected readonly shutdownModalTemplate = viewChild<TemplateRef<any>>("shutdownModal");
 

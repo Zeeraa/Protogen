@@ -1,26 +1,26 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardPageComponent } from './pages/dashboard-page/dashboard-page.component';
-import { FormsModule } from '@angular/forms';
-import { DashboardActionCardComponent } from './components/dashboard-action-card/dashboard-action-card.component';
-import { DashboardExpressionCardComponent } from './components/dashboard-expression-card/dashboard-expression-card.component';
+import { DashboardStatusCardComponent } from './components/dashboard-status-card/dashboard-status-card.component';
+import { DashboardActionsCardComponent } from './components/dashboard-actions-card/dashboard-actions-card.component';
+import { DashboardFaceCardComponent } from './components/dashboard-face-card/dashboard-face-card.component';
 import { DashboardRgbCardComponent } from './components/dashboard-rgb-card/dashboard-rgb-card.component';
-import { DashboardFaceRgbCardComponent } from './components/dashboard-face-rgb-card/dashboard-face-rgb-card.component';
+import { DashboardBoopCardComponent } from './components/dashboard-boop-card/dashboard-boop-card.component';
 
 @NgModule({
   declarations: [
     DashboardPageComponent,
-    DashboardActionCardComponent,
-    DashboardExpressionCardComponent,
+    DashboardStatusCardComponent,
+    DashboardActionsCardComponent,
+    DashboardFaceCardComponent,
     DashboardRgbCardComponent,
-    DashboardFaceRgbCardComponent
+    DashboardBoopCardComponent,
   ],
   imports: [
     CommonModule,
-    FormsModule,
   ],
   exports: [
-    DashboardPageComponent
+    DashboardPageComponent,
   ],
 })
 export class DashboardModule { }
