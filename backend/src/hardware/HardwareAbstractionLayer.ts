@@ -61,6 +61,16 @@ export abstract class HardwareAbstractionLayer {
   public abstract getVolume(): Promise<number>;
 
   /**
+   * Get available audio output devices.
+   */
+  public abstract getAudioDevices(): Promise<AudioDevice[]>;
+
+  /**
+   * Set the active audio output device by its id.
+   */
+  public abstract setAudioDevice(deviceId: number): Promise<void>;
+
+  /**
    * Erite text lines to the HUD.
    * @param lines Array of lines to write to the HUD.
    */
@@ -73,4 +83,10 @@ export abstract class HardwareAbstractionLayer {
   public abstract writeLedData(values: number[]): Promise<void>;
 
   public abstract get rawBoopSensorObservable(): Observable<boolean>;
+}
+
+export interface AudioDevice {
+  id: number;
+  name: string;
+  isDefault: boolean;
 }

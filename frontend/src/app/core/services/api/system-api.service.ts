@@ -58,6 +58,14 @@ export class SystemApiService extends ApiBaseService {
   updateClockSettings(settings: ClockSettings): Observable<any> {
     return this.http.put(this.apiBaseUrl + "/system/clock-settings", settings);
   }
+
+  getAudioDevices(): Observable<AudioDevice[]> {
+    return this.http.get<AudioDevice[]>(this.apiBaseUrl + "/system/audio-devices");
+  }
+
+  setAudioDevice(deviceId: number): Observable<any> {
+    return this.http.put(this.apiBaseUrl + "/system/audio-device", { deviceId });
+  }
 }
 
 interface ISessionIdObject {
@@ -98,4 +106,10 @@ export interface NetworkInterfaceInfo {
   name: string;
   ipv4: string | null;
   ipv6: string | null;
+}
+
+export interface AudioDevice {
+  id: number;
+  name: string;
+  isDefault: boolean;
 }

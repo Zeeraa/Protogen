@@ -1,5 +1,5 @@
 import { Observable, Subject } from "rxjs";
-import { HardwareAbstractionLayer } from "../HardwareAbstractionLayer";
+import { AudioDevice, HardwareAbstractionLayer } from "../HardwareAbstractionLayer";
 import { HardwareType } from "../HardwareType";
 import { Protogen } from "../../Protogen";
 import { getVolume, setVolume } from "loudness";
@@ -77,6 +77,14 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
       console.error("Failed to get volume:", error);
       return this._emulatedVolume;
     }
+  }
+
+  public async getAudioDevices(): Promise<AudioDevice[]> {
+    return [];
+  }
+
+  public async setAudioDevice(_deviceId: number): Promise<void> {
+    this.protogen.logger.info("EmulatedHardware", "setAudioDevice called (emulated, no-op)");
   }
 
   public async writeLedData(values: number[]) {

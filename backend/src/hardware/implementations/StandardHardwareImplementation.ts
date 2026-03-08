@@ -1,6 +1,6 @@
 import * as os from 'os';
 import { exec } from "child_process";
-import { HardwareAbstractionLayer } from "../HardwareAbstractionLayer";
+import { HardwareAbstractionLayer, AudioDevice } from "../HardwareAbstractionLayer";
 import { promisify } from "util";
 import { Protogen } from '../../Protogen';
 import { ReadlineParser, SerialPort } from 'serialport';
@@ -211,6 +211,43 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
 
   public async writeToHUD(lines: string[]): Promise<void> {
     this.serialWrite("TEXT:" + lines.join("|"));
+  }
+
+  public async getAudioDevices(): Promise<AudioDevice[]> {
+    try {
+      // Use pw-dump for reliable JSON output of all PipeWire objects
+      const { stdout: dumpOut } = await execAsync("pw-dump");
+      const allObjects = JSON.parse(dumpOut);
+
+      const sinks = allObjects.filter((o: any) =>
+        o.info?.props?.["media.class"] === "Audio/Sink"
+      );
+
+      // Get the default sink ID from wpctl
+      let defaultSinkId: number | null = null;
+      try {
+        const { stdout: inspectOut } = await execAsync("wpctl inspect @DEFAULT_AUDIO_SINK@");
+        const idMatch = inspectOut.match(/^id\s+(\d+),/);
+        if (idMatch) {
+          defaultSinkId = parseInt(idMatch[1], 10);
+        }
+      } catch {
+        // No default sink configured, that's fine
+      }
+
+      return sinks.map((s: any) => ({
+        id: s.id,
+        name: s.info.props["node.description"] || s.info.props["node.name"] || "Unknown",
+        isDefault: s.id === defaultSinkId,
+      }));
+    } catch (error) {
+      this.protogen.logger.error("StandardHardwareImplementation", "Error getting audio devices: " + error);
+      return [];
+    }
+  }
+
+  public async setAudioDevice(deviceId: number): Promise<void> {
+    await execAsync(`wpctl set-default ${deviceId}`);
   }
 
   public async writeLedData(values: number[]): Promise<void> {

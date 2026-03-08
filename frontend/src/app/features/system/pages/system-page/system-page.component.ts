@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
-import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
+import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -31,9 +31,11 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private updateInterval: any = null;
   private shutdownModalRef: null | NgbModalRef = null;
 
-  readonly showSensitiveNetworkingData = signal<boolean>(false);
-  readonly flaschenTaschenSettings = signal<FlaschenTaschenSettings>({ ledLimitRefresh: 100, ledSlowdownGpio: 3 });
-  readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
+  private readonly showSensitiveNetworkingData = signal<boolean>(false);
+  private readonly flaschenTaschenSettings = signal<FlaschenTaschenSettings>({ ledLimitRefresh: 100, ledSlowdownGpio: 3 });
+  private readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
+  private readonly audioDevices = signal<AudioDevice[]>([]);
+  private readonly selectedAudioDeviceId = signal<number | null>(null);
 
   private readonly clockSettingsModel = signal({
     is24HourFormat: true,
@@ -197,6 +199,17 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected onAudioDeviceChange(deviceId: number) {
+    this.api.setAudioDevice(deviceId).pipe(catchError(err => {
+      this.toastr.error("Failed to set audio device");
+      console.error("Failed to set audio device", err);
+      throw err;
+    })).subscribe(() => {
+      this.selectedAudioDeviceId.set(deviceId);
+      this.toastr.success("Audio device updated");
+    });
+  }
+
   ngOnInit(): void {
     this.update();
     this.updateInterval = setInterval(() => {
@@ -240,6 +253,20 @@ export class SystemPageComponent implements OnInit, OnDestroy {
         timeColor: rgbToHex(settings.timeColor),
         dateColor: rgbToHex(settings.dateColor)
       });
+    });
+
+    this.api.getAudioDevices().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch audio devices");
+        console.error("Failed to fetch audio devices", err);
+        return [];
+      })
+    ).subscribe(devices => {
+      this.audioDevices.set(devices);
+      const defaultDevice = devices.find(d => d.isDefault);
+      if (defaultDevice) {
+        this.selectedAudioDeviceId.set(defaultDevice.id);
+      }
     });
   }
 

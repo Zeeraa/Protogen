@@ -87,6 +87,37 @@
         <div class="row mt-2">
           <div class="col-12">
             <h5>
+              Audio Output
+              <i class="bi bi-speaker-fill"></i>
+            </h5>
+          </div>
+
+          @if(audioDevices().length > 0) {
+          <div class="col-12 mt-2">
+            <div class="form-group">
+              <label for="audioDevice">Output device</label>
+              <select class="form-select" id="audioDevice" [ngModel]="selectedAudioDeviceId()"
+                (ngModelChange)="onAudioDeviceChange($event)">
+                @for(device of audioDevices(); track device.id) {
+                <option [ngValue]="device.id">{{device.name}}</option>
+                }
+              </select>
+            </div>
+          </div>
+          } @else {
+          <div class="col-12 mt-2">
+            <span class="text-secondary">No audio devices available</span>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
+      <div class="container-fluid">
+        <div class="row mt-2">
+          <div class="col-12">
+            <h5>
               Networking
               <i class="bi bi-pci-card-network"></i>
             </h5>
