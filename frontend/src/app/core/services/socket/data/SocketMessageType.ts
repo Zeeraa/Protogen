@@ -8,6 +8,7 @@ export enum SocketMessageType {
   S2C_AudioLevel = "S2C_AudioLevel",
   S2C_DevHardwareEmulationState = "S2C_DevHardwareEmulationState",
   S2C_Overview = "S2C_Overview",
+  S2C_GamepadState = "S2C_GamepadState",
 
   // ===== C2S (Client to Server) =====
   C2S_EnableRgbPreview = "C2S_EnableRgbPreview",
@@ -16,4 +17,5 @@ export enum SocketMessageType {
   C2S_Ping = "C2S_Ping",
   C2S_AudioVisualiserSettings = "C2S_AudioVisualizerSettings",
   C2S_EnableDevData = "C2S_EnableDevData",
+  C2S_EnableGamepadPreview = "C2S_EnableGamepadState",
 }

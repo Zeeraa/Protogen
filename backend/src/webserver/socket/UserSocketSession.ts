@@ -14,6 +14,7 @@ export class UserSocketSession {
   private _enableRgbPreview = false;
   private _enableVisorPreview = false;
   private _enableAudioPreview = false;
+  private _enableGamepadPreview = false;
   private _enableDevData = false;
   private _auth: AuthData;
 
@@ -37,15 +38,15 @@ export class UserSocketSession {
     return this._protogen;
   }
 
-  get sessionId() {
+  public get sessionId() {
     return this._sessionId;
   }
 
-  get socket() {
+  public get socket() {
     return this._socket;
   }
 
-  get auth() {
+  public get auth() {
     return this._auth;
   }
 
@@ -55,24 +56,32 @@ export class UserSocketSession {
     }
   }
 
-  get enableAudioPreview() {
+  public get enableAudioPreview() {
     return this._enableAudioPreview;
   }
 
-  set enableAudioPreview(enable: boolean) {
+  public set enableAudioPreview(enable: boolean) {
     this._enableAudioPreview = enable;
   }
 
-  get enableRgbPreview() {
+  public get enableRgbPreview() {
     return this._enableRgbPreview;
   }
 
-  get enableVisorPreview() {
+  public get enableVisorPreview() {
     return this._enableVisorPreview;
   }
 
-  get enableDevData() {
+  public get enableDevData() {
     return this._enableDevData;
+  }
+
+  public get enableGamepadPreview() {
+    return this._enableGamepadPreview;
+  }
+
+  public set enableGamepadPreview(enable: boolean) {
+    this._enableGamepadPreview = enable;
   }
 
   sendMessage(type: SocketMessageType, data: any) {
@@ -108,6 +117,9 @@ export class UserSocketSession {
     } else if (type == SocketMessageType.C2S_EnableDevData) {
       const enable = message.data === true;
       this._enableDevData = enable;
+    } else if (type == SocketMessageType.C2S_EnableGamepadPreview) {
+      const enable = message.data === true;
+      this._enableGamepadPreview = enable;
     } else if (type == SocketMessageType.C2S_AudioVisualiserSettings) {
       const settings = AudioVisualiserSettingsModel.safeParse(message.data);
       if (!settings.success) {

@@ -25,6 +25,7 @@ import { AppsModule } from './features/apps/apps.module';
 import { DevModule } from './features/dev/dev.module';
 import { BoopSensorModule } from './features/boop-sensor/boop-sensor.module';
 import { BluetoothModule } from './features/bluetooth/bluetooth.module';
+import { RemoteModule } from './features/remote/remote.module';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { BluetoothModule } from './features/bluetooth/bluetooth.module';
     DevModule,
     BoopSensorModule,
     BluetoothModule,
+    RemoteModule,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),

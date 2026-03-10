@@ -8,6 +8,7 @@ import { MiscConfiguration } from "./objects/MiscConfiguration";
 import { RemoteWorkerConfiguration } from "./objects/RemoteWorkerConfiguration";
 import { RgbConfiguration } from "./objects/RgbConfiguration";
 import { SerialConfiguration } from "./objects/SerialConfiguration";
+import { MqttConfiguration } from "./objects/MqttConfiguration";
 import { WebConfiguration } from "./objects/WebConfiguration";
 
 /**
@@ -210,6 +211,20 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
+  //#region MQTT
+  const mqttHost = process.env["MQTT_HOST"] || "127.0.0.1";
+  const mqttPort = parseInt(String(process.env["MQTT_PORT"] || "1883"));
+
+  if (isNaN(mqttPort) || mqttPort <= 0 || mqttPort > 65535) {
+    throw new Error("Invalid: MQTT_PORT");
+  }
+
+  const mqtt: MqttConfiguration = {
+    host: mqttHost,
+    port: mqttPort,
+  }
+  //#endregion
+
   const dataDirectory = process.env["DATA_DIRECTORY"] || "./data";
   const logDirectory = process.env["LOG_DIRECTORY"] || "./logs";
 
@@ -221,6 +236,7 @@ export function loadConfiguration(): Configuration {
     remoteWorker: remoteWorker,
     serial: serialConfig,
     rgb: rgb,
+    mqtt: mqtt,
     dataDirectory: dataDirectory,
     logDirectory: logDirectory,
     misc: misc,

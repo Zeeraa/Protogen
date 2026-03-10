@@ -36,7 +36,7 @@ echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | sudo debconf-set-se
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $(pwgen -s -1 128)" | sudo debconf-set-selections
 
-sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2
+sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv
 
 # Check if Node.js is installed
 if ! command -v node &>/dev/null; then
@@ -103,6 +103,7 @@ fi
 
 cd /home/pi/protogen
 git checkout $REPO_BRANCH
+git submodule update --init --recursive
 
 # Frontend
 echo Building frontend
@@ -127,6 +128,21 @@ sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD="${GENERATED_DB_PASSWORD}"|" /home/pi/prot
 
 sudo chown -R pi:pi /home/pi/protogen
 
+# ========== Gamepad Listener ==========
+echo "Setting up Gamepad Listener..."
+cd /home/pi/protogen/gamepad_listener
+if [[ ! -d "venv" ]]; then
+    python3 -m venv venv
+fi
+venv/bin/pip install -r requirements.txt
+sudo chown -R pi:pi /home/pi/protogen/gamepad_listener
+
+# ========== Configure Mosquitto ==========
+echo "Configuring Mosquitto MQTT broker..."
+cp /home/pi/protogen/gamepad_listener/mosquitto.conf /etc/mosquitto/conf.d/protogen.conf
+systemctl enable mosquitto
+systemctl restart mosquitto
+
 # ========== Setup services ==========
 if [[ -f "/etc/systemd/system/flaschen-taschen.service" ]]; then
     echo "flaschen-taschen.service already exists"
@@ -143,6 +159,14 @@ else
     echo "Creating service protogen.service"
     cp /home/pi/protogen/systemd/protogen.service /etc/systemd/system/protogen.service
     systemctl enable protogen.service
+fi
+
+if [[ -f "/etc/systemd/system/gamepad-listener.service" ]]; then
+    echo "gamepad-listener.service already exists"
+else
+    echo "Creating service gamepad-listener.service"
+    cp /home/pi/protogen/systemd/gamepad-listener.service /etc/systemd/system/gamepad-listener.service
+    systemctl enable gamepad-listener.service
 fi
 
 # ========== Better gamepad support ==========
@@ -235,6 +259,7 @@ service apache2 restart
 
 # Start services
 service flaschen-taschen start
+service gamepad-listener start
 service protogen start
 
 echo "DB Credentials: protogen:$GENERATED_DB_PASSWORD"
