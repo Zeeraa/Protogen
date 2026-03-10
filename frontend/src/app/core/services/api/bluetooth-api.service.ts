@@ -45,6 +45,14 @@ export class BluetoothApiService extends ApiBaseService {
   disconnectDevice(mac: string): Observable<any> {
     return this.http.delete(this.apiBaseUrl + "/bluetooth/devices/" + mac + "/connect");
   }
+
+  getRfkillStatus(): Observable<RfkillStatus> {
+    return this.http.get<RfkillStatus>(this.apiBaseUrl + "/bluetooth/rfkill");
+  }
+
+  unblockRfkill(): Observable<any> {
+    return this.http.post(this.apiBaseUrl + "/bluetooth/rfkill/unblock", {});
+  }
 }
 
 export interface BluetoothDevice {
@@ -62,4 +70,9 @@ export interface ScanResponse {
 
 export interface ScanStatus {
   scanning: boolean;
+}
+
+export interface RfkillStatus {
+  softBlocked: boolean;
+  hardBlocked: boolean;
 }

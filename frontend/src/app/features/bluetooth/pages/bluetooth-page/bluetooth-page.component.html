@@ -5,6 +5,40 @@
     </div>
   </div>
 
+  <!-- rfkill blocked alert -->
+  @if (rfkillStatus()?.softBlocked) {
+  <div class="row mb-3">
+    <div class="col">
+      <div class="alert alert-warning d-flex justify-content-between align-items-center mb-0" role="alert">
+        <div>
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <strong>Bluetooth is blocked by rfkill (soft block).</strong>
+          Bluetooth features will not work until it is unblocked.
+        </div>
+        <button class="btn btn-warning btn-sm ms-3" (click)="unblockRfkill()" [disabled]="rfkillUnblocking()">
+          @if (rfkillUnblocking()) {
+          <span class="spinner-border spinner-border-sm me-1"></span>
+          } @else {
+          <i class="bi bi-unlock-fill me-1"></i>
+          }
+          Unblock
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+  @if (rfkillStatus()?.hardBlocked) {
+  <div class="row mb-3">
+    <div class="col">
+      <div class="alert alert-danger mb-0" role="alert">
+        <i class="bi bi-exclamation-octagon-fill me-2"></i>
+        <strong>Bluetooth is blocked by a hardware switch (hard block).</strong>
+        Check the physical hardware switch on your device.
+      </div>
+    </div>
+  </div>
+  }
+
   <!-- Paired Devices -->
   <div class="row mb-4">
     <div class="col">

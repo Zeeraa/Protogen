@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { BluetoothApiService, BluetoothDevice } from '../../../../core/services/api/bluetooth-api.service';
+import { BluetoothApiService, BluetoothDevice, RfkillStatus } from '../../../../core/services/api/bluetooth-api.service';
 import { ToastrService } from 'ngx-toastr';
 import { Title } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -23,6 +23,8 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
   protected readonly scanning = signal<boolean>(false);
   protected readonly loading = signal<boolean>(true);
   protected readonly busyDevices = signal<Set<string>>(new Set());
+  protected readonly rfkillStatus = signal<RfkillStatus | null>(null);
+  protected readonly rfkillUnblocking = signal<boolean>(false);
 
   /**
    * Discovered devices that are NOT already paired — avoids showing duplicates.
@@ -34,6 +36,7 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.title.setTitle("Bluetooth - Protogen");
+    this.checkRfkill();
     this.refresh();
     this.pollInterval = setInterval(() => this.pollScanStatus(), 2000);
   }
@@ -197,5 +200,28 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
         return [];
       }),
     ).subscribe((devices) => this.discoveredDevices.set(devices));
+  }
+
+  protected checkRfkill(): void {
+    this.api.getRfkillStatus().pipe(
+      catchError((_err: HttpErrorResponse) => {
+        return [];
+      }),
+    ).subscribe((status) => this.rfkillStatus.set(status));
+  }
+
+  protected unblockRfkill(): void {
+    this.rfkillUnblocking.set(true);
+    this.api.unblockRfkill().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.toastr.error(err.error?.message || "Failed to unblock Bluetooth");
+        this.rfkillUnblocking.set(false);
+        return [];
+      }),
+    ).subscribe(() => {
+      this.rfkillUnblocking.set(false);
+      this.toastr.success("Bluetooth unblocked");
+      this.checkRfkill();
+    });
   }
 }

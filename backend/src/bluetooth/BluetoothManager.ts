@@ -455,6 +455,43 @@ export class BluetoothManager {
     this._protogen.logger.info("BluetoothManager", `Disconnecting from device: ${mac}`);
     await this.exec(`disconnect ${mac}`);
   }
+
+  /**
+   * Check whether rfkill is soft- or hard-blocking Bluetooth.
+   * Returns { softBlocked, hardBlocked }. If rfkill is not available or
+   * does not list any Bluetooth device, both fields are false.
+   */
+  public async getRfkillStatus(): Promise<{ softBlocked: boolean; hardBlocked: boolean }> {
+    try {
+      const { stdout } = await execAsync("rfkill list bluetooth");
+      const softMatch = /Soft blocked:\s+(yes|no)/i.exec(stdout);
+      const hardMatch = /Hard blocked:\s+(yes|no)/i.exec(stdout);
+      return {
+        softBlocked: softMatch?.[1]?.toLowerCase() === "yes",
+        hardBlocked: hardMatch?.[1]?.toLowerCase() === "yes",
+      };
+    } catch {
+      // rfkill not installed or returned non-zero — treat as unblocked
+      return { softBlocked: false, hardBlocked: false };
+    }
+  }
+
+  /**
+   * Attempt to unblock Bluetooth via rfkill using sudo in non-interactive
+   * mode (`sudo -n`). Requires a NOPASSWD sudoers entry for this command.
+   */
+  public async unblockRfkill(): Promise<void> {
+    this._protogen.logger.info("BluetoothManager", "Unblocking Bluetooth via rfkill");
+    try {
+      await execAsync("sudo -n rfkill unblock bluetooth");
+    } catch (err: any) {
+      const msg =
+        ((err.stderr ?? "") as string).trim() ||
+        ((err.stdout ?? "") as string).trim() ||
+        "rfkill unblock failed";
+      throw new BluetoothError(msg, 500);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

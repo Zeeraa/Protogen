@@ -242,6 +242,54 @@ export class BluetoothRouter extends AbstractRouter {
     });
 
     /**
+     * Check rfkill status for Bluetooth
+     */
+    this.router.get("/rfkill", async (req, res) => {
+      /*
+      #swagger.path = '/bluetooth/rfkill'
+      #swagger.tags = ['Bluetooth']
+      #swagger.description = "Check whether rfkill is blocking Bluetooth"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const status = await this.protogen.bluetoothManager.getRfkillStatus();
+        res.json(status);
+      } catch (err) {
+        this.handleBluetoothError(err, req, res);
+      }
+    });
+
+    /**
+     * Unblock Bluetooth via rfkill (requires NOPASSWD sudoers entry)
+     */
+    this.router.post("/rfkill/unblock", async (req, res) => {
+      /*
+      #swagger.path = '/bluetooth/rfkill/unblock'
+      #swagger.tags = ['Bluetooth']
+      #swagger.description = "Unblock Bluetooth via rfkill using sudo"
+      #swagger.responses[200] = { description: "Unblocked" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        await this.protogen.bluetoothManager.unblockRfkill();
+        res.json({ message: "Bluetooth unblocked" });
+      } catch (err) {
+        this.handleBluetoothError(err, req, res);
+      }
+    });
+
+    /**
      * Disconnect from a device
      */
     this.router.delete("/devices/:mac/connect", async (req, res) => {
