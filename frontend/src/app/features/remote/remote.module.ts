@@ -1,19 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RemotePageComponent } from './pages/remote-page/remote-page.component';
 import { GamepadPreviewComponent } from './components/gamepad-preview/gamepad-preview.component';
+import { GamepadRemotePageComponent } from './pages/gamepad-remote-page/gamepad-remote-page.component';
+import { FormField } from "@angular/forms/signals";
 
 @NgModule({
   declarations: [
-    RemotePageComponent,
+    GamepadRemotePageComponent,
     GamepadPreviewComponent,
   ],
   imports: [
     CommonModule,
+    FormField
   ],
   exports: [
-    RemotePageComponent,
-    GamepadPreviewComponent,
+    GamepadRemotePageComponent,
   ],
 })
 export class RemoteModule { }

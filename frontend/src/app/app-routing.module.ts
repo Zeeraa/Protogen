@@ -22,7 +22,7 @@ import { DeveloperPageComponent } from './features/dev/pages/developer-page/deve
 import { BoopSensorPageComponent } from './features/boop-sensor/pages/boop-sensor-page/boop-sensor-page.component';
 import { BoopSensorProfileEditorPageComponent } from './features/boop-sensor/pages/boop-sensor-profile-editor-page/boop-sensor-profile-editor-page.component';
 import { BluetoothPageComponent } from './features/bluetooth/pages/bluetooth-page/bluetooth-page.component';
-import { RemotePageComponent } from './features/remote/pages/remote-page/remote-page.component';
+import { GamepadRemotePageComponent } from './features/remote/pages/gamepad-remote-page/gamepad-remote-page.component';
 
 export const routes: Routes = [
   {
@@ -148,8 +148,8 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: "remote",
-    component: RemotePageComponent,
+    path: "remote/gamepad",
+    component: GamepadRemotePageComponent,
     canActivate: [AuthGuard],
   },
 ];

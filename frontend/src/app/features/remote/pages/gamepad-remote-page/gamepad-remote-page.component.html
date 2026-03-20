@@ -1,0 +1,62 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col">
+      <h1>Gamepad Remote</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    @if(settingsVisible()) {
+    <div class="col-12">
+      <h3>Settings</h3>
+    </div>
+    }
+
+    <div class="col-12 mb-2">
+      <button class="btn btn-sm btn-primary" (click)="settingsVisible.set(!settingsVisible())">
+        {{settingsVisible() ? "Hide Settings" : "Show Settings"}}
+      </button>
+
+      @if(settingsVisible()) {
+      <button class="btn btn-sm btn-success ms-1" (click)="saveSettings()">Save</button>
+      }
+    </div>
+
+    @if(settingsVisible()) {
+    <div class="col-6">
+      <label for="controllerType" class="form-label">Controller Type</label>
+      <select class="form-select" id="controllerType" [formField]="settingsForm.type">
+        @for (type of constollerTypes(); track $index) {
+        <option [value]="type">{{type}}</option>
+        }
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <div class="form-check form-switch">
+        <input type="checkbox" class="form-check-input" id="enablePreview" [formField]="settingsForm.enablePreview" />
+        <label class="form-check-label" for="enablePreview">Enable Preview</label>
+      </div>
+    </div>
+    }
+  </div>
+
+  @if(settings().enablePreview) {
+  <div class="row mt-2">
+    <div class="col">
+      <app-gamepad-preview [controllerType]="settings().type" />
+    </div>
+  </div>
+  }
+
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <h3>Profiles</h3>
+    </div>
+
+    <div class="col-12">
+      <span class="text-danger">No profiles found. Create a new profile to get started.</span>
+    </div>
+  </div>
+</div>

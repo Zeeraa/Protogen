@@ -1,4 +1,5 @@
 import { Protogen } from "../Protogen";
+import { KV_GamepadEnablePreview, KV_GamepadType } from "../utils/KVDataStorageKeys";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { GamepadAxes, GamepadAxesMessage, GamepadButtons, GamepadButtonMessage, GamepadState, GamepadStatusMessage } from "./GamepadState";
 
@@ -9,6 +10,8 @@ const TOPIC_AXES = "protogen/gamepad/axes";
 export class GamepadManager {
   private readonly protogen: Protogen;
   private readonly _state: GamepadState;
+  private _enablePreview: boolean = false;
+  private _type: GamepadType = GamepadType.PLAYSTATION;
 
   private static readonly DEFAULT_BUTTONS: GamepadButtons = {
     A: false, B: false, X: false, Y: false,
@@ -87,6 +90,17 @@ export class GamepadManager {
         });
       })
     }, 100);
+
+    await this.protogen.database.initMissingData(KV_GamepadType, GamepadType.PLAYSTATION);
+    await this.protogen.database.initMissingData(KV_GamepadEnablePreview, "true");
+
+    this._type = await this.protogen.database.getData(KV_GamepadType) as GamepadType;
+    if (!Object.values(GamepadType).includes(this._type)) {
+      this._type = GamepadType.PLAYSTATION;
+      await this.protogen.database.setData(KV_GamepadType, this._type);
+    }
+
+    this._enablePreview = (await this.protogen.database.getData(KV_GamepadEnablePreview)) === "true";
   }
 
   private _markConnected(): void {
@@ -103,4 +117,27 @@ export class GamepadManager {
   public get connected(): boolean {
     return this._state.connected;
   }
+
+  public get type() {
+    return this._type;
+  }
+
+  public async setTypePersistently(type: GamepadType): Promise<void> {
+    this._type = type;
+    await this.protogen.database.setData(KV_GamepadType, type);
+  }
+
+  public get enablePreview(): boolean {
+    return this._enablePreview;
+  }
+
+  public async setEnablePreviewPersistently(enable: boolean): Promise<void> {
+    this._enablePreview = enable;
+    await this.protogen.database.setData(KV_GamepadEnablePreview, enable ? "true" : "false");
+  }
+}
+
+export enum GamepadType {
+  PLAYSTATION = "playstation",
+  XBOX = "xbox",
 }

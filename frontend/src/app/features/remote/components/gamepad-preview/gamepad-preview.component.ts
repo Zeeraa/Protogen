@@ -3,6 +3,7 @@ import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { Subscription } from 'rxjs';
 import { emptyGamepadState, GamepadState } from '../../../../core/interfaces/GamepadState';
+import { ControllerType } from '../../../../core/services/api/gamepad-api.service';
 
 @Component({
   selector: 'app-gamepad-preview',
@@ -41,4 +42,3 @@ export class GamepadPreviewComponent implements OnInit, OnDestroy {
   }
 }
 
-export type ControllerType = "xbox" | "playstation";

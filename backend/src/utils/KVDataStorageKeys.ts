@@ -42,3 +42,8 @@ export const KV_ClockShowDate = "ClockShowDate";
 export const KV_ClockTimeColor = "ClockTimeColor";
 export const KV_ClockDateColor = "ClockDateColor";
 //#endregion
+
+//#region Gamepad
+export const KV_GamepadType = "GamepadType";
+export const KV_GamepadEnablePreview = "GamepadEnablePreview";
+//#endregion

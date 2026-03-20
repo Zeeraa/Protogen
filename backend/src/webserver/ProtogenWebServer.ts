@@ -38,6 +38,7 @@ import { DevRouter } from "./routes/dev/DevRouter";
 import { BoopSensorRouter } from "./routes/boop-sensor/BoopSensorRouter";
 import { BluetoothRouter } from "./routes/bluetooth/BluetoothRouter";
 import { OverviewRouter } from "./routes/overview/OverviewRouter";
+import { GamepadRouter } from "./routes/gamepad/GamepadRouter";
 
 export const SocketPath = "/protogen-websocket.io";
 export const AppSocketPath = "/protogen-app-websocket.io";
@@ -155,6 +156,7 @@ export class ProtogenWebServer {
     new BoopSensorRouter(this).register();
     new BluetoothRouter(this).register();
     new OverviewRouter(this).register();
+    new GamepadRouter(this).register();
 
     const socketConnectionHandler = async (socket: Socket) => {
       const token = String(socket.handshake.headers.authorization);
