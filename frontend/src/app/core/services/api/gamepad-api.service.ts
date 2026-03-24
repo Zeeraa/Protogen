@@ -112,10 +112,12 @@ export enum GamepadActionTrigger {
   LEFT_STICK_DOWN = "LEFT_STICK_DOWN",
   LEFT_STICK_LEFT = "LEFT_STICK_LEFT",
   LEFT_STICK_RIGHT = "LEFT_STICK_RIGHT",
+  LEFT_STICK_CENTER = "LEFT_STICK_CENTER",
   RIGHT_STICK_UP = "RIGHT_STICK_UP",
   RIGHT_STICK_DOWN = "RIGHT_STICK_DOWN",
   RIGHT_STICK_LEFT = "RIGHT_STICK_LEFT",
   RIGHT_STICK_RIGHT = "RIGHT_STICK_RIGHT",
+  RIGHT_STICK_CENTER = "RIGHT_STICK_CENTER",
   RIGHT_TRIGGER_DOWN = "RIGHT_TRIGGER_DOWN",
   LEFT_TRIGGER_DOWN = "LEFT_TRIGGER_DOWN",
 }
@@ -139,10 +141,12 @@ export function translateTriggerName(trigger: GamepadActionTrigger): string {
     case GamepadActionTrigger.LEFT_STICK_DOWN: return "Left Stick Down";
     case GamepadActionTrigger.LEFT_STICK_LEFT: return "Left Stick Left";
     case GamepadActionTrigger.LEFT_STICK_RIGHT: return "Left Stick Right";
+    case GamepadActionTrigger.LEFT_STICK_CENTER: return "Left Stick Center";
     case GamepadActionTrigger.RIGHT_STICK_UP: return "Right Stick Up";
     case GamepadActionTrigger.RIGHT_STICK_DOWN: return "Right Stick Down";
     case GamepadActionTrigger.RIGHT_STICK_LEFT: return "Right Stick Left";
     case GamepadActionTrigger.RIGHT_STICK_RIGHT: return "Right Stick Right";
+    case GamepadActionTrigger.RIGHT_STICK_CENTER: return "Right Stick Center";
     case GamepadActionTrigger.RIGHT_TRIGGER_DOWN: return "Right Trigger";
     case GamepadActionTrigger.LEFT_TRIGGER_DOWN: return "Left Trigger";
     default: return trigger;
