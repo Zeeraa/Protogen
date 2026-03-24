@@ -1,7 +1,9 @@
+import { uuidv7 } from "uuidv7";
 import { Protogen } from "../Protogen";
-import { KV_GamepadEnablePreview, KV_GamepadType } from "../utils/KVDataStorageKeys";
+import { KV_ActiveGamepadProfile, KV_GamepadEnablePreview, KV_GamepadType } from "../utils/KVDataStorageKeys";
 import { SocketMessageType } from "../webserver/socket/SocketMessageType";
 import { GamepadAxes, GamepadAxesMessage, GamepadButtons, GamepadButtonMessage, GamepadState, GamepadStatusMessage } from "./GamepadState";
+import { GamepadProfile } from "../database/models/gamepad/GamepadProfile.model";
 
 const TOPIC_STATUS = "protogen/gamepad/status";
 const TOPIC_BUTTON = "protogen/gamepad/button";
@@ -12,6 +14,8 @@ export class GamepadManager {
   private readonly _state: GamepadState;
   private _enablePreview: boolean = false;
   private _type: GamepadType = GamepadType.PLAYSTATION;
+  private _profiles: GamepadProfile[] = [];
+  private _activeProfile: GamepadProfile | null = null;
 
   private static readonly DEFAULT_BUTTONS: GamepadButtons = {
     A: false, B: false, X: false, Y: false,
@@ -101,6 +105,19 @@ export class GamepadManager {
     }
 
     this._enablePreview = (await this.protogen.database.getData(KV_GamepadEnablePreview)) === "true";
+
+    const profileRepo = this.protogen.database.dataSource.getRepository(GamepadProfile);
+    this._profiles = await profileRepo.find({ relations: { actions: true } });
+
+    const activeProfileId = await this.protogen.database.getData(KV_ActiveGamepadProfile);
+    if (activeProfileId != null) {
+      const profile = this._profiles.find(p => p.id === activeProfileId);
+      if (profile != null) {
+        await this.setActiveProfile(profile, false);
+      } else {
+        this.protogen.logger.warn("GamepadManager", "Last active gamepad profile not found");
+      }
+    }
   }
 
   private _markConnected(): void {
@@ -112,6 +129,54 @@ export class GamepadManager {
 
   public get state(): Readonly<GamepadState> {
     return this._state;
+  }
+
+  public get profiles(): ReadonlyArray<GamepadProfile> {
+    return this._profiles;
+  }
+
+  public get activeProfile(): GamepadProfile | null {
+    return this._activeProfile;
+  }
+
+  public async createProfile(name: string): Promise<GamepadProfile> {
+    const repo = this.protogen.database.dataSource.getRepository(GamepadProfile);
+    const profile = new GamepadProfile();
+    profile.id = uuidv7();
+    profile.name = name;
+    profile.actions = [];
+    const saved = await repo.save(profile);
+    this._profiles.push(saved);
+    return saved;
+  }
+
+  public async saveProfile(profile: GamepadProfile): Promise<GamepadProfile> {
+    const repo = this.protogen.database.dataSource.getRepository(GamepadProfile);
+    const saved = await repo.save(profile);
+    const idx = this._profiles.findIndex(p => p.id === profile.id);
+    if (idx !== -1) {
+      this._profiles[idx] = saved;
+    }
+    if (this._activeProfile?.id === profile.id) {
+      this._activeProfile = saved;
+    }
+    return saved;
+  }
+
+  public async deleteProfile(profile: GamepadProfile): Promise<void> {
+    if (this._activeProfile?.id === profile.id) {
+      await this.setActiveProfile(null);
+    }
+    const repo = this.protogen.database.dataSource.getRepository(GamepadProfile);
+    await repo.delete(profile.id);
+    this._profiles = this._profiles.filter(p => p.id !== profile.id);
+  }
+
+  public async setActiveProfile(profile: GamepadProfile | null, updateDatabase = true): Promise<void> {
+    this._activeProfile = profile;
+    if (updateDatabase) {
+      await this.protogen.database.setData(KV_ActiveGamepadProfile, profile?.id ?? null);
+    }
   }
 
   public get connected(): boolean {

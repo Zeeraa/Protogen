@@ -49,14 +49,59 @@
   </div>
   }
 
-
   <div class="row mt-2">
-    <div class="col-12">
-      <h3>Profiles</h3>
+    <div class="col-12 d-flex align-items-center gap-2 mb-2">
+      <h3 class="mb-0">Profiles</h3>
+      @if(activeProfile() != null) {
+      <span class="badge bg-success">Active: {{activeProfile()!.name}}</span>
+      } @else {
+      <span class="badge bg-secondary">No active profile</span>
+      }
     </div>
 
+    @if(profiles().length === 0) {
     <div class="col-12">
-      <span class="text-danger">No profiles found. Create a new profile to get started.</span>
+      <span class="text-muted">No profiles found. Create a new profile to get started.</span>
+    </div>
+    }
+
+    @for (profile of profiles(); track profile.id) {
+    <div class="col-12 col-md-6 col-lg-4 mb-2">
+      <app-gamepad-profile-card [profile]="profile" [active]="profile.id === activeProfileId()"
+        (activateRequested)="activateProfile($event)" />
+    </div>
+    }
+
+    <div class="col-12 mt-1">
+      @if(activeProfileId() != null) {
+      <button class="btn btn-danger me-1" (click)="deactivateProfile()">Deactivate</button>
+      }
+      <button class="btn btn-primary" (click)="openNewProfileDialog()">New profile</button>
     </div>
   </div>
 </div>
+
+<!-- New profile modal -->
+<ng-template #newProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Create profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-2">
+      <label for="newProfileName" class="form-label">Profile name</label>
+      <input type="text" id="newProfileName" class="form-control" [ngModel]="newProfileName()"
+        (ngModelChange)="newProfileName.set($event)" placeholder="Profile name" maxlength="64"
+        [class.is-invalid]="newProfileNameEmpty()" [disabled]="newProfileSaving()" />
+      @if(newProfileNameEmpty()) {
+      <div class="invalid-feedback">Name cannot be empty</div>
+      }
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()"
+      [disabled]="newProfileSaving()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="createProfile()"
+      [disabled]="newProfileSaving()">Create</button>
+  </div>
+</ng-template>

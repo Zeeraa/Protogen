@@ -21,6 +21,8 @@ import { VideoCache } from "./models/video-player/VideoCache.model";
 import { BoopSensorProfile } from "./models/boop-sensor/BoopSensorProfile.model";
 import { BoopSensorProfileAction } from "./models/boop-sensor/BoopSensorProfileAction.model";
 import { cyan } from "colors";
+import { GamepadProfile } from "./models/gamepad/GamepadProfile.model";
+import { GamepadProfileAction } from "./models/gamepad/GamepadProfileAction.model";
 
 /**
  * Database class for connecting to the MariaDB database and managing data.
@@ -74,6 +76,10 @@ export class Database {
         // ---------- Boop sensor ----------
         BoopSensorProfile,
         BoopSensorProfileAction,
+
+        // ---------- Gamepad ----------
+        GamepadProfile,
+        GamepadProfileAction,
       ]
     });
   }
