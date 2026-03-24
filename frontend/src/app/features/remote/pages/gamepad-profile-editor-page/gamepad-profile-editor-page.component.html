@@ -93,7 +93,8 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
-    <p>Are you sure you want to delete <span class="text-info fw-semibold">{{ profile()?.name }}</span>? This cannot be undone.</p>
+    <p>Are you sure you want to delete <span class="text-info fw-semibold">{{ profile()?.name }}</span>? This cannot be
+      undone.</p>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.close()" [disabled]="deleting()">Cancel</button>
