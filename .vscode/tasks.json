@@ -79,6 +79,18 @@
       "isBackground": true,
       "group": "build",
       "problemMatcher": []
+    },
+    {
+      "label": "Generate: Swagger",
+      "type": "npm",
+      "script": "swagger",
+      "path": "backend/",
+      "group": "build",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
     }
   ]
 }
