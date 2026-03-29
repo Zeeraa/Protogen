@@ -1,6 +1,6 @@
 import axios, { isAxiosError } from "axios";
 import { Protogen } from "../Protogen";
-import { createReadStream, createWriteStream } from "fs";
+import { createWriteStream } from "fs";
 
 /**
  * Handles communication with the remote worker for processing tasks like GIF processing and video downloading.

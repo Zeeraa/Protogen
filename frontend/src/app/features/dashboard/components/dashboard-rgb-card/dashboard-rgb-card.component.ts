@@ -1,7 +1,5 @@
-import { Component, inject, Input } from '@angular/core';
-import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
-import { ToastrService } from 'ngx-toastr';
-import { catchError } from 'rxjs';
+import { Component, input, output } from '@angular/core';
+import { RgbScene } from '../../../../core/services/api/rgb-api.service';
 
 @Component({
   selector: 'app-dashboard-rgb-card',
@@ -10,17 +8,8 @@ import { catchError } from 'rxjs';
   styleUrl: './dashboard-rgb-card.component.scss'
 })
 export class DashboardRgbCardComponent {
-  private readonly rgbApi = inject(RgbApiService);
-  private readonly toastr = inject(ToastrService);
-
-  @Input({ required: true }) scene!: RgbScene;
-
-  activate() {
-    this.rgbApi.activateScene(this.scene.id).pipe(
-      catchError(err => {
-        this.toastr.error("Failed to activate scene");
-        throw err;
-      })
-    ).subscribe();
-  }
+  readonly scenes = input.required<RgbScene[]>();
+  readonly activeSceneId = input<string | null>(null);
+  readonly activate = output<RgbScene>();
+  readonly disable = output<void>();
 }

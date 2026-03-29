@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Protogen } from "../Protogen";
+import { networkInterfaces } from "os";
 
 /**
  * Manages network connectivity status
@@ -51,6 +52,19 @@ export class NetworkManager {
     }
   }
 
+  public getNetworkInterfaces() {
+    const nets = networkInterfaces();
+    const result: NetworkInterfaceInfo[] = [];
+
+    for (const [name, addrs] of Object.entries(nets)) {
+      const ipv4 = addrs?.find(a => a.family === "IPv4")?.address ?? null;
+      const ipv6 = addrs?.find(a => a.family === "IPv6")?.address ?? null;
+      result.push({ name, ipv4, ipv6 });
+    }
+
+    return result;
+  }
+
   /**
    * Check if the device has network connectivity.
    * @returns True if the device has network connectivity, false otherwise.
@@ -74,4 +88,10 @@ export class NetworkManager {
   public get isp() {
     return this._isp;
   }
+}
+
+export interface NetworkInterfaceInfo {
+  name: string;
+  ipv4: string | null;
+  ipv6: string | null;
 }

@@ -1,0 +1,42 @@
+<div class="card">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-display"></i>
+    <h5 class="mb-0">Status</h5>
+  </div>
+  <div class="card-body">
+    @if (overview()?.hasRenderLock) {
+    <div class="alert alert-warning py-2 px-3 mb-3 d-flex align-items-center gap-2 small">
+      <i class="bi bi-lock-fill"></i>
+      Visor rendering is being controlled by an application
+    </div>
+    }
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="text-body-secondary">Expression</span>
+      <span class="badge" [class]="overview()?.expression ? 'bg-success' : 'bg-secondary'">
+        {{ overview()?.expression?.name ?? 'None' }}
+      </span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="text-body-secondary">Face RGB</span>
+      <span class="badge" [class]="overview()?.faceRgbEffect ? 'bg-success' : 'bg-secondary'">
+        {{ overview()?.faceRgbEffect?.name ?? 'None' }}
+      </span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="text-body-secondary">RGB Scene</span>
+      <span class="badge" [class]="overview()?.rgbEffect ? 'bg-success' : 'bg-secondary'">
+        {{ overview()?.rgbEffect?.name ?? 'None' }}
+      </span>
+    </div>
+
+    <hr>
+
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="hudToggle"
+        [checked]="overview()?.hudEnabled ?? false" (change)="toggleHud.emit()">
+      <label class="form-check-label" for="hudToggle">HUD Display</label>
+    </div>
+  </div>
+</div>

@@ -1,12 +1,10 @@
 import { z } from "zod";
-
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
 import { existsSync, readFileSync } from "fs";
 import { KV_Clock24HourFormat, KV_ClockDateColor, KV_ClockShowDate, KV_ClockShowSeconds, KV_ClockTimeColor, KV_EnableSwagger } from "../../../utils/KVDataStorageKeys";
-import { decodeRGB, encodeRGB, encodeRGBObject } from "../../../utils/Utils";
-import { encode } from "punycode";
+import { decodeRGB, encodeRGBObject } from "../../../utils/Utils";
 import { ClockRenderer, ClockRendererId } from "../../../visor/rendering/renderers/special/ClockRenderer";
 
 export class SystemRouter extends AbstractRouter {
@@ -36,6 +34,27 @@ export class SystemRouter extends AbstractRouter {
         }
       } catch (err) {
         this.handleError(err, req, res);
+      }
+    });
+
+    this.router.get("/network-interfaces", async (req, res) => {
+      /*
+      #swagger.path = '/system/network-interfaces'
+      #swagger.tags = ['System'],
+      #swagger.description = "Get network interfaces"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An error occured while gathering information" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const interfaceData = this.protogen.networkManager.getNetworkInterfaces();
+        res.json(interfaceData);
+      } catch (err) {
+        return this.handleError(err, req, res);
       }
     });
 
@@ -352,8 +371,69 @@ export class SystemRouter extends AbstractRouter {
         return this.handleError(err, req, res);
       }
     });
+
+    this.router.get("/audio-devices", async (req, res) => {
+      /*
+      #swagger.path = '/system/audio-devices'
+      #swagger.tags = ['System'],
+      #swagger.description = "Get available audio output devices"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An error occured while gathering information" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const devices = await this.protogen.hardwareAbstractionLayer.getAudioDevices();
+        res.json(devices);
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
+
+    this.router.put("/audio-device", async (req, res) => {
+      /*
+      #swagger.path = '/system/audio-device'
+      #swagger.tags = ['System'],
+      #swagger.description = "Set the active audio output device"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response" }
+      #swagger.responses[500] = { description: "An error occured while executing command" }
+
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Set the active audio device',
+        schema: {
+          deviceId: 47
+        }
+      }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        const parsed = AudioDeviceSchema.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        await this.protogen.hardwareAbstractionLayer.setAudioDevice(parsed.data.deviceId);
+        res.json({});
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
   }
 }
+
+const AudioDeviceSchema = z.object({
+  deviceId: z.coerce.number().int(),
+});
 
 const ColorSchema = z.object({
   r: z.coerce.number().int().min(0).max(255),

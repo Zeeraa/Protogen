@@ -1,0 +1,55 @@
+<td>{{ triggerLabel }}</td>
+
+<td>
+  <select class="form-select" id="actionType_{{componentId}}" [(ngModel)]="row.actionType" [disabled]="disabled">
+    @for (type of actionTypeList; track $index) {
+    <option [value]="type">{{ translateActionType(type) }}</option>
+    }
+  </select>
+</td>
+
+<td>
+  @if (row.actionType === ActionType.PLAY_VIDEO) {
+  <select class="form-select" id="video_{{componentId}}" [(ngModel)]="row.action" [disabled]="disabled">
+    @for (video of actionDataSet.savedVideos; track $index) {
+    <option value="{{video.id}}">{{video.name}}</option>
+    }
+  </select>
+  } @else if (row.actionType === ActionType.ACTIVATE_VISOR_RENDERER) {
+  <select class="form-select" id="renderer_{{componentId}}" [(ngModel)]="row.action" [disabled]="disabled">
+    @for (renderer of actionDataSet.visorRenderers; track $index) {
+    <option value="{{renderer.id}}">{{renderer.name}}</option>
+    }
+  </select>
+  } @else if (row.actionType === ActionType.ACTIVATE_RGB_SCENE) {
+  <select class="form-select" id="rgb_{{componentId}}" [(ngModel)]="row.action" [disabled]="disabled">
+    @for (rgbScene of actionDataSet.rgbScenes; track $index) {
+    <option value="{{rgbScene.id}}">{{rgbScene.name}}</option>
+    }
+  </select>
+  } @else if (row.actionType === ActionType.FACE_EXPRESSION) {
+  <select class="form-select" id="expression_{{componentId}}" [(ngModel)]="row.action" [disabled]="disabled">
+    @for (expression of actionDataSet.expressions; track $index) {
+    <option value="{{expression.data.uuid}}">{{expression.data.name}}</option>
+    }
+  </select>
+  } @else if (row.actionType === ActionType.ACTIVATE_FACE_RGB_EFFECT) {
+  <select class="form-select" id="faceEffect_{{componentId}}" [(ngModel)]="row.action" [disabled]="disabled">
+    @for (colorEffect of actionDataSet.faceColorEffects; track $index) {
+    <option value="{{colorEffect.id}}">{{colorEffect.name}}</option>
+    }
+  </select>
+  } @else if (row.actionType === ActionType.RUN_ACTION_SET) {
+  <select class="form-select" id="actionSet_{{componentId}}" [(ngModel)]="row.action" [disabled]="disabled">
+    @for (actionSet of actionDataSet.actionSets; track $index) {
+    <option value="{{actionSet.id}}">{{actionSet.name}}</option>
+    }
+  </select>
+  } @else if (row.actionType === ActionType.TEMPORARY_EXPRESSION) {
+  <select class="form-select" id="tempExpr_{{componentId}}" [(ngModel)]="row.action" [disabled]="disabled">
+    @for (expression of actionDataSet.expressions; track $index) {
+    <option value="{{expression.data.uuid}}">{{expression.data.name}}</option>
+    }
+  </select>
+  }
+</td>

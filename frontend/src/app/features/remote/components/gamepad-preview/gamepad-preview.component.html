@@ -1,0 +1,104 @@
+<div class="row mb-3">
+  <div class="col-12 d-flex align-items-center gap-2">
+    <span>Status:</span>
+    @if(state().connected) {
+    <span class="badge bg-success">Connected</span>
+    } @else {
+    <span class="badge bg-danger">Disconnected</span>
+    }
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 d-flex justify-content-center">
+    <div class="controller" [class.disconnected]="!state().connected" [class.xbox]="controllerType() === 'xbox'"
+      [class.playstation]="controllerType() === 'playstation'">
+
+      <!-- Triggers (above body) -->
+      <div class="trigger trigger-left" [class.active]="state().axes.LT > 0.1">
+        <div class="trigger-fill" [style.height.%]="state().axes.LT * 100"></div>
+        <span class="trigger-label">{{ controllerType() === 'xbox' ? 'LT' : 'L2' }}</span>
+      </div>
+      <div class="trigger trigger-right" [class.active]="state().axes.RT > 0.1">
+        <div class="trigger-fill" [style.height.%]="state().axes.RT * 100"></div>
+        <span class="trigger-label">{{ controllerType() === 'xbox' ? 'RT' : 'R2' }}</span>
+      </div>
+
+      <!-- Controller body -->
+      <div class="body">
+        <div class="grip grip-left"></div>
+        <div class="grip grip-right"></div>
+      </div>
+
+      <!-- Light bar (PlayStation only) -->
+      @if (controllerType() === 'playstation') {
+      <div class="light-bar" [class.connected]="state().connected"></div>
+      }
+
+      <!-- Bumpers -->
+      <div class="bumper bumper-left" [class.active]="state().buttons.LB">
+        {{ controllerType() === 'xbox' ? 'LB' : 'L1' }}
+      </div>
+      <div class="bumper bumper-right" [class.active]="state().buttons.RB">
+        {{ controllerType() === 'xbox' ? 'RB' : 'R1' }}
+      </div>
+
+      <!-- D-pad -->
+      <div class="dpad">
+        <div class="dpad-btn dpad-up" [class.active]="state().axes.DPAD_Y < -0.5"></div>
+        <div class="dpad-btn dpad-right" [class.active]="state().axes.DPAD_X > 0.5"></div>
+        <div class="dpad-btn dpad-down" [class.active]="state().axes.DPAD_Y > 0.5"></div>
+        <div class="dpad-btn dpad-left" [class.active]="state().axes.DPAD_X < -0.5"></div>
+        <div class="dpad-center"></div>
+      </div>
+
+      <!-- Face buttons -->
+      @if (controllerType() === 'xbox') {
+      <div class="face-buttons">
+        <div class="face-btn btn-y" [class.active]="state().buttons.Y">Y</div>
+        <div class="face-btn btn-b" [class.active]="state().buttons.B">B</div>
+        <div class="face-btn btn-a" [class.active]="state().buttons.A">A</div>
+        <div class="face-btn btn-x" [class.active]="state().buttons.X">X</div>
+      </div>
+      } @else {
+      <div class="face-buttons">
+        <div class="face-btn btn-triangle" [class.active]="state().buttons.Y">△</div>
+        <div class="face-btn btn-circle" [class.active]="state().buttons.B">○</div>
+        <div class="face-btn btn-cross" [class.active]="state().buttons.A">✕</div>
+        <div class="face-btn btn-square" [class.active]="state().buttons.X">☐</div>
+      </div>
+      }
+
+      <!-- Left stick -->
+      <div class="stick-well stick-well-left">
+        <div class="stick" [class.pressed]="state().buttons.LS"
+          [style.transform]="'translate(' + (state().axes.LEFT_X * 10) + 'px, ' + (state().axes.LEFT_Y * 10) + 'px)'">
+        </div>
+      </div>
+
+      <!-- Right stick -->
+      <div class="stick-well stick-well-right">
+        <div class="stick" [class.pressed]="state().buttons.RS"
+          [style.transform]="'translate(' + (state().axes.RIGHT_X * 10) + 'px, ' + (state().axes.RIGHT_Y * 10) + 'px)'">
+        </div>
+      </div>
+
+      <!-- Touchpad (PlayStation only) -->
+      @if (controllerType() === 'playstation') {
+      <div class="touchpad"></div>
+      }
+
+      <!-- Share / Options (View / Menu for Xbox) -->
+      <div class="meta-btn share-btn" [class.active]="state().buttons.SELECT">
+        {{ controllerType() === 'xbox' ? 'VIEW' : 'SHARE' }}
+      </div>
+      <div class="meta-btn options-btn" [class.active]="state().buttons.START">
+        {{ controllerType() === 'xbox' ? 'MENU' : 'OPTIONS' }}
+      </div>
+
+      <!-- Home button -->
+      <div class="home-btn" [class.active]="state().buttons.HOME" [class.xbox-btn]="controllerType() === 'xbox'"
+        [class.ps-btn]="controllerType() === 'playstation'"></div>
+    </div>
+  </div>
+</div>

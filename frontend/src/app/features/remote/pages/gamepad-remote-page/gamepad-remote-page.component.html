@@ -1,0 +1,126 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col">
+      <h1>Gamepad Remote</h1>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-12 mb-3">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-gear"></i>
+            <h5 class="mb-0">Settings</h5>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" (click)="settingsVisible.set(!settingsVisible())">
+            <i class="bi" [class.bi-chevron-down]="!settingsVisible()" [class.bi-chevron-up]="settingsVisible()"></i>
+            {{settingsVisible() ? "Hide" : "Show"}}
+          </button>
+        </div>
+        @if(settingsVisible()) {
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-6 mb-2">
+              <label for="controllerType" class="form-label">Controller Type</label>
+              <select class="form-select" id="controllerType" [formField]="settingsForm.type">
+                @for (type of constollerTypes(); track $index) {
+                <option [value]="type">{{type}}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-auto d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="enablePreview"
+                  [formField]="settingsForm.enablePreview" />
+                <label class="form-check-label" for="enablePreview">Enable Preview</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-sm btn-success" (click)="saveSettings()">
+            <i class="bi bi-check-lg"></i> Save
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if(settings().enablePreview) {
+  <div class="row mb-3">
+    <div class="col">
+      <app-gamepad-preview [controllerType]="settings().type" />
+    </div>
+  </div>
+  }
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-controller"></i>
+            <h5 class="mb-0">Profiles</h5>
+          </div>
+          @if(activeProfile() != null) {
+          <span class="badge bg-success">Active: {{activeProfile()!.name}}</span>
+          } @else {
+          <span class="badge bg-secondary">No active profile</span>
+          }
+        </div>
+        <div class="card-body">
+          @if(profiles().length === 0) {
+          <p class="text-body-secondary mb-0">No profiles found. Create a new profile to get started.</p>
+          } @else {
+          <div class="row">
+            @for (profile of profiles(); track profile.id) {
+            <div class="col-12 col-md-6 col-lg-4 mb-2">
+              <app-gamepad-profile-card [profile]="profile" [active]="profile.id === activeProfileId()"
+                (activateRequested)="activateProfile($event)" />
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <div class="card-footer d-flex flex-wrap gap-2">
+          @if(activeProfileId() != null) {
+          <button class="btn btn-outline-danger btn-sm" (click)="deactivateProfile()">
+            <i class="bi bi-stop-circle"></i> Deactivate
+          </button>
+          }
+          <button class="btn btn-primary btn-sm" (click)="openNewProfileDialog()">
+            <i class="bi bi-plus-lg"></i> New profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New profile modal -->
+<ng-template #newProfilePrompt let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Create profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-2">
+      <label for="newProfileName" class="form-label">Profile name</label>
+      <input type="text" id="newProfileName" class="form-control" [ngModel]="newProfileName()"
+        (ngModelChange)="newProfileName.set($event)" placeholder="Profile name" maxlength="64"
+        [class.is-invalid]="newProfileNameEmpty()" [disabled]="newProfileSaving()" />
+      @if(newProfileNameEmpty()) {
+      <div class="invalid-feedback">Name cannot be empty</div>
+      }
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()"
+      [disabled]="newProfileSaving()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="createProfile()"
+      [disabled]="newProfileSaving()">Create</button>
+  </div>
+</ng-template>

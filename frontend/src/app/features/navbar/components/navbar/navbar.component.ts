@@ -43,7 +43,7 @@ export class NavbarComponent implements AfterViewInit {
   }
 
   get themeString() {
-    return String(this.theme.theme);
+    return String(this.theme.theme());
   }
 
   checkTogglerVisibility() {

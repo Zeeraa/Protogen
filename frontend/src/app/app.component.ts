@@ -19,7 +19,6 @@ export class AppComponent implements OnInit {
   }
 
   async init() {
-    this.theme.update();
     await this.auth.init();
     this.socket.init();
   }

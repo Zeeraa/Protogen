@@ -1,292 +1,361 @@
 <div class="container mt-4">
   <div class="row">
-    <div class="col-12">
+    <div class="col">
       <h1>System status</h1>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="col-12">
-            <h5>
-              OS
-              <i class="bi bi-ubuntu"></i>
-            </h5>
+  <div class="masonry mt-3">
+    <!-- OS -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-ubuntu"></i>
+          <h5 class="mb-0">OS</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-body-secondary">OS Name</span>
+            <span class="badge bg-primary">{{osName()}}</span>
           </div>
+          <button class="btn btn-danger btn-sm" (click)="openShutdownModal()">
+            <i class="bi bi-power"></i> Shutdown
+          </button>
+        </div>
+      </div>
+    </div>
 
-          <div class="col-12 mt-2">
-            <span>
-              OS Name:
-              <span class="text-info">{{osName}}</span>
-            </span>
-          </div>
-
-          <div class="col-12 mt-2">
-            <div class="btn btn-danger" (click)="openShutdownModal()">Shutdown</div>
+    <!-- HUD -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-display"></i>
+          <h5 class="mb-0">HUD</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="enableHud" [(ngModel)]="hudEnabled">
+            <label class="form-check-label" for="enableHud">Enable HUD display</label>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="col-12">
-            <h5>
-              HUD
-              <i class="bi bi-display"></i>
-            </h5>
-          </div>
+    <!-- Hardware -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-cpu"></i>
+          <h5 class="mb-0">Hardware</h5>
+        </div>
+        <div class="card-body">
+          <h6>Temperature</h6>
+          <ngb-progressbar class="mb-3" [type]="temperatureColor()" [value]="tempBarValue()" [max]="100">
+            {{realTemperature()}} &deg;C
+          </ngb-progressbar>
 
-          <div class="col-12 mt-2">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="enableHud" [(ngModel)]="hudEnabled">
-              <label class="form-check-label" for="enableHud">Enable HUD display</label>
-            </div>
-          </div>
+          <h6>CPU</h6>
+          <ngb-progressbar class="mb-3" [type]="cpuColor()" [value]="cpuUsage()" [max]="100" [showValue]="true" />
+
+          <h6>RAM</h6>
+          <ngb-progressbar [type]="ramColor()" [value]="ramUsage()" [max]="100" [showValue]="true" />
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="row mt-2">
-            <div class="col-12">
-              <h5>
-                Hardware
-                <i class="bi bi-pc"></i>
-              </h5>
-            </div>
-
-            <div class="col-12 mt-1">
-              <h6>Temperature</h6>
-              <ngb-progressbar class="mt-1" [type]="temperatureColor" [value]="tempBarValue" [max]="100">
-                {{realTemperature}} &deg;C
-              </ngb-progressbar>
-            </div>
-
-            <div class="col-12 mt-1">
-              <h6>CPU</h6>
-              <ngb-progressbar class="mt-1" type="info" [value]="cpuUsage" [max]="100" [showValue]="true" />
-            </div>
-
-            <div class="col-12 mt-1">
-              <h6>RAM</h6>
-              <ngb-progressbar class="mt-1" type="info" [value]="ramUsage" [max]="100" [showValue]="true" />
-            </div>
-          </div>
+    <!-- Audio Output -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-speaker-fill"></i>
+          <h5 class="mb-0">Audio Output</h5>
+        </div>
+        <div class="card-body">
+          @if(audioDevices().length > 0) {
+          <label for="audioDevice" class="form-label text-body-secondary">Output device</label>
+          <select class="form-select" id="audioDevice" [ngModel]="selectedAudioDeviceId()"
+            (ngModelChange)="onAudioDeviceChange($event)">
+            @for(device of audioDevices(); track device.id) {
+            <option [ngValue]="device.id">{{device.name}}</option>
+            }
+          </select>
+          } @else {
+          <p class="text-body-secondary mb-0">No audio devices available</p>
+          }
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="col-12">
-            <h5>
-              Networking
-              <i class="bi bi-pci-card-network"></i>
-            </h5>
+    <!-- Networking -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-pci-card-network"></i>
+          <h5 class="mb-0">Networking</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-3"
+            title="Enabling this will show potentially sensitive information like the name of your ISP and your public ip address">
+            <input class="form-check-input" type="checkbox" role="switch" id="showNetworkingData"
+              [ngModel]="showSensitiveNetworkingData()" (ngModelChange)="showNetworkDataChanged($event)">
+            <label class="form-check-label" for="showNetworkingData">Show sensitive data</label>
           </div>
 
-          <div class="col-12 mt-2">
-            <div class="form-check form-switch"
-              title="Enabling this will show potentially sensitive information like the name of your ISP and your public ip address">
-              <input class="form-check-input" type="checkbox" role="switch" id="showNetworkingData"
-                [(ngModel)]="showSensitiveNetworkingData" (click)="showNetworkDataChanged($event)">
-              <label class="form-check-label" for="showNetworkingData">Show sensitive data</label>
-            </div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-body-secondary">Connectivity</span>
+            @if(hasConnectivity()) {
+            <span class="badge bg-success">Yes</span>
+            } @else {
+            <span class="badge bg-danger">No</span>
+            }
           </div>
 
-          <div class="col-12 mt-2">
-            <span>
-              Connectivity:
-              @if(hasConnectivity) {
-              <span class="badge bg-success">Yes</span>
-              } @else {
-              <span class="badge bg-danger">No</span>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-body-secondary">ISP</span>
+            @if(showSensitiveNetworkingData()) {
+            <span class="badge bg-primary">{{isp()}}</span>
+            } @else {
+            <span class="badge bg-secondary"
+              title="Turn on 'Show sensitive data' to display networking info">Hidden</span>
+            }
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-body-secondary">IP</span>
+            @if(showSensitiveNetworkingData()) {
+            <span class="badge bg-primary">{{ip()}}</span>
+            } @else {
+            <span class="badge bg-secondary"
+              title="Turn on 'Show sensitive data' to display networking info">Hidden</span>
+            }
+          </div>
+
+          @if(networkInterfaces().length > 0) {
+          <h6 class="mt-3">Network Interfaces</h6>
+          <table class="table table-sm table-bordered mb-0">
+            <thead>
+              <tr>
+                <th>Interface</th>
+                <th>IPv4</th>
+                <th>IPv6</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(iface of networkInterfaces(); track iface.name) {
+              <tr>
+                <td><code>{{iface.name}}</code></td>
+                <td>
+                  @if(showSensitiveNetworkingData()) {
+                  <span class="text-info">{{iface.ipv4 ?? '—'}}</span>
+                  } @else {
+                  <span class="text-body-secondary">Hidden</span>
+                  }
+                </td>
+                <td>
+                  @if(showSensitiveNetworkingData()) {
+                  <span class="text-body-secondary">{{iface.ipv6 ?? '—'}}</span>
+                  } @else {
+                  <span class="text-body-secondary">Hidden</span>
+                  }
+                </td>
+              </tr>
               }
-            </span>
-          </div>
-
-          <div class="col-12 mt-2">
-            ISP:
-            @if(showSensitiveNetworkingData) {
-            <span class="text-info">{{isp}}</span>
-            } @else {
-            <span class="text-danger" title="Turn on 'Show sensitive data' to display networking info">[Hidden]</span>
-            }
-          </div>
-
-          <div class="col-12 mt-2">
-            IP:
-            @if(showSensitiveNetworkingData) {
-            <span class="text-info">{{ip}}</span>
-            } @else {
-            <span class="text-danger" title="Turn on 'Show sensitive data' to display networking info">[Hidden]</span>
-            }
-          </div>
+            </tbody>
+          </table>
+          }
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="col-12">
-            <h5>
-              Flaschen Taschen
-              <i class="bi bi-lightbulb-fill"></i>
-            </h5>
-          </div>
-
-          <div class="col-12 mt-2">
+    <!-- Flaschen Taschen -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-lightbulb-fill"></i>
+          <h5 class="mb-0">Flaschen Taschen</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-body-secondary small mb-3">
             Documentation can be found <a
               href="https://github.com/hzeller/rpi-rgb-led-matrix?tab=readme-ov-file#lets-do-it"
               target="_blank">here</a>
-          </div>
+          </p>
 
-          <div class="col-md-6 col-12 mt-2">
-            <div class="form-group">
-              <label for="ft_led-slowdown-gpio">Slowdown GPIO</label>
+          <div class="row">
+            <div class="col-md-6 col-12 mb-2">
+              <label for="ft_led-slowdown-gpio" class="form-label text-body-secondary">Slowdown GPIO</label>
               <input type="text" min="0" max="4" class="form-control" id="ft_led-slowdown-gpio"
-                placeholder="Slowdown GPIO" [(ngModel)]="flaschenTaschenSettings.ledSlowdownGpio">
+                placeholder="Slowdown GPIO" [ngModel]="flaschenTaschenSettings().ledSlowdownGpio"
+                (ngModelChange)="updateFlaschenTaschenSetting('ledSlowdownGpio', $event)">
             </div>
-          </div>
 
-          <div class="col-md-6 col-12 mt-2">
-            <div class="form-group">
-              <label for="ft_led-limit-refresh">Limit refresh</label>
+            <div class="col-md-6 col-12 mb-2">
+              <label for="ft_led-limit-refresh" class="form-label text-body-secondary">Limit refresh</label>
               <input type="text" min="1" max="1000" class="form-control" id="ft_led-limit-refresh"
-                placeholder="Limit refresh" [(ngModel)]="flaschenTaschenSettings.ledLimitRefresh">
+                placeholder="Limit refresh" [ngModel]="flaschenTaschenSettings().ledLimitRefresh"
+                (ngModelChange)="updateFlaschenTaschenSetting('ledLimitRefresh', $event)">
             </div>
           </div>
-
-          <div class="col-12 mt-2">
-            <button class="btn btn-warning mb-1 me-1" (click)="restartFlaschenTaschen()">Restart service</button>
-            <button class="btn btn-primary mb-1 me-1" (click)="saveFlaschenTaschen()">Save and restart</button>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-warning btn-sm" (click)="restartFlaschenTaschen()">
+              <i class="bi bi-arrow-clockwise"></i> Restart service
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="saveFlaschenTaschen()">
+              <i class="bi bi-save"></i> Save and restart
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="col-12">
-            <h5>
-              Auth
-              <i class="bi bi-people-fill"></i>
-            </h5>
-          </div>
-
-          <div class="col-12 mt-2">
-            <a class="btn btn-primary mb-1 me-1" routerLink="/users">User manager</a>
-            @if(isSuperUser) {
-            <a class="btn btn-primary mb-1 me-1" routerLink="/keys">API key manager</a>
+    <!-- Auth -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-people-fill"></i>
+          <h5 class="mb-0">Auth</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary btn-sm" routerLink="/users">
+              <i class="bi bi-person-gear"></i> User manager
+            </a>
+            @if(isSuperUser()) {
+            <a class="btn btn-outline-primary btn-sm" routerLink="/keys">
+              <i class="bi bi-key"></i> API key manager
+            </a>
             } @else {
-            <button class="btn btn-primary mb-1 me-1" disabled>API key manager</button>
+            <button class="btn btn-outline-primary btn-sm" disabled>
+              <i class="bi bi-key"></i> API key manager
+            </button>
             }
-
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="col-12">
-            <h5>
-              Clock Settings
-              <i class="bi bi-clock-fill"></i>
-            </h5>
+    <!-- Clock Settings -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-clock-fill"></i>
+          <h5 class="mb-0">Clock Settings</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="clock24Hour"
+              [formField]="clockSettingsForm.is24HourFormat">
+            <label class="form-check-label" for="clock24Hour">24-hour format</label>
           </div>
 
-          <div class="col-12 mt-2">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="clock24Hour"
-                [formField]="clockSettingsForm.is24HourFormat">
-              <label class="form-check-label" for="clock24Hour">24-hour format</label>
-            </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="clockShowSeconds"
+              [formField]="clockSettingsForm.showSeconds">
+            <label class="form-check-label" for="clockShowSeconds">Show seconds</label>
           </div>
 
-          <div class="col-12 mt-2">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="clockShowSeconds"
-                [formField]="clockSettingsForm.showSeconds">
-              <label class="form-check-label" for="clockShowSeconds">Show seconds</label>
-            </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" role="switch" id="clockShowDate"
+              [formField]="clockSettingsForm.showDate">
+            <label class="form-check-label" for="clockShowDate">Show date</label>
           </div>
 
-          <div class="col-12 mt-2">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="clockShowDate"
-                [formField]="clockSettingsForm.showDate">
-              <label class="form-check-label" for="clockShowDate">Show date</label>
-            </div>
-          </div>
-
-          <div class="col-md-6 col-12 mt-2">
-            <div class="form-group">
-              <label for="clockTimeColor">Time color</label>
+          <div class="row">
+            <div class="col-md-6 col-12 mb-2">
+              <label for="clockTimeColor" class="form-label text-body-secondary">Time color</label>
               <input type="color" class="form-control" id="clockTimeColor" [formField]="clockSettingsForm.timeColor">
             </div>
-          </div>
 
-          <div class="col-md-6 col-12 mt-2">
-            <div class="form-group">
-              <label for="clockDateColor">Date color</label>
+            <div class="col-md-6 col-12 mb-2">
+              <label for="clockDateColor" class="form-label text-body-secondary">Date color</label>
               <input type="color" class="form-control" id="clockDateColor" [formField]="clockSettingsForm.dateColor">
             </div>
           </div>
-
-          <div class="col-12 mt-2">
-            <button class="btn btn-primary mb-1 me-1" (click)="saveClockSettings()">Save clock settings</button>
-          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm" (click)="saveClockSettings()">
+            <i class="bi bi-save"></i> Save clock settings
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-sm-12 col-md-6 mt-2 mb-4">
-      <div class="container-fluid">
-        <div class="row mt-2">
-          <div class="col-12">
-            <h5>
-              Misc
-              <i class="bi bi-gear-fill"></i>
-            </h5>
+    <!-- Appearance -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-palette-fill"></i>
+          <h5 class="mb-0">Appearance</h5>
+        </div>
+        <div class="card-body">
+          <label class="form-label text-body-secondary">Color Mode</label>
+          <div class="btn-group d-flex mb-3" role="group">
+            <button type="button" class="btn btn-sm" [class.btn-primary]="themeService.theme() === Theme.Light"
+              [class.btn-outline-primary]="themeService.theme() !== Theme.Light"
+              (click)="themeService.setTheme(Theme.Light)">
+              <i class="bi bi-sun-fill"></i> Light
+            </button>
+            <button type="button" class="btn btn-sm" [class.btn-primary]="themeService.theme() === Theme.Dark"
+              [class.btn-outline-primary]="themeService.theme() !== Theme.Dark"
+              (click)="themeService.setTheme(Theme.Dark)">
+              <i class="bi bi-moon-fill"></i> Dark
+            </button>
+            <button type="button" class="btn btn-sm" [class.btn-primary]="themeService.theme() === Theme.System"
+              [class.btn-outline-primary]="themeService.theme() !== Theme.System"
+              (click)="themeService.setTheme(Theme.System)">
+              <i class="bi bi-circle-half"></i> Auto
+            </button>
           </div>
 
-          <div class="col-12 mt-2">
-            <span>
-              Backend version:
-              <span class="text-info">{{backendVersion}}</span>
-            </span>
+          <label for="bootswatchTheme" class="form-label text-body-secondary">Bootswatch Theme</label>
+          <small class="text-body-secondary d-block mb-1">Not all themes may look good or support light/dark
+            mode.</small>
+          <select class="form-select" id="bootswatchTheme" [ngModel]="themeService.bootswatchTheme()"
+            (ngModelChange)="themeService.setBootswatchTheme($event)">
+            <option [ngValue]="null">Default Bootstrap theme</option>
+            @for(theme of bootswatchThemes; track theme) {
+            <option [ngValue]="theme">{{theme[0].toUpperCase() + theme.slice(1)}}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Misc -->
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-gear-fill"></i>
+          <h5 class="mb-0">Misc</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-body-secondary">Angular version</span>
+            <span class="badge bg-primary">{{angularVersion()}}</span>
           </div>
 
-          <div class="col-12 mt-2">
-            <div class="col-12 mt-2">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="enableSwagger"
-                  [(ngModel)]="swaggerEnabled">
-                <label class="form-check-label" for="enableSwagger">Enable swagger</label>
-              </div>
-
-              <p>
-                Swagger is used to provide API documentation for developers.<br>
-                If enabled the page can be viewed <a [href]="swaggerUrl" target="_blank">here</a>.<br>
-                A restart of the system is required to apply this setting.
-              </p>
-            </div>
-
-            <div class="col-12 mt-2">
-              <a [href]="phpMyAdminLink" target="_blank" class="btn btn-primary">Open phpMyAdmin</a>
-            </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-body-secondary">Backend version</span>
+            <span class="badge bg-primary">{{backendVersion()}}</span>
           </div>
+
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="enableSwagger"
+              [(ngModel)]="swaggerEnabled">
+            <label class="form-check-label" for="enableSwagger">Enable swagger</label>
+          </div>
+
+          <p class="text-body-secondary small">
+            Swagger is used to provide API documentation for developers.<br>
+            If enabled the page can be viewed <a [href]="swaggerUrl" target="_blank">here</a>.<br>
+            A restart of the system is required to apply this setting.
+          </p>
+
+          <a [href]="phpMyAdminLink" target="_blank" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-box-arrow-up-right"></i> Open phpMyAdmin
+          </a>
         </div>
       </div>
     </div>

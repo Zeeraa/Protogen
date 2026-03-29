@@ -37,6 +37,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "*/bootstrap.min.css",
+                "input": "node_modules/bootswatch/dist",
+                "output": "css/bootswatch"
               }
             ],
             "styles": [

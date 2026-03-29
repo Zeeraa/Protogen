@@ -5,18 +5,20 @@
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-3">
     @for (action of actionSets; track $index) {
-    <div class="col-12 col-sm-12 col-md-6 mt-2">
+    <div class="col-12 col-sm-12 col-md-6 mb-3">
       <app-action-card [actionSet]="action" [actionDataSet]="actionDataSet" (deleted)="actionSetDeleted($event)"
         (revertChanged)="undoEdit($event)" />
     </div>
     }
   </div>
 
-  <div class="row mt-2">
+  <div class="row">
     <div class="col">
-      <button class="btn btn-primary" (click)="openNewModal()">Create new action</button>
+      <button class="btn btn-primary btn-sm" (click)="openNewModal()">
+        <i class="bi bi-plus-lg"></i> Create new action
+      </button>
     </div>
   </div>
 </div>

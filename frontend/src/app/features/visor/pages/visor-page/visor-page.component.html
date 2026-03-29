@@ -1,57 +1,60 @@
 <div class="container mt-4">
   <div class="row">
-    <div class="col-12">
+    <div class="col">
       <h1>Visor</h1>
     </div>
   </div>
 
   @if(hasRenderLock) {
-  <div class="row">
+  <div class="row mt-2">
     <div class="col-12">
-      <div class="alert alert-warning" role="alert">
+      <div class="alert alert-warning py-2 px-3 d-flex align-items-center gap-2 small" role="alert">
+        <i class="bi bi-lock-fill"></i>
         Another process is blocking rendering. Processes: {{this.renderLocks.join(", ")}}
       </div>
     </div>
   </div>
   }
 
-  <div class="row mt-2">
+  <div class="row mt-3">
     <div class="col-12">
-      <div class="d-flex justify-content-center">
-        <div class="d-block">
-          <h5 class="text-center">Visor Preview</h5>
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          <h5 class="mb-0">Visor Preview</h5>
+        </div>
+        <div class="card-body d-flex justify-content-center">
           <app-visor-live-preview />
         </div>
       </div>
     </div>
-    <hr class="mt-1">
   </div>
 
-  <div class="row mt-2">
+  <div class="row mt-3">
     <div class="col-12">
-      <h5>Renderers</h5>
-    </div>
-
-    <div class="col-12">
-      <span>
-        Active renderer:
-        <span class="text-info">{{rendererName}}</span>
-      </span>
-    </div>
-
-    @for (renderer of renderers; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-      <app-renderer-card [renderer]="renderer" />
-    </div>
-    }
-  </div>
-
-  <div class="row mt-2">
-    <div class="col-12">
-      <hr>
-    </div>
-    <div class="col-12">
-      <button class="btn btn-primary btn-sm" (click)="createNewImageRenderer()">Create image</button>
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-display"></i>
+            <h5 class="mb-0">Renderers</h5>
+          </div>
+          <span class="badge bg-primary">{{rendererName}}</span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            @for (renderer of renderers; track $index) {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+              <app-renderer-card [renderer]="renderer" />
+            </div>
+            }
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm" (click)="createNewImageRenderer()">
+            <i class="bi bi-plus-lg"></i> Create image
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

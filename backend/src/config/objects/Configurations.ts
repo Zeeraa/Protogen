@@ -8,6 +8,7 @@ import { RgbConfiguration } from "./RgbConfiguration";
 import { MiscConfiguration } from "./MiscConfiguration";
 import { HardwareType } from "../../hardware/HardwareType";
 import { HUDConfiguration } from "./HUDConfiguration";
+import { MqttConfiguration } from "./MqttConfiguration";
 
 export interface Configuration {
   web: WebConfiguration;
@@ -17,6 +18,7 @@ export interface Configuration {
   remoteWorker: RemoteWorkerConfiguration;
   serial: SerialConfiguration;
   rgb: RgbConfiguration;
+  mqtt: MqttConfiguration;
   dataDirectory: string;
   logDirectory: string;
   misc: MiscConfiguration;

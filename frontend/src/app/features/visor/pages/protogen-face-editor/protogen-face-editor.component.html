@@ -1,98 +1,113 @@
 <div class="container mt-4">
-  @if(isNotActivated) {
   <div class="row">
+    <div class="col">
+      <h1>Protogen face editor</h1>
+    </div>
+  </div>
+
+  @if(isNotActivated) {
+  <div class="row mt-2">
     <div class="col-12">
-      <div class="alert alert-danger">
-        Face renderer is not activated. Preview will not show active face expression
+      <div class="alert alert-warning py-2 px-3 d-flex align-items-center gap-2 small">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Face renderer is not activated. Preview will not show active face expression.
+        <button class="btn btn-warning btn-sm ms-auto" (click)="activateSelf()">Activate</button>
       </div>
     </div>
   </div>
   }
 
-  <div class="row">
+  <div class="row mt-3">
     <div class="col-12">
-      <h1>Protogen face editor</h1>
-    </div>
-  </div>
-
-  <div class="row mt-2">
-    <div class="col-12">
-      <div class="d-flex justify-content-center">
-        <div class="d-block">
-          <h5 class="text-center">Visor Preview</h5>
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          <h5 class="mb-0">Visor Preview</h5>
+        </div>
+        <div class="card-body d-flex justify-content-center">
           <app-visor-live-preview />
         </div>
       </div>
     </div>
-    <hr class="mt-1">
   </div>
 
-  <div class="row mt-2">
+  <div class="row mt-3">
     <div class="col-12">
-      <h4>Expressions</h4>
-    </div>
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-emoji-smile"></i>
+            <h5 class="mb-0">Expressions</h5>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="showEditOptions" [(ngModel)]="showEdit">
+            <label class="form-check-label" for="showEditOptions">Edit mode</label>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="mb-3"
+            title="Select the expression that will activate when the protogen face renderer is activated">
+            <label for="face_default_expression" class="form-label text-body-secondary">Default expression</label>
+            <select class="form-select" id="face_default_expression" aria-describedby="face_default_expression_info"
+              [(ngModel)]="defaultExpression" (change)="defaultExpressionChanged($event)">
+              <option value="">None</option>
+              @for (expression of faceExpressions; track $index) {
+              <option value="{{expression.data.uuid}}">
+                {{expression.data.name}}
+              </option>
+              }
+            </select>
+            <div class="form-text" id="face_default_expression_info">Select expression to activate when face renderer is
+              activated</div>
+          </div>
 
-    @if(isNotActivated) {
-    <div class="col-12">
-      <button class="btn btn-primary" (click)="activateSelf()">Activate face renderer</button>
-    </div>
-    }
-
-    <div class="col-auto mt-2 mb-2">
-      <div title="Select the expression that will activate when the protogen face renderer is activated">
-        <label for="face_default_expression" class="form-label">Default expression</label>
-        <select class="form-select" id="face_default_expression" aria-describedby="face_default_expression_info"
-          [(ngModel)]="defaultExpression" (change)="defaultExpressionChanged($event)">
-          <option value="">None</option>
-          @for (expression of faceExpressions; track $index) {
-          <option value="{{expression.data.uuid}}">
-            {{expression.data.name}}
-          </option>
-          }
-        </select>
-        <div class="form-text" id="face_default_expression_info">Select expression to activate when face renderer is
-          activated</div>
+          <div class="row">
+            @for (expression of faceExpressions; track $index) {
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 mt-2">
+              <app-protogen-expression-card [expression]="expression" [isDefault]="isDefault(expression)"
+                [showEdit]="showEdit" [faceColorEffects]="faceColorEffects" (deleted)="expressionDeleted(expression)" />
+            </div>
+            }
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm" (click)="openNewExpressionModal()">
+            <i class="bi bi-plus-lg"></i> Add new expression
+          </button>
+        </div>
       </div>
-    </div>
-
-    <div class="col-12 mb-2">
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" role="switch" id="showEditOptions" [(ngModel)]="showEdit">
-        <label class="form-check-label" for="showEditOptions">Show edit options</label>
-      </div>
-    </div>
-
-    @for (expression of faceExpressions; track $index) {
-    <div class="col-12 col-md-6 col-lg-4 col-xl-3 mt-2">
-      <app-protogen-expression-card [expression]="expression" [isDefault]="isDefault(expression)" [showEdit]="showEdit"
-        [faceColorEffects]="faceColorEffects" (deleted)="expressionDeleted(expression)" />
-    </div>
-    }
-
-    <div class="col-12 mt-2">
-      <button class="btn btn-primary" (click)="openNewExpressionModal()">Add new expression</button>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-3">
     <div class="col-12">
-      <hr>
-    </div>
-
-    <div class="col-12 mt-2">
-      <h4>Face RGB effects</h4>
-      <button class="btn btn-secondary" (click)="deactivate()">Deactivate RGB effect</button>
-    </div>
-
-    @for (rgbEffect of faceColorEffects; track $index) {
-    <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
-      <app-face-color-effect-card [effect]="rgbEffect" [showEdit]="showEdit" [lockInputs]="lockInputs || !showEdit"
-        [effectTypes]="faceColorEffectTypes" (deleted)="visorEffectDelete($event)" />
-    </div>
-    }
-
-    <div class="col-12 mt-2">
-      <button class="btn btn-primary" (click)="showNewEffect()">New RGB effect</button>
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-lightbulb"></i>
+            <h5 class="mb-0">Face RGB Effects</h5>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" (click)="deactivate()">
+            <i class="bi bi-x-circle"></i> Deactivate
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            @for (rgbEffect of faceColorEffects; track $index) {
+            <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
+              <app-face-color-effect-card [effect]="rgbEffect" [showEdit]="showEdit"
+                [lockInputs]="lockInputs || !showEdit" [effectTypes]="faceColorEffectTypes"
+                (deleted)="visorEffectDelete($event)" />
+            </div>
+            }
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm" (click)="showNewEffect()">
+            <i class="bi bi-plus-lg"></i> New RGB effect
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

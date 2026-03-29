@@ -15,6 +15,9 @@ export class ApiBaseService {
     return environment.apiUrl;
   }
 
+  /**
+   * @deprecated errors should be handled with pipe and catchError
+   */
   protected defaultErrorHandler = (err: HttpErrorResponse) => {
     if (err.status == 0) {
       console.error("Got status 0 from request");

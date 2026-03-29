@@ -28,7 +28,10 @@ import { HUDManager } from "./hud/HUDManager";
 import { SensorManager } from "./sensors/SensorManager";
 import { EmulatedHardwareImplementation } from "./hardware/implementations/EmulatedHardwareImplementation";
 import { BoopSensorManager } from "./boop-sensor/BoopSensorManager";
+import { BluetoothManager } from "./bluetooth/BluetoothManager";
 import { InitialSetup } from "./initial-setup/InitialSetup";
+import { GamepadManager } from "./gamepadmanager/GamepadManager";
+import { MqttManager } from "./mqtt/MqttManager";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
@@ -57,6 +60,9 @@ export class Protogen {
   private readonly _integrationStateReportingKey: string;
   private readonly _appManager: AppManager;
   private readonly _boopSensorManager: BoopSensorManager;
+  private readonly _bluetoothManager: BluetoothManager;
+  private readonly _gamepadManager: GamepadManager;
+  private readonly _mqttManager: MqttManager;
   private _hudManager: HUDManager;
   private readonly _hardwareAbstractionLayer: HardwareAbstractionLayer;
   private readonly _sensorManager: SensorManager;
@@ -160,6 +166,9 @@ export class Protogen {
     this._actionManager = new ActionManager(this);
     this._appManager = new AppManager(this);
     this._boopSensorManager = new BoopSensorManager(this);
+    this._bluetoothManager = new BluetoothManager(this);
+    this._mqttManager = new MqttManager(this);
+    this._gamepadManager = new GamepadManager(this);
   }
 
   public async init() {
@@ -204,6 +213,10 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit apps", BootMessageColor);
     await this.appManager.registerApp(new PaintApp(this.appManager));
+
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit MQTT", BootMessageColor);
+    await this.mqttManager.init();
+    await this.gamepadManager.init();
 
     // Custom crash handler
     process.on('uncaughtException', (err) => {
@@ -326,6 +339,18 @@ export class Protogen {
 
   public get boopSensorManager() {
     return this._boopSensorManager;
+  }
+
+  public get bluetoothManager() {
+    return this._bluetoothManager;
+  }
+
+  public get gamepadManager() {
+    return this._gamepadManager;
+  }
+
+  public get mqttManager() {
+    return this._mqttManager;
   }
   //#endregion
 }

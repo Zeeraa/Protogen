@@ -1,0 +1,17 @@
+[Unit]
+Description=Protogen Gamepad Listener
+After=network.target mosquitto.service
+Requires=mosquitto.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/protogen/gamepad_listener/venv/bin/python /home/pi/protogen/gamepad_listener/gamepad_listener.py
+WorkingDirectory=/home/pi/protogen/gamepad_listener
+Restart=always
+RestartSec=5
+User=pi
+# Allow access to input devices
+SupplementaryGroups=input
+
+[Install]
+WantedBy=multi-user.target

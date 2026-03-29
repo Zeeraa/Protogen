@@ -36,7 +36,7 @@ echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | sudo debconf-set-se
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $(pwgen -s -1 128)" | sudo debconf-set-selections
 
-sudo apt install -y vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2
+sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv
 
 # Check if Node.js is installed
 if ! command -v node &>/dev/null; then
@@ -103,6 +103,7 @@ fi
 
 cd /home/pi/protogen
 git checkout $REPO_BRANCH
+git submodule update --init --recursive
 
 # Frontend
 echo Building frontend
@@ -127,6 +128,21 @@ sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD="${GENERATED_DB_PASSWORD}"|" /home/pi/prot
 
 sudo chown -R pi:pi /home/pi/protogen
 
+# ========== Gamepad Listener ==========
+echo "Setting up Gamepad Listener..."
+cd /home/pi/protogen/gamepad_listener
+if [[ ! -d "venv" ]]; then
+    python3 -m venv venv
+fi
+venv/bin/pip install -r requirements.txt
+sudo chown -R pi:pi /home/pi/protogen/gamepad_listener
+
+# ========== Configure Mosquitto ==========
+echo "Configuring Mosquitto MQTT broker..."
+cp /home/pi/protogen/gamepad_listener/mosquitto.conf /etc/mosquitto/conf.d/protogen.conf
+systemctl enable mosquitto
+systemctl restart mosquitto
+
 # ========== Setup services ==========
 if [[ -f "/etc/systemd/system/flaschen-taschen.service" ]]; then
     echo "flaschen-taschen.service already exists"
@@ -145,9 +161,81 @@ else
     systemctl enable protogen.service
 fi
 
+if [[ -f "/etc/systemd/system/gamepad-listener.service" ]]; then
+    echo "gamepad-listener.service already exists"
+else
+    echo "Creating service gamepad-listener.service"
+    cp /home/pi/protogen/systemd/gamepad-listener.service /etc/systemd/system/gamepad-listener.service
+    systemctl enable gamepad-listener.service
+fi
+
+# ========== Better gamepad support ==========
+# Install xpadneo for better Xbox controller support
+if [[ -d "/home/pi/xpadneo" ]]; then
+    echo "xpadneo directory already exists. Checking installation..."
+    if lsmod | grep -q "hid_xpadneo"; then
+        echo "xpadneo driver already loaded"
+    else
+        echo "xpadneo directory exists but driver not loaded. Reinstalling..."
+        cd /home/pi/xpadneo
+        sudo ./install.sh
+    fi
+else
+    echo "Installing xpadneo for better Xbox controller support..."
+    git clone https://github.com/atar-axis/xpadneo.git /home/pi/xpadneo
+    cd /home/pi/xpadneo
+    sudo ./install.sh
+    echo "xpadneo installed successfully"
+fi
+sudo chown -R pi:pi /home/pi/xpadneo
+
+
 # ========== Final ==========
 echo "--led-cols=64 --led-rows=32 --led-chain=2 --led-gpio-mapping=adafruit-hat --led-slowdown-gpio=3 --led-limit-refresh=100" > /home/pi/ft_config.txt
 sudo chown pi:pi /home/pi/ft_config.txt
+
+# Enable bluetooth
+sudo systemctl enable bluetooth
+
+# ========== Configure Bluetooth stack ==========
+echo "Configuring Bluetooth stack for controller support..."
+
+# Disable ERTM (required for Xbox controller pairing)
+if ! grep -q "disable_ertm" /etc/modprobe.d/bluetooth.conf 2>/dev/null; then
+    echo "options bluetooth disable_ertm=y" | sudo tee -a /etc/modprobe.d/bluetooth.conf
+    echo "ERTM disabled in /etc/modprobe.d/bluetooth.conf"
+else
+    echo "ERTM already disabled"
+fi
+
+# Also disable at runtime in case we don't reboot
+sudo bash -c 'echo 1 > /sys/module/bluetooth/parameters/disable_ertm' 2>/dev/null || true
+
+# Configure /etc/bluetooth/main.conf
+BTCONF="/etc/bluetooth/main.conf"
+if [[ -f "$BTCONF" ]]; then
+    # Enable dual controller mode (BR/EDR + LE)
+    sed -i 's/^#ControllerMode = dual/ControllerMode = dual/' "$BTCONF"
+    sed -i 's/^ControllerMode = .*/ControllerMode = dual/' "$BTCONF"
+
+    # Enable device privacy mode (needed for BLE devices like Xbox controllers)
+    sed -i 's/^#Privacy = off/Privacy = device/' "$BTCONF"
+    sed -i 's/^Privacy = off/Privacy = device/' "$BTCONF"
+
+    # Enable JustWorks pairing (no interactive PIN for headless pairing)
+    sed -i 's/^#JustWorksRepairing = never/JustWorksRepairing = always/' "$BTCONF"
+    sed -i 's/^JustWorksRepairing = never/JustWorksRepairing = always/' "$BTCONF"
+
+    # Enable fast connectable for quicker reconnection
+    sed -i 's/^#FastConnectable = false/FastConnectable = true/' "$BTCONF"
+    sed -i 's/^FastConnectable = false/FastConnectable = true/' "$BTCONF"
+
+    echo "Bluetooth main.conf configured"
+else
+    echo "Warning: $BTCONF not found, skipping Bluetooth config"
+fi
+
+sudo systemctl restart bluetooth
 
 # Apache2
 a2enmod rewrite
@@ -171,6 +259,7 @@ service apache2 restart
 
 # Start services
 service flaschen-taschen start
+service gamepad-listener start
 service protogen start
 
 echo "DB Credentials: protogen:$GENERATED_DB_PASSWORD"

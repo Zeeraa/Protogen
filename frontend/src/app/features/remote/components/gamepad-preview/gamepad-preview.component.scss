@@ -1,0 +1,544 @@
+$body-color: #2a2a2e;
+$body-lighter: #353538;
+$body-darker: #1a1a1e;
+$accent: #4fc3f7;
+$accent-glow: rgba(79, 195, 247, 0.5);
+
+// PS4 face button colors
+$color-triangle: #00c9a7;
+$color-circle: #ff6b6b;
+$color-cross: #6b9fff;
+$color-square: #d46bff;
+
+// Xbox face button colors
+$color-xbox-y: #ffd54f;
+$color-xbox-b: #ef5350;
+$color-xbox-a: #66bb6a;
+$color-xbox-x: #42a5f5;
+
+.controller {
+  position: relative;
+  width: 440px;
+  height: 280px;
+  user-select: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  transition: opacity 0.3s;
+
+  &.disconnected {
+    opacity: 0.45;
+  }
+}
+
+// ── Body & Grips ──
+
+.body {
+  position: absolute;
+  top: 44px;
+  left: 30px;
+  width: 380px;
+  height: 150px;
+  background: $body-color;
+  border-radius: 90px 90px 40px 40px;
+}
+
+.grip {
+  position: absolute;
+  width: 58px;
+  height: 105px;
+  background: $body-color;
+
+  &.grip-left {
+    bottom: -72px;
+    left: 8px;
+    border-radius: 8px 8px 28px 36px;
+    transform: rotate(14deg);
+    transform-origin: top right;
+  }
+
+  &.grip-right {
+    bottom: -72px;
+    right: 8px;
+    border-radius: 8px 8px 36px 28px;
+    transform: rotate(-14deg);
+    transform-origin: top left;
+  }
+}
+
+// ── Light Bar ──
+
+.light-bar {
+  position: absolute;
+  top: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 3px;
+  background: #444;
+  border-radius: 2px;
+  transition: background 0.3s, box-shadow 0.3s;
+  z-index: 3;
+
+  &.connected {
+    background: #0d6efd;
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
+  }
+}
+
+// ── Triggers ──
+
+.trigger {
+  position: absolute;
+  top: 4px;
+  width: 68px;
+  height: 34px;
+  background: $body-darker;
+  border-radius: 8px 8px 4px 4px;
+  overflow: hidden;
+  z-index: 1;
+
+  &.trigger-left {
+    left: 56px;
+    border-radius: 12px 6px 4px 10px;
+  }
+
+  &.trigger-right {
+    right: 56px;
+    border-radius: 6px 12px 10px 4px;
+  }
+
+  .trigger-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: $accent;
+    opacity: 0.6;
+    transition: height 0.05s linear;
+  }
+
+  .trigger-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #888;
+    z-index: 1;
+  }
+
+  &.active .trigger-label {
+    color: #fff;
+  }
+}
+
+// ── Bumpers ──
+
+.bumper {
+  position: absolute;
+  top: 42px;
+  width: 90px;
+  height: 20px;
+  background: $body-lighter;
+  font-size: 10px;
+  font-weight: 600;
+  color: #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s, box-shadow 0.1s;
+  z-index: 3;
+
+  &.bumper-left {
+    left: 36px;
+    border-radius: 10px 6px 0 0;
+  }
+
+  &.bumper-right {
+    right: 36px;
+    border-radius: 6px 10px 0 0;
+  }
+
+  &.active {
+    background: lighten($body-lighter, 12%);
+    color: $accent;
+    box-shadow: 0 0 6px $accent-glow;
+  }
+}
+
+// ── D-pad ──
+
+.dpad {
+  position: absolute;
+  top: 86px;
+  left: 72px;
+  width: 72px;
+  height: 72px;
+  z-index: 3;
+
+  .dpad-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    transform: translate(-50%, -50%);
+    background: $body-lighter;
+    border-radius: 3px;
+  }
+
+  .dpad-btn {
+    position: absolute;
+    background: $body-lighter;
+    transition: background 0.08s, box-shadow 0.08s;
+
+    &.dpad-up {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22px;
+      height: 28px;
+      border-radius: 4px 4px 0 0;
+    }
+
+    &.dpad-down {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22px;
+      height: 28px;
+      border-radius: 0 0 4px 4px;
+    }
+
+    &.dpad-left {
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 22px;
+      border-radius: 4px 0 0 4px;
+    }
+
+    &.dpad-right {
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 22px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    &.active {
+      background: lighten($body-lighter, 18%);
+      box-shadow: 0 0 6px $accent-glow;
+    }
+  }
+}
+
+// ── Face Buttons ──
+
+.face-buttons {
+  position: absolute;
+  top: 82px;
+  right: 68px;
+  width: 84px;
+  height: 84px;
+  z-index: 3;
+
+  .face-btn {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: $body-lighter;
+    border: 1.5px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 300;
+    transition: background 0.08s, box-shadow 0.08s, border-color 0.08s;
+
+    // Triangle △ — top center
+    &.btn-triangle {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      color: $color-triangle;
+
+      &.active {
+        background: rgba($color-triangle, 0.25);
+        border-color: $color-triangle;
+        box-shadow: 0 0 8px rgba($color-triangle, 0.5);
+      }
+    }
+
+    // Circle ○ — right center
+    &.btn-circle {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      color: $color-circle;
+
+      &.active {
+        background: rgba($color-circle, 0.25);
+        border-color: $color-circle;
+        box-shadow: 0 0 8px rgba($color-circle, 0.5);
+      }
+    }
+
+    // Cross ✕ — bottom center
+    &.btn-cross {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      color: $color-cross;
+
+      &.active {
+        background: rgba($color-cross, 0.25);
+        border-color: $color-cross;
+        box-shadow: 0 0 8px rgba($color-cross, 0.5);
+      }
+    }
+
+    // Square ☐ — left center
+    &.btn-square {
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      color: $color-square;
+
+      &.active {
+        background: rgba($color-square, 0.25);
+        border-color: $color-square;
+        box-shadow: 0 0 8px rgba($color-square, 0.5);
+      }
+    }
+  }
+}
+
+// ── Analog Sticks ──
+
+.stick-well {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: $body-darker;
+  border: 2px solid #222;
+  z-index: 3;
+
+  &.stick-well-left {
+    top: 134px;
+    left: 142px;
+  }
+
+  &.stick-well-right {
+    top: 134px;
+    left: 248px;
+  }
+
+  // Xbox asymmetric stick layout
+  .xbox & {
+    &.stick-well-left {
+      top: 74px;
+      left: 98px;
+    }
+
+    &.stick-well-right {
+      top: 136px;
+      left: 266px;
+    }
+  }
+
+  .stick {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    margin-top: -18px;
+    margin-left: -18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 38%, #4a4a50, #333338);
+    border: 1.5px solid #555;
+    transition: background 0.1s, box-shadow 0.1s;
+    cursor: default;
+
+    &.pressed {
+      background: radial-gradient(circle at 40% 38%, lighten(#4a4a50, 10%), #444);
+      box-shadow: 0 0 8px $accent-glow;
+      border-color: $accent;
+    }
+  }
+}
+
+// ── Touchpad ──
+
+.touchpad {
+  position: absolute;
+  top: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 112px;
+  height: 48px;
+  background: $body-lighter;
+  border-radius: 4px;
+  border: 1px solid #3a3a3e;
+  z-index: 3;
+}
+
+// ── Share / Options ──
+
+.meta-btn {
+  position: absolute;
+  top: 82px;
+  height: 14px;
+  padding: 0 5px;
+  background: $body-lighter;
+  border-radius: 3px;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s;
+  z-index: 3;
+
+  &.share-btn {
+    left: 140px;
+  }
+
+  &.options-btn {
+    right: 140px;
+  }
+
+  &.active {
+    background: lighten($body-lighter, 14%);
+    color: $accent;
+  }
+}
+
+// ── Home Button ──
+
+.home-btn {
+  position: absolute;
+  top: 168px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: $body-darker;
+  border: 1.5px solid #444;
+  transition: background 0.1s, box-shadow 0.1s;
+  z-index: 3;
+
+  &.xbox-btn {
+    width: 20px;
+    height: 20px;
+    top: 76px;
+    border-radius: 50%;
+    border-color: #555;
+  }
+
+  &.active {
+    background: lighten($body-darker, 16%);
+    box-shadow: 0 0 8px $accent-glow;
+    border-color: $accent;
+  }
+}
+
+// ── Xbox Face Buttons ──
+
+.xbox .face-buttons {
+  .face-btn {
+    font-size: 12px;
+    font-weight: 700;
+
+    &.btn-y {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      color: $color-xbox-y;
+
+      &.active {
+        background: rgba($color-xbox-y, 0.25);
+        border-color: $color-xbox-y;
+        box-shadow: 0 0 8px rgba($color-xbox-y, 0.5);
+      }
+    }
+
+    &.btn-b {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      color: $color-xbox-b;
+
+      &.active {
+        background: rgba($color-xbox-b, 0.25);
+        border-color: $color-xbox-b;
+        box-shadow: 0 0 8px rgba($color-xbox-b, 0.5);
+      }
+    }
+
+    &.btn-a {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      color: $color-xbox-a;
+
+      &.active {
+        background: rgba($color-xbox-a, 0.25);
+        border-color: $color-xbox-a;
+        box-shadow: 0 0 8px rgba($color-xbox-a, 0.5);
+      }
+    }
+
+    &.btn-x {
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      color: $color-xbox-x;
+
+      &.active {
+        background: rgba($color-xbox-x, 0.25);
+        border-color: $color-xbox-x;
+        box-shadow: 0 0 8px rgba($color-xbox-x, 0.5);
+      }
+    }
+  }
+}
+
+// ── Xbox Body Adjustments ──
+
+.xbox {
+  .body {
+    border-radius: 80px 80px 50px 50px;
+  }
+
+  .dpad {
+    top: 118px;
+    left: 132px;
+  }
+
+  .face-buttons {
+    top: 68px;
+    right: 58px;
+  }
+
+  .meta-btn {
+    font-size: 6px;
+
+    &.share-btn {
+      left: 170px;
+    }
+
+    &.options-btn {
+      right: 170px;
+    }
+  }
+}

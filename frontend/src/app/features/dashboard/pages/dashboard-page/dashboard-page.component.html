@@ -5,83 +5,32 @@
     </div>
   </div>
 
-  <div class="row mt-lg-4">
-    <div class="col-12">
-      <h4>Actions</h4>
+  <div class="masonry mt-3">
+    <div class="masonry-item">
+      <app-dashboard-status-card [overview]="overview()" (toggleHud)="toggleHud()" />
     </div>
 
-    @if(actions.length == 0) {
-    <div class="col-12">
-      <p>No actions configured to be displayed on dashboard</p>
-    </div>
-    }
-
-    @for (action of actions; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-      <app-dashboard-action-card [action]="action" />
-    </div>
-    }
-  </div>
-
-  <div class="row mt-4">
-    <div class="col-12">
-      <h4>Face expressions</h4>
+    <div class="masonry-item">
+      <app-dashboard-actions-card [actions]="dashboardActions()" (activate)="activateAction($event)" />
     </div>
 
-    @if(actions.length == 0) {
-    <div class="col-12">
-      <p>No face expressions defined</p>
-    </div>
-    }
-
-    @for (expression of expressions; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-      <app-dashboard-expression-card [expression]="expression" />
-    </div>
-    }
-  </div>
-
-  <div class="row mt-4">
-    <div class="col-12">
-      <h4>RGB Scenes</h4>
+    <div class="masonry-item">
+      <app-dashboard-face-card [renderers]="renderers()" [expressions]="expressions()"
+        [faceRgbEffects]="faceRgbEffects()" [activeRendererId]="activeRendererId()"
+        [activeExpressionId]="activeExpressionId()" [activeFaceRgbId]="activeFaceRgbId()"
+        (activateRenderer)="activateRenderer($event)" (activateExpression)="activateExpression($event)"
+        (activateFaceRgb)="activateFaceRgb($event)" (disableFaceRgb)="disableFaceRgb()" />
     </div>
 
-    <div class="col-12 mt-1">
-      <button class="btn btn-secondary" (click)="disableRgb()">Disable RGB</button>
+    <div class="masonry-item">
+      <app-dashboard-rgb-card [scenes]="rgbScenes()" [activeSceneId]="activeRgbSceneId()"
+        (activate)="activateRgbScene($event)" (disable)="disableRgb()" />
     </div>
 
-    @if(actions.length == 0) {
-    <div class="col-12 mt-1">
-      <p>No RGB scenes defined</p>
+    <div class="masonry-item">
+      <app-dashboard-boop-card [enabled]="boopSensorEnabled()" [profiles]="boopProfiles()"
+        [activeProfileId]="activeBoopProfileId()" (toggleEnabled)="toggleBoopSensor()"
+        (activateProfile)="activateBoopProfile($event)" (deactivateProfile)="deactivateBoopProfile()" />
     </div>
-    }
-
-    @for (scene of rgbScenes; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-      <app-dashboard-rgb-card [scene]="scene" />
-    </div>
-    }
-  </div>
-
-  <div class="row mt-4">
-    <div class="col-12">
-      <h4>Face RGB effects</h4>
-    </div>
-
-    <div class="col-12 mt-1">
-      <button class="btn btn-secondary" (click)="disableFaceRgb()">Disable RGB</button>
-    </div>
-
-    @if(actions.length == 0) {
-    <div class="col-12 mt-1">
-      <p>No face RGB effects defined</p>
-    </div>
-    }
-
-    @for (effect of faceRgbEffects; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-      <app-dashboard-face-rgb-card [effect]="effect" />
-    </div>
-    }
   </div>
 </div>

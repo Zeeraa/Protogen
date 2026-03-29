@@ -27,6 +27,10 @@ export class SystemApiService extends ApiBaseService {
     return this.http.put(this.apiBaseUrl + "/system/flaschen-taschen/settings", settings).pipe(catchError(this.defaultErrorHandler));
   }
 
+  getNetworkInterfaces() {
+    return this.http.get<NetworkInterfaceInfo[]>(this.apiBaseUrl + "/system/network-interfaces");
+  }
+
   getLogs() {
     return this.http.get(this.apiBaseUrl + "/system/logs", {
       responseType: 'text',
@@ -53,6 +57,14 @@ export class SystemApiService extends ApiBaseService {
 
   updateClockSettings(settings: ClockSettings): Observable<any> {
     return this.http.put(this.apiBaseUrl + "/system/clock-settings", settings);
+  }
+
+  getAudioDevices(): Observable<AudioDevice[]> {
+    return this.http.get<AudioDevice[]>(this.apiBaseUrl + "/system/audio-devices");
+  }
+
+  setAudioDevice(deviceId: number): Observable<any> {
+    return this.http.put(this.apiBaseUrl + "/system/audio-device", { deviceId });
   }
 }
 
@@ -88,4 +100,16 @@ export interface ClockSettings {
   showDate: boolean;
   timeColor: RGBColor;
   dateColor: RGBColor;
+}
+
+export interface NetworkInterfaceInfo {
+  name: string;
+  ipv4: string | null;
+  ipv6: string | null;
+}
+
+export interface AudioDevice {
+  id: number;
+  name: string;
+  isDefault: boolean;
 }

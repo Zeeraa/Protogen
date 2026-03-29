@@ -1,5 +1,5 @@
-import { Component, inject, OnDestroy, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
-import { ClockSettings, FlaschenTaschenSettings, SystemApiService, SystemOverview } from '../../../../core/services/api/system-api.service';
+import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
+import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
@@ -10,6 +10,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
 import { form } from '@angular/forms/signals'
 import { hexToRgb, RGBColors, rgbToHex } from '../../../../core/services/utils/Utils';
+import { BootswatchThemes, Theme, ThemeService } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-system-page',
@@ -24,15 +25,25 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
+  protected readonly themeService = inject(ThemeService);
 
-  @ViewChild("shutdownModal") shutdownModalTemplate!: TemplateRef<any>;
-  overview: SystemOverview | null = null;
-  updateInterval: any = null;
-  shutdownModalRef: null | NgbModalRef = null;
-  showSensitiveNetworkingData = false;
-  flaschenTaschenSettings: FlaschenTaschenSettings = { ledLimitRefresh: 100, ledSlowdownGpio: 3 }
+  protected readonly bootswatchThemes = BootswatchThemes;
+  protected readonly Theme = Theme;
 
-  private clockSettingsModel = signal({
+  protected readonly shutdownModalTemplate = viewChild<TemplateRef<any>>("shutdownModal");
+
+  private readonly overview = signal<SystemOverview | null>(null);
+  private updateInterval: any = null;
+  private shutdownModalRef: null | NgbModalRef = null;
+
+  protected readonly showSensitiveNetworkingData = signal<boolean>(false);
+  protected readonly flaschenTaschenSettings = signal<FlaschenTaschenSettings>({ ledLimitRefresh: 100, ledSlowdownGpio: 3 });
+  protected readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
+  protected readonly audioDevices = signal<AudioDevice[]>([]);
+  protected readonly selectedAudioDeviceId = signal<number | null>(null);
+  protected readonly angularVersion = signal<string>("Unknown");
+
+  private readonly clockSettingsModel = signal({
     is24HourFormat: true,
     showSeconds: true,
     showDate: true,
@@ -40,15 +51,51 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     dateColor: "#FFFFFF"
   });
 
-  protected clockSettingsForm = form(this.clockSettingsModel);
+  protected readonly clockSettingsForm = form(this.clockSettingsModel);
 
-  get hasConnectivity() {
-    return this.overview?.network.hasConnectivity || false;
-  }
+  protected readonly hasConnectivity = computed(() => this.overview()?.network.hasConnectivity ?? false);
+  protected readonly ip = computed(() => this.overview()?.network.ip ?? "Unknown");
+  protected readonly isp = computed(() => this.overview()?.network.isp ?? "Unknown");
+  protected readonly backendVersion = computed(() => this.overview()?.backendVersion ?? "Unknown");
+  protected readonly osName = computed(() => this.overview()?.osVersion ?? "Unknown");
+  protected readonly realTemperature = computed(() => this.overview()?.cpuTemperature ?? 0);
+  protected readonly cpuUsage = computed(() => this.overview()?.cpuUsage ?? 0);
+  protected readonly ramUsage = computed(() => this.overview()?.ramUsage ?? 0);
+  protected readonly isSuperUser = computed(() => this.auth.authDetails?.isSuperUser ?? false);
+
+  protected readonly tempBarValue = computed(() => {
+    const temp = this.overview()?.cpuTemperature;
+    if (temp == null || temp < 0) return 0;
+    if (temp > 100) return 100;
+    return temp;
+  });
+
+  protected readonly temperatureColor = computed(() => {
+    const temp = this.overview()?.cpuTemperature;
+    if (temp == null) return "success";
+    if (temp > 80) return "danger";
+    if (temp > 60) return "warning";
+    return "success";
+  });
+
+  protected readonly cpuColor = computed(() => {
+    const usage = this.overview()?.cpuUsage;
+    if (usage == null) return "success";
+    if (usage > 90) return "danger";
+    if (usage > 70) return "warning";
+    return "success";
+  });
+
+  protected readonly ramColor = computed(() => {
+    const usage = this.overview()?.ramUsage;
+    if (usage == null) return "success";
+    if (usage > 90) return "danger";
+    if (usage > 70) return "warning";
+    return "success";
+  });
 
   get swaggerUrl() {
     const apiBase = this.api.apiBaseUrl;
-
     return apiBase + (apiBase.endsWith("/") ? "" : "/");
   }
 
@@ -56,36 +103,23 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     return environment.phpMyAdminLink;
   }
 
-  get ip() {
-    if (this.overview?.network.ip != null) {
-      return this.overview?.network.ip;
-    }
-    return "Unknown";
-  }
-
   get hudEnabled() {
-    return this.overview?.hudEnabled || false;
+    return this.overview()?.hudEnabled ?? false;
   }
 
   set hudEnabled(enabled: boolean) {
-    if (this.overview != null) {
-      this.overview.hudEnabled = enabled;
-    }
+    this.overview.update(o => o ? { ...o, hudEnabled: enabled } : o);
     this.hudApi.setHudEnabled(enabled).pipe(catchError(err => {
       this.toastr.error("Failed to toggle hud");
       throw err;
     })).subscribe();
   }
 
-  get backendVersion() {
-    return this.overview?.backendVersion || "Unknown";
+  protected get swaggerEnabled(): boolean {
+    return this.overview()?.swaggerEnabled ?? false;
   }
 
-  get swaggerEnabled(): boolean {
-    return this.overview?.swaggerEnabled || false;
-  }
-
-  set swaggerEnabled(enabled: boolean) {
+  protected set swaggerEnabled(enabled: boolean) {
     this.api.setSwaggerEnabled(enabled).pipe(catchError(err => {
       this.toastr.error("Failed to " + (enabled ? "enable" : "disable") + " swagger");
       throw err;
@@ -94,73 +128,15 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  get isp() {
-    if (this.overview?.network.isp != null) {
-      return this.overview?.network.isp;
-    }
-    return "Unknown";
-  }
-
-  get temperatureColor() {
-    if (this.overview != null) {
-      if (this.overview.cpuTemperature > 80) {
-        return "danger";
-      }
-
-      if (this.overview.cpuTemperature > 60) {
-        return "warning";
-      }
-    }
-    return "success";
-  }
-
-  get realTemperature() {
-    return this.overview?.cpuTemperature || 0;
-  }
-
-  get tempBarValue() {
-    if (this.overview == null || this.overview.cpuTemperature < 0) {
-      return 0;
-    }
-
-    if (this.overview.cpuTemperature > 100) {
-      return 100;
-    }
-
-    return this.overview.cpuTemperature;
-  }
-
-  get cpuUsage() {
-    if (this.overview?.cpuUsage !== undefined) {
-      return this.overview.cpuUsage;
-    }
-    return 0;
-  }
-
-  get ramUsage() {
-    if (this.overview?.ramUsage !== undefined) {
-      return this.overview.ramUsage;
-    }
-    return 0;
-  }
-
-  get getTemperature() {
-    if (this.overview?.cpuTemperature !== undefined) {
-      return this.overview.cpuTemperature;
-    }
-    return 0;
-  }
-
-  get osName() {
-    return this.overview?.osVersion || "Unknown";
-  }
-
-  openShutdownModal() {
+  protected openShutdownModal() {
     this.shutdownModalRef?.close();
-    this.shutdownModalRef = this.modal.open(this.shutdownModalTemplate, { ariaLabelledBy: 'shutdown-modal-title' });
+    const template = this.shutdownModalTemplate();
+    if (template) {
+      this.shutdownModalRef = this.modal.open(template, { ariaLabelledBy: 'shutdown-modal-title' });
+    }
   }
 
-  restartFlaschenTaschen() {
+  protected restartFlaschenTaschen() {
     this.api.restartFlaschenTaschen().pipe(catchError(err => {
       console.error(err);
       this.toastr.error("Failed to run command");
@@ -170,8 +146,8 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  saveFlaschenTaschen() {
-    this.api.updateFlaschenTaschenSettings(this.flaschenTaschenSettings)
+  protected saveFlaschenTaschen() {
+    this.api.updateFlaschenTaschenSettings(this.flaschenTaschenSettings())
       .pipe(catchError(err => {
         console.error(err);
         this.toastr.error("Failed to update settings");
@@ -181,16 +157,20 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  update() {
+  protected updateFlaschenTaschenSetting<K extends keyof FlaschenTaschenSettings>(key: K, value: FlaschenTaschenSettings[K]) {
+    this.flaschenTaschenSettings.update(s => ({ ...s, [key]: value }));
+  }
+
+  protected update() {
     this.api.getOverview().pipe(catchError(err => {
       this.toastr.error("Failed to get system overview");
       throw err;
     })).subscribe(overview => {
-      this.overview = overview;
+      this.overview.set(overview);
     });
   }
 
-  shutdown() {
+  protected shutdown() {
     this.shutdownModalRef?.close();
     this.toastr.info("Executing poweroff command...");
     this.api.shutdown().pipe(catchError(err => {
@@ -202,14 +182,9 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  showNetworkDataChanged(event: Event) {
-    const element = event.target as HTMLInputElement
-    const checked = element.checked;
+  protected showNetworkDataChanged(checked: boolean) {
+    this.showSensitiveNetworkingData.set(checked);
     localStorage.setItem(LocalStorageKey_ShowSentitiveNetworkingInfo, checked ? "true" : "false");
-  }
-
-  get isSuperUser() {
-    return this.auth.authDetails?.isSuperUser || false;
   }
 
   protected saveClockSettings() {
@@ -230,14 +205,36 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected onAudioDeviceChange(deviceId: number) {
+    this.api.setAudioDevice(deviceId).pipe(catchError(err => {
+      this.toastr.error("Failed to set audio device");
+      console.error("Failed to set audio device", err);
+      throw err;
+    })).subscribe(() => {
+      this.selectedAudioDeviceId.set(deviceId);
+      this.toastr.success("Audio device updated");
+    });
+  }
+
   ngOnInit(): void {
+    this.angularVersion.set(document.querySelector('app-root')?.getAttribute('ng-version') ?? "Unknown");
     this.update();
     this.updateInterval = setInterval(() => {
       this.update();
     }, 2000);
     this.title.setTitle("System - Protogen");
 
-    this.showSensitiveNetworkingData = localStorage.getItem(LocalStorageKey_ShowSentitiveNetworkingInfo) == "true";
+    this.showSensitiveNetworkingData.set(localStorage.getItem(LocalStorageKey_ShowSentitiveNetworkingInfo) == "true");
+
+    this.api.getNetworkInterfaces().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch network interfaces");
+        console.error("Failed to fetch network interfaces", err);
+        return [];
+      })
+    ).subscribe(interfaces => {
+      this.networkInterfaces.set(interfaces);
+    });
 
     this.api.getFlaschenTaschenSettings().pipe(
       catchError(err => {
@@ -245,7 +242,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
         throw err;
       })
     ).subscribe(settings => {
-      this.flaschenTaschenSettings = settings;
+      this.flaschenTaschenSettings.set(settings);
     });
 
     this.api.getClockSettings().pipe(
@@ -263,6 +260,20 @@ export class SystemPageComponent implements OnInit, OnDestroy {
         timeColor: rgbToHex(settings.timeColor),
         dateColor: rgbToHex(settings.dateColor)
       });
+    });
+
+    this.api.getAudioDevices().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch audio devices");
+        console.error("Failed to fetch audio devices", err);
+        return [];
+      })
+    ).subscribe(devices => {
+      this.audioDevices.set(devices);
+      const defaultDevice = devices.find(d => d.isDefault);
+      if (defaultDevice) {
+        this.selectedAudioDeviceId.set(defaultDevice.id);
+      }
     });
   }
 

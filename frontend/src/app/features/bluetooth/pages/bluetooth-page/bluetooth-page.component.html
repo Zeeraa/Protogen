@@ -1,0 +1,167 @@
+<div class="container mt-4">
+  <div class="row mb-3">
+    <div class="col">
+      <h1>Bluetooth</h1>
+    </div>
+  </div>
+
+  <!-- rfkill blocked alert -->
+  @if (rfkillStatus()?.softBlocked) {
+  <div class="row mb-3">
+    <div class="col">
+      <div class="alert alert-warning d-flex justify-content-between align-items-center mb-0" role="alert">
+        <div>
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <strong>Bluetooth is blocked by rfkill (soft block).</strong>
+          Bluetooth features will not work until it is unblocked.
+        </div>
+        <button class="btn btn-warning btn-sm ms-3" (click)="unblockRfkill()" [disabled]="rfkillUnblocking()">
+          @if (rfkillUnblocking()) {
+          <span class="spinner-border spinner-border-sm me-1"></span>
+          } @else {
+          <i class="bi bi-unlock-fill me-1"></i>
+          }
+          Unblock
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+  @if (rfkillStatus()?.hardBlocked) {
+  <div class="row mb-3">
+    <div class="col">
+      <div class="alert alert-danger mb-0" role="alert">
+        <i class="bi bi-exclamation-octagon-fill me-2"></i>
+        <strong>Bluetooth is blocked by a hardware switch (hard block).</strong>
+        Check the physical hardware switch on your device.
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Paired Devices -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-bluetooth"></i>
+            <h5 class="mb-0">Paired Devices</h5>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" (click)="refresh()" [disabled]="loading()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+        <div class="card-body">
+          @if (loading()) {
+          <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span class="ms-2">Loading...</span>
+          </div>
+          } @else if (pairedDevices().length === 0) {
+          <p class="text-muted mb-0">No paired devices.</p>
+          } @else {
+          <div class="list-group">
+            @for (device of pairedDevices(); track device.macAddress) {
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold">
+                  {{ device.name }}
+                  @if (device.connected) {
+                  <span class="badge bg-success ms-2">Connected</span>
+                  }
+                </div>
+                <small class="text-muted">{{ device.macAddress }}</small>
+              </div>
+              <div class="btn-group btn-group-sm">
+                @if (device.connected) {
+                <button class="btn btn-outline-warning" (click)="disconnectDevice(device)"
+                  [disabled]="isDeviceBusy(device.macAddress)">
+                  @if (isDeviceBusy(device.macAddress)) {
+                  <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                  Disconnect
+                  }
+                </button>
+                } @else {
+                <button class="btn btn-outline-primary" (click)="connectDevice(device)"
+                  [disabled]="isDeviceBusy(device.macAddress)">
+                  @if (isDeviceBusy(device.macAddress)) {
+                  <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                  Connect
+                  }
+                </button>
+                }
+                <button class="btn btn-outline-danger" (click)="unpairDevice(device)"
+                  [disabled]="isDeviceBusy(device.macAddress)">
+                  Forget
+                </button>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan for new devices -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-broadcast"></i>
+            <h5 class="mb-0">Discover New Devices</h5>
+          </div>
+          <div>
+            @if (scanning()) {
+            <button class="btn btn-sm btn-outline-danger" (click)="stopScan()">
+              <i class="bi bi-stop-fill"></i> Stop Scan
+            </button>
+            } @else {
+            <button class="btn btn-sm btn-outline-primary" (click)="startScan()">
+              <i class="bi bi-search"></i> Scan
+            </button>
+            }
+          </div>
+        </div>
+        <div class="card-body">
+          @if (scanning()) {
+          <div class="d-flex align-items-center mb-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span class="ms-2">Scanning for nearby devices...</span>
+          </div>
+          }
+
+          @if (newDevices().length === 0 && !scanning()) {
+          <p class="text-muted mb-0">No new devices found. Click "Scan" to search for nearby Bluetooth devices.</p>
+          } @else if (newDevices().length === 0 && scanning()) {
+          <p class="text-muted mb-0">Searching...</p>
+          } @else {
+          <div class="list-group">
+            @for (device of newDevices(); track device.macAddress) {
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold">{{ device.name }}</div>
+                <small class="text-muted">{{ device.macAddress }}</small>
+              </div>
+              <button class="btn btn-sm btn-outline-success" (click)="pairDevice(device)"
+                [disabled]="isDeviceBusy(device.macAddress)">
+                @if (isDeviceBusy(device.macAddress)) {
+                <span class="spinner-border spinner-border-sm"></span>
+                } @else {
+                Pair
+                }
+              </button>
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
