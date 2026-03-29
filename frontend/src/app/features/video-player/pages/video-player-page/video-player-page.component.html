@@ -6,134 +6,154 @@
   </div>
 
   @if(isDownloading) {
-  <div class="alert alert-info" role="alert">
-    Video download job running. Status: {{downloadJobStatusText}}
+  <div class="row mt-2">
+    <div class="col-12">
+      <div class="alert alert-info py-2 px-3 d-flex align-items-center gap-2 small mb-0">
+        <i class="bi bi-download"></i>
+        Video download job running. Status: {{downloadJobStatusText}}
+      </div>
+    </div>
   </div>
   }
 
   @if(isPlaying) {
-  <div class="alert alert-primary" role="alert">
-    A video is currently being played
+  <div class="row mt-2">
+    <div class="col-12">
+      <div class="alert alert-primary py-2 px-3 d-flex align-items-center gap-2 small mb-0">
+        <i class="bi bi-play-circle-fill"></i>
+        A video is currently being played
+      </div>
+    </div>
   </div>
   }
 
-  <div class="row mt-2">
+  <div class="row mt-3">
     <div class="col-12">
-      <div class="input-group mb-3">
-        <input type="text" class="form-control" [(ngModel)]="videoInputUrl" placeholder="Video URL">
-        <button class="btn btn-primary" type="button" (click)="startPlayback()">Play</button>
-      </div>
-    </div>
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-play-btn"></i>
+          <h5 class="mb-0">Playback Controls</h5>
+        </div>
+        <div class="card-body">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" [(ngModel)]="videoInputUrl" placeholder="Video URL">
+            <button class="btn btn-primary" type="button" (click)="startPlayback()">
+              <i class="bi bi-play-fill"></i> Play
+            </button>
+          </div>
 
-    <div class="col-auto mt-1">
-      <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
-        <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo" [disabled]="stream"
-          [(ngModel)]="mirrorVideo">
-        <label class="form-check-label" for="cbx_splitVideo">Mirror video</label>
-      </div>
-    </div>
+          <div class="d-flex flex-wrap gap-3 mb-3">
+            <div class="form-check form-switch" title="Mirror video to that it plays on both led panels">
+              <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo" [disabled]="stream"
+                [(ngModel)]="mirrorVideo">
+              <label class="form-check-label" for="cbx_splitVideo">Mirror video</label>
+            </div>
 
-    <div class="col-auto mt-1">
-      <div class="form-check form-switch" title="Flip the right side video (viewers perspective)">
-        <input class="form-check-input" type="checkbox" role="switch" id="cbx_flipVideo"
-          [disabled]="stream || !mirrorVideo" [(ngModel)]="flipVideo">
-        <label class="form-check-label" for="cbx_flipVideo">Flip video</label>
-      </div>
-    </div>
+            <div class="form-check form-switch" title="Flip the right side video (viewers perspective)">
+              <input class="form-check-input" type="checkbox" role="switch" id="cbx_flipVideo"
+                [disabled]="stream || !mirrorVideo" [(ngModel)]="flipVideo">
+              <label class="form-check-label" for="cbx_flipVideo">Flip video</label>
+            </div>
 
-    <div class="col-auto mt-1">
-      <div class="form-check form-switch" title="Stream the video instead of downloading and processing it">
-        <input class="form-check-input" type="checkbox" role="switch" id="cbx_streamVideo" [(ngModel)]="stream">
-        <label class="form-check-label" for="cbx_streamVideo">Stream</label>
-      </div>
-    </div>
-
-    <div class="col-12 mt-4">
-      <button class="btn btn-danger" type="button" (click)="stopPlayback()">Stop playback</button>
-    </div>
-  </div>
-
-  <div class="row mt-4">
-    <div class="col-12">
-      <label for="vp_volumeRange" class="form-label">System volume ({{volume}}%)</label>
-      <input type="range" class="form-range" min="0" max="100" id="vp_volumeRange" [(ngModel)]="volume"
-        (change)="onVolumeChange($event)">
-    </div>
-  </div>
-
-  <div class="row mt-4">
-    <div class="col-12">
-      <h4>Saved videos</h4>
-    </div>
-
-    <div class="col-auto mt-1">
-      <button (click)="showSaveVideoModal()" class="btn btn-primary btn-sm">Add</button>
-    </div>
-
-    <div class="col-auto mt-1">
-      <button (click)="showCreateGroupModal()" class="btn btn-primary btn-sm">Create group</button>
-    </div>
-
-    <div class="col-auto mt-1">
-      <div class="form-check form-switch" title="Allow editing and deleting saved videos">
-        <input class="form-check-input" type="checkbox" role="switch" id="cbx_splitVideo"
-          [(ngModel)]="allowEditSavedVideos">
-        <label class="form-check-label" for="cbx_splitVideo">Allow editing</label>
-      </div>
-    </div>
-
-    <div class="col-12"></div>
-
-    @if(groupedVideos.length > 0) {
-    <div class="col-12 mt-2">
-      <div ngbAccordion #accordion="ngbAccordion">
-        @for (group of groupedVideoList; track $index) {
-        <div ngbAccordionItem="v_{{group.id}}">
-          <h2 ngbAccordionHeader>
-            <button ngbAccordionButton>{{group.name}}</button>
-          </h2>
-          <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-              <ng-template>
-                <div class="row">
-                  @for (video of group.videos; track $index) {
-                  <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-                    <app-saved-video-card [video]="video" [showEditOptions]="allowEditSavedVideos"
-                      (savedVideoChanged)="fetchSavedVideos(true)" [groups]="groups" />
-                  </div>
-                  }
-                </div>
-
-                @if(allowEditSavedVideos) {
-                <div class="row mt-2">
-                  <div class="col">
-                    <button class="btn btn-danger" (click)="deleteGroup(group.id)">
-                      Delete group
-                    </button>
-                  </div>
-                </div>
-                }
-              </ng-template>
+            <div class="form-check form-switch" title="Stream the video instead of downloading and processing it">
+              <input class="form-check-input" type="checkbox" role="switch" id="cbx_streamVideo" [(ngModel)]="stream">
+              <label class="form-check-label" for="cbx_streamVideo">Stream</label>
             </div>
           </div>
+
+          <div class="mb-3">
+            <label for="vp_volumeRange" class="form-label text-body-secondary">
+              System volume
+              <span class="badge bg-primary">{{volume}}%</span>
+            </label>
+            <input type="range" class="form-range" min="0" max="100" id="vp_volumeRange" [(ngModel)]="volume"
+              (change)="onVolumeChange($event)">
+          </div>
         </div>
-        }
+        <div class="card-footer">
+          <button class="btn btn-outline-secondary btn-sm" type="button" (click)="stopPlayback()">
+            <i class="bi bi-stop-fill"></i> Stop playback
+          </button>
+        </div>
       </div>
     </div>
-    }
-
-    @for (video of nonGroupedVideos; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-      <app-saved-video-card [video]="video" [showEditOptions]="allowEditSavedVideos"
-        (savedVideoChanged)="fetchSavedVideos(true)" [groups]="groups" />
-    </div>
-    }
   </div>
 
-  <div class="row mt-2">
-    <div class="col">
-      <button class="btn btn-danger" title="Clear cached video files forcing redownload on next playback"
-        (click)="clearCache()">Clear cache</button>
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-collection-play"></i>
+            <h5 class="mb-0">Saved Videos</h5>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="cbx_editSaved"
+              [(ngModel)]="allowEditSavedVideos">
+            <label class="form-check-label" for="cbx_editSaved">Edit mode</label>
+          </div>
+        </div>
+        <div class="card-body">
+          @if(groupedVideos.length > 0) {
+          <div ngbAccordion #accordion="ngbAccordion">
+            @for (group of groupedVideoList; track $index) {
+            <div ngbAccordionItem="v_{{group.id}}">
+              <h2 ngbAccordionHeader>
+                <button ngbAccordionButton>{{group.name}}</button>
+              </h2>
+              <div ngbAccordionCollapse>
+                <div ngbAccordionBody>
+                  <ng-template>
+                    <div class="row">
+                      @for (video of group.videos; track $index) {
+                      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+                        <app-saved-video-card [video]="video" [showEditOptions]="allowEditSavedVideos"
+                          (savedVideoChanged)="fetchSavedVideos(true)" [groups]="groups" />
+                      </div>
+                      }
+                    </div>
+
+                    @if(allowEditSavedVideos) {
+                    <div class="row mt-2">
+                      <div class="col">
+                        <button class="btn btn-danger btn-sm" (click)="deleteGroup(group.id)">
+                          <i class="bi bi-trash"></i> Delete group
+                        </button>
+                      </div>
+                    </div>
+                    }
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          }
+
+          <div class="row">
+            @for (video of nonGroupedVideos; track $index) {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+              <app-saved-video-card [video]="video" [showEditOptions]="allowEditSavedVideos"
+                (savedVideoChanged)="fetchSavedVideos(true)" [groups]="groups" />
+            </div>
+            }
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex flex-wrap gap-2">
+            <button (click)="showSaveVideoModal()" class="btn btn-primary btn-sm">
+              <i class="bi bi-plus-lg"></i> Add
+            </button>
+            <button (click)="showCreateGroupModal()" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-folder-plus"></i> Create group
+            </button>
+            <button class="btn btn-outline-secondary btn-sm"
+              title="Clear cached video files forcing redownload on next playback" (click)="clearCache()">
+              <i class="bi bi-trash"></i> Clear cache
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

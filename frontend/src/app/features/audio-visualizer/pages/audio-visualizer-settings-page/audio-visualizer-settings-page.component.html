@@ -1,62 +1,83 @@
-<div class="container">
+<div class="container mt-4">
   <div class="row">
-    <div class="col-12">
+    <div class="col">
       <h1>Audio visualizer settings</h1>
     </div>
   </div>
 
-  <div class="row mt-2">
-    <div class="col-auto">
-      <p>Raw value</p>
-      <canvas width="50" height="200" #rawVolumePreviewCanvas></canvas>
-    </div>
-    <div class="col-auto">
-      <p>Adjusted value</p>
-      <canvas width="50" height="200" #adjustedVolumePreviewCanvas></canvas>
-    </div>
-
-    <div class="col-auto">
-      <p>History</p>
-      <canvas width="400" height="200" #historyGraphCanvas></canvas>
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-soundwave"></i>
+          <h5 class="mb-0">Preview</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-4">
+            <div class="text-center">
+              <span class="text-body-secondary small d-block mb-1">Raw value</span>
+              <canvas width="50" height="200" #rawVolumePreviewCanvas></canvas>
+            </div>
+            <div class="text-center">
+              <span class="text-body-secondary small d-block mb-1">Adjusted value</span>
+              <canvas width="50" height="200" #adjustedVolumePreviewCanvas></canvas>
+            </div>
+            <div class="text-center">
+              <span class="text-body-secondary small d-block mb-1">History</span>
+              <canvas width="400" height="200" #historyGraphCanvas></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-3">
     <div class="col-12">
-      <label for="lowRange" class="form-label">
-        Raw value amplification
-        <span class="text-info">
-          {{rawAmplification}}
-        </span>
-      </label>
-      <input type="range" class="form-range" min="0" max="100" step="0.1" id="lowRange" [(ngModel)]="rawAmplification">
-    </div>
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-sliders"></i>
+          <h5 class="mb-0">Settings</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="rawAmpRange" class="form-label">
+              Raw value amplification
+              <span class="badge bg-primary">{{rawAmplification}}</span>
+            </label>
+            <input type="range" class="form-range" min="0" max="100" step="0.1" id="rawAmpRange"
+              [(ngModel)]="rawAmplification">
+          </div>
 
-    <div class="col-12">
-      <label for="lowRange" class="form-label">
-        Low threshold
-        <span class="text-info">
-          {{lowThreshold}}
-        </span>
-      </label>
-      <input type="range" class="form-range" min="0" max="100" step="0.01" id="lowRange" [(ngModel)]="lowThreshold">
-    </div>
+          <div class="mb-3">
+            <label for="lowRange" class="form-label">
+              Low threshold
+              <span class="badge bg-primary">{{lowThreshold}}</span>
+            </label>
+            <input type="range" class="form-range" min="0" max="100" step="0.01" id="lowRange"
+              [(ngModel)]="lowThreshold">
+          </div>
 
-    <div class="col-12">
-      <label for="highRange" class="form-label">
-        High threshold
-        <span class="text-info">
-          {{highThreshold}}
-        </span>
-      </label>
-      <input type="range" class="form-range" min="0" max="100" step="0.01" id="highRange" [(ngModel)]="highThreshold">
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col">
-      <button class="btn btn-danger me-2 mb-2" (click)="rollback()">Rollback settings</button>
-      <button class="btn btn-success me-2 mb-2" (click)="saveSettings()">Save settings</button>
+          <div class="mb-3">
+            <label for="highRange" class="form-label">
+              High threshold
+              <span class="badge bg-primary">{{highThreshold}}</span>
+            </label>
+            <input type="range" class="form-range" min="0" max="100" step="0.01" id="highRange"
+              [(ngModel)]="highThreshold">
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-secondary btn-sm" (click)="rollback()">
+              <i class="bi bi-arrow-counterclockwise"></i> Rollback
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="saveSettings()">
+              <i class="bi bi-save"></i> Save settings
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

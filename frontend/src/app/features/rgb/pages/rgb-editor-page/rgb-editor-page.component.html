@@ -5,51 +5,78 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col">
-      <app-rgb-preview />
-    </div>
-  </div>
-
-  <div class="row mt-2">
+  <div class="row mt-3">
     <div class="col-12">
-      <div class="form-group">
-        <label for="sceneName">Scene name</label>
-        <input type="text" maxlength="255" class="form-control" id="sceneName" placeholder="Scene name"
-          [(ngModel)]="sceneName" (change)="onNameChanged()">
-      </div>
-    </div>
-
-    <div class="col-12 mt-2">
-      <button class="btn btn-secondary mt-1 me-1" (click)="back()">Back to scenes</button>
-      <button class="btn btn-danger mt-1 me-1" (click)="deleteScene()">Delete</button>
-    </div>
-  </div>
-
-  <div class="row mt-2">
-    <div class="col-12">
-      <h4>Effects</h4>
-    </div>
-
-    <div class="col-12 col-md-7 col-lg-6">
-      <div class="input-group">
-        <select class="form-select" [(ngModel)]="selectedEffectToAdd">
-          @for (effect of availableEffects; track $index) {
-          <option [value]="effect.name">{{effect.name}} - {{effect.description}}</option>
-          }
-        </select>
-        <button class="btn btn-success" type="button" (click)="addEffect()">Add effect</button>
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          <h5 class="mb-0">Preview</h5>
+        </div>
+        <div class="card-body">
+          <app-rgb-preview />
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="row mt-2">
-    @for (effect of effects; track $index) {
-    <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
-      <app-rgb-effect-card [effectList]="availableEffects" [scene]="scene!" [effect]="effect"
-        (majorChange)="refresh()" />
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-pencil"></i>
+          <h5 class="mb-0">Scene Settings</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="sceneName" class="form-label text-body-secondary">Scene name</label>
+            <input type="text" maxlength="255" class="form-control" id="sceneName" placeholder="Scene name"
+              [(ngModel)]="sceneName" (change)="onNameChanged()">
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-secondary btn-sm" (click)="back()">
+              <i class="bi bi-arrow-left"></i> Back to scenes
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="deleteScene()">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    }
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-lightbulb"></i>
+          <h5 class="mb-0">Effects</h5>
+        </div>
+        <div class="card-body">
+          <div class="col-12 col-md-7 col-lg-6 mb-3">
+            <div class="input-group">
+              <select class="form-select" [(ngModel)]="selectedEffectToAdd">
+                @for (effect of availableEffects; track $index) {
+                <option [value]="effect.name">{{effect.name}} - {{effect.description}}</option>
+                }
+              </select>
+              <button class="btn btn-success" type="button" (click)="addEffect()">Add</button>
+            </div>
+          </div>
+
+          <div class="row">
+            @for (effect of effects; track $index) {
+            <div class="col-12 col-sm-6 col-md-6 col-lg-4 mt-2">
+              <app-rgb-effect-card [effectList]="availableEffects" [scene]="scene!" [effect]="effect"
+                (majorChange)="refresh()" />
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

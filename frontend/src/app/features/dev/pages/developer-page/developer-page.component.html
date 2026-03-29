@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container mt-4">
   <div class="row">
     <div class="col">
       <h1>Developer tools</h1>
@@ -6,77 +6,97 @@
   </div>
 
   @if(!socket.connected) {
-  <div class="row">
+  <div class="row mt-2">
     <div class="col">
-      <div class="alert alert-danger">
-        Socket is not connected. Some fetures migth not work.
+      <div class="alert alert-danger py-2 px-3 d-flex align-items-center gap-2 small mb-0">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Socket is not connected. Some features might not work.
       </div>
     </div>
   </div>
   }
 
-  <div class="row">
-    <div class="col">
-      <h3>Visor</h3>
-      <app-visor-live-preview />
-      <hr>
-    </div>
-  </div>
-
-  @if(hardwareEmulationStatusString == "loading") {
-  <div class="row mt-2">
-    <div class="col">
-      <div class="alert alert-info">
-        Loading hardware emulation status...
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          <h5 class="mb-0">Visor Preview</h5>
+        </div>
+        <div class="card-body d-flex justify-content-center">
+          <app-visor-live-preview />
+        </div>
       </div>
     </div>
   </div>
-  } @else {
-  <div class="row mt-2">
-    <div class="col-12 mb-2">
-      <h3>Hardware emulation</h3>
-    </div>
-    @if(hardwareEmulationStatusString == "unavailable") {
+
+  <div class="row mt-3">
     <div class="col-12">
-      <p>Hardware emulation is not enabled.</p>
-    </div>
-    } @else {
-    <div class="col-12 mt-2">
-      HUD:<br>
-      <code>
-        <span [innerHTML]="hudLinesDisplay"></span>
-      </code>
-    </div>
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-cpu"></i>
+            <h5 class="mb-0">Hardware Emulation</h5>
+          </div>
+          @if(hardwareEmulationStatusString == "loading") {
+          <span class="badge bg-secondary">Loading...</span>
+          } @else if(hardwareEmulationStatusString == "unavailable") {
+          <span class="badge bg-danger">Unavailable</span>
+          } @else {
+          <span class="badge bg-success">Active</span>
+          }
+        </div>
+        <div class="card-body">
+          @if(hardwareEmulationStatusString == "loading") {
+          <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span class="ms-2 text-body-secondary">Loading hardware emulation status...</span>
+          </div>
+          } @else if(hardwareEmulationStatusString == "unavailable") {
+          <p class="text-body-secondary mb-0">Hardware emulation is not enabled.</p>
+          } @else {
+          <div class="mb-3">
+            <span class="text-body-secondary d-block mb-1">HUD</span>
+            <code>
+              <span [innerHTML]="hudLinesDisplay"></span>
+            </code>
+          </div>
 
-    <div class="col-12 mt-2">
-      LEDs:<br>
-      @for (led of hardwareState.ledData; track $index) {
-      <app-dev-led-preview [index]="$index" [color]="led" />
-      }
-    </div>
+          <div class="mb-3">
+            <span class="text-body-secondary d-block mb-1">LEDs</span>
+            @for (led of hardwareState.ledData; track $index) {
+            <app-dev-led-preview [index]="$index" [color]="led" />
+            }
+          </div>
 
-    <div class="col-12 mt-2">
-      Boop sensor state:
-      @if(hardwareState.boopSensorState) {
-      <span class="badge bg-success">High</span>
-      } @else {
-      <span class="badge bg-danger">Low</span>
-      }
-      <br>
-      <button class="btn btn-primary mt-2" (click)="toggleBoopSensor()">Toggle</button>
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-body-secondary">Boop sensor state</span>
+            @if(hardwareState.boopSensorState) {
+            <span class="badge bg-success">High</span>
+            } @else {
+            <span class="badge bg-danger">Low</span>
+            }
+            <button class="btn btn-outline-primary btn-sm" (click)="toggleBoopSensor()">Toggle</button>
+          </div>
+          }
+        </div>
+      </div>
     </div>
-    }
   </div>
-  }
 
-  <div class="row mt-2">
+  <div class="row mt-3">
     <div class="col-12">
-      <hr>
-      <h3>Misc</h3>
-    </div>
-
-    <div class="col-12">
-      <button class="btn btn-secondary mt-1 me-1" (click)="copyAuthToken()">Copy auth token</button>
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-gear-fill"></i>
+          <h5 class="mb-0">Misc</h5>
+        </div>
+        <div class="card-body">
+          <button class="btn btn-outline-primary btn-sm" (click)="copyAuthToken()">
+            <i class="bi bi-clipboard"></i> Copy auth token
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

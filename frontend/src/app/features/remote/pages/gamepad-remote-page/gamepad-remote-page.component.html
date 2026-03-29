@@ -5,78 +5,97 @@
     </div>
   </div>
 
-  <div class="row">
-    @if(settingsVisible()) {
-    <div class="col-12">
-      <h3>Settings</h3>
-    </div>
-    }
+  <div class="row mt-3">
+    <div class="col-12 mb-3">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-gear"></i>
+            <h5 class="mb-0">Settings</h5>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" (click)="settingsVisible.set(!settingsVisible())">
+            <i class="bi" [class.bi-chevron-down]="!settingsVisible()" [class.bi-chevron-up]="settingsVisible()"></i>
+            {{settingsVisible() ? "Hide" : "Show"}}
+          </button>
+        </div>
+        @if(settingsVisible()) {
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-6 mb-2">
+              <label for="controllerType" class="form-label">Controller Type</label>
+              <select class="form-select" id="controllerType" [formField]="settingsForm.type">
+                @for (type of constollerTypes(); track $index) {
+                <option [value]="type">{{type}}</option>
+                }
+              </select>
+            </div>
 
-    <div class="col-12 mb-2">
-      <button class="btn btn-sm btn-primary" (click)="settingsVisible.set(!settingsVisible())">
-        {{settingsVisible() ? "Hide Settings" : "Show Settings"}}
-      </button>
-
-      @if(settingsVisible()) {
-      <button class="btn btn-sm btn-success ms-1" (click)="saveSettings()">Save</button>
-      }
-    </div>
-
-    @if(settingsVisible()) {
-    <div class="col-6">
-      <label for="controllerType" class="form-label">Controller Type</label>
-      <select class="form-select" id="controllerType" [formField]="settingsForm.type">
-        @for (type of constollerTypes(); track $index) {
-        <option [value]="type">{{type}}</option>
+            <div class="col-auto d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="enablePreview"
+                  [formField]="settingsForm.enablePreview" />
+                <label class="form-check-label" for="enablePreview">Enable Preview</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-sm btn-success" (click)="saveSettings()">
+            <i class="bi bi-check-lg"></i> Save
+          </button>
+        </div>
         }
-      </select>
-    </div>
-
-    <div class="col-auto">
-      <div class="form-check form-switch">
-        <input type="checkbox" class="form-check-input" id="enablePreview" [formField]="settingsForm.enablePreview" />
-        <label class="form-check-label" for="enablePreview">Enable Preview</label>
       </div>
     </div>
-    }
   </div>
 
   @if(settings().enablePreview) {
-  <div class="row mt-2">
+  <div class="row mb-3">
     <div class="col">
       <app-gamepad-preview [controllerType]="settings().type" />
     </div>
   </div>
   }
 
-  <div class="row mt-2">
-    <div class="col-12 d-flex align-items-center gap-2 mb-2">
-      <h3 class="mb-0">Profiles</h3>
-      @if(activeProfile() != null) {
-      <span class="badge bg-success">Active: {{activeProfile()!.name}}</span>
-      } @else {
-      <span class="badge bg-secondary">No active profile</span>
-      }
-    </div>
-
-    @if(profiles().length === 0) {
+  <div class="row">
     <div class="col-12">
-      <span class="text-muted">No profiles found. Create a new profile to get started.</span>
-    </div>
-    }
-
-    @for (profile of profiles(); track profile.id) {
-    <div class="col-12 col-md-6 col-lg-4 mb-2">
-      <app-gamepad-profile-card [profile]="profile" [active]="profile.id === activeProfileId()"
-        (activateRequested)="activateProfile($event)" />
-    </div>
-    }
-
-    <div class="col-12 mt-1">
-      @if(activeProfileId() != null) {
-      <button class="btn btn-danger me-1" (click)="deactivateProfile()">Deactivate</button>
-      }
-      <button class="btn btn-primary" (click)="openNewProfileDialog()">New profile</button>
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-controller"></i>
+            <h5 class="mb-0">Profiles</h5>
+          </div>
+          @if(activeProfile() != null) {
+          <span class="badge bg-success">Active: {{activeProfile()!.name}}</span>
+          } @else {
+          <span class="badge bg-secondary">No active profile</span>
+          }
+        </div>
+        <div class="card-body">
+          @if(profiles().length === 0) {
+          <p class="text-body-secondary mb-0">No profiles found. Create a new profile to get started.</p>
+          } @else {
+          <div class="row">
+            @for (profile of profiles(); track profile.id) {
+            <div class="col-12 col-md-6 col-lg-4 mb-2">
+              <app-gamepad-profile-card [profile]="profile" [active]="profile.id === activeProfileId()"
+                (activateRequested)="activateProfile($event)" />
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <div class="card-footer d-flex flex-wrap gap-2">
+          @if(activeProfileId() != null) {
+          <button class="btn btn-outline-danger btn-sm" (click)="deactivateProfile()">
+            <i class="bi bi-stop-circle"></i> Deactivate
+          </button>
+          }
+          <button class="btn btn-primary btn-sm" (click)="openNewProfileDialog()">
+            <i class="bi bi-plus-lg"></i> New profile
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -26,6 +26,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
   protected readonly themeService = inject(ThemeService);
+
   protected readonly bootswatchThemes = BootswatchThemes;
   protected readonly Theme = Theme;
 
@@ -40,6 +41,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
   protected readonly audioDevices = signal<AudioDevice[]>([]);
   protected readonly selectedAudioDeviceId = signal<number | null>(null);
+  protected readonly angularVersion = signal<string>("Unknown");
 
   private readonly clockSettingsModel = signal({
     is24HourFormat: true,
@@ -215,6 +217,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.angularVersion.set(document.querySelector('app-root')?.getAttribute('ng-version') ?? "Unknown");
     this.update();
     this.updateInterval = setInterval(() => {
       this.update();

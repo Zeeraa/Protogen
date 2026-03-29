@@ -5,31 +5,47 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col">
-      <app-rgb-preview />
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col">
-      <button class="btn btn-danger mt-1 me-1" (click)="disable()">Disable</button>
-      <button class="btn btn-primary mt-1 me-1" (click)="addBlank()">Add new effect</button>
-    </div>
-  </div>
-
-  <div class="row mt-4">
+  <div class="row mt-3">
     <div class="col-12">
-      <h4>Scenes</h4>
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          <h5 class="mb-0">Preview</h5>
+        </div>
+        <div class="card-body">
+          <app-rgb-preview />
+        </div>
+        <div class="card-footer">
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-secondary btn-sm" (click)="disable()">
+              <i class="bi bi-x-circle"></i> Disable
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="addBlank()">
+              <i class="bi bi-plus-lg"></i> Add new effect
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="row mt-1">
-    @for (scene of scenes; track $index) {
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
-      <app-rgb-scene-card [scene]="scene" />
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-collection"></i>
+          <h5 class="mb-0">Scenes</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            @for (scene of scenes; track $index) {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+              <app-rgb-scene-card [scene]="scene" />
+            </div>
+            }
+          </div>
+        </div>
+      </div>
     </div>
-    }
-
   </div>
 </div>
