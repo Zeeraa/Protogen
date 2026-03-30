@@ -37,47 +37,47 @@ export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
 
 export class Protogen {
-  private readonly _config: Configuration;
-  private readonly _database: Database;
-  private readonly _webServer: ProtogenWebServer;
-  private readonly _logger: Logger;
-  private readonly _visor: ProtogenVisor;
-  private readonly _flaschenTaschen: FlaschenTaschen;
-  private readonly _remoteWorker: ProtogenRemoteWorker;
-  private readonly _videoPlaybackManager: ProtogenVideoPlaybackManager;
-  private readonly _rgb: RgbManager;
-  private readonly _networkManager: NetworkManager;
-  private readonly _eventEmitter: EventEmitter;
-  private readonly _userManager: UserManager;
-  private readonly _apiKeyManager: ApiKeyManager;
-  private readonly _sessionId: string;
-  private readonly _imageDirectory: string;
-  private readonly _tempDirectory: string;
-  private readonly _builtInAssets: BuiltInAsset[] = [];
-  private readonly _actionManager: ActionManager;
-  private readonly _audioVisualiser: AudioVisualiser;
-  private readonly _versionNumber: string;
-  private readonly _integrationStateReportingKey: string;
-  private readonly _appManager: AppManager;
-  private readonly _boopSensorManager: BoopSensorManager;
-  private readonly _bluetoothManager: BluetoothManager;
-  private readonly _gamepadManager: GamepadManager;
-  private readonly _mqttManager: MqttManager;
-  private _hudManager: HUDManager;
-  private readonly _hardwareAbstractionLayer: HardwareAbstractionLayer;
-  private readonly _sensorManager: SensorManager;
+  public readonly config: Configuration;
+  public readonly database: Database;
+  public readonly webServer: ProtogenWebServer;
+  public readonly logger: Logger;
+  public readonly visor: ProtogenVisor;
+  public readonly flaschenTaschen: FlaschenTaschen;
+  public readonly remoteWorker: ProtogenRemoteWorker;
+  public readonly videoPlaybackManager: ProtogenVideoPlaybackManager;
+  public readonly rgb: RgbManager | null;
+  public readonly networkManager: NetworkManager;
+  public readonly eventEmitter: EventEmitter;
+  public readonly userManager: UserManager;
+  public readonly apiKeyManager: ApiKeyManager;
+  public readonly sessionId: string;
+  public readonly imageDirectory: string;
+  public readonly tempDirectory: string;
+  public readonly builtInAssets: BuiltInAsset[] = [];
+  public readonly actionManager: ActionManager;
+  public readonly audioVisualiser: AudioVisualiser;
+  public readonly versionNumber: string;
+  public readonly integrationStateReportingKey: string;
+  public readonly appManager: AppManager;
+  public readonly boopSensorManager: BoopSensorManager | null;
+  public readonly bluetoothManager: BluetoothManager;
+  public readonly gamepadManager: GamepadManager;
+  public readonly mqttManager: MqttManager;
+  public readonly hudManager: HUDManager | null;
+  public readonly hardwareAbstractionLayer: HardwareAbstractionLayer;
+  public readonly sensorManager: SensorManager;
   public interuptLoops = false;
 
   constructor(config: Configuration) {
-    this._sessionId = uuidv7();
-    Object.freeze(this._sessionId);
+    this.sessionId = uuidv7();
+    Object.freeze(this.sessionId);
 
-    this._config = config;
+    this.config = config;
 
-    this._eventEmitter = new EventEmitter();
-    this._logger = new Logger(this);
+    this.eventEmitter = new EventEmitter();
+    this.logger = new Logger(this);
 
-    this._integrationStateReportingKey = uuidv7();
+    this.integrationStateReportingKey = uuidv7();
 
     if (!existsSync(this.config.logDirectory)) {
       mkdirSync(this.config.logDirectory);
@@ -100,14 +100,14 @@ export class Protogen {
       mkdirSync(videoTempDirectory);
     }
 
-    this._imageDirectory = this.config.dataDirectory + "/images";
-    Object.freeze(this._imageDirectory);
+    this.imageDirectory = this.config.dataDirectory + "/images";
+    Object.freeze(this.imageDirectory);
     if (!existsSync(this.imageDirectory)) {
       mkdirSync(this.imageDirectory);
     }
 
-    this._tempDirectory = this.config.dataDirectory + "/temp";
-    Object.freeze(this._tempDirectory);
+    this.tempDirectory = this.config.dataDirectory + "/temp";
+    Object.freeze(this.tempDirectory);
     if (!existsSync(this.tempDirectory)) {
       mkdirSync(this.tempDirectory);
     }
@@ -115,11 +115,11 @@ export class Protogen {
     this.logger.info("Protogen", "Setting up hardware abstraction layer. Selected hardware type: " + magenta(config.hardware));
     switch (config.hardware) {
       case HardwareType.STANDARD:
-        this._hardwareAbstractionLayer = new StandardHardwareImplementation(this, config.serial.port, config.serial.baudRate);
+        this.hardwareAbstractionLayer = new StandardHardwareImplementation(this, config.serial.port, config.serial.baudRate, config.systemFeatures.serial);
         break;
 
       case HardwareType.EMULATED:
-        this._hardwareAbstractionLayer = new EmulatedHardwareImplementation(this);
+        this.hardwareAbstractionLayer = new EmulatedHardwareImplementation(this);
         break;
 
       default:
@@ -141,34 +141,46 @@ export class Protogen {
       if (!existsSync(asset.path)) {
         throw new Error("Could not find file for asset " + asset.name + " at path " + asset.path);
       }
-      this._builtInAssets.push(asset);
+      this.builtInAssets.push(asset);
     });
 
     const packageJson = JSON.parse(readFileSync("package.json").toString());
-    this._versionNumber = String(packageJson.version || "0.0.0");
+    this.versionNumber = String(packageJson.version || "0.0.0");
 
-    Object.freeze(this._versionNumber);
-    Object.freeze(this._builtInAssets);
+    Object.freeze(this.versionNumber);
+    Object.freeze(this.builtInAssets);
 
-    this._sensorManager = new SensorManager(this);
-    this._database = new Database(this);
-    this._userManager = new UserManager(this);
-    this._apiKeyManager = new ApiKeyManager(this);
-    this._webServer = new ProtogenWebServer(this);
-    this._flaschenTaschen = new FlaschenTaschen(this);
-    this._visor = new ProtogenVisor(this);
-    this._hudManager = new HUDManager(this);
-    this._remoteWorker = new ProtogenRemoteWorker(this);
-    this._videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
-    this._rgb = new RgbManager(this);
-    this._audioVisualiser = new AudioVisualiser(this);
-    this._networkManager = new NetworkManager(this);
-    this._actionManager = new ActionManager(this);
-    this._appManager = new AppManager(this);
-    this._boopSensorManager = new BoopSensorManager(this);
-    this._bluetoothManager = new BluetoothManager(this);
-    this._mqttManager = new MqttManager(this);
-    this._gamepadManager = new GamepadManager(this);
+    this.sensorManager = new SensorManager(this);
+    this.database = new Database(this);
+    this.userManager = new UserManager(this);
+    this.apiKeyManager = new ApiKeyManager(this);
+    this.webServer = new ProtogenWebServer(this);
+    this.flaschenTaschen = new FlaschenTaschen(this);
+    this.visor = new ProtogenVisor(this);
+    if (this.config.systemFeatures.hud) {
+      this.hudManager = new HUDManager(this);
+    } else {
+      this.hudManager = null;
+    }
+    this.remoteWorker = new ProtogenRemoteWorker(this);
+    this.videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
+    if (this.config.systemFeatures.rgb) {
+      this.rgb = new RgbManager(this);
+    } else {
+      this.rgb = null;
+    }
+    this.audioVisualiser = new AudioVisualiser(this);
+    this.networkManager = new NetworkManager(this);
+    this.actionManager = new ActionManager(this);
+    this.appManager = new AppManager(this);
+    if (this.config.systemFeatures.boopSensor) {
+      this.boopSensorManager = new BoopSensorManager(this);
+    } else {
+      this.boopSensorManager = null;
+    }
+    this.bluetoothManager = new BluetoothManager(this);
+    this.mqttManager = new MqttManager(this);
+    this.gamepadManager = new GamepadManager(this);
   }
 
   public async init() {
@@ -183,8 +195,10 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit hardware", BootMessageColor);
     await this.hardwareAbstractionLayer.init();
 
-    await this.visor.tryRenderTextFrame("BOOTING...\nInit HUD", BootMessageColor);
-    await this.hudManager.init();
+    if (this.config.systemFeatures.hud) {
+      await this.visor.tryRenderTextFrame("BOOTING...\nInit HUD", BootMessageColor);
+      await this.hudManager?.init();
+    }
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit auth", BootMessageColor);
     await this.userManager.init();
@@ -193,10 +207,12 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit web server", BootMessageColor);
     await this.webServer.init();
 
-    await this.visor.tryRenderTextFrame("BOOTING...\nInit RGB", BootMessageColor);
-    await this.rgb.init();
-    await this.rgb.loadScenes();
-    await this.rgb.applyLastScene();
+    if (this.config.systemFeatures.rgb) {
+      await this.visor.tryRenderTextFrame("BOOTING...\nInit RGB", BootMessageColor);
+      await this.rgb?.init();
+      await this.rgb?.loadScenes();
+      await this.rgb?.applyLastScene();
+    }
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit video", BootMessageColor);
     await this.videoPlaybackManager.removeDeletedCache();
@@ -205,8 +221,10 @@ export class Protogen {
     await this.visor.loadActiveRendererFromDatabase();
     await this.visor.init();
 
-    await this.visor.tryRenderTextFrame("BOOTING...\nInit sensors", BootMessageColor);
-    await this.boopSensorManager.init();
+    if (this.config.systemFeatures.boopSensor) {
+      await this.visor.tryRenderTextFrame("BOOTING...\nInit sensors", BootMessageColor);
+      await this.boopSensorManager?.init();
+    }
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
     await this.audioVisualiser.init();
@@ -236,121 +254,5 @@ export class Protogen {
     this.logger.info("Protogen", "Protogen::init() finished");
   }
 
-  //#region Getters
-  public get config() {
-    return this._config;
-  }
 
-  public get database() {
-    return this._database;
-  }
-
-  public get webServer() {
-    return this._webServer;
-  }
-
-  public get logger() {
-    return this._logger;
-  }
-
-  public get visor() {
-    return this._visor;
-  }
-
-  public get flaschenTaschen() {
-    return this._flaschenTaschen;
-  }
-
-  public get remoteWorker() {
-    return this._remoteWorker;
-  }
-
-  public get videoPlaybackManager() {
-    return this._videoPlaybackManager;
-  }
-
-  public get rgb() {
-    return this._rgb;
-  }
-
-  public get networkManager() {
-    return this._networkManager;
-  }
-
-  public get eventEmitter() {
-    return this._eventEmitter;
-  }
-
-  public get sessionId() {
-    return this._sessionId;
-  }
-
-  public get imageDirectory() {
-    return this._imageDirectory;
-  }
-
-  public get tempDirectory() {
-    return this._tempDirectory;
-  }
-
-  public get userManager() {
-    return this._userManager;
-  }
-
-  public get apiKeyManager() {
-    return this._apiKeyManager;
-  }
-
-  public get builtInAssets() {
-    return this._builtInAssets;
-  }
-
-  public get actionManager() {
-    return this._actionManager;
-  }
-
-  get audioVisualiser() {
-    return this._audioVisualiser;
-  }
-
-  get versionNumber() {
-    return this._versionNumber;
-  }
-
-  public get integrationStateReportingKey() {
-    return this._integrationStateReportingKey;
-  }
-
-  public get appManager() {
-    return this._appManager;
-  }
-
-  get hardwareAbstractionLayer() {
-    return this._hardwareAbstractionLayer;
-  }
-
-  get hudManager() {
-    return this._hudManager;
-  }
-
-  get sensorManager() {
-    return this._sensorManager;
-  }
-
-  public get boopSensorManager() {
-    return this._boopSensorManager;
-  }
-
-  public get bluetoothManager() {
-    return this._bluetoothManager;
-  }
-
-  public get gamepadManager() {
-    return this._gamepadManager;
-  }
-
-  public get mqttManager() {
-    return this._mqttManager;
-  }
-  //#endregion
 }

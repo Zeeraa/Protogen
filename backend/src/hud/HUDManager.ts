@@ -82,8 +82,6 @@ export class HUDManager {
       visorStatus = "Visor: Video playing";
     }
 
-    const rgbStatus = "RGB: " + cleanText(this.protogen.rgb.activeScene?.name || "None");
-
     const additionalInfo: string[] = [];
 
     if (this.protogen.visor.activeRenderer?.id == this.protogen.visor.faceRenderer.id) {
@@ -98,11 +96,17 @@ export class HUDManager {
       additionalInfo.push("Video DL: " + this.protogen.videoPlaybackManager.status);
     }
 
-    if (this.protogen.boopSensorManager.enabled && this.protogen.boopSensorManager.showOnHud) {
+    if (this.protogen.boopSensorManager && this.protogen.boopSensorManager.enabled && this.protogen.boopSensorManager.showOnHud) {
       additionalInfo.push("Boops: " + this.protogen.boopSensorManager.boopCounter);
     }
 
-    const lineArray = [visorStatus, rgbStatus];
+    const lineArray = [visorStatus];
+
+    if (this.protogen.rgb) {
+      const rgbStatus = "RGB: " + cleanText(this.protogen.rgb.activeScene?.name || "None");
+      lineArray.push(rgbStatus);
+    }
+
     while (lineArray.length < this.config.lines) {
       if (additionalInfo.length > 0) {
         lineArray.push(String(additionalInfo.shift()));

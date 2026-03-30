@@ -105,22 +105,26 @@ export class ActionManager {
     //#endregion
 
     //#region Activate RGB scene
-    if (type == ActionType.ACTIVATE_RGB_SCENE) {
-      const scene = this.protogen.rgb.scenes.find(s => s.id == action);
-      if (scene == null) {
-        return false;
+    if (this.protogen.rgb != null) {
+      if (type == ActionType.ACTIVATE_RGB_SCENE) {
+        const scene = this.protogen.rgb.scenes.find(s => s.id == action);
+        if (scene == null) {
+          return false;
+        }
+
+        this.protogen.rgb.setActiveScene(scene);
+
+        return true;
       }
-
-      this.protogen.rgb.setActiveScene(scene);
-
-      return true;
     }
     //#region
 
     //#region Disable RGB
-    if (type == ActionType.DISABLE_RGB) {
-      this.protogen.rgb.setActiveScene(null);
-      return true;
+    if (this.protogen.rgb != null) {
+      if (type == ActionType.DISABLE_RGB) {
+        this.protogen.rgb.setActiveScene(null);
+        return true;
+      }
     }
     //#endregion
 
@@ -196,14 +200,16 @@ export class ActionManager {
     //#endregion
 
     //#region Boop sensor
-    if (type == ActionType.RESET_BOOP_SENSOR_COUNTER) {
-      await this.protogen.boopSensorManager.resetBoopCounter();
-      return true;
-    }
+    if (this.protogen.boopSensorManager != null) {
+      if (type == ActionType.RESET_BOOP_SENSOR_COUNTER) {
+        await this.protogen.boopSensorManager.resetBoopCounter();
+        return true;
+      }
 
-    if (type == ActionType.TOGGLE_BOOP_SENSOR) {
-      await this.protogen.boopSensorManager.toggleEnabled();
-      return true;
+      if (type == ActionType.TOGGLE_BOOP_SENSOR) {
+        await this.protogen.boopSensorManager.toggleEnabled();
+        return true;
+      }
     }
     //#endregion
 

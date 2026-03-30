@@ -18,6 +18,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.description = "Get boop sensor data"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -25,6 +26,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         res.json(this.protogen.boopSensorManager.data);
       } catch (err) {
         this.handleError(err, req, res);
@@ -38,12 +44,18 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.description = "Get boop counter"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         res.json({ counter: this.protogen.boopSensorManager.boopCounter });
       } catch (err) {
         this.handleError(err, req, res);
@@ -57,12 +69,18 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.description = "Reset boop counter"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
       #swagger.security = [
         {"apiKeyAuth": []},
         {"tokenAuth": []}
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         await this.protogen.boopSensorManager.resetBoopCounter();
         res.json({ counter: this.protogen.boopSensorManager.boopCounter });
       } catch (err) {
@@ -77,6 +95,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.description = "Get boop sensor enabled state"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -84,6 +103,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         res.json({ enabled: this.protogen.boopSensorManager.enabled });
       } catch (err) {
         this.handleError(err, req, res);
@@ -98,6 +122,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -105,6 +130,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const parsed = SetEnabledModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -126,6 +156,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.description = "Get boop sensor show on hud state"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -133,6 +164,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         res.json({ showOnHud: this.protogen.boopSensorManager.showOnHud });
       } catch (err) {
         this.handleError(err, req, res);
@@ -147,6 +183,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -154,6 +191,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const parsed = SetEnabledModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -175,6 +217,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.description = "Get boop sensor profiles"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -182,6 +225,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         res.json(this.protogen.boopSensorManager.profiles.map(profile => boopProfileToDTO(profile)));
       } catch (err) {
         this.handleError(err, req, res);
@@ -196,6 +244,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See console for more info" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -203,6 +252,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const parsed = CreateNewProfileModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -236,6 +290,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "No active profile found" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -243,6 +298,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const active = this.protogen.boopSensorManager.activeProfile;
         if (active == null) {
           res.status(404).send({ message: "No active profile found" });
@@ -262,6 +322,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Profile not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -269,6 +330,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const prodile = this.protogen.boopSensorManager.profiles.find(p => p.id === req.params.profileId);
         if (prodile == null) {
           res.status(404).send({ message: "Profile not found" });
@@ -289,6 +355,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "No active profile to deactivate" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -296,6 +363,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         if (this.protogen.boopSensorManager.activeProfile == null) {
           res.status(404).send({ message: "No active profile found" });
           return;
@@ -316,6 +388,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Profile not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -323,6 +396,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const profileId = req.params.id;
         const profile = this.protogen.boopSensorManager.profiles.find(p => p.id === profileId);
         if (profile == null) {
@@ -345,6 +423,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[400] = { description: "Bad request. See console for more info" }
       #swagger.responses[404] = { description: "Profile not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -352,6 +431,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const parsed = ProfileModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -414,6 +498,7 @@ export class BoopSensorRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Profile not found" }
       #swagger.responses[500] = { description: "An internal error occured" }
+      #swagger.responses[503] = { description: "Boop sensor system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -421,6 +506,11 @@ export class BoopSensorRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.boopSensorManager == null) {
+          res.status(503).send({ message: "Boop sensor system not initialized" });
+          return;
+        }
+
         const profileId = req.params.id;
         const profile = this.protogen.boopSensorManager.profiles.find(p => p.id === profileId);
         if (profile == null) {

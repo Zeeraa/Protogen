@@ -136,6 +136,16 @@ export class ProtogenWebServer {
     this.express.use(cors())
     this.express.use(bodyParser.json());
 
+    this.express.get("/system-features", (_, res) => {
+      /**
+       * #swagger.path = '/system-features'
+       * #swagger.tags = ['System']
+       * #swagger.description = "Get a list of enabled system features. This can be used by clients to determine if certain features are available or not."
+       * #swagger.responses[200] = { description: "Ok" }
+       */
+      res.json(this.protogen.config.systemFeatures);
+    })
+
     new VideoPlayerRouter(this).register();
     new AudioRouter(this).register();
     new VisorRouter(this).register();
@@ -373,15 +383,22 @@ export class ProtogenWebServer {
       name: this.protogen.visor.faceRenderer.colorEffectToUse.displayName,
     } : null;
 
-    const rgbEffect = this.protogen.rgb.activeScene ? {
-      id: this.protogen.rgb.activeScene.id,
-      name: this.protogen.rgb.activeScene.name,
-    } : null;
+    let rgbEffect = null;
+    if (this.protogen.rgb != null) {
+      rgbEffect = this.protogen.rgb.activeScene ? {
+        id: this.protogen.rgb.activeScene.id,
+        name: this.protogen.rgb.activeScene.name,
+      } : null;
+    }
 
-    const boopSensorProfile = this.protogen.boopSensorManager.activeProfile ? {
-      id: this.protogen.boopSensorManager.activeProfile.id,
-      name: this.protogen.boopSensorManager.activeProfile.name,
-    } : null;
+    let boopSensorProfile = null;
+    if (this.protogen.boopSensorManager != null) {
+      boopSensorProfile = this.protogen.boopSensorManager.activeProfile ? {
+        id: this.protogen.boopSensorManager.activeProfile.id,
+        name: this.protogen.boopSensorManager.activeProfile.name,
+      } : null;
+    }
+
 
     return {
       renderer,
@@ -389,8 +406,8 @@ export class ProtogenWebServer {
       faceRgbEffect,
       rgbEffect,
       boopSensorProfile,
-      hudEnabled: this.protogen.hudManager.enableHud,
-      boopSensorEnabled: this.protogen.boopSensorManager.enabled,
+      hudEnabled: this.protogen.hudManager?.enableHud ?? false,
+      boopSensorEnabled: this.protogen.boopSensorManager?.enabled ?? false,
       hasRenderLock: this.protogen.visor.hasRenderLock,
     }
   }

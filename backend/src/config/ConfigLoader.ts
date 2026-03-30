@@ -10,6 +10,8 @@ import { RgbConfiguration } from "./objects/RgbConfiguration";
 import { SerialConfiguration } from "./objects/SerialConfiguration";
 import { MqttConfiguration } from "./objects/MqttConfiguration";
 import { WebConfiguration } from "./objects/WebConfiguration";
+import { SystemFeatures } from "./objects/SystemFeatures";
+import { red } from "colors";
 
 /**
  * Reads configuration from environment variables and returns a Configuration object.
@@ -225,23 +227,53 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
+  const hasSerial = String(process.env["ENABLE_SERIAL"]).toLowerCase() == "true";
+  const hasRgb = String(process.env["ENABLE_RGB"]).toLowerCase() == "true";
+  const hasHUD = String(process.env["ENABLE_HUD"]).toLowerCase() == "true";
+  const hasBoopSensor = String(process.env["ENABLE_BOOP_SENSOR"]).toLowerCase() == "true";
+
+  const systemFeatures: SystemFeatures = {
+    serial: hasSerial,
+    rgb: hasRgb,
+    hud: hasHUD,
+    boopSensor: hasBoopSensor,
+  };
+
+  if (!hasSerial) {
+    if (hasRgb) {
+      console.warn(red("Serial is disabled but RGB is enabled. Disabling RGB."));
+      systemFeatures.rgb = false;
+    }
+
+    if (hasHUD) {
+      console.warn(red("Serial is disabled but HUD is enabled. Disabling HUD."));
+      systemFeatures.hud = false;
+    }
+
+    if (hasBoopSensor) {
+      console.warn(red("Serial is disabled but Boop Sensor is enabled. Disabling Boop Sensor."));
+      systemFeatures.boopSensor = false;
+    }
+  }
+
   const dataDirectory = process.env["DATA_DIRECTORY"] || "./data";
   const logDirectory = process.env["LOG_DIRECTORY"] || "./logs";
 
   return {
-    web: web,
-    database: database,
-    flaschenTaschen: flaschenTaschen,
-    ledMatrix: ledMatrix,
-    remoteWorker: remoteWorker,
+    web,
+    database,
+    flaschenTaschen,
+    ledMatrix,
+    remoteWorker,
     serial: serialConfig,
-    rgb: rgb,
-    mqtt: mqtt,
-    dataDirectory: dataDirectory,
-    logDirectory: logDirectory,
-    misc: misc,
-    hardware: hardware,
+    rgb,
+    mqtt,
+    dataDirectory,
+    logDirectory,
+    misc,
+    hardware,
     hud: hudConfig,
+    systemFeatures,
   }
 }
 

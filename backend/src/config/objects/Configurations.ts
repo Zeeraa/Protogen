@@ -9,6 +9,7 @@ import { MiscConfiguration } from "./MiscConfiguration";
 import { HardwareType } from "../../hardware/HardwareType";
 import { HUDConfiguration } from "./HUDConfiguration";
 import { MqttConfiguration } from "./MqttConfiguration";
+import { SystemFeatures } from "./SystemFeatures";
 
 export interface Configuration {
   web: WebConfiguration;
@@ -24,4 +25,6 @@ export interface Configuration {
   misc: MiscConfiguration;
   hardware: HardwareType;
   hud: HUDConfiguration;
+  systemFeatures: SystemFeatures;
 }
+

@@ -27,6 +27,35 @@ fi
 
 echo "Proceeding with installation..."
 
+# ========== Feature selection ==========
+ask_yes_no() {
+    local prompt="$1"
+    local answer
+    while true; do
+        read -rp "$prompt (y/n): " answer
+        case "${answer,,}" in
+            y) return 0 ;;
+            n) return 1 ;;
+            *) echo "Please enter y or n." ;;
+        esac
+    done
+}
+
+echo ""
+echo "--- Feature Configuration ---"
+if ask_yes_no "Enable Serial communication? (required for RGB, HUD, and boop sensor)"; then
+    ENABLE_SERIAL="true"
+    if ask_yes_no "Enable RGB?"; then ENABLE_RGB="true"; else ENABLE_RGB="false"; fi
+    if ask_yes_no "Enable HUD?"; then ENABLE_HUD="true"; else ENABLE_HUD="false"; fi
+    if ask_yes_no "Enable Boop Sensor?"; then ENABLE_BOOP_SENSOR="true"; else ENABLE_BOOP_SENSOR="false"; fi
+else
+    ENABLE_SERIAL="false"
+    ENABLE_RGB="false"
+    ENABLE_HUD="false"
+    ENABLE_BOOP_SENSOR="false"
+fi
+echo ""
+
 # ========== Packages ==========
 echo Installing required packages
 sudo apt update
@@ -125,6 +154,10 @@ fi
 
 sed -i 's|^DB_USERNAME=.*|DB_USERNAME="protogen"|' /home/pi/protogen/backend/.env
 sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD="${GENERATED_DB_PASSWORD}"|" /home/pi/protogen/backend/.env
+sed -i "s|^ENABLE_SERIAL=.*|ENABLE_SERIAL=\"${ENABLE_SERIAL}\"|" /home/pi/protogen/backend/.env
+sed -i "s|^ENABLE_RGB=.*|ENABLE_RGB=\"${ENABLE_RGB}\"|" /home/pi/protogen/backend/.env
+sed -i "s|^ENABLE_HUD=.*|ENABLE_HUD=\"${ENABLE_HUD}\"|" /home/pi/protogen/backend/.env
+sed -i "s|^ENABLE_BOOP_SENSOR=.*|ENABLE_BOOP_SENSOR=\"${ENABLE_BOOP_SENSOR}\"|" /home/pi/protogen/backend/.env
 
 sudo chown -R pi:pi /home/pi/protogen
 
