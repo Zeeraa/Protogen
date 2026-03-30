@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 $body-color: #2a2a2e;
 $body-lighter: #353538;
 $body-darker: #1a1a1e;
@@ -161,7 +163,7 @@ $color-xbox-x: #42a5f5;
   }
 
   &.active {
-    background: lighten($body-lighter, 12%);
+    background: color.adjust($body-lighter, $lightness: 12%);
     color: $accent;
     box-shadow: 0 0 6px $accent-glow;
   }
@@ -230,7 +232,7 @@ $color-xbox-x: #42a5f5;
     }
 
     &.active {
-      background: lighten($body-lighter, 18%);
+      background: color.adjust($body-lighter, $lightness: 18%);
       box-shadow: 0 0 6px $accent-glow;
     }
   }
@@ -367,7 +369,7 @@ $color-xbox-x: #42a5f5;
     cursor: default;
 
     &.pressed {
-      background: radial-gradient(circle at 40% 38%, lighten(#4a4a50, 10%), #444);
+      background: radial-gradient(circle at 40% 38%, color.adjust(#4a4a50, $lightness: 10%), #444);
       box-shadow: 0 0 8px $accent-glow;
       border-color: $accent;
     }
@@ -417,7 +419,7 @@ $color-xbox-x: #42a5f5;
   }
 
   &.active {
-    background: lighten($body-lighter, 14%);
+    background: color.adjust($body-lighter, $lightness: 14%);
     color: $accent;
   }
 }
@@ -446,7 +448,7 @@ $color-xbox-x: #42a5f5;
   }
 
   &.active {
-    background: lighten($body-darker, 16%);
+    background: color.adjust($body-darker, $lightness: 16%);
     box-shadow: 0 0 8px $accent-glow;
     border-color: $accent;
   }

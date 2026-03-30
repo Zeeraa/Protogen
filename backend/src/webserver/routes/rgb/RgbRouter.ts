@@ -27,6 +27,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const repo = this.protogen.database.dataSource.getRepository(RgbEditorPreviewElement);
 
         const w = parseInt(await this.protogen.database.getData(KV_RbgPreviewWidth) || "200");
@@ -62,6 +67,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Save the configuration"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for details" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -69,6 +75,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const parsed = RgbPreviewConfigModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -142,6 +153,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Get all RGB scenes"
       #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -149,6 +161,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const scenes = this.protogen.rgb.scenes;
         res.json(scenes.map(s => sceneToDTO(s)));
       } catch (err) {
@@ -162,6 +179,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Clears the active scene"
       #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -169,6 +187,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         this.protogen.rgb.setActiveScene(null);
         res.json({});
       } catch (err) {
@@ -182,6 +205,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.tags = ['RGB'],
       #swagger.description = "Create a new RGB scene"
       #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.parameters['body'] = {
         in: 'body',
@@ -197,6 +221,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const parsed = CreateNewSceneModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -220,6 +249,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Update a RGB scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.parameters['body'] = {
         in: 'body',
@@ -235,6 +265,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const parsed = UpdateSceneModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -265,6 +300,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Delete a scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -272,6 +308,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
         if (scene == null) {
           res.status(404).send({ message: "Scene not found" });
@@ -294,6 +335,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Get scene by id"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -301,6 +343,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
         if (scene == null) {
           res.status(404).send({ message: "Scene not found" });
@@ -320,6 +367,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Activates a scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -327,6 +375,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
         if (scene == null) {
           res.status(404).send({ message: "Scene not found" });
@@ -348,6 +401,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Edd effect to scene"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene or effect not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.parameters['body'] = {
         in: 'body',
@@ -364,6 +418,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const parsed = AddEffectModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -401,6 +460,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Update an effect"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene or effect not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.parameters['body'] = {
         in: 'body',
@@ -416,6 +476,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const parsed = UpdateEffectModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -453,6 +518,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.description = "Remove an effect"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[404] = { description: "Scene or effect not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.security = [
         {"apiKeyAuth": []},
@@ -460,6 +526,11 @@ export class RgbRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const scene = this.protogen.rgb.scenes.find(s => s.id == req.params.id);
         if (scene == null) {
           res.status(404).send({ message: "Scene not found" });
@@ -491,6 +562,7 @@ export class RgbRouter extends AbstractRouter {
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for details" }
       #swagger.responses[404] = { description: "Scene, effect or property not found" }
+      #swagger.responses[503] = { description: "RGB system not initialized" }
 
       #swagger.parameters['fullSave'] = {
         in: 'query',
@@ -514,6 +586,11 @@ export class RgbRouter extends AbstractRouter {
 
       */
       try {
+        if (this.protogen.rgb == null) {
+          res.status(503).send({ message: "RGB system not initialized" });
+          return;
+        }
+
         const parsed = SetPropertyModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });

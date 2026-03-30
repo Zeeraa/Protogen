@@ -14,11 +14,15 @@
 
         @if(showLoggedInOptions) {
         <a class="nav-link" routerLink="/visor">Visor</a>
+        @if(systemConfig.features()?.rgb) {
         <a class="nav-link" routerLink="/rgb">RGB</a>
+        }
         <a class="nav-link" routerLink="/video-player">Video Player</a>
         <a class="nav-link" routerLink="/actions">Actions</a>
         <a class="nav-link" routerLink="/apps">Apps</a>
+        @if(systemConfig.features()?.boopSensor) {
         <a class="nav-link" routerLink="/boop-sensor">Touch</a>
+        }
         <a class="nav-link" routerLink="/remote/gamepad">Remote</a>
         }
 

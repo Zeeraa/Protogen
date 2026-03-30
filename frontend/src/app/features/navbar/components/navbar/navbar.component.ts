@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, HostListener, inject, ViewChild }
 import { NavbarService } from '../../../../core/services/navbar.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ThemeService } from '../../../../core/services/theme.service';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +14,7 @@ export class NavbarComponent implements AfterViewInit {
   private readonly navbarService = inject(NavbarService);
   private readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
+  protected readonly systemConfig = inject(SystemConfigService);
 
   isTogglerVisible = false;
 

@@ -13,6 +13,7 @@ export class HudRouter extends AbstractRouter {
       #swagger.description = "Enable/Disable hud"
       #swagger.responses[200] = { description: "Ok" }
       #swagger.responses[400] = { description: "Bad request. See response for more info" }
+      #swagger.responses[503] = { description: "HUD system not initialized" }
 
       #swagger.parameters['body'] = {
         in: 'body',
@@ -28,6 +29,11 @@ export class HudRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.protogen.hudManager == null) {
+          res.status(503).send({ message: "HUD system not initialized" });
+          return;
+        }
+
         const parsed = HudStatusModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });

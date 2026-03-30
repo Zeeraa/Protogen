@@ -33,10 +33,12 @@
 
     <hr>
 
+    @if(systemConfig.features()?.hud) {
     <div class="form-check form-switch">
       <input class="form-check-input" type="checkbox" role="switch" id="hudToggle"
         [checked]="overview()?.hudEnabled ?? false" (change)="toggleHud.emit()">
       <label class="form-check-label" for="hudToggle">HUD Display</label>
     </div>
+    }
   </div>
 </div>

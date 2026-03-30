@@ -18,11 +18,13 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   private serialBaudRate: number;
   private serial: SerialPort | null = null;
   private boopSensorSubject = new Subject<boolean>();
+  private enableSerial: boolean;
 
-  constructor(protogen: Protogen, serialPort: string, serialBaudRate: number) {
+  constructor(protogen: Protogen, serialPort: string, serialBaudRate: number, enableSerial: boolean) {
     super(protogen);
     this.serialPort = serialPort;
     this.serialBaudRate = serialBaudRate;
+    this.enableSerial = enableSerial;
   }
 
   public get hardwareType(): HardwareType {
@@ -30,6 +32,11 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   }
 
   public connectSerial() {
+    if (!this.enableSerial) {
+      this.protogen.logger.info("StandardHardwareImplementation", "Serial connection is disabled");
+      return;
+    }
+
     if (this.serial != null) {
       if (this.serial.isOpen) {
         this.protogen.logger.info("StandardHardwareImplementation", "Closing existing existing serial connection");
@@ -79,6 +86,10 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   }
 
   public serialWrite(data: string) {
+    if (!this.enableSerial) {
+      return false;
+    }
+
     if (this.serial != null) {
       if (this.serial.isOpen) {
         this.serial.write(data + "\n", (err) => {

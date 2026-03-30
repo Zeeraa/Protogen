@@ -26,6 +26,7 @@
     </div>
 
     <!-- HUD -->
+    @if(systemConfig.features()?.hud) {
     <div class="masonry-item">
       <div class="card">
         <div class="card-header d-flex align-items-center gap-2">
@@ -40,6 +41,7 @@
         </div>
       </div>
     </div>
+    }
 
     <!-- Hardware -->
     <div class="masonry-item">

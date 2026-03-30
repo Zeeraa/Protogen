@@ -1,5 +1,6 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { OverviewData } from '../../../../core/services/api/overview-api.service';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-dashboard-status-card',
@@ -10,4 +11,5 @@ import { OverviewData } from '../../../../core/services/api/overview-api.service
 export class DashboardStatusCardComponent {
   readonly overview = input<OverviewData | null>(null);
   readonly toggleHud = output<void>();
+  protected readonly systemConfig = inject(SystemConfigService);
 }

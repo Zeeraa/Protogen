@@ -125,7 +125,7 @@ export class SystemRouter extends AbstractRouter {
             ip: this.protogen.networkManager.ip,
             isp: this.protogen.networkManager.isp,
           },
-          hudEnabled: this.protogen.hudManager.enableHud,
+          hudEnabled: this.protogen.hudManager && this.protogen.hudManager.enableHud,
           swaggerEnabled: swaggerEnabled,
           backendVersion: this.protogen.versionNumber,
         });
@@ -289,7 +289,7 @@ export class SystemRouter extends AbstractRouter {
       /*
       #swagger.path = '/system/clock-settings'
       #swagger.tags = ['System'],
-      #swagger.description = "Get clock renderer settings"
+      #swagger.description = "Get clock renderer settings"l rgb
       #swagger.responses[200] = { description: "Ok" }
 
       #swagger.security = [

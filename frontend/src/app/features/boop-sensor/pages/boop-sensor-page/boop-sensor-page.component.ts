@@ -7,6 +7,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-boop-sensor-page',
@@ -20,6 +21,11 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   private readonly modal = inject(NgbModal);
   private readonly router = inject(Router);
   private readonly title = inject(Title);
+  protected readonly systemConfig = inject(SystemConfigService);
+
+  get boopEnabled() {
+    return this.systemConfig.features()?.boopSensor ?? true;
+  }
 
   protected profiles: BoopSensorProfile[] = [];
   protected activeProfileId: string | null = null;
@@ -119,6 +125,7 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.title.setTitle("Boop Sensor - Protogen");
+    if (!this.boopEnabled) return;
 
     this.boopSensorApi.getProfiles().pipe(catchError((err) => {
       console.error('Failed to load Boop Sensor profiles', err);

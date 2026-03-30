@@ -1,0 +1,21 @@
+.startup-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.startup-message {
+  text-align: center;
+
+  .startup-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .startup-spinner {
+    width: 3rem;
+    height: 3rem;
+  }
+}

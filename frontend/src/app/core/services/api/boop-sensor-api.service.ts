@@ -1,13 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { ActionType } from '../../enum/ActionType';
+import { SystemConfigService } from '../system-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoopSensorApiService extends ApiBaseService {
+  private readonly systemConfig = inject(SystemConfigService);
+
   resetCounter() {
     return this.http.delete(this.apiBaseUrl + "/boop-sensor/counter").pipe(catchError(this.defaultErrorHandler));
   }
@@ -25,6 +28,7 @@ export class BoopSensorApiService extends ApiBaseService {
   }
 
   getProfiles() {
+    if (!this.systemConfig.features()?.boopSensor) return of([]);
     return this.http.get<BoopSensorProfile[]>(this.apiBaseUrl + "/boop-sensor/profiles").pipe(catchError(this.defaultErrorHandler));
   }
 

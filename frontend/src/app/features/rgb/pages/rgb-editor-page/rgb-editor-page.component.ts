@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-rgb-editor-page',
@@ -19,6 +20,11 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
+  protected readonly systemConfig = inject(SystemConfigService);
+
+  get rgbEnabled() {
+    return this.systemConfig.features()?.rgb ?? true;
+  }
 
   scene: RgbScene | null = null;
   sceneName = "";
@@ -114,6 +120,9 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("RGB Editor - Protogen");
+    if (!this.rgbEnabled) return;
+
     this.route.params.subscribe(params => {
       const id = String(params['id']);
 

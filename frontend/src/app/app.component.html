@@ -1,3 +1,24 @@
+@if (systemConfig.error()) {
+<div class="startup-overlay">
+  <div class="startup-message">
+    <i class="bi bi-exclamation-triangle startup-icon text-warning"></i>
+    <h4>Unable to reach the backend</h4>
+    <p class="text-muted">Retrying in {{ systemConfig.retryCountdown() }}s...</p>
+    <div class="spinner-border spinner-border-sm text-secondary" role="status">
+      <span class="visually-hidden">Retrying...</span>
+    </div>
+  </div>
+</div>
+} @else if (!systemConfig.loaded()) {
+<div class="startup-overlay">
+  <div class="startup-message">
+    <div class="spinner-border startup-spinner" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Connecting to server...</p>
+  </div>
+</div>
+} @else {
 <app-navbar />
-
 <router-outlet />
+}
