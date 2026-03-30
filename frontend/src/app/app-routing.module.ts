@@ -24,6 +24,7 @@ import { BoopSensorProfileEditorPageComponent } from './features/boop-sensor/pag
 import { BluetoothPageComponent } from './features/bluetooth/pages/bluetooth-page/bluetooth-page.component';
 import { GamepadRemotePageComponent } from './features/remote/pages/gamepad-remote-page/gamepad-remote-page.component';
 import { GamepadProfileEditorPageComponent } from './features/remote/pages/gamepad-profile-editor-page/gamepad-profile-editor-page.component';
+import { NotFoundPageComponent } from './features/not-found/pages/not-found-page/not-found-page.component';
 
 export const routes: Routes = [
   {
@@ -161,6 +162,10 @@ export const routes: Routes = [
         component: GamepadProfileEditorPageComponent,
       }
     ]
+  },
+  {
+    path: "**",
+    component: NotFoundPageComponent,
   },
 ];
 
