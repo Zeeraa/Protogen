@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { catchError } from 'rxjs';
+import { catchError, of } from 'rxjs';
+import { SystemConfigService } from '../system-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RgbApiService extends ApiBaseService {
+  private readonly systemConfig = inject(SystemConfigService);
+
   getEffects() {
     return this.http.get<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/effects").pipe(catchError(this.defaultErrorHandler));
   }
@@ -58,6 +61,7 @@ export class RgbApiService extends ApiBaseService {
   }
 
   getScenes() {
+    if (!this.systemConfig.features()?.rgb) return of([]);
     return this.http.get<RgbScene[]>(this.apiBaseUrl + "/rgb/scenes").pipe(catchError(this.defaultErrorHandler));
   }
 
