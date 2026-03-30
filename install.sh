@@ -96,6 +96,13 @@ if [[ "$IS_UPDATE" == "true" ]]; then
         fi
     fi
 
+    # Stop services before updating
+    echo "Stopping services..."
+    systemctl stop protogen || true
+    systemctl stop gamepad-listener || true
+    systemctl stop flaschen-taschen || true
+    systemctl stop mosquitto || true
+
     # Pull latest changes
     echo "Pulling latest changes from '$REPO_BRANCH'..."
     if ! git pull; then
@@ -365,9 +372,10 @@ if [[ "$IS_UPDATE" == "true" ]]; then
     systemctl restart gamepad-listener
     systemctl restart protogen
 else
-    service flaschen-taschen start
-    service gamepad-listener start
-    service protogen start
+    systemctl start flaschen-taschen
+    systemctl start gamepad-listener
+    systemctl start protogen
+    systemctl start mosquitto
 fi
 
 if [[ "$IS_UPDATE" == "true" ]]; then
