@@ -136,14 +136,17 @@ export class ProtogenWebServer {
     this.express.use(cors())
     this.express.use(bodyParser.json());
 
-    this.express.get("/system-features", (_, res) => {
+    this.express.get("/system-config", async (_, res) => {
       /**
-       * #swagger.path = '/system-features'
+       * #swagger.path = '/system-config'
        * #swagger.tags = ['System']
-       * #swagger.description = "Get a list of enabled system features. This can be used by clients to determine if certain features are available or not."
+       * #swagger.description = "Get data required for the frontend to load"
        * #swagger.responses[200] = { description: "Ok" }
        */
-      res.json(this.protogen.config.systemFeatures);
+      await (new Promise(resolve => setTimeout(resolve, 3000)))
+      res.json({
+        features: this.protogen.config.systemFeatures,
+      });
     })
 
     new VideoPlayerRouter(this).register();

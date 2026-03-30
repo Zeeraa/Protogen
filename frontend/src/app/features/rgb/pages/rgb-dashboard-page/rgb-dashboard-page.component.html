@@ -1,3 +1,14 @@
+@if(!rgbEnabled) {
+<div class="container mt-4">
+  <div class="alert alert-warning d-flex align-items-start gap-3">
+    <i class="bi bi-slash-circle fs-4 mt-1"></i>
+    <div>
+      <strong>RGB is disabled</strong>
+      <p class="mb-0 mt-1">This feature is currently disabled. To enable it, set <code>ENABLE_RGB=true</code> in your <code>.env</code> file and restart the server.</p>
+    </div>
+  </div>
+</div>
+} @else {
 <div class="container mt-4">
   <div class="row">
     <div class="col">
@@ -49,3 +60,4 @@
     </div>
   </div>
 </div>
+}

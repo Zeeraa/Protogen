@@ -12,6 +12,7 @@ import { SocketMessageType } from '../../../../core/services/socket/data/SocketM
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of, Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -30,6 +31,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly boopApi = inject(BoopSensorApiService);
   private readonly visorApi = inject(VisorApiService);
   private readonly socket = inject(SocketService);
+  protected readonly systemConfig = inject(SystemConfigService);
 
   private socketSubscription?: Subscription;
 
@@ -97,13 +99,15 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       })
     ).subscribe(expressions => this.expressions.set(expressions));
 
-    this.rgbApi.getScenes().pipe(
-      catchError(err => {
-        console.error("Failed to load RGB scenes", err);
-        this.toastr.error("Failed to load RGB scenes");
-        return [];
-      })
-    ).subscribe(scenes => this.rgbScenes.set(scenes));
+    if (this.systemConfig.features()?.rgb) {
+      this.rgbApi.getScenes().pipe(
+        catchError(err => {
+          console.error("Failed to load RGB scenes", err);
+          this.toastr.error("Failed to load RGB scenes");
+          return [];
+        })
+      ).subscribe(scenes => this.rgbScenes.set(scenes));
+    }
 
     this.faceApi.getFaceColorEffects().pipe(
       catchError(err => {
@@ -113,13 +117,15 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       })
     ).subscribe(effects => this.faceRgbEffects.set(effects));
 
-    this.boopApi.getProfiles().pipe(
-      catchError(err => {
-        console.error("Failed to load boop profiles", err);
-        this.toastr.error("Failed to load boop profiles");
-        return [];
-      })
-    ).subscribe(profiles => this.boopProfiles.set(profiles));
+    if (this.systemConfig.features()?.boopSensor) {
+      this.boopApi.getProfiles().pipe(
+        catchError(err => {
+          console.error("Failed to load boop profiles", err);
+          this.toastr.error("Failed to load boop profiles");
+          return [];
+        })
+      ).subscribe(profiles => this.boopProfiles.set(profiles));
+    }
   }
 
   protected activateAction(action: ActionSet): void {
@@ -205,6 +211,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   }
 
   protected toggleHud(): void {
+    if (!this.systemConfig.features()?.hud) return;
     const newState = !(this.overview()?.hudEnabled ?? false);
     this.hudApi.setHudEnabled(newState).pipe(
       catchError(err => {

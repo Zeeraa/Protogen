@@ -22,15 +22,19 @@
         (activateFaceRgb)="activateFaceRgb($event)" (disableFaceRgb)="disableFaceRgb()" />
     </div>
 
+    @if(systemConfig.features()?.rgb) {
     <div class="masonry-item">
       <app-dashboard-rgb-card [scenes]="rgbScenes()" [activeSceneId]="activeRgbSceneId()"
         (activate)="activateRgbScene($event)" (disable)="disableRgb()" />
     </div>
+    }
 
+    @if(systemConfig.features()?.boopSensor) {
     <div class="masonry-item">
       <app-dashboard-boop-card [enabled]="boopSensorEnabled()" [profiles]="boopProfiles()"
         [activeProfileId]="activeBoopProfileId()" (toggleEnabled)="toggleBoopSensor()"
         (activateProfile)="activateBoopProfile($event)" (deactivateProfile)="deactivateBoopProfile()" />
     </div>
+    }
   </div>
 </div>

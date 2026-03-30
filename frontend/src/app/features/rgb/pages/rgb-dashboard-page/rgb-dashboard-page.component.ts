@@ -3,6 +3,7 @@ import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.s
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-rgb-dashboard-page',
@@ -14,8 +15,13 @@ export class RgbDashboardPageComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly rgbApi = inject(RgbApiService);
   private readonly title = inject(Title);
+  protected readonly systemConfig = inject(SystemConfigService);
 
   scenes: RgbScene[] = [];
+
+  get rgbEnabled() {
+    return this.systemConfig.features()?.rgb ?? true;
+  }
 
   addBlank() {
     this.rgbApi.createNewScene("New scene").pipe(catchError(err => {
@@ -46,7 +52,9 @@ export class RgbDashboardPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadEffects();
     this.title.setTitle("RGB Light management - Protogen");
+    if (this.rgbEnabled) {
+      this.loadEffects();
+    }
   }
 }

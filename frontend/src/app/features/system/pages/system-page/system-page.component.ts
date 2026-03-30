@@ -11,6 +11,7 @@ import { environment } from '../../../../../environments/environment';
 import { form } from '@angular/forms/signals'
 import { hexToRgb, RGBColors, rgbToHex } from '../../../../core/services/utils/Utils';
 import { BootswatchThemes, Theme, ThemeService } from '../../../../core/services/theme.service';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-system-page',
@@ -26,6 +27,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
   protected readonly themeService = inject(ThemeService);
+  protected readonly systemConfig = inject(SystemConfigService);
 
   protected readonly bootswatchThemes = BootswatchThemes;
   protected readonly Theme = Theme;
