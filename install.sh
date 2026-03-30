@@ -14,18 +14,33 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-echo "WARNING: This script is intended to run on a clean install of Raspberry Pi OS Lite as the user 'pi' using sudo."
-echo "I am not responsible for any data loss if this script is run on an existing install or a non-supported system."
+# ========== Detect update vs fresh install ==========
+IS_UPDATE=false
+if [[ -d "/home/pi/protogen" ]]; then
+    IS_UPDATE=true
+fi
+
+if [[ "$IS_UPDATE" == "true" ]]; then
+    echo "Existing installation detected at /home/pi/protogen."
+    echo "This script will update your Protogen installation."
+else
+    echo "WARNING: This script is intended to run on a clean install of Raspberry Pi OS Lite as the user 'pi' using sudo."
+    echo "I am not responsible for any data loss if this script is run on an existing install or a non-supported system."
+fi
 echo ""
 read -rp "Do you want to continue? (y/N): " confirm
 
 # Convert input to lowercase and check if it's 'y'
 if [[ "${confirm,,}" != "y" ]]; then
-    echo "Installation canceled."
+    echo "Canceled."
     exit 1
 fi
 
-echo "Proceeding with installation..."
+if [[ "$IS_UPDATE" == "true" ]]; then
+    echo "Proceeding with update..."
+else
+    echo "Proceeding with installation..."
+fi
 
 # ========== Feature selection ==========
 ask_yes_no() {
@@ -41,20 +56,71 @@ ask_yes_no() {
     done
 }
 
-echo ""
-echo "--- Feature Configuration ---"
-if ask_yes_no "Enable Serial communication? (required for RGB, HUD, and boop sensor)"; then
-    ENABLE_SERIAL="true"
-    if ask_yes_no "Enable RGB?"; then ENABLE_RGB="true"; else ENABLE_RGB="false"; fi
-    if ask_yes_no "Enable HUD?"; then ENABLE_HUD="true"; else ENABLE_HUD="false"; fi
-    if ask_yes_no "Enable Boop Sensor?"; then ENABLE_BOOP_SENSOR="true"; else ENABLE_BOOP_SENSOR="false"; fi
-else
-    ENABLE_SERIAL="false"
-    ENABLE_RGB="false"
-    ENABLE_HUD="false"
-    ENABLE_BOOP_SENSOR="false"
+# ========== Update mode: Git checks ==========
+if [[ "$IS_UPDATE" == "true" ]]; then
+    # Check if git repo
+    if [[ ! -d "/home/pi/protogen/.git" ]]; then
+        echo "Error: /home/pi/protogen is not a git repository."
+        echo "The directory is already in use and we were unable to update due to a missing git repo."
+        exit 1
+    fi
+
+    cd /home/pi/protogen
+
+    # Check branch
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    if [[ "$CURRENT_BRANCH" != "$REPO_BRANCH" ]]; then
+        echo "Warning: You are currently on branch '$CURRENT_BRANCH', not '$REPO_BRANCH'."
+        read -rp "Switch to '$REPO_BRANCH' to proceed with the update? (y/N): " switch_confirm
+        if [[ "${switch_confirm,,}" != "y" ]]; then
+            echo "Update canceled."
+            exit 1
+        fi
+        if ! git checkout "$REPO_BRANCH"; then
+            echo "Error: Failed to switch to branch '$REPO_BRANCH'."
+            exit 1
+        fi
+    fi
+
+    # Check if repo is dirty
+    if [[ -n "$(git status --porcelain)" ]]; then
+        echo "Warning: The repository has uncommitted local changes."
+        read -rp "Run 'git reset --hard' to discard all local changes and proceed? (y/N): " reset_confirm
+        if [[ "${reset_confirm,,}" != "y" ]]; then
+            echo "Update canceled."
+            exit 1
+        fi
+        if ! git reset --hard; then
+            echo "Error: Failed to reset repository."
+            exit 1
+        fi
+    fi
+
+    # Pull latest changes
+    echo "Pulling latest changes from '$REPO_BRANCH'..."
+    if ! git pull; then
+        echo "Error: git pull failed."
+        exit 1
+    fi
+    echo "Repository updated successfully."
 fi
-echo ""
+
+if [[ "$IS_UPDATE" == "false" ]]; then
+    echo ""
+    echo "--- Feature Configuration ---"
+    if ask_yes_no "Enable Serial communication? (required for RGB, HUD, and boop sensor)"; then
+        ENABLE_SERIAL="true"
+        if ask_yes_no "Enable RGB?"; then ENABLE_RGB="true"; else ENABLE_RGB="false"; fi
+        if ask_yes_no "Enable HUD?"; then ENABLE_HUD="true"; else ENABLE_HUD="false"; fi
+        if ask_yes_no "Enable Boop Sensor?"; then ENABLE_BOOP_SENSOR="true"; else ENABLE_BOOP_SENSOR="false"; fi
+    else
+        ENABLE_SERIAL="false"
+        ENABLE_RGB="false"
+        ENABLE_HUD="false"
+        ENABLE_BOOP_SENSOR="false"
+    fi
+    echo ""
+fi
 
 # ========== Packages ==========
 echo Installing required packages
@@ -93,17 +159,19 @@ npm install --global typescript @angular/cli
 ng config -g cli.interactive false
 
 # ========== Configure stuff ==========
-# Database password
-GENERATED_DB_PASSWORD=$(pwgen -s -1 32)
-echo "Configuring MariaDB..."
+if [[ "$IS_UPDATE" == "false" ]]; then
+    # Database password
+    GENERATED_DB_PASSWORD=$(pwgen -s -1 32)
+    echo "Configuring MariaDB..."
 
-sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'protogen'@'localhost' IDENTIFIED BY '$GENERATED_DB_PASSWORD';"
-sudo mysql -u root -e "ALTER USER 'protogen'@'localhost' IDENTIFIED BY '$GENERATED_DB_PASSWORD';"
-sudo mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'protogen'@'localhost' WITH GRANT OPTION;"
-sudo mysql -u root -e "FLUSH PRIVILEGES;"
-sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS protogen;"
+    sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'protogen'@'localhost' IDENTIFIED BY '$GENERATED_DB_PASSWORD';"
+    sudo mysql -u root -e "ALTER USER 'protogen'@'localhost' IDENTIFIED BY '$GENERATED_DB_PASSWORD';"
+    sudo mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'protogen'@'localhost' WITH GRANT OPTION;"
+    sudo mysql -u root -e "FLUSH PRIVILEGES;"
+    sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS protogen;"
 
-echo "DB Password: $GENERATED_DB_PASSWORD"
+    echo "DB Password: $GENERATED_DB_PASSWORD"
+fi
 
 # ========== Build flaschen-taschen ==========
 if [[ -f "/home/pi/flaschen-taschen/server/ft-server" ]]; then
@@ -118,20 +186,19 @@ sudo chown -R pi:pi /home/pi/flaschen-taschen
 
 
 # ========== Setup protogen frontend and backend ==========
-# Clone the repository
-if [[ ! -d "/home/pi/protogen" ]]; then
-    echo "Cloning repository into $TARGET_DIR..."
+if [[ "$IS_UPDATE" == "false" ]]; then
+    # Clone the repository
+    echo "Cloning repository..."
     if ! git clone "$REPO_URL" "/home/pi/protogen"; then
         echo "Error: Failed to clone the repository!"
         exit 1
     fi
     echo "Repository cloned successfully."
-else
-    echo "Directory /home/pi/protogen already exists. Skipping clone."
+    cd /home/pi/protogen
+    git checkout $REPO_BRANCH
 fi
 
 cd /home/pi/protogen
-git checkout $REPO_BRANCH
 git submodule update --init --recursive
 
 # Frontend
@@ -146,18 +213,20 @@ cd /home/pi/protogen/backend
 npm install
 npm run build
 
-if [[ ! -f "/home/pi/backend/.env" ]]; then
-    echo "Cloning .env sample file"
-    cp /home/pi/protogen/backend/.env.sample /home/pi/protogen/backend/.env
-    sed -i 's|^REMOTE_WORKER_URL=.*|REMOTE_WORKER_URL="http://127.0.0.1:3069"|' /home/pi/protogen/backend/.env
-fi
+if [[ "$IS_UPDATE" == "false" ]]; then
+    if [[ ! -f "/home/pi/protogen/backend/.env" ]]; then
+        echo "Creating .env from sample file"
+        cp /home/pi/protogen/backend/.env.sample /home/pi/protogen/backend/.env
+        sed -i 's|^REMOTE_WORKER_URL=.*|REMOTE_WORKER_URL="http://127.0.0.1:3069"|' /home/pi/protogen/backend/.env
+    fi
 
-sed -i 's|^DB_USERNAME=.*|DB_USERNAME="protogen"|' /home/pi/protogen/backend/.env
-sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD="${GENERATED_DB_PASSWORD}"|" /home/pi/protogen/backend/.env
-sed -i "s|^ENABLE_SERIAL=.*|ENABLE_SERIAL=\"${ENABLE_SERIAL}\"|" /home/pi/protogen/backend/.env
-sed -i "s|^ENABLE_RGB=.*|ENABLE_RGB=\"${ENABLE_RGB}\"|" /home/pi/protogen/backend/.env
-sed -i "s|^ENABLE_HUD=.*|ENABLE_HUD=\"${ENABLE_HUD}\"|" /home/pi/protogen/backend/.env
-sed -i "s|^ENABLE_BOOP_SENSOR=.*|ENABLE_BOOP_SENSOR=\"${ENABLE_BOOP_SENSOR}\"|" /home/pi/protogen/backend/.env
+    sed -i 's|^DB_USERNAME=.*|DB_USERNAME="protogen"|' /home/pi/protogen/backend/.env
+    sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=\"${GENERATED_DB_PASSWORD}\"|" /home/pi/protogen/backend/.env
+    sed -i "s|^ENABLE_SERIAL=.*|ENABLE_SERIAL=\"${ENABLE_SERIAL}\"|" /home/pi/protogen/backend/.env
+    sed -i "s|^ENABLE_RGB=.*|ENABLE_RGB=\"${ENABLE_RGB}\"|" /home/pi/protogen/backend/.env
+    sed -i "s|^ENABLE_HUD=.*|ENABLE_HUD=\"${ENABLE_HUD}\"|" /home/pi/protogen/backend/.env
+    sed -i "s|^ENABLE_BOOP_SENSOR=.*|ENABLE_BOOP_SENSOR=\"${ENABLE_BOOP_SENSOR}\"|" /home/pi/protogen/backend/.env
+fi
 
 sudo chown -R pi:pi /home/pi/protogen
 
@@ -290,9 +359,20 @@ a2ensite protogen.conf
 
 service apache2 restart
 
-# Start services
-service flaschen-taschen start
-service gamepad-listener start
-service protogen start
+# Start / restart services
+if [[ "$IS_UPDATE" == "true" ]]; then
+    systemctl restart flaschen-taschen
+    systemctl restart gamepad-listener
+    systemctl restart protogen
+else
+    service flaschen-taschen start
+    service gamepad-listener start
+    service protogen start
+fi
 
-echo "DB Credentials: protogen:$GENERATED_DB_PASSWORD"
+if [[ "$IS_UPDATE" == "true" ]]; then
+    echo "Update complete! Services have been restarted."
+else
+    echo "Installation complete!"
+    echo "DB Credentials: protogen:$GENERATED_DB_PASSWORD"
+fi
