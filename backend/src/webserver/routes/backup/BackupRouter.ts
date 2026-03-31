@@ -157,11 +157,8 @@ export class BackupRouter extends AbstractRouter {
         // Compress and send files
         const tempArchive = resolve(this.protogen.tempDirectory, uuidv7() + ".tar.gz");
 
-        try {
-          await execFileAsync("tar", ["-czf", tempArchive, "-C", tempDirectory, "."]);
-        } catch (tarErr) {
-          throw tarErr;
-        }
+        await execFileAsync("tar", ["-czf", tempArchive, "-C", tempDirectory, "."]);
+
         await rm(tempDirectory, { recursive: true, force: true }).catch(() => undefined);
 
         const filename = `protogen-backup-${new Date().toISOString().slice(0, 10)}.tar.gz`;
