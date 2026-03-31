@@ -78,8 +78,10 @@ export class HUDManager {
     }
 
     let visorStatus = "Visor: " + cleanText(this.protogen.visor.activeRenderer?.name || "None");
-    if (this.protogen.videoPlaybackManager.isPlaying) {
-      visorStatus = "Visor: Video playing";
+    if (this.protogen.videoPlaybackManager) {
+      if (this.protogen.videoPlaybackManager.isPlaying) {
+        visorStatus = "Visor: Video playing";
+      }
     }
 
     const additionalInfo: string[] = [];
@@ -92,8 +94,10 @@ export class HUDManager {
       additionalInfo.push("Connectivity issues!");
     }
 
-    if (this.protogen.videoPlaybackManager.monitoredJob != null) {
-      additionalInfo.push("Video DL: " + this.protogen.videoPlaybackManager.status);
+    if (this.protogen.videoPlaybackManager) {
+      if (this.protogen.videoPlaybackManager.monitoredJob != null) {
+        additionalInfo.push("Video DL: " + this.protogen.videoPlaybackManager.status);
+      }
     }
 
     if (this.protogen.boopSensorManager && this.protogen.boopSensorManager.enabled && this.protogen.boopSensorManager.showOnHud) {

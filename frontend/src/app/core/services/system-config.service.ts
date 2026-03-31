@@ -9,6 +9,7 @@ export interface SystemFeatures {
   rgb: boolean;
   hud: boolean;
   boopSensor: boolean;
+  videoPlayback: boolean;
 }
 
 export interface SystemConfig {

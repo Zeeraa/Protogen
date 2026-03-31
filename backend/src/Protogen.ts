@@ -44,7 +44,7 @@ export class Protogen {
   public readonly visor: ProtogenVisor;
   public readonly flaschenTaschen: FlaschenTaschen;
   public readonly remoteWorker: ProtogenRemoteWorker;
-  public readonly videoPlaybackManager: ProtogenVideoPlaybackManager;
+  public readonly videoPlaybackManager: ProtogenVideoPlaybackManager | null;
   public readonly rgb: RgbManager | null;
   public readonly networkManager: NetworkManager;
   public readonly eventEmitter: EventEmitter;
@@ -163,7 +163,9 @@ export class Protogen {
       this.hudManager = null;
     }
     this.remoteWorker = new ProtogenRemoteWorker(this);
-    this.videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
+    if (this.config.systemFeatures.videoPlayback) {
+      this.videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
+    }
     if (this.config.systemFeatures.rgb) {
       this.rgb = new RgbManager(this);
     } else {
@@ -214,8 +216,10 @@ export class Protogen {
       await this.rgb?.applyLastScene();
     }
 
-    await this.visor.tryRenderTextFrame("BOOTING...\nInit video", BootMessageColor);
-    await this.videoPlaybackManager.removeDeletedCache();
+    if (this.config.systemFeatures.videoPlayback) {
+      await this.visor.tryRenderTextFrame("BOOTING...\nInit video", BootMessageColor);
+      await this.videoPlaybackManager?.removeDeletedCache();
+    }
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit VISOR", BootMessageColor);
     await this.visor.loadActiveRendererFromDatabase();

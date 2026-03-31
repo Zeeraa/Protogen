@@ -390,8 +390,10 @@ export class GamepadManager {
         const expression = this.protogen.visor.faceRenderer.expressions.find(e => e.data.uuid == profileAction.action);
         if (expression != null) {
           this.protogen.visor.activateRenderer(FaceRendererId);
-          if (this.protogen.videoPlaybackManager.isPlaying) {
-            this.protogen.videoPlaybackManager.kill();
+          if (this.protogen.videoPlaybackManager) {
+            if (this.protogen.videoPlaybackManager.isPlaying) {
+              this.protogen.videoPlaybackManager.kill();
+            }
           }
           this.protogen.visor.faceRenderer.setActiveExpression(expression);
           this.protogen.visor.faceRenderer.defaultExpression = expression.data.uuid;

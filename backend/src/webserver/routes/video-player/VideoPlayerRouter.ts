@@ -31,6 +31,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         res.json({
           hasDownloadJob: this.playbackManager.monitoredJob != null,
           downloadJobStatus: this.playbackManager.status,
@@ -65,6 +70,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const parsed = PlayVideoModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -104,6 +114,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const parsed = StreamVideoModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -134,6 +149,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const result = this.playbackManager.kill();
         res.json({
           didStop: result,
@@ -159,6 +179,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const result = await savedVideoRepo.find({
           order: {
             sortingNumber: "ASC",
@@ -202,6 +227,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const parsed = SavedVideoModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -269,6 +299,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
           res.status(400).send({ message: "Bad request: invalid id provided" });
@@ -370,6 +405,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
           res.status(400).send({ message: "Bad request: invalid id provided" });
@@ -411,6 +451,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
           res.status(400).send({ message: "Bad request: invalid id provided" });
@@ -432,9 +477,9 @@ export class VideoPlayerRouter extends AbstractRouter {
         let downloadJob: VideoDownloadJob | null = null;
 
         if (isStream) {
-          await this.protogen.videoPlaybackManager.streamVideo(savedVideo.url);
+          await this.playbackManager.streamVideo(savedVideo.url);
         } else {
-          downloadJob = await this.protogen.videoPlaybackManager.playVideoCached(savedVideo.url, savedVideo.mirrorVideo, savedVideo.flipVideo);
+          downloadJob = await this.playbackManager.playVideoCached(savedVideo.url, savedVideo.mirrorVideo, savedVideo.flipVideo);
         }
 
         res.json({
@@ -462,6 +507,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const result = await groupRepo.find({});
         res.json(result);
       } catch (err) {
@@ -492,6 +542,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const parsed = AlterGroupModel.safeParse(req.body);
         if (!parsed.success) {
           res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
@@ -535,6 +590,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
           res.status(400).send({ message: "Bad request: Id is not a valid number" });
@@ -586,6 +646,11 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
           res.status(400).send({ message: "Bad request: Id is not a valid number" });
@@ -627,7 +692,12 @@ export class VideoPlayerRouter extends AbstractRouter {
       ]
       */
       try {
-        const directory = this.protogen.videoPlaybackManager.videoDirectory;
+        if (this.playbackManager == null) {
+          res.status(503).send({ message: "Video playback system not initialized" });
+          return;
+        }
+
+        const directory = this.playbackManager.videoDirectory;
 
         const files = readdirSync(directory);
         let deletedCount = 0;
