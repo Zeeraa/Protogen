@@ -5,7 +5,7 @@ import { DataSource, Equal, In, IsNull, Not } from "typeorm";
 import { VideoDownloaderJob } from "./VideoDownloaderJob";
 import { VideoDownloaderJobStatus } from "../enum/VideoDownloaderJobStatus";
 import { cyan, green, red } from "colors";
-import youtubeDl, { Flags } from "youtube-dl-exec";
+import youtubeDl, { Flags, update } from "youtube-dl-exec";
 import { VideoDownloadJobDTO } from "../dto/comment/VideoDownloadJob";
 import { uuidv7 } from "uuidv7";
 import { sleep } from "../utils/Sleep";
@@ -59,7 +59,7 @@ export class VideoDownloadManager {
     mkdirSync(this._tempFolder);
   }
 
-  async init() {
+  public async init() {
     if (!existsSync(this._dbFile)) {
       console.log("Creating initial database for video downloader");
     }
@@ -221,6 +221,15 @@ export class VideoDownloadManager {
       job.errorMessage = "An exception occured while processing job. " + err.message;
       await repo.save(job);
       throw err;
+    }
+  }
+
+  public async update() {
+    try {
+      await update();
+      console.log("Update function completed");
+    } catch (err) {
+      console.error("Update failed", err);
     }
   }
 

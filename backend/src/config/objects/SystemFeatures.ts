@@ -3,4 +3,5 @@ export interface SystemFeatures {
   hud: boolean;
   boopSensor: boolean;
   rgb: boolean;
+  videoPlayback: boolean;
 }

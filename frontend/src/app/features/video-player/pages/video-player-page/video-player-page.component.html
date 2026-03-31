@@ -1,3 +1,18 @@
+@if(!videoPlaybackEnabled) {
+<div class="container mt-4">
+  <div class="alert alert-warning d-flex align-items-start gap-3">
+    <i class="bi bi-slash-circle fs-4 mt-1"></i>
+    <div>
+      <strong>Video Playback is disabled</strong>
+      <p class="mb-0 mt-1">This feature is currently disabled. To enable it, set
+        <code>VIDEO_PLAYBACK_ENABLED=true</code> in your
+        <code>.env</code> file and restart the server. Note that video playback requires a separate processing server
+        (remote worker) to be configured manually &mdash; see the documentation for details.
+      </p>
+    </div>
+  </div>
+</div>
+} @else {
 <div class="container mt-4">
   <div class="row">
     <div class="col">
@@ -157,6 +172,7 @@
     </div>
   </div>
 </div>
+}
 
 <ng-template #addVideoModal let-modal>
   <div class="modal-header">

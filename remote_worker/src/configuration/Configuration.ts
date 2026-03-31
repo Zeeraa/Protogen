@@ -46,19 +46,21 @@ export async function loadConfiguration(): Promise<Configuration> {
   }
 
   const cookiesPath = process.env["COOKIES_PATH"] || "./cookies/cookies.txt";
+  const autoUpdate = String(process.env["AUTO_UPDATE"]).toLowerCase() == "true";
 
   const webConfig: WebConfig = {
-    port: port,
+    port,
     sslKeyPath: sslKey,
     sslCertPath: sslCert,
-    trustProxy: trustProxy,
+    trustProxy,
   }
   //#endregion
 
   return {
     web: webConfig,
-    apiKey: apiKey,
-    cookiesPath: cookiesPath,
+    apiKey,
+    cookiesPath,
+    autoUpdate,
   }
 }
 
@@ -66,6 +68,7 @@ export interface Configuration {
   web: WebConfig;
   apiKey: string | null;
   cookiesPath: string;
+  autoUpdate: boolean;
 }
 
 export interface WebConfig {

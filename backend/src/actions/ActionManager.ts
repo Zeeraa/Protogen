@@ -69,38 +69,42 @@ export class ActionManager {
   public async performAction(type: ActionType, action: string | null, metadata: string | null, reqursionProtectionCounter = 0): Promise<boolean> {
     //#region Start video playback
     if (type == ActionType.PLAY_VIDEO) {
-      const id = parseInt(action || "");
-      if (isNaN(id)) {
-        this.protogen.logger.error("ActionManager", "Invalid id passed");
-        return false;
-      }
-
-      const repo = this.protogen.database.dataSource.getRepository(SavedVideo);
-
-      const video = await repo.findOne({
-        where: {
-          id: Equal(id),
+      if (this.protogen.videoPlaybackManager != null) {
+        const id = parseInt(action || "");
+        if (isNaN(id)) {
+          this.protogen.logger.error("ActionManager", "Invalid id passed");
+          return false;
         }
-      });
 
-      if (video == null) {
-        this.protogen.logger.error("ActionManager", "Failed to play saved video since id was not found in database");
-        return false;
+        const repo = this.protogen.database.dataSource.getRepository(SavedVideo);
+
+        const video = await repo.findOne({
+          where: {
+            id: Equal(id),
+          }
+        });
+
+        if (video == null) {
+          this.protogen.logger.error("ActionManager", "Failed to play saved video since id was not found in database");
+          return false;
+        }
+
+        if (video.isStream) {
+          await this.protogen.videoPlaybackManager.streamVideo(video.url);
+        } else {
+          await this.protogen.videoPlaybackManager.playVideo(video.url, video.mirrorVideo, video.flipVideo);
+        }
+
+        return true;
       }
-
-      if (video.isStream) {
-        await this.protogen.videoPlaybackManager.streamVideo(video.url);
-      } else {
-        await this.protogen.videoPlaybackManager.playVideo(video.url, video.mirrorVideo, video.flipVideo);
-      }
-
-      return true;
     }
     //#endregion
 
     //#region Stop video playback
     if (type == ActionType.STOP_VIDEO) {
-      this.protogen.videoPlaybackManager.kill();
+      if (this.protogen.videoPlaybackManager != null) {
+        this.protogen.videoPlaybackManager.kill();
+      }
     }
     //#endregion
 

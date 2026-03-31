@@ -7,6 +7,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { nullToUndefined, UrlPattern } from '../../../../core/services/utils/Utils';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
+import { SystemConfigService } from '../../../../core/services/system-config.service';
 
 @Component({
   selector: 'app-video-player-page',
@@ -20,6 +21,11 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   private readonly volumeApi = inject(AudioApiService);
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
+  protected readonly systemConfig = inject(SystemConfigService);
+
+  get videoPlaybackEnabled() {
+    return this.systemConfig.features()?.videoPlayback ?? true;
+  }
 
   videoInputUrl = "";
   mirrorVideo = true;
@@ -266,6 +272,8 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle("Video playback - Protogen");
+    if (!this.videoPlaybackEnabled) return;
     this.update();
     this.updateVolume();
     this.fetchVideoGroups();
@@ -277,8 +285,6 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     this.volumeUpdateInterval = setInterval(() => {
       this.updateVolume();
     }, 5000);
-
-    this.title.setTitle("Video playback - Protogen");
   }
 
   ngOnDestroy(): void {

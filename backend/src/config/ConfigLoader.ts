@@ -231,12 +231,14 @@ export function loadConfiguration(): Configuration {
   const hasRgb = String(process.env["ENABLE_RGB"]).toLowerCase() == "true";
   const hasHUD = String(process.env["ENABLE_HUD"]).toLowerCase() == "true";
   const hasBoopSensor = String(process.env["ENABLE_BOOP_SENSOR"]).toLowerCase() == "true";
+  const hasVideoPlayback = String(process.env["VIDEO_PLAYBACK_ENABLED"]).toLowerCase() == "true";
 
   const systemFeatures: SystemFeatures = {
     serial: hasSerial,
     rgb: hasRgb,
     hud: hasHUD,
     boopSensor: hasBoopSensor,
+    videoPlayback: hasVideoPlayback,
   };
 
   if (!hasSerial) {

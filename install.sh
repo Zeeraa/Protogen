@@ -127,6 +127,10 @@ if [[ "$IS_UPDATE" == "false" ]]; then
         ENABLE_BOOP_SENSOR="false"
     fi
     echo ""
+    echo "Video playback requires a separate processing server (remote worker) to be set up manually."
+    echo "See the documentation for instructions on how to configure it."
+    if ask_yes_no "Enable Video Playback?"; then VIDEO_PLAYBACK_ENABLED="true"; else VIDEO_PLAYBACK_ENABLED="false"; fi
+    echo ""
 fi
 
 # ========== Packages ==========
@@ -233,6 +237,7 @@ if [[ "$IS_UPDATE" == "false" ]]; then
     sed -i "s|^ENABLE_RGB=.*|ENABLE_RGB=\"${ENABLE_RGB}\"|" /home/pi/protogen/backend/.env
     sed -i "s|^ENABLE_HUD=.*|ENABLE_HUD=\"${ENABLE_HUD}\"|" /home/pi/protogen/backend/.env
     sed -i "s|^ENABLE_BOOP_SENSOR=.*|ENABLE_BOOP_SENSOR=\"${ENABLE_BOOP_SENSOR}\"|" /home/pi/protogen/backend/.env
+    sed -i "s|^VIDEO_PLAYBACK_ENABLED=.*|VIDEO_PLAYBACK_ENABLED=\"${VIDEO_PLAYBACK_ENABLED}\"|" /home/pi/protogen/backend/.env
 fi
 
 sudo chown -R pi:pi /home/pi/protogen

@@ -16,42 +16,42 @@ import { VideoDownloaderRouter } from "./routes/video_downloader/VideoDownloader
 import { VideoDownloadManager } from "./video_downloader/VideoDownloaderManager";
 
 export class Server {
-  private _configuration;
-  private _express: Express;
-  private _videoDownloadManager: VideoDownloadManager;
-  private _dataDirectory: string;
+  public readonly configuration;
+  public readonly express: Express;
+  public readonly videoDownloadManager: VideoDownloadManager;
+  public readonly dataDirectory: string;
 
   constructor(config: Configuration) {
-    this._configuration = config;
+    this.configuration = config;
 
-    this._dataDirectory = "./data";
+    this.dataDirectory = "./data";
     if (!existsSync(this.dataDirectory)) {
       mkdirSync(this.dataDirectory);
     }
 
-    this._videoDownloadManager = new VideoDownloadManager(this);
+    this.videoDownloadManager = new VideoDownloadManager(this);
 
     //#region Express and middleware
-    this._express = express();
-    this._express.use(cors());
-    this._express.use(bodyParser.json());
-    this._express.use(helmet.hidePoweredBy());
-    this._express.use(morgan("combined"));
+    this.express = express();
+    this.express.use(cors());
+    this.express.use(bodyParser.json());
+    this.express.use(helmet.hidePoweredBy());
+    this.express.use(morgan("combined"));
     if (String(process.env["TRUST_PROXY"]).toLowerCase() == "true") {
-      this._express.set('trust proxy', true);
+      this.express.set('trust proxy', true);
     }
     //#endregion
 
-    if (this._configuration.apiKey == null) {
+    if (this.configuration.apiKey == null) {
       console.warn(red("No api key defined. The server will not use authentication"));
     } else {
       console.log("Using api key for authentication");
-      this._express.use((req, res, next) => {
+      this.express.use((req, res, next) => {
         if (req.headers.authorization == null) {
           return res.status(401).send({ message: "Missing auth header" });
         }
         const headerValue = req.headers.authorization.startsWith('Bearer ') ? req.headers.authorization.replace('Bearer ', '') : req.headers.authorization;
-        if (headerValue == this._configuration.apiKey) {
+        if (headerValue == this.configuration.apiKey) {
           return next();
         }
         return res.status(401).send({ message: "Invalid api key" });
@@ -67,11 +67,11 @@ export class Server {
         //TODO: replace with readFileSync
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const swaggerOutput = require("../swagger.json"); // But relative to the Server.ts file here
-        this._express.use("/", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
+        this.express.use("/", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
       } else {
         console.error(red("Could not find swagger.json. Make sure to run \"npm run swagger\" before starting the server"));
         console.warn(yellow("Swagger documentation will not be available until this is resolved"));
-        this._express.get("/", (_: Request, res: Response) => {
+        this.express.get("/", (_: Request, res: Response) => {
           res.send("Could not find swagger.json. Make sure to run \"npm run swagger\" before starting the server");
         });
       }
@@ -83,13 +83,39 @@ export class Server {
   }
 
   private async init() {
-    await this._videoDownloadManager.init();
+    await this.videoDownloadManager.init();
 
     //#region Register endpoints
     new VideoDownloaderRouter(this).register();
     //#endregion
 
+    if (this.configuration.autoUpdate) {
+      console.log(green("Auto update is enabled. Checking for updates..."));
+      await this.videoDownloadManager.update();
+      this.scheduleMidnightUpdate();
+    }
+
     await this.startExpress();
+  }
+
+  private scheduleMidnightUpdate() {
+    const now = new Date();
+    const nextMidnight = new Date(now);
+    nextMidnight.setDate(now.getDate() + 1);
+    nextMidnight.setHours(0, 0, 0, 0);
+    const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+    console.log(green(`Auto update scheduled. Next update in ${Math.round(msUntilMidnight / 1000 / 60)} minutes (at midnight)`));
+
+    setTimeout(async () => {
+      console.log(green("Running scheduled midnight auto update..."));
+      try {
+        await this.videoDownloadManager.update();
+      } catch (err) {
+        console.error(red("Scheduled auto update failed:"), err);
+      }
+      this.scheduleMidnightUpdate();
+    }, msUntilMidnight);
   }
 
   //#region Start express
@@ -103,14 +129,14 @@ export class Server {
           console.log("Reading certificate...");
           const certificate = readFileSync(this.configuration.web.sslCertPath!, 'utf8');
           const credentials = { key: privateKey, cert: certificate };
-          const httpsServer = https.createServer(credentials, this._express);
+          const httpsServer = https.createServer(credentials, this.express);
           httpsServer.listen(this.configuration.web.port, () => {
             console.log(green("HTTPS listening on port:"), cyan(String(this.configuration.web.port)));
             resolve();
           });
         } else {
           console.log("Using HTTP");
-          this._express.listen(this.configuration.web.port, () => {
+          this.express.listen(this.configuration.web.port, () => {
             console.log(green("Express listening on port:"), cyan(String(this.configuration.web.port)));
             resolve();
           });
@@ -120,24 +146,6 @@ export class Server {
         reject(err);
       }
     });
-  }
-  //#endregion
-
-  //#region Getters
-  get configuration() {
-    return this._configuration;
-  }
-
-  get express() {
-    return this._express;
-  }
-
-  get dataDirectory() {
-    return this._dataDirectory;
-  }
-
-  get videoDownloadManager() {
-    return this._videoDownloadManager;
   }
   //#endregion
 }
