@@ -6,6 +6,7 @@ import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
 import { HudApiService } from '../../../../core/services/api/hud-api.service';
+import { BackupApiService } from '../../../../core/services/api/backup-api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
 import { form } from '@angular/forms/signals'
@@ -23,6 +24,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly toastr = inject(ToastrService);
   private readonly api = inject(SystemApiService);
   private readonly hudApi = inject(HudApiService);
+  private readonly backupApi = inject(BackupApiService);
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
@@ -127,6 +129,19 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       throw err;
     })).subscribe(() => {
       this.toastr.success("Swagger " + (enabled ? "enabled" : "disabled") + ". The system needs to be restarted before changes take effect");
+    });
+  }
+
+  protected downloadBackup() {
+    this.backupApi.getDownloadToken().pipe(catchError(err => {
+      this.toastr.error('Failed to get backup download token');
+      throw err;
+    })).subscribe(({ token }) => {
+      this.toastr.info('Download started. It might take a bit of time to prepare the file for download.', undefined, { timeOut: 8000 });
+      const a = document.createElement('a');
+      a.href = this.api.apiBaseUrl + '/backup/download?token=' + encodeURIComponent(token);
+      a.download = 'backup.tar.gz';
+      a.click();
     });
   }
 

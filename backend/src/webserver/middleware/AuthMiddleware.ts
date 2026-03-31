@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ProtogenWebServer } from "../ProtogenWebServer";
 import { ApiKeyHeader } from "../../apikeys/ApiKeyManager";
 import { User } from "../../database/models/auth/User.model";
 
-export const AuthMiddleware = (webServer: ProtogenWebServer) => {
+export const AuthMiddleware = (webServer: ProtogenWebServer): RequestHandler => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authHeader = req.headers.authorization;

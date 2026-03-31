@@ -17,16 +17,11 @@ export class ProtogenVideoPlaybackManager {
   private _canceled: boolean = false;
   private _nextCheck: number = 0;
   private _status: VideoDownloadJobStatus | null = null;
-  private _videoDirectory;
   private _vlcProcess: ChildProcess | null = null;
   private _isDownloading = false;
 
-  constructor(protogen: Protogen, videoDirectory: string) {
+  constructor(protogen: Protogen) {
     this._protogen = protogen;
-    this._videoDirectory = videoDirectory;
-    if (!existsSync(videoDirectory)) {
-      mkdirSync(videoDirectory);
-    }
     this.tick();
   }
 
@@ -122,7 +117,7 @@ export class ProtogenVideoPlaybackManager {
   }
 
   private async downloadAndStartPlayback(hash: string): Promise<boolean> {
-    const targetDirectory = this._videoDirectory + "/" + hash.substring(0, 2);
+    const targetDirectory = this.protogen.videoDirectory + "/" + hash.substring(0, 2);
     if (!existsSync(targetDirectory)) {
       mkdirSync(targetDirectory, { recursive: true });
     }
@@ -181,7 +176,7 @@ export class ProtogenVideoPlaybackManager {
     const repo = this.protogen.database.dataSource.getRepository(VideoCache);
     const entries = await repo.find();
     for (const entry of entries) {
-      const targetDirectory = this._videoDirectory + "/" + entry.hash.substring(0, 2);
+      const targetDirectory = this.protogen.videoDirectory + "/" + entry.hash.substring(0, 2);
       const output = targetDirectory + "/" + entry.hash + ".mp4";
       if (!existsSync(output)) {
         this.protogen.logger.info("VideoPlaybackManager", "Deleting video cache entry " + cyan(entry.hash) + " becuse the video file was no longer found locally");
@@ -286,9 +281,5 @@ export class ProtogenVideoPlaybackManager {
 
   public get vlcProcess() {
     return this._vlcProcess;
-  }
-
-  public get videoDirectory() {
-    return this._videoDirectory;
   }
 }
