@@ -10,6 +10,7 @@ export interface SystemFeatures {
   hud: boolean;
   boopSensor: boolean;
   videoPlayback: boolean;
+  systemd: boolean;
 }
 
 export interface SystemConfig {

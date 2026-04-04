@@ -10,6 +10,7 @@ WorkingDirectory=/home/pi/protogen/backend
 Restart=no
 User=pi
 Environment="XDG_RUNTIME_DIR=/run/user/1000"
+Environment="WITH_SYSTEMD=true"
 ExecStartPre=+/bin/mkdir -p /run/user/1000
 ExecStartPre=+/bin/chown pi:pi /run/user/1000
 

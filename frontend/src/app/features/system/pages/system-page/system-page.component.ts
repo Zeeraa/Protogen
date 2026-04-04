@@ -3,7 +3,7 @@ import { HttpEventType } from '@angular/common/http';
 import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { catchError } from 'rxjs';
+import { catchError, of, timeout } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
 import { HudApiService } from '../../../../core/services/api/hud-api.service';
@@ -14,6 +14,7 @@ import { form } from '@angular/forms/signals'
 import { hexToRgb, RGBColors, rgbToHex } from '../../../../core/services/utils/Utils';
 import { BootswatchThemes, Theme, ThemeService } from '../../../../core/services/theme.service';
 import { SystemConfigService } from '../../../../core/services/system-config.service';
+import { DevApi } from '../../../../core/services/api/discorvery-api.service';
 
 @Component({
   selector: 'app-system-page',
@@ -29,6 +30,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
+  private readonly discoveryApi = inject(DevApi);
   protected readonly themeService = inject(ThemeService);
   protected readonly systemConfig = inject(SystemConfigService);
 
@@ -38,6 +40,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected readonly shutdownModalTemplate = viewChild<TemplateRef<any>>("shutdownModal");
   protected readonly importModalTemplate = viewChild<TemplateRef<any>>("importModal");
   protected readonly importProgressModalTemplate = viewChild<TemplateRef<any>>("importProgressModal");
+  protected readonly restartServerModalTemplate = viewChild<TemplateRef<any>>("restartServerModal");
 
   private readonly overview = signal<SystemOverview | null>(null);
   private updateInterval: any = null;
@@ -51,7 +54,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected readonly importFile = signal<File | null>(null);
   protected readonly importConfirmText = signal<string>('');
   protected readonly importUploadProgress = signal<number>(0);
-  protected readonly importStatus = signal<'idle' | 'uploading' | 'importing' | 'done' | 'error'>('idle');
+  protected readonly importStatus = signal<'idle' | 'uploading' | 'importing' | 'done' | 'waiting-restart' | 'manual-restart' | 'error'>('idle');
   protected readonly importCanStart = computed(() =>
     this.importFile() !== null && this.importConfirmText().toLowerCase() === 'confirm'
   );
@@ -59,6 +62,10 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private importModalRef: NgbModalRef | null = null;
   private importProgressModalRef: NgbModalRef | null = null;
   private shutdownModalRef: null | NgbModalRef = null;
+  private restartServerModalRef: NgbModalRef | null = null;
+  private restartPollInterval: any = null;
+
+  protected readonly restartServerStatus = signal<'confirm' | 'waiting-restart' | 'error'>('confirm');
 
   private readonly clockSettingsModel = signal({
     is24HourFormat: true,
@@ -192,7 +199,14 @@ export class SystemPageComponent implements OnInit, OnDestroy {
         }
       } else if (event.type === HttpEventType.Response) {
         if (event.ok) {
-          this.importStatus.set('done');
+          this.killIntervals();
+          const autoRestart = event.body?.autoRestart ?? false;
+          if (autoRestart) {
+            this.importStatus.set('waiting-restart');
+            this.startRestartPolling();
+          } else {
+            this.importStatus.set('manual-restart');
+          }
         } else {
           this.importStatus.set('error');
           console.error('Backup import failed with status', event.status, event.body);
@@ -201,7 +215,36 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  private killIntervals() {
+    if (this.updateInterval != null) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
+    if (this.restartPollInterval != null) {
+      clearInterval(this.restartPollInterval);
+      this.restartPollInterval = null;
+    }
+  }
+
+  private startRestartPolling() {
+    setTimeout(() => {
+      this.restartPollInterval = setInterval(() => {
+        this.discoveryApi.getDiscoveryInfo({ timeout: 3000 }).pipe(
+          timeout(3000),
+          catchError(() => of(null))
+        ).subscribe(result => {
+          if (result?.sessionId) {
+            clearInterval(this.restartPollInterval);
+            this.restartPollInterval = null;
+            window.location.reload();
+          }
+        });
+      }, 5000);
+    }, 5000);
+  }
+
   protected closeImportProgressModal() {
+    if (this.importStatus() === 'waiting-restart') return;
     this.importProgressModalRef?.close();
     this.importStatus.set('idle');
   }
@@ -271,6 +314,33 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     })).subscribe(() => {
       this.toastr.success("Shutdown command executed!");
     });
+  }
+
+  protected restartServer() {
+    this.restartServerStatus.set('confirm');
+    this.restartServerModalRef?.close();
+    const template = this.restartServerModalTemplate();
+    if (template) {
+      this.restartServerModalRef = this.modal.open(template, { ariaLabelledBy: 'restart-server-modal-title', backdrop: 'static', keyboard: false });
+    }
+  }
+
+  protected confirmRestartServer() {
+    this.restartServerStatus.set('waiting-restart');
+    this.api.restart().pipe(catchError(err => {
+      console.error(err);
+      this.restartServerStatus.set('error');
+      throw err;
+    })).subscribe(() => {
+      this.killIntervals();
+      this.startRestartPolling();
+    });
+  }
+
+  protected closeRestartServerModal() {
+    if (this.restartServerStatus() === 'waiting-restart') return;
+    this.restartServerModalRef?.close();
+    this.restartServerStatus.set('confirm');
   }
 
   protected showNetworkDataChanged(checked: boolean) {
@@ -369,8 +439,6 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.updateInterval != null) {
-      clearInterval(this.updateInterval);
-    }
+    this.killIntervals();
   }
 }

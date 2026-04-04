@@ -18,9 +18,16 @@
             <span class="text-body-secondary">OS Name</span>
             <span class="badge bg-primary">{{osName()}}</span>
           </div>
-          <button class="btn btn-danger btn-sm" (click)="openShutdownModal()">
-            <i class="bi bi-power"></i> Shutdown
-          </button>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-danger btn-sm" (click)="openShutdownModal()">
+              <i class="bi bi-power"></i> Shutdown
+            </button>
+            @if(systemConfig.features()?.systemd) {
+            <button class="btn btn-warning btn-sm" (click)="restartServer()">
+              <i class="bi bi-arrow-clockwise"></i> Restart server
+            </button>
+            }
+          </div>
         </div>
       </div>
     </div>
@@ -460,10 +467,20 @@
       <span>Importing configuration...</span>
     </div>
     }
-    @if (importStatus() === 'done') {
-    <div class="alert alert-success d-flex align-items-center gap-2 mb-0">
-      <i class="bi bi-check-circle-fill"></i>
-      Backup imported successfully. You may need to restart the system for all changes to take effect.
+    @if (importStatus() === 'waiting-restart') {
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      <span>Waiting for restart... The page will automatically reload when done.</span>
+    </div>
+    <div class="progress" role="progressbar" aria-label="Restart progress" aria-valuenow="100" aria-valuemin="0"
+      aria-valuemax="100">
+      <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+    </div>
+    }
+    @if (importStatus() === 'manual-restart') {
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-0">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      Backup imported successfully. Please restart the hardware manually for all changes to take effect.
     </div>
     }
     @if (importStatus() === 'error') {
@@ -473,9 +490,52 @@
     </div>
     }
   </div>
-  @if (importStatus() === 'done' || importStatus() === 'error') {
+  @if (importStatus() === 'manual-restart' || importStatus() === 'error') {
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="closeImportProgressModal()">Close</button>
+  </div>
+  }
+</ng-template>
+
+<ng-template #restartServerModal>
+  <div class="modal-header">
+    <h4 class="modal-title text-warning" id="restart-server-modal-title">Restart server</h4>
+    @if(restartServerStatus() !== 'waiting-restart') {
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeRestartServerModal()"></button>
+    }
+  </div>
+  <div class="modal-body">
+    @if(restartServerStatus() === 'confirm') {
+    <p>Do you really want to restart the server process?</p>
+    }
+    @if(restartServerStatus() === 'waiting-restart') {
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      <span>Waiting for restart... The page will automatically reload when done.</span>
+    </div>
+    <div class="progress" role="progressbar" aria-label="Restart progress" aria-valuenow="100" aria-valuemin="0"
+      aria-valuemax="100">
+      <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+    </div>
+    }
+    @if(restartServerStatus() === 'error') {
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-0">
+      <i class="bi bi-x-circle-fill"></i>
+      Failed to restart server. Check the console for more details.
+    </div>
+    }
+  </div>
+  @if(restartServerStatus() === 'confirm' || restartServerStatus() === 'error') {
+  <div class="modal-footer">
+    @if(restartServerStatus() === 'confirm') {
+    <button type="button" class="btn btn-secondary" (click)="closeRestartServerModal()">Cancel</button>
+    <button type="button" class="btn btn-warning" (click)="confirmRestartServer()">
+      <i class="bi bi-arrow-clockwise"></i> Restart
+    </button>
+    }
+    @if(restartServerStatus() === 'error') {
+    <button type="button" class="btn btn-secondary" (click)="closeRestartServerModal()">Close</button>
+    }
   </div>
   }
 </ng-template>

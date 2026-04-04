@@ -155,6 +155,35 @@ export class SystemRouter extends AbstractRouter {
       }
     });
 
+    this.router.post("/restart", async (req, res) => {
+      /*
+      #swagger.path = '/system/restart'
+      #swagger.tags = ['System'],
+      #swagger.description = "Restart the system"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An error occured while executing command" }
+      #swagger.responses[503] = { description: "Process was not launched with WITH_SYSTEMD set to true. Unable to perform restart" }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        if (!this.protogen.config.systemFeatures.systemd) {
+          res.status(503).send({ message: "Process was not launched with WITH_SYSTEMD set to true. Unable to perform restart" });
+          return;
+        }
+
+        res.json({});
+
+        await this.protogen.hardwareAbstractionLayer.restartProcess();
+        process.exit(0);
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
+
     this.router.post("/flaschen-taschen/restart", async (req, res) => {
       /*
       #swagger.path = '/system/flaschen-taschen/restart'

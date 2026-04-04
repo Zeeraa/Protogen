@@ -635,7 +635,22 @@ export class BackupRouter extends AbstractRouter {
           this.protogen.logger.info("Backup", "Import completed successfully");
         });
 
-        res.json({ id });
+        const autoRestart = this.protogen.config.systemFeatures.systemd;
+
+        res.json({ autoRestart });
+
+        try {
+          if (autoRestart) {
+            this.protogen.logger.info("Backup", "Restarting process to apply imported backup");
+            await this.protogen.hardwareAbstractionLayer.restartProcess();
+            process.exit(0);
+          } else {
+            this.protogen.logger.info("Backup", "Backup imported successfully. Please restart the process to apply changes.");
+          }
+        } catch (err) {
+          this.protogen.logger.error("Backup", "Error during post-import restart");
+          console.error(err);
+        }
       } catch (err) {
         this.handleError(err, req, res);
       }

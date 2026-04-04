@@ -5,10 +5,43 @@ import { loadConfiguration } from "./config/ConfigLoader";
 import { Protogen } from "./Protogen";
 import { red, yellow } from "colors";
 import { readFileSync } from 'fs';
+import { ArgumentParser } from 'argparse';
 
 try {
   dotenv.config();
   consoleStamp(console);
+
+  const parser = new ArgumentParser({
+    description: 'Protogen backend server',
+  });
+
+  parser.add_argument('--with-systemd', {
+    action: 'store_true',
+    help: 'Indicate that the backend was lauches with systemd. This enables things like restarting the server from within the app.',
+  });
+
+  parser.add_argument('--led-width', {
+    type: 'int',
+    help: 'Override the width of the LED matrix defined in the config file. This is the total width of all connected panels.',
+  });
+
+  parser.add_argument('--led-height', {
+    type: 'int',
+    help: 'Override the height of the LED matrix defined in the config file. This is the total height of all connected panels .',
+  });
+
+  const args = parser.parse_args();
+  if (args.led_width != null) {
+    process.env["LED_WIDTH"] = args.led_width.toString();
+  }
+
+  if (args.led_height != null) {
+    process.env["LED_HEIGHT"] = args.led_height.toString();
+  }
+
+  if (args.with_systemd) {
+    process.env["WITH_SYSTEMD"] = "true";
+  }
 
   console.log("Reading configuration");
   const config = loadConfiguration();

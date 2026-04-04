@@ -4,4 +4,5 @@ export interface SystemFeatures {
   boopSensor: boolean;
   rgb: boolean;
   videoPlayback: boolean;
+  systemd: boolean;
 }

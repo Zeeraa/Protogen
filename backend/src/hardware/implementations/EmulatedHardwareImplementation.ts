@@ -133,6 +133,11 @@ export class EmulatedHardwareImplementation extends HardwareAbstractionLayer {
       session.sendMessage(SocketMessageType.S2C_DevHardwareEmulationState, state);
     });
   }
+
+  public async restartProcess() {
+    this.protogen.logger.info("EmulatedHardware", "Process restart requested");
+    process.exit(0);
+  }
 }
 
 export interface EmulatedHardwareState {

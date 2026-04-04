@@ -16,6 +16,6 @@ export class BackupApiService extends ApiBaseService {
     const req = new HttpRequest('POST', this.apiBaseUrl + '/backup/import', formData, {
       reportProgress: true,
     });
-    return this.http.request<{ id: string }>(req);
+    return this.http.request<{ autoRestart: boolean }>(req);
   }
 }

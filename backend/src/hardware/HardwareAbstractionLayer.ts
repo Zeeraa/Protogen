@@ -31,6 +31,11 @@ export abstract class HardwareAbstractionLayer {
   public abstract shutdown(): Promise<void>;
 
   /**
+   * Restart the process
+   */
+  public abstract restartProcess(): Promise<void>;
+
+  /**
    * Get the CPU temperature in degrees Celsius.
    */
   public abstract getCPUTemperature(): Promise<number>;
