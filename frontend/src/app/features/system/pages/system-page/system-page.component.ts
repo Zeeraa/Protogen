@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
+import { HttpEventType } from '@angular/common/http';
 import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -35,17 +36,29 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected readonly Theme = Theme;
 
   protected readonly shutdownModalTemplate = viewChild<TemplateRef<any>>("shutdownModal");
+  protected readonly importModalTemplate = viewChild<TemplateRef<any>>("importModal");
+  protected readonly importProgressModalTemplate = viewChild<TemplateRef<any>>("importProgressModal");
 
   private readonly overview = signal<SystemOverview | null>(null);
   private updateInterval: any = null;
-  private shutdownModalRef: null | NgbModalRef = null;
-
   protected readonly showSensitiveNetworkingData = signal<boolean>(false);
   protected readonly flaschenTaschenSettings = signal<FlaschenTaschenSettings>({ ledLimitRefresh: 100, ledSlowdownGpio: 3 });
   protected readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
   protected readonly audioDevices = signal<AudioDevice[]>([]);
   protected readonly selectedAudioDeviceId = signal<number | null>(null);
   protected readonly angularVersion = signal<string>("Unknown");
+
+  protected readonly importFile = signal<File | null>(null);
+  protected readonly importConfirmText = signal<string>('');
+  protected readonly importUploadProgress = signal<number>(0);
+  protected readonly importStatus = signal<'idle' | 'uploading' | 'importing' | 'done' | 'error'>('idle');
+  protected readonly importCanStart = computed(() =>
+    this.importFile() !== null && this.importConfirmText().toLowerCase() === 'confirm'
+  );
+
+  private importModalRef: NgbModalRef | null = null;
+  private importProgressModalRef: NgbModalRef | null = null;
+  private shutdownModalRef: null | NgbModalRef = null;
 
   private readonly clockSettingsModel = signal({
     is24HourFormat: true,
@@ -130,6 +143,67 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     })).subscribe(() => {
       this.toastr.success("Swagger " + (enabled ? "enabled" : "disabled") + ". The system needs to be restarted before changes take effect");
     });
+  }
+
+  protected openImportModal() {
+    this.importFile.set(null);
+    this.importConfirmText.set('');
+    this.importModalRef?.close();
+    const template = this.importModalTemplate();
+    if (template) {
+      this.importModalRef = this.modal.open(template, { ariaLabelledBy: 'import-modal-title' });
+    }
+  }
+
+  protected onImportFileChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.importFile.set(input.files?.[0] ?? null);
+  }
+
+  protected startImport() {
+    const file = this.importFile();
+    if (!file) return;
+
+    this.importModalRef?.close();
+    this.importUploadProgress.set(0);
+    this.importStatus.set('uploading');
+
+    const template = this.importProgressModalTemplate();
+    if (template) {
+      this.importProgressModalRef = this.modal.open(template, {
+        ariaLabelledBy: 'import-progress-modal-title',
+        backdrop: 'static',
+        keyboard: false,
+      });
+    }
+
+    this.backupApi.importBackup(file).pipe(
+      catchError(err => {
+        this.importStatus.set('error');
+        console.error('Backup import failed', err);
+        throw err;
+      })
+    ).subscribe(event => {
+      if (event.type === HttpEventType.UploadProgress) {
+        const progress = event.total ? Math.round(100 * event.loaded / event.total) : 0;
+        this.importUploadProgress.set(progress);
+        if (progress >= 100) {
+          this.importStatus.set('importing');
+        }
+      } else if (event.type === HttpEventType.Response) {
+        if (event.ok) {
+          this.importStatus.set('done');
+        } else {
+          this.importStatus.set('error');
+          console.error('Backup import failed with status', event.status, event.body);
+        }
+      }
+    });
+  }
+
+  protected closeImportProgressModal() {
+    this.importProgressModalRef?.close();
+    this.importStatus.set('idle');
   }
 
   protected downloadBackup() {

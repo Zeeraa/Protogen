@@ -334,9 +334,19 @@
         </div>
         <div class="card-body">
           <p class="text-body-secondary small mb-3">Download a full backup of the system data as a zip archive.</p>
-          <button class="btn btn-primary btn-sm" (click)="downloadBackup()">
-            <i class="bi bi-download"></i> Download backup
-          </button>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary btn-sm" (click)="downloadBackup()" [disabled]="!isSuperUser()">
+              <i class="bi bi-download"></i> Download backup
+            </button>
+            <button class="btn btn-warning btn-sm" (click)="openImportModal()" [disabled]="!isSuperUser()">
+              <i class="bi bi-upload"></i> Import backup
+            </button>
+          </div>
+          @if (!isSuperUser()) {
+          <p class="text-danger mt-3 mb-0">
+            You do not have permissions to download or import backups.
+          </p>
+          }
         </div>
       </div>
     </div>
@@ -392,4 +402,80 @@
     <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
     <button type="button" class="btn btn-danger" (click)="shutdown()">Shutdown</button>
   </div>
+</ng-template>
+
+<ng-template #importModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-warning" id="import-modal-title">Import backup</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+      <div>
+        <strong>Warning:</strong> Importing a backup will <strong>delete your current configuration</strong> and replace
+        it with the contents of the backup. This action cannot be undone.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="importFileInput">Backup file</label>
+      <input id="importFileInput" type="file" class="form-control" accept=".tar.gz,.gz"
+        (change)="onImportFileChange($event)">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="importConfirmInput">
+        Type <strong>confirm</strong> to proceed
+      </label>
+      <input id="importConfirmInput" type="text" class="form-control" placeholder="confirm"
+        [value]="importConfirmText()" (input)="importConfirmText.set($any($event.target).value)">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+    <button type="button" class="btn btn-warning" [disabled]="!importCanStart()" (click)="startImport()">
+      <i class="bi bi-upload"></i> Import
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #importProgressModal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="import-progress-modal-title">Importing backup</h4>
+  </div>
+  <div class="modal-body">
+    @if (importStatus() === 'uploading') {
+    <p class="text-body-secondary mb-2">Uploading file...</p>
+    <div class="progress" role="progressbar" [attr.aria-valuenow]="importUploadProgress()" aria-valuemin="0"
+      aria-valuemax="100">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" [style.width.%]="importUploadProgress()">
+        {{ importUploadProgress() }}%
+      </div>
+    </div>
+    }
+    @if (importStatus() === 'importing') {
+    <div class="d-flex align-items-center gap-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      <span>Importing configuration...</span>
+    </div>
+    }
+    @if (importStatus() === 'done') {
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-0">
+      <i class="bi bi-check-circle-fill"></i>
+      Backup imported successfully. You may need to restart the system for all changes to take effect.
+    </div>
+    }
+    @if (importStatus() === 'error') {
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-0">
+      <i class="bi bi-x-circle-fill"></i>
+      Import failed. Check the console for more details.
+    </div>
+    }
+  </div>
+  @if (importStatus() === 'done' || importStatus() === 'error') {
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="closeImportProgressModal()">Close</button>
+  </div>
+  }
 </ng-template>
