@@ -58,13 +58,10 @@
               }
             </tbody>
 
+            @if(isAdmin) {
             <tbody>
               <tr>
-                @if(isAdmin) {
-                <td colspan="3"></td>
-                } @else {
                 <td colspan="2"></td>
-                }
                 <td class="t-fit">
                   <button class="btn btn-primary btn-sm w-100" (click)="showNewUserPrompt()">
                     <i class="bi bi-plus-lg"></i> Add
@@ -72,6 +69,7 @@
                 </td>
               </tr>
             </tbody>
+            }
           </table>
         </div>
         <div class="card-footer">
