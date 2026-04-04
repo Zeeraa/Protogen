@@ -7,7 +7,7 @@ import { catchError, map, of } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthApiService extends ApiBaseService {
-  login(username: string, password: string) {
+  public login(username: string, password: string) {
     return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/authenticate", { username, password }).pipe(
       map((response: any) => {
         return response.token as string;
@@ -22,7 +22,7 @@ export class AuthApiService extends ApiBaseService {
     );
   }
 
-  refreshToken() {
+  public refreshToken() {
     return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/refresh-token", {}).pipe(
       map((response: any) => {
         return response.token as string;
@@ -37,7 +37,7 @@ export class AuthApiService extends ApiBaseService {
     );
   }
 
-  checkAuth() {
+  public checkAuth() {
     return this.http.get<any>(this.apiBaseUrl + "/auth/check-auth").pipe(
       map(() => true),
       catchError((error: HttpErrorResponse) => {
@@ -50,37 +50,36 @@ export class AuthApiService extends ApiBaseService {
     );
   }
 
-  getUsers() {
-    return this.http.get<ProtogenUser[]>(this.apiBaseUrl + "/users").pipe(catchError(this.defaultErrorHandler));
+  public getUsers() {
+    return this.http.get<ProtogenUser[]>(this.apiBaseUrl + "/users");
   }
 
-  deleteUser(userId: number) {
-    return this.http.delete(this.apiBaseUrl + "/users/" + userId).pipe(catchError(this.defaultErrorHandler))
+  public deleteUser(userId: number) {
+    return this.http.delete(this.apiBaseUrl + "/users/" + userId);
   }
 
-  createUser(data: CreateNewUserData) {
-    return this.http.post<ProtogenUser>(this.apiBaseUrl + "/users", data).pipe(catchError(this.defaultErrorHandler));
+  public createUser(data: CreateNewUserData) {
+    return this.http.post<ProtogenUser>(this.apiBaseUrl + "/users", data);
   }
 
-  changePassword(userId: number, data: ChangePasswordData) {
-    return this.http.put<ProtogenUser>(this.apiBaseUrl + "/users/" + userId + "/password", data).pipe(catchError(this.defaultErrorHandler));
+  public changePassword(userId: number, data: ChangePasswordData) {
+    return this.http.put<ProtogenUser>(this.apiBaseUrl + "/users/" + userId + "/password", data)
   }
 
-  beginPasswordlessSignIn() {
-    return this.http.post<PasswordlessSigninRequest>(this.apiBaseUrl + "/auth/passwordless-signin/new", {}).pipe(catchError(this.defaultErrorHandler));
+  public beginPasswordlessSignIn() {
+    return this.http.post<PasswordlessSigninRequest>(this.apiBaseUrl + "/auth/passwordless-signin/new", {});
   }
 
-  checkSigninRequestStatus(request: PasswordlessSigninRequest) {
-    return this.http.post<PasswordlessSigninRequestStatus>(this.apiBaseUrl + "/auth/passwordless-signin/check", request).pipe(catchError(this.defaultErrorHandler));
+  public checkSigninRequestStatus(request: PasswordlessSigninRequest) {
+    return this.http.post<PasswordlessSigninRequestStatus>(this.apiBaseUrl + "/auth/passwordless-signin/check", request);
   }
 
-  aquireTokenFromPasswordless(request: PasswordlessSigninRequest) {
-    return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/passwordless-signin/authenticate", request).pipe(catchError(this.defaultErrorHandler));
+  public aquireTokenFromPasswordless(request: PasswordlessSigninRequest) {
+    return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/passwordless-signin/authenticate", request);
   }
 
-  approveLogin(signinKey: string) {
+  public approveLogin(signinKey: string) {
     return this.http.post<ITokenResponse>(this.apiBaseUrl + "/auth/passwordless-signin/approve", { signinKey }).pipe(
-      catchError(this.defaultErrorHandler),
       catchError((error: HttpErrorResponse) => {
         if (error.status === 404) {
           return of(null);
