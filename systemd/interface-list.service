@@ -1,0 +1,14 @@
+[Unit]
+Description=Interface List - Device IP display
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=npm start
+WorkingDirectory=/home/pi/Interface-List
+Restart=on-failure
+User=pi
+Environment="PORT=4000"
+
+[Install]
+WantedBy=multi-user.target

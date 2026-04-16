@@ -178,6 +178,10 @@ if [[ "$IS_UPDATE" == "false" ]]; then
     echo "See the documentation for instructions on how to configure it."
     if ask_yes_no "Enable Video Playback?"; then VIDEO_PLAYBACK_ENABLED="true"; else VIDEO_PLAYBACK_ENABLED="false"; fi
     echo ""
+    echo "Interface List is a development tool that exposes the local IP addresses of this device under /whatsyourip."
+    echo "Only install this if you need it for development or network discovery purposes."
+    if ask_yes_no "Install Interface List (exposes device IP at /whatsmyip)? [default: no]"; then INSTALL_INTERFACE_LIST="true"; else INSTALL_INTERFACE_LIST="false"; fi
+    echo ""
 fi
 
 # ========== Packages ==========
@@ -322,6 +326,29 @@ else
     systemctl enable gamepad-listener.service
 fi
 
+# ========== Interface List ==========
+if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
+    echo "Installing Interface List..."
+    if [[ -d "/home/pi/Interface-List" ]]; then
+        echo "Removing existing Interface-List directory..."
+        rm -rf /home/pi/Interface-List
+    fi
+    git clone https://github.com/Zeeraa/Interface-List /home/pi/Interface-List
+    cd /home/pi/Interface-List
+    npm install
+    tsc
+    chown -R pi:pi /home/pi/Interface-List
+
+    if [[ -f "/etc/systemd/system/interface-list.service" ]]; then
+        echo "interface-list.service already exists"
+    else
+        echo "Creating service interface-list.service"
+        cp /home/pi/protogen/systemd/interface-list.service /etc/systemd/system/interface-list.service
+        systemctl enable interface-list.service
+    fi
+    echo "Interface List installed."
+fi
+
 # ========== Better gamepad support ==========
 # Install xpadneo for better Xbox controller support
 if [[ -d "/home/pi/xpadneo" ]]; then
@@ -415,11 +442,17 @@ if [[ "$IS_UPDATE" == "true" ]]; then
     systemctl restart flaschen-taschen
     systemctl restart gamepad-listener
     systemctl restart protogen
+    if systemctl is-enabled --quiet interface-list 2>/dev/null; then
+        systemctl restart interface-list
+    fi
 else
     systemctl start flaschen-taschen
     systemctl start gamepad-listener
     systemctl start protogen
     systemctl start mosquitto
+    if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
+        systemctl start interface-list
+    fi
 fi
 
 if [[ "$IS_UPDATE" == "true" ]]; then
