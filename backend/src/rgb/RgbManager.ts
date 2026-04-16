@@ -19,6 +19,7 @@ export class RgbManager {
   private _ledBuffer: number[];
   private _scenes: RgbScene[];
   private _activeScene: RgbScene | null = null;
+  private _interval: ReturnType<typeof setInterval> | null = null;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
@@ -29,7 +30,7 @@ export class RgbManager {
     }
 
     if (this.config.refreshRate > 0) {
-      setInterval(() => {
+      this._interval = setInterval(() => {
         this.tick();
       }, 1000 / this.config.refreshRate);
     } else {
@@ -52,6 +53,24 @@ export class RgbManager {
     this.protogen.database.initMissingData(KV_RbgPreviewWidth, "720");
     this.protogen.database.initMissingData(KV_RgbPreviewHeigth, "400");
     this.protogen.database.initMissingData(KV_RgbPreviewFullSizeOnLargeViewports, "false");
+  }
+
+  /**
+   * Clear the RGB strip setting all LEDs to black.
+   */
+  public async clear() {
+    await this.protogen.hardwareAbstractionLayer.writeLedData(new Array(this.config.ledCount).fill(0))
+  }
+
+  /**
+   * Turn off the interval
+   */
+  public async shutdown() {
+    if (this._interval) {
+      clearInterval(this._interval);
+      this._interval = null;
+    }
+    await this.clear();
   }
 
   /**

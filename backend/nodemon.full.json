@@ -6,5 +6,6 @@
     "assets/AssetManifest.json"
   ],
   "ext": ".ts",
+  "signal": "SIGTERM",
   "exec": "ts-node --files ./src/index.ts"
 }

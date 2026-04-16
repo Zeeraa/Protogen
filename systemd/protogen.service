@@ -1,13 +1,16 @@
 [Unit]
 Description=Protogen OS
-After=network.target mariadb.service
+After=network.target mariadb.service flaschen-taschen.service
 Requires=mariadb.service
+Wants=flaschen-taschen.service
 
 [Service]
 Type=simple
 ExecStart=npm start
 WorkingDirectory=/home/pi/protogen/backend
 Restart=no
+KillSignal=SIGTERM
+TimeoutStopSec=15
 User=pi
 Environment="XDG_RUNTIME_DIR=/run/user/1000"
 Environment="WITH_SYSTEMD=true"
