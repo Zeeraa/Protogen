@@ -116,17 +116,22 @@ export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
     this.route.params.subscribe(params => {
       this.id = String(params['id']);
 
-      this.visor.getRenderer(this.id).subscribe(renderer => {
-        this.isLoading = false;
-        if (renderer == null) {
-          this.toastr.error("Could not find renderer with the provided id");
-          return;
-        }
+      this.visor.getRenderer(this.id).pipe(catchError(err => {
+          this.isLoading = false;
+          console.error('Failed to load renderer', err);
+          this.toastr.error("Failed to load renderer");
+          return [];
+      })).subscribe(renderer => {
+          this.isLoading = false;
+          if (renderer == null) {
+            this.toastr.error("Could not find renderer with the provided id");
+            return;
+          }
 
-        if (renderer.type != VisorRendererType.CustomisableImage) {
-          this.toastr.error("Provided renderer id is not of the type \"CustomisableImage\"");
-          return;
-        }
+          if (renderer.type != VisorRendererType.CustomisableImage) {
+            this.toastr.error("Provided renderer id is not of the type \"CustomisableImage\"");
+            return;
+          }
 
         this.renderer = renderer;
 

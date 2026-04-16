@@ -8,27 +8,27 @@ import { catchError, of } from 'rxjs';
 })
 export class VisorApiService extends ApiBaseService {
   getStatus() {
-    return this.http.get<VisorStatus>(this.apiBaseUrl + "/visor/status").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<VisorStatus>(this.apiBaseUrl + "/visor/status");
   }
 
   getRenderers() {
-    return this.http.get<VisorRenderer[]>(this.apiBaseUrl + "/visor/renderers").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<VisorRenderer[]>(this.apiBaseUrl + "/visor/renderers");
   }
 
   activateRenderer(id: string) {
-    return this.http.post<VisorRenderer>(this.apiBaseUrl + "/visor/renderers/" + id + "/activate", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<VisorRenderer>(this.apiBaseUrl + "/visor/renderers/" + id + "/activate", {});
   }
 
   saveCustomisableImageVisor(id: string, data: SaveCustomisableImageRendererPayload) {
-    return this.http.put<CustomFaceData>(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data", data).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put<CustomFaceData>(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data", data);
   }
 
   deleteCustomisableImageVisor(id: string) {
-    return this.http.delete(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data").pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/visor/renderers/" + id + "/customisable-image-renderer-data");
   }
 
   createBlankImageRenderer() {
-    return this.http.post<CreateImageRendererResult>(this.apiBaseUrl + "/visor/renderers/new-image-renderer", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<CreateImageRendererResult>(this.apiBaseUrl + "/visor/renderers/new-image-renderer", {});
   }
 
   getRenderer(id: string) {
@@ -38,23 +38,24 @@ export class VisorApiService extends ApiBaseService {
           return of(null);
         }
         throw err;
-      }),
-      catchError(this.defaultErrorHandler)
+      })
     );
   }
 
   getPreviewBase64() {
     return new Promise<string>((resolve, reject) => {
-      this.http.get(this.apiBaseUrl + "/visor/preview", { responseType: 'blob' }).pipe(catchError(err => {
-        reject(err);
-        throw err;
-      })).subscribe(blob => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result as string);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
+      this.http.get(this.apiBaseUrl + "/visor/preview", { responseType: 'blob' }).pipe(
+        catchError(err => {
+          reject(err);
+          return [];
+        })
+      ).subscribe(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result as string);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
       });
     })
   }

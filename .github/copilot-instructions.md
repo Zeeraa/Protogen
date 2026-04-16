@@ -19,23 +19,25 @@ The client communicates with the backend using both a REST API and a socket.io c
 ### Error Handling
 - API services should NOT include error handling (no `catchError` or `throwError`).
 - Error handling belongs in the consuming component's `subscribe()` callbacks.
-- Use `pipe(catchError(...))` in components to handle errors.
-- Return `[]` from `catchError` for empty fallback values.
-
-### RxJS Patterns
-- Use `pipe(catchError(...)).subscribe(...)` pattern.
-- Keep `catchError` in the pipe, success handling in `subscribe()`.
+- When making web request anways handle error in the components. This can range from just logging with consile.error to showing a friendly error message in the ui ur usign the toastr library.
+- Use 'return []' when handling http errors to stop the subscription from propagating.
 
 ### Code Style
 - Use signals for reactive state management.
 - Use `computed()` for derived state.
 - Prefer `inject()` over constructor injection.
+- Prefer input and output over @Input and @Output for component communication.
+- Prefer viewChild over @ViewChild for accessing child components and elements.
 - Always use the readonly keyword for signals and computed properties.
 - Use the private or protected keyword for component methods and properties that are not needed to be externally accessible.
+- In RxJS always use pipe(catchError()) instead of handling errors in the subscribe() callback.
 
 ### Design
 - Use bootstrap for styling and layout.
 - Use bootstrap icons for icons.
+- Use a modern card based design for the UI.
+- Make sure to adapt the design to support both dark and light mode using the data-bs-theme attribute.
+- Always have a mobile friendly design that works well on smaller screens.
 
 ---
 
@@ -45,3 +47,4 @@ The client communicates with the backend using both a REST API and a socket.io c
 - Try to avoid the use of the any type.
 - Prefer async/await over raw promises.
 - Use proper type definitions for all public APIs.
+- Always use the public, protected, or private keywords for class methods and properties.

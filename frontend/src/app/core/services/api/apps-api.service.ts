@@ -7,15 +7,15 @@ import { catchError, map } from 'rxjs';
 })
 export class AppsApi extends ApiBaseService {
   getApps() {
-    return this.http.get<AppList>(this.apiBaseUrl + "/apps").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<AppList>(this.apiBaseUrl + "/apps");
   }
 
   activateApp(name: string) {
-    return this.http.post<App>(this.apiBaseUrl + "/apps/" + name + "/activate", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<App>(this.apiBaseUrl + "/apps/" + name + "/activate", {});
   }
 
   getAppToken(name: string) {
-    return this.http.get<AppToken>(this.apiBaseUrl + "/apps/" + name + "/get-token").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<AppToken>(this.apiBaseUrl + "/apps/" + name + "/get-token");
   }
 
   getUserAppDetails(token: string) {
@@ -23,7 +23,7 @@ export class AppsApi extends ApiBaseService {
       headers: {
         "x-app-token": token,
       },
-    }).pipe(catchError(this.defaultErrorHandler));
+    });
   }
 
   deactivateApp() {
@@ -40,7 +40,6 @@ export class AppsApi extends ApiBaseService {
 
   getActiveApp() {
     return this.http.get<{ activeApp: App | null }>(this.apiBaseUrl + "/apps/active").pipe(
-      catchError(this.defaultErrorHandler),
       map(response => response.activeApp)
     );
   }

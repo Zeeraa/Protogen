@@ -61,8 +61,13 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     const faceColorEffectsRequest = this.faceApi.getFaceColorEffects();
     const actionSetsRequest = this.actionApi.getActionSets();
 
-    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).subscribe({
-      next: ([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects, actionSets]) => {
+    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).pipe(
+      catchError(err => {
+        this.toastr.error("Failed fetch action target data. Editor will not fully function");
+        console.error('Error occurred:', err);
+        return [];
+      })
+    ).subscribe(([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects, actionSets]) => {
         this.actionDataSet = {
           rgbScenes: rgbScenes,
           savedVideos: videos,
@@ -73,11 +78,6 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
         }
         console.log(this.actionDataSet);
         console.log("Action dataset loaded");
-      },
-      error: (err) => {
-        this.toastr.error("Failed fetch action target data. Editor will not fully function");
-        console.error('Error occurred:', err);
-      },
     });
   }
 

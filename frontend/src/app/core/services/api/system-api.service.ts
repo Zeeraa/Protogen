@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { catchError, map, Observable, of } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { RGBColor } from '../utils/Utils';
 
 @Injectable({
@@ -8,7 +8,7 @@ import { RGBColor } from '../utils/Utils';
 })
 export class SystemApiService extends ApiBaseService {
   getOverview(): Observable<SystemOverview> {
-    return this.http.get<SystemOverview>(this.apiBaseUrl + "/system/overview").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<SystemOverview>(this.apiBaseUrl + "/system/overview");
   }
 
   shutdown() {
@@ -24,11 +24,11 @@ export class SystemApiService extends ApiBaseService {
   }
 
   getFlaschenTaschenSettings() {
-    return this.http.get<FlaschenTaschenSettings>(this.apiBaseUrl + "/system/flaschen-taschen/settings").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<FlaschenTaschenSettings>(this.apiBaseUrl + "/system/flaschen-taschen/settings");
   }
 
   updateFlaschenTaschenSettings(settings: FlaschenTaschenSettings) {
-    return this.http.put(this.apiBaseUrl + "/system/flaschen-taschen/settings", settings).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put(this.apiBaseUrl + "/system/flaschen-taschen/settings", settings);
   }
 
   getNetworkInterfaces() {
@@ -38,21 +38,17 @@ export class SystemApiService extends ApiBaseService {
   getLogs() {
     return this.http.get(this.apiBaseUrl + "/system/logs", {
       responseType: 'text',
-    }).pipe(catchError(this.defaultErrorHandler)) as Observable<string>;
+    }) as Observable<string>;
   }
 
   getSessionId() {
     return this.http.get<ISessionIdObject>(this.apiBaseUrl + "/system/session-id").pipe(
-      map(response => String(response.sessionId)),
-      catchError(() => {
-        console.error('Request failed');
-        return of(null);
-      })
+      map(response => String(response.sessionId))
     );
   }
 
   setSwaggerEnabled(enabled: boolean): Observable<any> {
-    return this.http.put(this.apiBaseUrl + "/system/swagger", { enabled }).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put(this.apiBaseUrl + "/system/swagger", { enabled });
   }
 
   getClockSettings(): Observable<ClockSettings> {

@@ -115,37 +115,59 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     }
 
     if (this.stream) {
-      this.api.streamVideo(this.videoInputUrl).subscribe(_ => {
+      this.api.streamVideo(this.videoInputUrl).pipe(catchError(err => {
+        console.error('Failed to start stream', err);
+        this.toastr.error("Failed to start stream");
+        return [];
+      })).subscribe(_ => {
         this.toastr.success("Stream started");
       });
     } else {
-      this.api.playVideo(this.videoInputUrl, this.mirrorVideo, this.flipVideo).subscribe(() => {
+      this.api.playVideo(this.videoInputUrl, this.mirrorVideo, this.flipVideo).pipe(catchError(err => {
+        console.error('Failed to start playback', err);
+        this.toastr.error("Failed to start playback");
+        return [];
+      })).subscribe(() => {
         this.toastr.success("Preparing video");
       });
     }
   }
 
   stopPlayback() {
-    this.api.stopPlayback().subscribe(() => {
+    this.api.stopPlayback().pipe(catchError(err => {
+      console.error('Failed to stop playback', err);
+      this.toastr.error("Failed to stop playback");
+      return [];
+    })).subscribe(() => {
       this.toastr.success("Stopping playback");
     });
   }
 
   update() {
-    this.api.getStatus().subscribe(status => {
+    this.api.getStatus().pipe(catchError(err => {
+      console.error('Failed to fetch player status', err);
+      return [];
+    })).subscribe(status => {
       this.lastStatus = status;
     });
   }
 
   updateVolume() {
-    this.volumeApi.getVolume().subscribe(data => {
+    this.volumeApi.getVolume().pipe(catchError(err => {
+      console.error('Failed to fetch volume', err);
+      return [];
+    })).subscribe(data => {
       this.volume = data.volume;
     });
   }
 
   fetchVideoGroups() {
     this.groups = [];
-    this.api.getGroups().subscribe(groups => {
+    this.api.getGroups().pipe(catchError(err => {
+      console.error('Failed to fetch video groups', err);
+      this.toastr.error("Failed to load video groups");
+      return [];
+    })).subscribe(groups => {
       this.groups = groups;
     });
   }
@@ -155,7 +177,11 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
       this.nonGroupedVideos = [];
       this.groupedVideos = [];
     }
-    this.api.getSavedVideos().subscribe(videos => {
+    this.api.getSavedVideos().pipe(catchError(err => {
+      console.error('Failed to fetch saved videos', err);
+      this.toastr.error("Failed to load saved videos");
+      return [];
+    })).subscribe(videos => {
       this.nonGroupedVideos = videos.filter(v => v.group == null);
       this.groupedVideos = videos.filter(v => v.group != null);
     });
@@ -177,7 +203,10 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   onVolumeChange(event: Event) {
     const value = parseInt((event.target as HTMLInputElement).value);
     console.log("Volume target: " + value);
-    this.volumeApi.setVolume(value).subscribe();
+    this.volumeApi.setVolume(value).pipe(catchError(err => {
+      console.error('Failed to set volume', err);
+      return [];
+    })).subscribe();
   }
 
   get downloadJobStatusText() {

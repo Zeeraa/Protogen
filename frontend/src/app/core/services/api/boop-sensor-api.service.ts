@@ -12,44 +12,44 @@ export class BoopSensorApiService extends ApiBaseService {
   private readonly systemConfig = inject(SystemConfigService);
 
   resetCounter() {
-    return this.http.delete(this.apiBaseUrl + "/boop-sensor/counter").pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/boop-sensor/counter");
   }
 
   setEnabled(enabled: boolean) {
-    return this.http.post<{ enabled: boolean }>(this.apiBaseUrl + "/boop-sensor/enabled", { enabled }).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<{ enabled: boolean }>(this.apiBaseUrl + "/boop-sensor/enabled", { enabled });
   }
 
   setShowOnHud(showOnHud: boolean) {
-    return this.http.post<{ showOnHud: boolean }>(this.apiBaseUrl + "/boop-sensor/show-on-hud", { enabled: showOnHud }).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<{ showOnHud: boolean }>(this.apiBaseUrl + "/boop-sensor/show-on-hud", { enabled: showOnHud });
   }
 
   getData() {
-    return this.http.get<BoopSensorInfo>(this.apiBaseUrl + "/boop-sensor").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<BoopSensorInfo>(this.apiBaseUrl + "/boop-sensor");
   }
 
   getProfiles() {
     if (!this.systemConfig.features()?.boopSensor) return of([]);
-    return this.http.get<BoopSensorProfile[]>(this.apiBaseUrl + "/boop-sensor/profiles").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<BoopSensorProfile[]>(this.apiBaseUrl + "/boop-sensor/profiles");
   }
 
   deleteProfile(profileId: string) {
-    return this.http.delete(this.apiBaseUrl + "/boop-sensor/profiles/" + profileId).pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/boop-sensor/profiles/" + profileId);
   }
 
   createNewProfile(profile: NewBoopSensorProfile) {
-    return this.http.post<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles", profile).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles", profile);
   }
 
   activateProfile(profileId: string) {
-    return this.http.post<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles/" + profileId + "/activate", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles/" + profileId + "/activate", {});
   }
 
   deactivateProfile() {
-    return this.http.delete(this.apiBaseUrl + "/boop-sensor/profiles/active").pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/boop-sensor/profiles/active");
   }
 
   updateProfile(profile: BoopSensorProfile) {
-    return this.http.put<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles/" + profile.id, profile).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put<BoopSensorProfile>(this.apiBaseUrl + "/boop-sensor/profiles/" + profile.id, profile);
   }
 
   getProfileById(id: string) {
@@ -58,7 +58,7 @@ export class BoopSensorApiService extends ApiBaseService {
         return of(null);
       }
       throw err;
-    }), catchError(this.defaultErrorHandler));
+    }));
   }
 
   getActiveProfile() {
@@ -67,7 +67,7 @@ export class BoopSensorApiService extends ApiBaseService {
         return of(null);
       }
       throw err;
-    }), catchError(this.defaultErrorHandler));
+    }));
   }
 }
 

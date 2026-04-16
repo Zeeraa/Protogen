@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { catchError } from 'rxjs';
 import { ActionType } from '../../enum/ActionType';
 
 @Injectable({
@@ -8,23 +7,23 @@ import { ActionType } from '../../enum/ActionType';
 })
 export class ActionApiService extends ApiBaseService {
   getActionSets() {
-    return this.http.get<ActionSet[]>(this.apiBaseUrl + "/actions").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<ActionSet[]>(this.apiBaseUrl + "/actions");
   }
 
   createActionSet(name: string, showOnDashboard: boolean) {
-    return this.http.post<ActionSet>(this.apiBaseUrl + "/actions", { name, showOnDashboard, actions: [] }).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<ActionSet>(this.apiBaseUrl + "/actions", { name, showOnDashboard, actions: [] });
   }
 
   editActionSet(id: number, data: AlterActionSet) {
-    return this.http.put<ActionSet>(this.apiBaseUrl + "/actions/" + id, data).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put<ActionSet>(this.apiBaseUrl + "/actions/" + id, data);
   }
 
   deleteActionSet(id: number) {
-    return this.http.delete(this.apiBaseUrl + "/actions/" + id).pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/actions/" + id);
   }
 
   activateActionSet(id: number) {
-    return this.http.post(this.apiBaseUrl + "/actions/" + id + "/run", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post(this.apiBaseUrl + "/actions/" + id + "/run", {});
   }
 }
 

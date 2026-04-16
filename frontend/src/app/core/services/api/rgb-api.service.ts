@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { catchError, of } from 'rxjs';
+import { of } from 'rxjs';
 import { SystemConfigService } from '../system-config.service';
 
 @Injectable({
@@ -10,67 +10,67 @@ export class RgbApiService extends ApiBaseService {
   private readonly systemConfig = inject(SystemConfigService);
 
   getEffects() {
-    return this.http.get<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/effects").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/effects");
   }
 
   removeEffect(sceneId: string, effectId: string) {
-    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId).pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId);
   }
 
   addEffect(sceneId: string, effect: string, displayName: string) {
     return this.http.post<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect", {
       effect: effect,
       displayName: displayName,
-    }).pipe(catchError(this.defaultErrorHandler));
+    });
   }
 
   setEffectProperty(sceneId: string, effectId: string, propertyName: string, value: string, fullSave = false) {
     return this.http.put<RgbEffectInfo[]>(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId + "/property/" + propertyName + "?fullSave=" + (fullSave ? "true" : "false"), {
       value: value,
-    }).pipe(catchError(this.defaultErrorHandler));
+    });
   }
 
   updateEffect(sceneId: string, effectId: string, data: { displayName: string; }) {
-    return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId, data).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + sceneId + "/effect/" + effectId, data);
   }
 
   activateScene(id: string) {
-    return this.http.post<RgbScene>(this.apiBaseUrl + "/rgb/scenes/" + id + "/activate", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<RgbScene>(this.apiBaseUrl + "/rgb/scenes/" + id + "/activate", {});
   }
 
   deleteScene(id: string) {
-    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + id).pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/" + id);
   }
 
   deactivate() {
-    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/active").pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/rgb/scenes/active");
   }
 
   saveSceneData(id: string, data: { name: string; }) {
-    return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + id, data).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put(this.apiBaseUrl + "/rgb/scenes/" + id, data);
   }
 
   createNewScene(name: string) {
     return this.http.post<RgbScene>(this.apiBaseUrl + "/rgb/scenes/new", {
       name: name,
-    }).pipe(catchError(this.defaultErrorHandler));
+    });
   }
 
   getScene(id: string) {
-    return this.http.get<RgbScene>(this.apiBaseUrl + "/rgb/scenes/" + id).pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<RgbScene>(this.apiBaseUrl + "/rgb/scenes/" + id);
   }
 
   getScenes() {
     if (!this.systemConfig.features()?.rgb) return of([]);
-    return this.http.get<RgbScene[]>(this.apiBaseUrl + "/rgb/scenes").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<RgbScene[]>(this.apiBaseUrl + "/rgb/scenes");
   }
 
   getRgbPreviewConfig() {
-    return this.http.get<RgbPreviewConfiguration>(this.apiBaseUrl + "/rgb/preview/config").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<RgbPreviewConfiguration>(this.apiBaseUrl + "/rgb/preview/config");
   }
 
   setRgbPreviewConfig(config: RgbPreviewConfiguration) {
-    return this.http.put(this.apiBaseUrl + "/rgb/preview/config", config).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put(this.apiBaseUrl + "/rgb/preview/config", config);
   }
 }
 

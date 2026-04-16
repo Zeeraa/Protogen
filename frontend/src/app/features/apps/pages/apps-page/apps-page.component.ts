@@ -42,8 +42,13 @@ export class AppsPageComponent implements OnInit, OnDestroy {
   }
 
   private getOpenApp() {
-    this.appsApi.getActiveApp().subscribe(activeApp => {
-      this.activeApp = activeApp;
+    this.appsApi.getActiveApp().pipe(
+      catchError(err => {
+        console.error('Failed to fetch active app', err);
+        return [];
+      })
+    ).subscribe(activeApp => {
+        this.activeApp = activeApp;
     });
   }
 

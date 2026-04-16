@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ApiBaseService } from '../api-base.service';
-import { catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +12,7 @@ export class VideoPlayerApiService extends ApiBaseService {
       flipVideo: flip,
     }
 
-    return this.http.post<VideoDownloadJob>(this.apiBaseUrl + "/video_player/play", payload).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<VideoDownloadJob>(this.apiBaseUrl + "/video_player/play", payload);
   }
 
   streamVideo(url: string) {
@@ -21,55 +20,55 @@ export class VideoPlayerApiService extends ApiBaseService {
       url: url,
     }
 
-    return this.http.post(this.apiBaseUrl + "/video_player/stream", payload).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post(this.apiBaseUrl + "/video_player/stream", payload);
   }
 
   stopPlayback() {
-    return this.http.post(this.apiBaseUrl + "/video_player/stop", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post(this.apiBaseUrl + "/video_player/stop", {});
   }
 
   getStatus() {
-    return this.http.get<VideoPlayerStatus>(this.apiBaseUrl + "/video_player/status").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<VideoPlayerStatus>(this.apiBaseUrl + "/video_player/status");
   }
 
   getSavedVideos() {
-    return this.http.get<SavedVideo[]>(this.apiBaseUrl + "/video_player/saved").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<SavedVideo[]>(this.apiBaseUrl + "/video_player/saved");
   }
 
   saveVideo(data: SaveVideoPayload) {
-    return this.http.post<SavedVideo>(this.apiBaseUrl + "/video_player/saved", data).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<SavedVideo>(this.apiBaseUrl + "/video_player/saved", data);
   }
 
   editSavedVideo(id: number, data: SaveVideoPayload) {
-    return this.http.put<SavedVideo>(this.apiBaseUrl + "/video_player/saved/" + id, data).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put<SavedVideo>(this.apiBaseUrl + "/video_player/saved/" + id, data);
   }
 
   playSavedVideo(id: number) {
-    return this.http.post<SavedVideo>(this.apiBaseUrl + "/video_player/saved/" + id + "/play", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<SavedVideo>(this.apiBaseUrl + "/video_player/saved/" + id + "/play", {});
   }
 
   deleteSavedVideo(id: number) {
-    return this.http.delete(this.apiBaseUrl + "/video_player/saved/" + id).pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/video_player/saved/" + id);
   }
 
   getGroups() {
-    return this.http.get<VideoGroup[]>(this.apiBaseUrl + "/video_player/groups").pipe(catchError(this.defaultErrorHandler));
+    return this.http.get<VideoGroup[]>(this.apiBaseUrl + "/video_player/groups");
   }
 
   createGroup(group: AlterGroupModel) {
-    return this.http.post<VideoGroup>(this.apiBaseUrl + "/video_player/groups", group).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post<VideoGroup>(this.apiBaseUrl + "/video_player/groups", group);
   }
 
   editGroup(id: number, group: AlterGroupModel) {
-    return this.http.put<VideoGroup>(this.apiBaseUrl + "/video_player/groups/" + id, group).pipe(catchError(this.defaultErrorHandler));
+    return this.http.put<VideoGroup>(this.apiBaseUrl + "/video_player/groups/" + id, group);
   }
 
   deleteGroup(id: number) {
-    return this.http.delete(this.apiBaseUrl + "/video_player/groups/" + id).pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/video_player/groups/" + id);
   }
 
   clearCache() {
-    return this.http.delete(this.apiBaseUrl + "/video_player/cache").pipe(catchError(this.defaultErrorHandler));
+    return this.http.delete(this.apiBaseUrl + "/video_player/cache");
   }
 }
 

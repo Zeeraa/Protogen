@@ -179,17 +179,22 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
   }
 
   protected pollScanStatus(): void {
-    this.api.getScanStatus().subscribe((status) => {
-      const wasScanningBefore = this.scanning();
-      this.scanning.set(status.scanning);
-      // When scan finishes, refresh the discovered list
-      if (wasScanningBefore && !status.scanning) {
-        this.refreshDiscovered();
-      }
-      // While scanning, refresh discovered devices periodically
-      if (status.scanning) {
-        this.refreshDiscovered();
-      }
+    this.api.getScanStatus().pipe(
+      catchError(err => {
+        console.error('Failed to poll scan status', err);
+        return [];
+      })
+    ).subscribe(status => {
+        const wasScanningBefore = this.scanning();
+        this.scanning.set(status.scanning);
+        // When scan finishes, refresh the discovered list
+        if (wasScanningBefore && !status.scanning) {
+          this.refreshDiscovered();
+        }
+        // While scanning, refresh discovered devices periodically
+        if (status.scanning) {
+          this.refreshDiscovered();
+        }
     });
   }
 
