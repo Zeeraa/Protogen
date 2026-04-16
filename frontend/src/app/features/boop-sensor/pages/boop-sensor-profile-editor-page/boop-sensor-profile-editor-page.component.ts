@@ -68,16 +68,16 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
         return [];
       })
     ).subscribe(([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects, actionSets]) => {
-        this.actionDataSet = {
-          rgbScenes: rgbScenes,
-          savedVideos: videos,
-          visorRenderers: visorRenderers,
-          expressions: faceExpressions,
-          faceColorEffects: faceColorEffects,
-          actionSets: actionSets,
-        }
-        console.log(this.actionDataSet);
-        console.log("Action dataset loaded");
+      this.actionDataSet = {
+        rgbScenes: rgbScenes,
+        savedVideos: videos,
+        visorRenderers: visorRenderers,
+        expressions: faceExpressions,
+        faceColorEffects: faceColorEffects,
+        actionSets: actionSets,
+      }
+      console.log(this.actionDataSet);
+      console.log("Action dataset loaded");
     });
   }
 

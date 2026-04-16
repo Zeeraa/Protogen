@@ -185,16 +185,16 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
         return [];
       })
     ).subscribe(status => {
-        const wasScanningBefore = this.scanning();
-        this.scanning.set(status.scanning);
-        // When scan finishes, refresh the discovered list
-        if (wasScanningBefore && !status.scanning) {
-          this.refreshDiscovered();
-        }
-        // While scanning, refresh discovered devices periodically
-        if (status.scanning) {
-          this.refreshDiscovered();
-        }
+      const wasScanningBefore = this.scanning();
+      this.scanning.set(status.scanning);
+      // When scan finishes, refresh the discovered list
+      if (wasScanningBefore && !status.scanning) {
+        this.refreshDiscovered();
+      }
+      // While scanning, refresh discovered devices periodically
+      if (status.scanning) {
+        this.refreshDiscovered();
+      }
     });
   }
 

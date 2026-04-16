@@ -48,7 +48,7 @@ export class AppsPageComponent implements OnInit, OnDestroy {
         return [];
       })
     ).subscribe(activeApp => {
-        this.activeApp = activeApp;
+      this.activeApp = activeApp;
     });
   }
 

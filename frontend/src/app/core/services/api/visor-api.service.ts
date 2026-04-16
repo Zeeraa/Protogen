@@ -50,12 +50,12 @@ export class VisorApiService extends ApiBaseService {
           return [];
         })
       ).subscribe(blob => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve(reader.result as string);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
       });
     })
   }
