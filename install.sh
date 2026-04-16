@@ -6,12 +6,59 @@ REPO_URL="https://github.com/Zeeraa/Protogen"
 REPO_BRANCH="main"
 
 
+# ========== Argument parsing ==========
+REINSTALL_FT_ONLY=false
+EXPERIMENTAL_PI5_SUPPORT=false
+for arg in "$@"; do
+    case "$arg" in
+        --reinstall-ft) REINSTALL_FT_ONLY=true ;;
+        --experimental-pi5-support) EXPERIMENTAL_PI5_SUPPORT=true ;;
+    esac
+done
+
+# ========== Functions ==========
+install_flaschen_taschen() {
+    local force_reinstall="${1:-false}"
+    local pi5_support="${2:-false}"
+    if [[ "$force_reinstall" == "true" ]] && [[ -d "/home/pi/flaschen-taschen" ]]; then
+        echo "Removing existing flaschen-taschen directory..."
+        rm -rf /home/pi/flaschen-taschen
+    fi
+    if [[ -f "/home/pi/flaschen-taschen/server/ft-server" ]]; then
+        echo "flaschen-taschen binary already found"
+    else
+        echo "flaschen-taschen binary not found. Cloning repo and compiling it"
+        git clone --recursive https://github.com/hzeller/flaschen-taschen.git /home/pi/flaschen-taschen
+
+        if [[ "$pi5_support" == "true" ]]; then
+            echo "[Experimental] Swapping rgb-matrix submodule to Pi5 fork..."
+            cd /home/pi/flaschen-taschen/server/rgb-matrix
+            git remote add pi5fork https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment.git
+            git fetch pi5fork pi5_support
+            git checkout bbd4cf1
+            echo "[Experimental] rgb-matrix switched to Pi5 fork commit bbd4cf1"
+        fi
+
+        cd /home/pi/flaschen-taschen/server
+        make FT_BACKEND=rgb-matrix
+    fi
+    chown -R pi:pi /home/pi/flaschen-taschen
+}
+
 # ========== Permission check and disclaimer ==========
 # Check for root permissions
 
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root!"
     exit 1
+fi
+
+# ========== Reinstall flaschen-taschen only ==========
+if [[ "$REINSTALL_FT_ONLY" == "true" ]]; then
+    echo "Reinstalling flaschen-taschen..."
+    install_flaschen_taschen true "$EXPERIMENTAL_PI5_SUPPORT"
+    echo "flaschen-taschen reinstall complete."
+    exit 0
 fi
 
 # ========== Detect update vs fresh install ==========
@@ -185,15 +232,7 @@ if [[ "$IS_UPDATE" == "false" ]]; then
 fi
 
 # ========== Build flaschen-taschen ==========
-if [[ -f "/home/pi/flaschen-taschen/server/ft-server" ]]; then
-    echo "flaschen-taschen binary already found"
-else
-    echo "flaschen-taschen binary not found. Cloning repo and compiling it"
-    git clone --recursive https://github.com/hzeller/flaschen-taschen.git /home/pi/flaschen-taschen
-    cd flaschen-taschen/server
-    make FT_BACKEND=rgb-matrix
-fi
-sudo chown -R pi:pi /home/pi/flaschen-taschen
+install_flaschen_taschen false "$EXPERIMENTAL_PI5_SUPPORT"
 
 
 # ========== Setup protogen frontend and backend ==========
