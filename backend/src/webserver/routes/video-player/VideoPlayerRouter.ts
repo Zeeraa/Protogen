@@ -697,7 +697,7 @@ export class VideoPlayerRouter extends AbstractRouter {
           return;
         }
 
-        const directory = this.playbackManager.videoDirectory;
+        const directory = this.protogen.videoDirectory;
 
         const files = readdirSync(directory);
         let deletedCount = 0;

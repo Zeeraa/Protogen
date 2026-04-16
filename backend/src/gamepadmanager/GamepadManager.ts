@@ -83,6 +83,7 @@ export class GamepadManager {
         }
         this.protogen.logger.info("GamepadManager", `Gamepad ${data.connected ? "connected" : "disconnected"}: ${data.name}`);
       } catch (e) {
+        console.error(e);
         this.protogen.logger.error("GamepadManager", "Failed to parse gamepad status message");
       }
     });
@@ -99,6 +100,7 @@ export class GamepadManager {
           void this.triggerButtonAction(data.name);
         }
       } catch (e) {
+        console.error(e);
         this.protogen.logger.error("GamepadManager", "Failed to parse gamepad button message");
       }
     });
@@ -115,6 +117,7 @@ export class GamepadManager {
         this.markConnected();
         this.processAxesActions(axes);
       } catch (e) {
+        console.error(e);
         this.protogen.logger.error("GamepadManager", "Failed to parse gamepad axes message");
       }
     });

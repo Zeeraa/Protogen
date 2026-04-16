@@ -12,11 +12,15 @@ export class SystemApiService extends ApiBaseService {
   }
 
   shutdown() {
-    return this.http.post(this.apiBaseUrl + "/system/shutdown", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post(this.apiBaseUrl + "/system/shutdown", {});
+  }
+
+  restart() {
+    return this.http.post(this.apiBaseUrl + "/system/restart", {});
   }
 
   restartFlaschenTaschen() {
-    return this.http.post(this.apiBaseUrl + "/system/flaschen-taschen/restart", {}).pipe(catchError(this.defaultErrorHandler));
+    return this.http.post(this.apiBaseUrl + "/system/flaschen-taschen/restart", {});
   }
 
   getFlaschenTaschenSettings() {

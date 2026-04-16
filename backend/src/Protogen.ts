@@ -51,6 +51,7 @@ export class Protogen {
   public readonly userManager: UserManager;
   public readonly apiKeyManager: ApiKeyManager;
   public readonly sessionId: string;
+  public readonly videoDirectory: string;
   public readonly imageDirectory: string;
   public readonly tempDirectory: string;
   public readonly builtInAssets: BuiltInAsset[] = [];
@@ -95,9 +96,9 @@ export class Protogen {
       mkdirSync(this.config.dataDirectory);
     }
 
-    const videoTempDirectory = this.config.dataDirectory + "/videos";
-    if (!existsSync(videoTempDirectory)) {
-      mkdirSync(videoTempDirectory);
+    this.videoDirectory = this.config.dataDirectory + "/videos";
+    if (!existsSync(this.videoDirectory)) {
+      mkdirSync(this.videoDirectory);
     }
 
     this.imageDirectory = this.config.dataDirectory + "/images";
@@ -108,9 +109,10 @@ export class Protogen {
 
     this.tempDirectory = this.config.dataDirectory + "/temp";
     Object.freeze(this.tempDirectory);
-    if (!existsSync(this.tempDirectory)) {
-      mkdirSync(this.tempDirectory);
+    if (existsSync(this.tempDirectory)) {
+      rmSync(this.tempDirectory, { recursive: true });
     }
+    mkdirSync(this.tempDirectory);
 
     this.logger.info("Protogen", "Setting up hardware abstraction layer. Selected hardware type: " + magenta(config.hardware));
     switch (config.hardware) {
@@ -164,7 +166,7 @@ export class Protogen {
     }
     this.remoteWorker = new ProtogenRemoteWorker(this);
     if (this.config.systemFeatures.videoPlayback) {
-      this.videoPlaybackManager = new ProtogenVideoPlaybackManager(this, videoTempDirectory);
+      this.videoPlaybackManager = new ProtogenVideoPlaybackManager(this);
     }
     if (this.config.systemFeatures.rgb) {
       this.rgb = new RgbManager(this);

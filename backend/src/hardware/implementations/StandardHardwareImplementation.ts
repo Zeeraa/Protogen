@@ -108,7 +108,7 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   }
 
   public async shutdown(): Promise<void> {
-    await execAsync("sudo systemctl poweroff");
+    await execAsync("sudo -n systemctl poweroff");
   }
 
   public async getCPUTemperature(): Promise<number> {
@@ -274,6 +274,10 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
   }
 
   public async restartFlaschenTaschen() {
-    await execAsync("sudo service flaschen-taschen restart");
+    await execAsync("sudo -n systemctl restart flaschen-taschen");
+  }
+
+  public async restartProcess() {
+    await execAsync("sudo -n systemctl restart protogen");
   }
 }

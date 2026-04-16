@@ -232,6 +232,7 @@ export function loadConfiguration(): Configuration {
   const hasHUD = String(process.env["ENABLE_HUD"]).toLowerCase() == "true";
   const hasBoopSensor = String(process.env["ENABLE_BOOP_SENSOR"]).toLowerCase() == "true";
   const hasVideoPlayback = String(process.env["VIDEO_PLAYBACK_ENABLED"]).toLowerCase() == "true";
+  const systemd = String(process.env["WITH_SYSTEMD"]).toLowerCase() == "true";
 
   const systemFeatures: SystemFeatures = {
     serial: hasSerial,
@@ -239,6 +240,7 @@ export function loadConfiguration(): Configuration {
     hud: hasHUD,
     boopSensor: hasBoopSensor,
     videoPlayback: hasVideoPlayback,
+    systemd,
   };
 
   if (!hasSerial) {

@@ -6,12 +6,59 @@ REPO_URL="https://github.com/Zeeraa/Protogen"
 REPO_BRANCH="main"
 
 
+# ========== Argument parsing ==========
+REINSTALL_FT_ONLY=false
+EXPERIMENTAL_PI5_SUPPORT=false
+for arg in "$@"; do
+    case "$arg" in
+        --reinstall-ft) REINSTALL_FT_ONLY=true ;;
+        --experimental-pi5-support) EXPERIMENTAL_PI5_SUPPORT=true ;;
+    esac
+done
+
+# ========== Functions ==========
+install_flaschen_taschen() {
+    local force_reinstall="${1:-false}"
+    local pi5_support="${2:-false}"
+    if [[ "$force_reinstall" == "true" ]] && [[ -d "/home/pi/flaschen-taschen" ]]; then
+        echo "Removing existing flaschen-taschen directory..."
+        rm -rf /home/pi/flaschen-taschen
+    fi
+    if [[ -f "/home/pi/flaschen-taschen/server/ft-server" ]]; then
+        echo "flaschen-taschen binary already found"
+    else
+        echo "flaschen-taschen binary not found. Cloning repo and compiling it"
+        git clone --recursive https://github.com/hzeller/flaschen-taschen.git /home/pi/flaschen-taschen
+
+        if [[ "$pi5_support" == "true" ]]; then
+            echo "[Experimental] Swapping rgb-matrix submodule to Pi5 fork..."
+            cd /home/pi/flaschen-taschen/server/rgb-matrix
+            git remote add pi5fork https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment.git
+            git fetch pi5fork pi5_support
+            git checkout bbd4cf1
+            echo "[Experimental] rgb-matrix switched to Pi5 fork commit bbd4cf1"
+        fi
+
+        cd /home/pi/flaschen-taschen/server
+        make FT_BACKEND=rgb-matrix
+    fi
+    chown -R pi:pi /home/pi/flaschen-taschen
+}
+
 # ========== Permission check and disclaimer ==========
 # Check for root permissions
 
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root!"
     exit 1
+fi
+
+# ========== Reinstall flaschen-taschen only ==========
+if [[ "$REINSTALL_FT_ONLY" == "true" ]]; then
+    echo "Reinstalling flaschen-taschen..."
+    install_flaschen_taschen true "$EXPERIMENTAL_PI5_SUPPORT"
+    echo "flaschen-taschen reinstall complete."
+    exit 0
 fi
 
 # ========== Detect update vs fresh install ==========
@@ -131,6 +178,10 @@ if [[ "$IS_UPDATE" == "false" ]]; then
     echo "See the documentation for instructions on how to configure it."
     if ask_yes_no "Enable Video Playback?"; then VIDEO_PLAYBACK_ENABLED="true"; else VIDEO_PLAYBACK_ENABLED="false"; fi
     echo ""
+    echo "Interface List is a development tool that exposes the local IP addresses of this device under /whatsyourip."
+    echo "Only install this if you need it for development or network discovery purposes."
+    if ask_yes_no "Install Interface List (exposes device IP at /whatsmyip)? [default: no]"; then INSTALL_INTERFACE_LIST="true"; else INSTALL_INTERFACE_LIST="false"; fi
+    echo ""
 fi
 
 # ========== Packages ==========
@@ -185,15 +236,7 @@ if [[ "$IS_UPDATE" == "false" ]]; then
 fi
 
 # ========== Build flaschen-taschen ==========
-if [[ -f "/home/pi/flaschen-taschen/server/ft-server" ]]; then
-    echo "flaschen-taschen binary already found"
-else
-    echo "flaschen-taschen binary not found. Cloning repo and compiling it"
-    git clone --recursive https://github.com/hzeller/flaschen-taschen.git /home/pi/flaschen-taschen
-    cd flaschen-taschen/server
-    make FT_BACKEND=rgb-matrix
-fi
-sudo chown -R pi:pi /home/pi/flaschen-taschen
+install_flaschen_taschen false "$EXPERIMENTAL_PI5_SUPPORT"
 
 
 # ========== Setup protogen frontend and backend ==========
@@ -281,6 +324,29 @@ else
     echo "Creating service gamepad-listener.service"
     cp /home/pi/protogen/systemd/gamepad-listener.service /etc/systemd/system/gamepad-listener.service
     systemctl enable gamepad-listener.service
+fi
+
+# ========== Interface List ==========
+if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
+    echo "Installing Interface List..."
+    if [[ -d "/home/pi/Interface-List" ]]; then
+        echo "Removing existing Interface-List directory..."
+        rm -rf /home/pi/Interface-List
+    fi
+    git clone https://github.com/Zeeraa/Interface-List /home/pi/Interface-List
+    cd /home/pi/Interface-List
+    npm install
+    tsc
+    chown -R pi:pi /home/pi/Interface-List
+
+    if [[ -f "/etc/systemd/system/interface-list.service" ]]; then
+        echo "interface-list.service already exists"
+    else
+        echo "Creating service interface-list.service"
+        cp /home/pi/protogen/systemd/interface-list.service /etc/systemd/system/interface-list.service
+        systemctl enable interface-list.service
+    fi
+    echo "Interface List installed."
 fi
 
 # ========== Better gamepad support ==========
@@ -376,11 +442,17 @@ if [[ "$IS_UPDATE" == "true" ]]; then
     systemctl restart flaschen-taschen
     systemctl restart gamepad-listener
     systemctl restart protogen
+    if systemctl is-enabled --quiet interface-list 2>/dev/null; then
+        systemctl restart interface-list
+    fi
 else
     systemctl start flaschen-taschen
     systemctl start gamepad-listener
     systemctl start protogen
     systemctl start mosquitto
+    if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
+        systemctl start interface-list
+    fi
 fi
 
 if [[ "$IS_UPDATE" == "true" ]]; then

@@ -43,6 +43,7 @@ export class Database {
       logging: this.config.logging,
       synchronize: true,
       migrationsTableName: "protogen_typeorm_migrations",
+      // Note: when adding/modifying database structure also update BackupRouter.ts so that backups and imports work
       entities: [
         // ---------- Video manager ----------
         SavedVideo,
