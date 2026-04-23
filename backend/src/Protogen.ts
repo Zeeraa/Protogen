@@ -68,6 +68,7 @@ export class Protogen {
   public readonly hardwareAbstractionLayer: HardwareAbstractionLayer;
   public readonly sensorManager: SensorManager;
   public interuptLoops = false;
+  private shutdownCalled = false;
 
   constructor(config: Configuration) {
     this.sessionId = uuidv7();
@@ -242,6 +243,9 @@ export class Protogen {
     await this.mqttManager.init();
     await this.gamepadManager.init();
 
+    process.on('SIGINT', () => this.gracefulShutdown());
+    process.on('SIGTERM', () => this.gracefulShutdown());
+
     // Custom crash handler
     process.on('uncaughtException', (err) => {
       this.visor.appendRenderLock("Crash");
@@ -260,5 +264,43 @@ export class Protogen {
     this.logger.info("Protogen", "Protogen::init() finished");
   }
 
+  public async gracefulShutdown() {
+    if (this.shutdownCalled) {
+      return;
+    }
+    this.shutdownCalled = true;
 
+    this.logger.info("Protogen", "Beginning graceful shutdown...");
+    this.interuptLoops = true;
+
+    if (this.hudManager) {
+      await this.hudManager.shutdown();
+    }
+
+    if (this.rgb) {
+      await this.rgb.shutdown();
+    }
+
+    if (this.videoPlaybackManager) {
+      if (this.videoPlaybackManager.isPlaying) {
+        this.videoPlaybackManager.kill();
+      }
+    }
+
+    this.visor.shutdown();
+    await this.visor.tryRenderTextFrame("", "#000000"); // Clear visor
+
+    try {
+      if (this.database?.dataSource?.isInitialized) {
+        await this.database.dataSource.destroy();
+      }
+    } catch (err) {
+      console.error("Error while shutting down database connection: ", err);
+    }
+
+    await sleep(250); // Allow for some time to send out the clear frame and serial port commands before shutting down hardware
+
+    this.logger.info("Protogen", "Graceful shutdown complete. Exiting process.");
+    process.exit(0);
+  }
 }

@@ -97,24 +97,24 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
     const faceColorEffectsRequest = this.faceApi.getFaceColorEffects();
     const actionSetsRequest = this.actionApi.getActionSets();
 
-    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).subscribe({
-      next: ([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects, actionSets]) => {
-        this.actionDataSet = {
-          rgbScenes: rgbScenes,
-          savedVideos: videos,
-          visorRenderers: visorRenderers,
-          expressions: faceExpressions,
-          faceColorEffects: faceColorEffects,
-          actionSets: actionSets,
-        }
-        console.log(this.actionDataSet);
-        console.log("Related data loaded. Loading actions...");
-        this.fetchData();
-      },
-      error: (err) => {
+    forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).pipe(
+      catchError(err => {
         this.toastr.error("Failed fetch action target data");
         console.error('Error occurred:', err);
-      },
+        return [];
+      })
+    ).subscribe(([rgbScenes, visorRenderers, videos, faceExpressions, faceColorEffects, actionSets]) => {
+      this.actionDataSet = {
+        rgbScenes: rgbScenes,
+        savedVideos: videos,
+        visorRenderers: visorRenderers,
+        expressions: faceExpressions,
+        faceColorEffects: faceColorEffects,
+        actionSets: actionSets,
+      }
+      console.log(this.actionDataSet);
+      console.log("Related data loaded. Loading actions...");
+      this.fetchData();
     });
   }
 

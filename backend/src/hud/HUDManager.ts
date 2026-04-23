@@ -11,16 +11,26 @@ export class HUDManager {
   private readonly protogen;
   private _enableHud = true;
   private _lastDisplayContent: string[] = [];
+  private _interval: ReturnType<typeof setInterval> | null = null;
 
   constructor(protogen: Protogen) {
     this.protogen = protogen;
 
-    setInterval(() => {
+    this._interval = setInterval(() => {
       if (this.protogen.interuptLoops) {
         return;
       }
       this.updateDisplay();
     }, 1000 * 0.5);
+  }
+
+  public async shutdown() {
+    if (this._interval) {
+      clearInterval(this._interval);
+      this._interval = null;
+    }
+
+    await this.writeToHUD(new Array(this.config.lines).fill(" "));
   }
 
   get config() {

@@ -27,6 +27,8 @@ export class ProtogenVisor {
   private _lastFrame: Buffer;
   private _initCalled = false;
   private _faceRenderer: VisorFaceRenderer;
+  private _interval: ReturnType<typeof setInterval> | null = null;
+  private _previewInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
@@ -53,9 +55,34 @@ export class ProtogenVisor {
     // Default to the face renderer
     this.activateRenderer(FaceRendererId, false);
 
-    setInterval(() => {
+    this._previewInterval = setInterval(() => {
       this.sendVisorPreview();
     }, this.protogen.config.misc.visorPreviewInterval);
+  }
+
+  /**
+   * Clear the interval
+   */
+  public shutdown() {
+    if (this._interval) {
+      clearInterval(this._interval);
+      this._interval = null;
+    }
+
+    if (this._previewInterval) {
+      clearInterval(this._previewInterval);
+      this._previewInterval = null;
+    }
+  }
+
+  /**
+   * Clear the visor
+   */
+  public async clear() {
+    // Clear the visor (set all pixels to black)
+    this.ctx.fillStyle = "#000000";
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    await this.push();
   }
 
   public get scale() {
@@ -215,7 +242,11 @@ export class ProtogenVisor {
   }
 
   public beginMainLoop() {
-    setInterval(() => {
+    if (this._interval) {
+      clearInterval(this._interval);
+    }
+
+    this._interval = setInterval(() => {
       this.render();
     }, 1000 / 60)
   }

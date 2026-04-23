@@ -46,7 +46,11 @@ export class SavedVideoCardComponent implements OnDestroy {
   }
 
   play() {
-    this.api.playSavedVideo(this.video.id).subscribe((result) => {
+    this.api.playSavedVideo(this.video.id).pipe(catchError(err => {
+      console.error('Failed to play video', err);
+      this.toastr.error("Failed to play video");
+      return [];
+    })).subscribe(result => {
       this.toastr.success("Playing video " + result.name);
     });
   }

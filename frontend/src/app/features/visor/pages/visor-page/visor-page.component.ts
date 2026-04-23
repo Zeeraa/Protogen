@@ -34,9 +34,12 @@ export class VisorPageComponent implements OnInit, OnDestroy {
   }
 
   update() {
-    this.api.getStatus().subscribe(status => {
+    this.api.getStatus().pipe(catchError(err => {
+      console.error('Failed to fetch visor status', err);
+      return [];
+    })).subscribe(status => {
       this.status = status;
-    })
+    });
   }
 
   fetchRenderers() {

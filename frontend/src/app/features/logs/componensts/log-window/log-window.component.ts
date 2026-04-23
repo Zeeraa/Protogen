@@ -103,7 +103,10 @@ export class LogWindowComponent implements AfterViewInit, OnDestroy {
   }
 
   private checkSession() {
-    this.system.getSessionId().subscribe(sessionId => {
+    this.system.getSessionId().pipe(catchError(err => {
+      console.error('Failed to check session', err);
+      return [];
+    })).subscribe(sessionId => {
       if (sessionId == null) {
         return;
       }
