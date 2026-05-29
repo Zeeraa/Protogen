@@ -5,6 +5,7 @@ import { NgbProgressbarModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FormField } from '@angular/forms/signals';
+import { ImageCropperComponent } from 'ngx-image-cropper';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { FormField } from '@angular/forms/signals';
     ReactiveFormsModule,
     RouterLink,
     FormField,
+    ImageCropperComponent,
   ]
 })
 export class SystemModule { }

@@ -19,5 +19,13 @@
     "secure": false,
     "changeOrigin": true,
     "ws": true
+  },
+  "/favicon.ico": {
+    "target": "http://protogen.local:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/favicon.ico": "/images/icon/favicon.ico"
+    }
   }
 }
