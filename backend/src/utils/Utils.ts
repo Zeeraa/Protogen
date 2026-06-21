@@ -106,3 +106,10 @@ export function getPlatform() {
       return platform; // returns the raw platform name for less common OSes
   }
 }
+
+export function removeTrailingSlash(url: string): string {
+  if (url.endsWith('/')) {
+    return url.slice(0, -1);
+  }
+  return url;
+}
