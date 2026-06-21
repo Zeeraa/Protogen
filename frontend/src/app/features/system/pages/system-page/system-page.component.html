@@ -375,6 +375,55 @@
       </div>
     </div>
 
+    <!-- Remote Worker -->
+    @if(isSuperUser()) {
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-hdd-network-fill"></i>
+          <h5 class="mb-0">Remote Worker</h5>
+        </div>
+        <div class="card-body">
+          @if(workerConfig() !== null) {
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-body-secondary">Key status</span>
+            @if(workerConfig()!.keyLength !== null) {
+            <span class="badge bg-success">Set ({{workerConfig()!.keyLength}} characters)</span>
+            } @else {
+            <span class="badge bg-secondary">Not set</span>
+            }
+          </div>
+          } @else {
+          <div class="d-flex align-items-center gap-2 mb-3 text-body-secondary">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span>Loading...</span>
+          </div>
+          }
+
+          <div class="mb-3">
+            <label for="workerUrl" class="form-label text-body-secondary">Worker URL</label>
+            <input type="url" class="form-control" id="workerUrl" placeholder="http://worker-host:3005"
+              [ngModel]="workerUrlInput()" (ngModelChange)="workerUrlInput.set($event)">
+          </div>
+
+          <div class="mb-1">
+            <label for="workerKey" class="form-label text-body-secondary">API Key</label>
+            <input type="password" class="form-control" id="workerKey" placeholder="Enter key, or leave blank to clear"
+              [ngModel]="workerKeyInput()" (ngModelChange)="workerKeyInput.set($event)" autocomplete="new-password">
+          </div>
+          <small class="text-body-secondary d-block">
+            <i class="bi bi-shield-lock"></i> The key is write-only and will never be shown after saving. Leave blank to clear the key.
+          </small>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm" (click)="saveWorkerConfig()">
+            <i class="bi bi-save"></i> Save worker config
+          </button>
+        </div>
+      </div>
+    </div>
+    }
+
     <!-- Misc -->
     <div class="masonry-item">
       <div class="card">

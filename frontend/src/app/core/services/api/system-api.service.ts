@@ -66,6 +66,14 @@ export class SystemApiService extends ApiBaseService {
   setAudioDevice(deviceId: number): Observable<any> {
     return this.http.put(this.apiBaseUrl + "/system/audio-device", { deviceId });
   }
+
+  getWorkerConfig(): Observable<WorkerConfig> {
+    return this.http.get<WorkerConfig>(this.apiBaseUrl + "/system/worker-config");
+  }
+
+  updateWorkerConfig(url: string | null, key: string | null): Observable<WorkerConfig> {
+    return this.http.post<WorkerConfig>(this.apiBaseUrl + "/system/worker-config", { url, key });
+  }
 }
 
 interface ISessionIdObject {
@@ -112,4 +120,9 @@ export interface AudioDevice {
   id: number;
   name: string;
   isDefault: boolean;
+}
+
+export interface WorkerConfig {
+  url: string | null;
+  keyLength: number | null;
 }

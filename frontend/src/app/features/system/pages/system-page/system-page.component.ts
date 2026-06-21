@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
-import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice } from '../../../../core/services/api/system-api.service';
+import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice, WorkerConfig } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of, timeout } from 'rxjs';
@@ -53,6 +53,9 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
   protected readonly audioDevices = signal<AudioDevice[]>([]);
   protected readonly selectedAudioDeviceId = signal<number | null>(null);
+  protected readonly workerConfig = signal<WorkerConfig | null>(null);
+  protected readonly workerUrlInput = signal<string>('');
+  protected readonly workerKeyInput = signal<string>('');
   protected readonly angularVersion = signal<string>("Unknown");
 
   protected readonly importFile = signal<File | null>(null);
@@ -386,6 +389,21 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected saveWorkerConfig() {
+    const url = this.workerUrlInput().trim() || null;
+    const key = this.workerKeyInput() || null;
+    this.api.updateWorkerConfig(url, key).pipe(catchError(err => {
+      this.toastr.error("Failed to save worker configuration");
+      console.error("Failed to save worker configuration", err);
+      return [];
+    })).subscribe(config => {
+      this.workerConfig.set(config);
+      this.workerUrlInput.set(config.url ?? '');
+      this.workerKeyInput.set('');
+      this.toastr.success("Worker configuration saved");
+    });
+  }
+
   ngOnInit(): void {
     this.angularVersion.set(document.querySelector('app-root')?.getAttribute('ng-version') ?? "Unknown");
     this.update();
@@ -444,6 +462,17 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       if (defaultDevice) {
         this.selectedAudioDeviceId.set(defaultDevice.id);
       }
+    });
+
+    this.api.getWorkerConfig().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch worker configuration");
+        console.error("Failed to fetch worker configuration", err);
+        return [];
+      })
+    ).subscribe(config => {
+      this.workerConfig.set(config);
+      this.workerUrlInput.set(config.url ?? '');
     });
   }
 
