@@ -5,7 +5,7 @@ Requires=mosquitto.service
 
 [Service]
 Type=simple
-ExecStart=/home/pi/protogen/gamepad_listener/venv/bin/python /home/pi/protogen/gamepad_listener/gamepad_listener.py
+ExecStart=/home/pi/protogen/gamepad_listener/venv/bin/python /home/pi/protogen/gamepad_listener/gamepad_listener.py --config /home/pi/protogen/gamepad_config.json
 WorkingDirectory=/home/pi/protogen/gamepad_listener
 Restart=always
 RestartSec=5

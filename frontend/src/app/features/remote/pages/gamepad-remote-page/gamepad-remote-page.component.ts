@@ -39,6 +39,22 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
   protected readonly newProfileName = signal('');
   protected readonly newProfileSaving = signal(false);
   protected readonly newProfileNameEmpty = signal(false);
+  protected readonly restartingListener = signal(false);
+
+  protected restartListener() {
+    this.restartingListener.set(true);
+    this.gamepadApi.restartListener().pipe(
+      catchError((err: HttpErrorResponse) => {
+        console.error("Failed to restart gamepad listener", err);
+        this.toastr.error("Failed to restart gamepad listener");
+        this.restartingListener.set(false);
+        return [];
+      })
+    ).subscribe(() => {
+      this.restartingListener.set(false);
+      this.toastr.success("Gamepad listener restarted");
+    });
+  }
 
   protected saveSettings() {
     this.gamepadApi.setSettings(this.settings()).pipe(

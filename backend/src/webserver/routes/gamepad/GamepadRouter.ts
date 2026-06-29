@@ -90,6 +90,27 @@ export class GamepadRouter extends AbstractRouter {
       }
     });
 
+    this.router.post("/restart-listener", async (req, res) => {
+      /*
+      #swagger.path = '/gamepad/restart-listener'
+      #swagger.tags = ['Gamepad']
+      #swagger.description = "Restart the gamepad listener service"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[500] = { description: "An internal error occured" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        await this.protogen.gamepadManager.restartGamepadListenerService();
+        res.json({ message: "Gamepad listener restarted" });
+      } catch (err) {
+        this.handleError(err, req, res);
+      }
+    });
+
     this.router.get("/profiles", async (req, res) => {
       /*
       #swagger.path = '/gamepad/profiles'

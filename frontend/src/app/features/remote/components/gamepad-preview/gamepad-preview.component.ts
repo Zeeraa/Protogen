@@ -1,4 +1,4 @@
-import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { Subscription } from 'rxjs';
@@ -17,6 +17,13 @@ export class GamepadPreviewComponent implements OnInit, OnDestroy {
   public readonly controllerType = input.required<ControllerType>();
 
   protected readonly state = signal<GamepadState>(emptyGamepadState());
+
+  // Steam Controller renders as PlayStation
+  protected readonly renderType = computed(() =>
+    this.controllerType() === ControllerType.STEAM_CONTROLLER
+      ? ControllerType.PLAYSTATION
+      : this.controllerType()
+  );
 
   private subscription: Subscription | null = null;
   private interval: any;

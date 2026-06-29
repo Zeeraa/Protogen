@@ -16,6 +16,7 @@ import signal
 import sys
 import time
 import os
+import argparse
 
 # Add the Gamepad submodule to the path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "Gamepad"))
@@ -67,9 +68,47 @@ AXIS_NAMES = {
     7: "DPAD_Y",
 }
 
+# Steam Controller button name mapping
+STEAM_CONTROLLER_BUTTON_NAMES = {
+    2: "HOME",
+    3: "A",
+    4: "B",
+    5: "X",
+    6: "Y",
+    7: "LB",
+    8: "RB",
+    11: "SELECT",
+    12: "START",
+    14: "LS",
+    15: "RS",
+}
+
+# Steam Controller axis name mapping
+STEAM_CONTROLLER_AXIS_NAMES = {
+    0: "LEFT_X",
+    1: "LEFT_Y",
+    2: "LT",
+    3: "RIGHT_X",
+    4: "RIGHT_Y",
+    5: "RT",
+    6: "DPAD_X",
+    7: "DPAD_Y",
+}
+
+STEAM_CONTROLLER_IMMEDIATE_AXES = {"LT", "RT"}
+
+
+def load_config(path: str) -> dict:
+    """Load a JSON config file and return the parsed options."""
+    with open(path, "r") as f:
+        raw = json.load(f)
+    return {
+        "steam_controller": bool(raw.get("steam_controller", False)),
+    }
+
 
 class GamepadListener:
-    def __init__(self):
+    def __init__(self, debug=False, steam_controller=False):
         self._mqtt_client = mqtt.Client(
             mqtt.CallbackAPIVersion.VERSION2,
             client_id="gamepad_listener",
@@ -79,6 +118,21 @@ class GamepadListener:
         self._throttled_dirty = False
         self._immediate_dirty = False
         self._last_axis_send = 0.0
+        self._debug = debug
+        self._debug_last_axes: dict = {}
+
+        if steam_controller:
+            print("Using Steam Controller mapping", flush=True)
+            self._button_names = STEAM_CONTROLLER_BUTTON_NAMES
+            self._axis_names = STEAM_CONTROLLER_AXIS_NAMES
+            self._immediate_axes = STEAM_CONTROLLER_IMMEDIATE_AXES
+        else:
+            self._button_names = BUTTON_NAMES
+            self._axis_names = AXIS_NAMES
+            self._immediate_axes = IMMEDIATE_AXES
+
+        # Reverse map: axis name -> raw id (for debug output)
+        self._axis_names_inv = {v: k for k, v in self._axis_names.items()}
 
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -117,38 +171,49 @@ class GamepadListener:
         self._mqtt_client.publish(TOPIC_STATUS, payload, qos=1, retain=True)
         print(f"Gamepad {'connected' if connected else 'disconnected'}: {name}", flush=True)
 
-    def _publish_button(self, name: str, pressed: bool):
+    def _publish_button(self, button_id: int, name: str, pressed: bool):
+        if self._debug:
+            print(f"Button id={button_id} ({name}): {'pressed' if pressed else 'released'}", flush=True)
         payload = json.dumps({"code": name, "name": name, "pressed": pressed})
         self._mqtt_client.publish(TOPIC_BUTTON, payload, qos=1)
 
-    @staticmethod
-    def _remap_axis(name: str, value: float) -> float:
-        if name in IMMEDIATE_AXES:
+    def _remap_axis(self, name: str, value: float) -> float:
+        if name in self._immediate_axes:
             return (value + 1.0) / 2.0
         return value
 
     def _publish_axes(self, axes: dict):
         payload = json.dumps({"axes": axes})
+        if self._debug:
+            changed = {
+                name: value for name, value in axes.items()
+                if abs(value - self._debug_last_axes.get(name, 0.0)) >= 0.05
+            }
+            if changed:
+                # Print as "id=N (NAME): value"
+                parts = [f"id={self._axis_names_inv.get(n, '?')} ({n}): {v}" for n, v in changed.items()]
+                print(f"Axes: {', '.join(parts)}", flush=True)
+                self._debug_last_axes.update(changed)
         self._mqtt_client.publish(TOPIC_AXES, payload, qos=0)
 
     def _on_button_pressed(self, button_id):
         """Closure factory for button pressed events."""
-        name = BUTTON_NAMES.get(button_id, str(button_id))
+        name = self._button_names.get(button_id, str(button_id))
         def handler():
-            self._publish_button(name, True)
+            self._publish_button(button_id, name, True)
         return handler
 
     def _on_button_released(self, button_id):
         """Closure factory for button released events."""
-        name = BUTTON_NAMES.get(button_id, str(button_id))
+        name = self._button_names.get(button_id, str(button_id))
         def handler():
-            self._publish_button(name, False)
+            self._publish_button(button_id, name, False)
         return handler
 
     def _on_axis_moved(self, axis_id):
         """Closure factory for axis moved events."""
-        name = AXIS_NAMES.get(axis_id, str(axis_id))
-        is_immediate = name in IMMEDIATE_AXES
+        name = self._axis_names.get(axis_id, str(axis_id))
+        is_immediate = name in self._immediate_axes
         def handler(value):
             if is_immediate:
                 self._immediate_dirty = True
@@ -168,7 +233,7 @@ class GamepadListener:
         available = GamepadLib.available(JOYSTICK_NUMBER)
         if available:
             try:
-                gamepad = GamepadLib.Gamepad(JOYSTICK_NUMBER)
+                gamepad = GamepadLib.Gamepad(JOYSTICK_NUMBER)  # noqa: keep module-level constant for device index
                 self._gamepad = gamepad
                 name = getattr(gamepad, "fullName", "Generic")
 
@@ -177,6 +242,17 @@ class GamepadListener:
                 # Register handlers by raw index after init events have populated the maps
                 button_indices = list(gamepad.pressedMap.keys())
                 axis_indices = list(gamepad.axisMap.keys())
+
+                if self._debug:
+                    print(f"Detected gamepad: {name}", flush=True)
+                    print(f"Available buttons: {button_indices}", flush=True)
+                    for btn_idx in button_indices:
+                        btn_name = self._button_names.get(btn_idx, f"UNKNOWN_{btn_idx}")
+                        print(f"  Button {btn_idx}: {btn_name}", flush=True)
+                    print(f"Available axes: {axis_indices}", flush=True)
+                    for axis_idx in axis_indices:
+                        axis_name = self._axis_names.get(axis_idx, f"UNKNOWN_{axis_idx}")
+                        print(f"  Axis {axis_idx}: {axis_name}", flush=True)
 
                 for btn_idx in button_indices:
                     gamepad.addButtonPressedHandler(btn_idx, self._on_button_pressed(btn_idx))
@@ -218,8 +294,8 @@ class GamepadListener:
             axes = {}
             for axis_idx in list(gamepad.axisMap.keys()):
                 try:
-                    name = AXIS_NAMES.get(axis_idx, str(axis_idx))
-                    is_imm = name in IMMEDIATE_AXES
+                    name = self._axis_names.get(axis_idx, str(axis_idx))
+                    is_imm = name in self._immediate_axes
                     if (is_imm and send_immediate) or (not is_imm and send_throttled):
                         axes[name] = round(self._remap_axis(name, gamepad.axisMap[axis_idx]), 4)
                 except (KeyError, ValueError):
@@ -237,7 +313,7 @@ class GamepadListener:
             axes = {}
             for axis_idx in list(gamepad.axisMap.keys()):
                 try:
-                    name = AXIS_NAMES.get(axis_idx, str(axis_idx))
+                    name = self._axis_names.get(axis_idx, str(axis_idx))
                     axes[name] = round(self._remap_axis(name, gamepad.axisMap[axis_idx]), 4)
                 except (KeyError, ValueError):
                     pass
@@ -250,8 +326,26 @@ class GamepadListener:
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Gamepad Listener Service for Protogen")
+    parser.add_argument("--debug", action="store_true", help="Enable debug output for buttons and axes")
+    parser.add_argument("--config", metavar="PATH", help="Path to a JSON config file")
+    args = parser.parse_args()
+
+    steam_controller = False
+    if args.config:
+        try:
+            cfg = load_config(args.config)
+            steam_controller = cfg["steam_controller"]
+        except FileNotFoundError:
+            print(f"Config file at {args.config} not found, continuing with defaults", flush=True)
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"Error loading config: {e}", flush=True)
+            sys.exit(1)
+
     print("Gamepad Listener starting...", flush=True)
-    listener = GamepadListener()
+    if args.debug:
+        print("Debug mode enabled", flush=True)
+    listener = GamepadListener(debug=args.debug, steam_controller=steam_controller)
     listener.start()
 
 

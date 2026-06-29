@@ -61,6 +61,10 @@ export class GamepadApiService extends ApiBaseService {
   public deleteProfile(id: string) {
     return this.http.delete(this.apiBaseUrl + "/gamepad/profiles/" + id);
   }
+
+  public restartListener() {
+    return this.http.post<{ message: string }>(this.apiBaseUrl + "/gamepad/restart-listener", {});
+  }
 }
 
 export interface GamepadSettings {
@@ -71,6 +75,7 @@ export interface GamepadSettings {
 export enum ControllerType {
   PLAYSTATION = "playstation",
   XBOX = "xbox",
+  STEAM_CONTROLLER = "steam_controller",
 }
 
 export interface GamepadProfile {
