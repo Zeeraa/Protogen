@@ -5,7 +5,6 @@ import { FlaschenTaschenConfiguration } from "./objects/FlaschenTaschenConfigura
 import { HUDConfiguration } from "./objects/HUDConfiguration";
 import { LedMatrixConfiguration } from "./objects/LedMatrixConfiguration";
 import { MiscConfiguration } from "./objects/MiscConfiguration";
-import { RemoteWorkerConfiguration } from "./objects/RemoteWorkerConfiguration";
 import { RgbConfiguration } from "./objects/RgbConfiguration";
 import { SerialConfiguration } from "./objects/SerialConfiguration";
 import { MqttConfiguration } from "./objects/MqttConfiguration";
@@ -137,24 +136,6 @@ export function loadConfiguration(): Configuration {
   }
   //#endregion
 
-  //#region Remote Worker
-  const remoteWorkerUrl = process.env["REMOTE_WORKER_URL"];
-  let workerKey = "";
-  if (process.env["REMOTE_WORKER_KEY"] != null) {
-    workerKey = process.env["REMOTE_WORKER_KEY"];
-  }
-
-  if (remoteWorkerUrl == null) {
-    throw new Error("Missing: REMOTE_WORKER_URL");
-  }
-
-
-  const remoteWorker: RemoteWorkerConfiguration = {
-    url: removeTrailingSlash(remoteWorkerUrl),
-    key: workerKey,
-  }
-  //#endregion
-
   //#region Serial
   const serialPort = process.env["SERIAL_PORT"];
   const serialBaudRate = parseInt(String(process.env["SERIAL_BAUD_RATE"]));
@@ -268,7 +249,6 @@ export function loadConfiguration(): Configuration {
     database,
     flaschenTaschen,
     ledMatrix,
-    remoteWorker,
     serial: serialConfig,
     rgb,
     mqtt,
@@ -281,9 +261,3 @@ export function loadConfiguration(): Configuration {
   }
 }
 
-function removeTrailingSlash(url: string): string {
-  if (url.endsWith('/')) {
-    return url.slice(0, -1);
-  }
-  return url;
-}

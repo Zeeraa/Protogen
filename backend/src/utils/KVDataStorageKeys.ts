@@ -16,6 +16,8 @@ export const KV_ActiveVisorColorEffect = "ActiveVisorColorEffect";
 //#region System
 export const KV_EnableHUD = "EnableHUD";
 export const KV_EnableSwagger = "EnableSwagger";
+export const KV_WorkerUrl = "WorkerUrl";
+export const KV_WorkerKey = "WorkerKey";
 //#endregion
 
 //#region Remote

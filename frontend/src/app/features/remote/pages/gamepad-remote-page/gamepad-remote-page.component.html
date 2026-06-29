@@ -39,9 +39,17 @@
             </div>
           </div>
         </div>
-        <div class="card-footer">
+        <div class="card-footer d-flex flex-wrap gap-2">
           <button class="btn btn-sm btn-success" (click)="saveSettings()">
             <i class="bi bi-check-lg"></i> Save
+          </button>
+          <button class="btn btn-sm btn-outline-warning" (click)="restartListener()" [disabled]="restartingListener()">
+            @if(restartingListener()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            } @else {
+            <i class="bi bi-arrow-clockwise"></i>
+            }
+            Restart Listener
           </button>
         </div>
         }

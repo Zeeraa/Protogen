@@ -4,3 +4,5 @@ remote/joystick/local_communication_cert.pem
 remote/joystick/.env
 backend/ft_config.txt
 gamepad_listener/venv
+gamepad_listener/test_config.json
+gamepad_config.json

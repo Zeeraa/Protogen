@@ -29,7 +29,7 @@ install_flaschen_taschen() {
     else
         echo "flaschen-taschen binary not found. Cloning repo and compiling it"
         git clone --recursive https://github.com/hzeller/flaschen-taschen.git /home/pi/flaschen-taschen
-
+        
         if [[ "$pi5_support" == "true" ]]; then
             echo "[Experimental] Swapping rgb-matrix submodule to Pi5 fork..."
             cd /home/pi/flaschen-taschen/server/rgb-matrix
@@ -38,7 +38,7 @@ install_flaschen_taschen() {
             git checkout bbd4cf1
             echo "[Experimental] rgb-matrix switched to Pi5 fork commit bbd4cf1"
         fi
-
+        
         cd /home/pi/flaschen-taschen/server
         make FT_BACKEND=rgb-matrix
     fi
@@ -111,9 +111,9 @@ if [[ "$IS_UPDATE" == "true" ]]; then
         echo "The directory is already in use and we were unable to update due to a missing git repo."
         exit 1
     fi
-
+    
     cd /home/pi/protogen
-
+    
     # Check branch
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     if [[ "$CURRENT_BRANCH" != "$REPO_BRANCH" ]]; then
@@ -128,7 +128,7 @@ if [[ "$IS_UPDATE" == "true" ]]; then
             exit 1
         fi
     fi
-
+    
     # Check if repo is dirty
     if [[ -n "$(git status --porcelain)" ]]; then
         echo "Warning: The repository has uncommitted local changes."
@@ -142,14 +142,14 @@ if [[ "$IS_UPDATE" == "true" ]]; then
             exit 1
         fi
     fi
-
+    
     # Stop services before updating
     echo "Stopping services..."
     systemctl stop protogen || true
     systemctl stop gamepad-listener || true
     systemctl stop flaschen-taschen || true
     systemctl stop mosquitto || true
-
+    
     # Pull latest changes
     echo "Pulling latest changes from '$REPO_BRANCH'..."
     if ! git pull; then
@@ -193,7 +193,7 @@ echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | sudo debconf-set-se
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $(pwgen -s -1 128)" | sudo debconf-set-selections
 
-sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv
+sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv libhidapi-dev libudev-dev
 
 # Check if Node.js is installed
 if ! command -v node &>/dev/null; then
@@ -202,9 +202,9 @@ if ! command -v node &>/dev/null; then
     curl -fsSL https://deb.nodesource.com/setup_24.x -o nodesource_setup.sh
     bash nodesource_setup.sh
     rm nodesource_setup.sh
-
+    
     sudo apt install -y nodejs
-
+    
     # Verify installation
     if command -v node &>/dev/null; then
         echo "Node.js installed successfully."
@@ -225,13 +225,13 @@ if [[ "$IS_UPDATE" == "false" ]]; then
     # Database password
     GENERATED_DB_PASSWORD=$(pwgen -s -1 32)
     echo "Configuring MariaDB..."
-
+    
     sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'protogen'@'localhost' IDENTIFIED BY '$GENERATED_DB_PASSWORD';"
     sudo mysql -u root -e "ALTER USER 'protogen'@'localhost' IDENTIFIED BY '$GENERATED_DB_PASSWORD';"
     sudo mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'protogen'@'localhost' WITH GRANT OPTION;"
     sudo mysql -u root -e "FLUSH PRIVILEGES;"
     sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS protogen;"
-
+    
     echo "DB Password: $GENERATED_DB_PASSWORD"
 fi
 
@@ -271,9 +271,8 @@ if [[ "$IS_UPDATE" == "false" ]]; then
     if [[ ! -f "/home/pi/protogen/backend/.env" ]]; then
         echo "Creating .env from sample file"
         cp /home/pi/protogen/backend/.env.sample /home/pi/protogen/backend/.env
-        sed -i 's|^REMOTE_WORKER_URL=.*|REMOTE_WORKER_URL="http://127.0.0.1:3069"|' /home/pi/protogen/backend/.env
     fi
-
+    
     sed -i 's|^DB_USERNAME=.*|DB_USERNAME="protogen"|' /home/pi/protogen/backend/.env
     sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=\"${GENERATED_DB_PASSWORD}\"|" /home/pi/protogen/backend/.env
     sed -i "s|^ENABLE_SERIAL=.*|ENABLE_SERIAL=\"${ENABLE_SERIAL}\"|" /home/pi/protogen/backend/.env
@@ -326,6 +325,14 @@ else
     systemctl enable gamepad-listener.service
 fi
 
+if [[ -f "/etc/systemd/system/scwrapper.service" ]]; then
+    echo "scwrapper.service already exists"
+else
+    echo "Creating service scwrapper.service"
+    cp /home/pi/protogen/systemd/scwrapper.service /etc/systemd/system/scwrapper.service
+    systemctl enable scwrapper.service
+fi
+
 # ========== Interface List ==========
 if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
     echo "Installing Interface List..."
@@ -338,7 +345,7 @@ if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
     npm install
     tsc
     chown -R pi:pi /home/pi/Interface-List
-
+    
     if [[ -f "/etc/systemd/system/interface-list.service" ]]; then
         echo "interface-list.service already exists"
     else
@@ -369,6 +376,29 @@ else
 fi
 sudo chown -R pi:pi /home/pi/xpadneo
 
+# ========== Install scwrapper ==========
+if [[ -f "/home/pi/scwrapper/bin/scwrapper" ]]; then
+    echo "scwrapper binary already found"
+else
+    echo "Building scwrapper for Steam Controller support..."
+    git clone https://github.com/bnpfeife/scwrapper /home/pi/scwrapper
+    cd /home/pi/scwrapper
+    make
+    echo "scwrapper built successfully"
+fi
+sudo chown -R pi:pi /home/pi/scwrapper
+
+# Configure udev rules for Steam Controller
+echo "Configuring udev rules for Steam Controller..."
+sudo tee /etc/udev/rules.d/90-steam-controller-2026.rules > /dev/null <<EOF
+SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+KERNEL=="uinput", MODE="0660", GROUP="pi", OPTIONS+="static_node=uinput"
+EOF
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+echo "udev rules configured"
+
 
 # ========== Final ==========
 echo "--led-cols=64 --led-rows=32 --led-chain=2 --led-gpio-mapping=adafruit-hat --led-slowdown-gpio=3 --led-limit-refresh=100" > /home/pi/ft_config.txt
@@ -397,19 +427,19 @@ if [[ -f "$BTCONF" ]]; then
     # Enable dual controller mode (BR/EDR + LE)
     sed -i 's/^#ControllerMode = dual/ControllerMode = dual/' "$BTCONF"
     sed -i 's/^ControllerMode = .*/ControllerMode = dual/' "$BTCONF"
-
+    
     # Enable device privacy mode (needed for BLE devices like Xbox controllers)
     sed -i 's/^#Privacy = off/Privacy = device/' "$BTCONF"
     sed -i 's/^Privacy = off/Privacy = device/' "$BTCONF"
-
+    
     # Enable JustWorks pairing (no interactive PIN for headless pairing)
     sed -i 's/^#JustWorksRepairing = never/JustWorksRepairing = always/' "$BTCONF"
     sed -i 's/^JustWorksRepairing = never/JustWorksRepairing = always/' "$BTCONF"
-
+    
     # Enable fast connectable for quicker reconnection
     sed -i 's/^#FastConnectable = false/FastConnectable = true/' "$BTCONF"
     sed -i 's/^FastConnectable = false/FastConnectable = true/' "$BTCONF"
-
+    
     echo "Bluetooth main.conf configured"
 else
     echo "Warning: $BTCONF not found, skipping Bluetooth config"
@@ -434,14 +464,16 @@ else
 fi
 
 a2ensite protogen.conf
-
-service apache2 restart
-
-# Start / restart services
-if [[ "$IS_UPDATE" == "true" ]]; then
-    systemctl restart flaschen-taschen
-    systemctl restart gamepad-listener
-    systemctl restart protogen
+systemctl restart scwrapper
+    if systemctl is-enabled --quiet interface-list 2>/dev/null; then
+        systemctl restart interface-list
+    fi
+else
+    systemctl start flaschen-taschen
+    systemctl start gamepad-listener
+    systemctl start protogen
+    systemctl start mosquitto
+    systemctl start scwrappern
     if systemctl is-enabled --quiet interface-list 2>/dev/null; then
         systemctl restart interface-list
     fi

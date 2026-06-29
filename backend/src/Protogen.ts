@@ -10,7 +10,7 @@ import { ProtogenWebServer } from "./webserver/ProtogenWebServer";
 import { RgbManager } from "./rgb/RgbManager";
 import { NetworkManager } from "./network-manager/NetworkManager";
 import EventEmitter from "events";
-import { sleep } from "./utils/Utils";
+import { removeTrailingSlash, sleep } from "./utils/Utils";
 import { uuidv7 } from "uuidv7";
 import { UserManager } from "./user-manager/UserManager";
 import { ApiKeyManager } from "./apikeys/ApiKeyManager";
@@ -32,9 +32,12 @@ import { BluetoothManager } from "./bluetooth/BluetoothManager";
 import { InitialSetup } from "./initial-setup/InitialSetup";
 import { GamepadManager } from "./gamepadmanager/GamepadManager";
 import { MqttManager } from "./mqtt/MqttManager";
+import { KV_WorkerKey, KV_WorkerUrl } from "./utils/KVDataStorageKeys";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
+
+export const DefaultWorkerUrl = "http://localhost:3005";
 
 export class Protogen {
   public readonly config: Configuration;
@@ -67,6 +70,8 @@ export class Protogen {
   public readonly hudManager: HUDManager | null;
   public readonly hardwareAbstractionLayer: HardwareAbstractionLayer;
   public readonly sensorManager: SensorManager;
+  public remoteWorkerUrl: string;
+  public remoteWorkerKey: string | null;
   public interuptLoops = false;
   private shutdownCalled = false;
 
@@ -193,6 +198,9 @@ export class Protogen {
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit database", BootMessageColor);
     await this.database.init();
+    const url = await this.database.getData(KV_WorkerUrl) ?? DefaultWorkerUrl;
+    this.remoteWorkerUrl = removeTrailingSlash(url);
+    this.remoteWorkerKey = await this.database.getData(KV_WorkerKey);
 
     const initialSetup = new InitialSetup(this);
     await initialSetup.checkInitialSetup();

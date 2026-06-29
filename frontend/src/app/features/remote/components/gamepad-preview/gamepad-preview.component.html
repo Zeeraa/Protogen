@@ -11,17 +11,17 @@
 
 <div class="row">
   <div class="col-12 d-flex justify-content-center">
-    <div class="controller" [class.disconnected]="!state().connected" [class.xbox]="controllerType() === 'xbox'"
-      [class.playstation]="controllerType() === 'playstation'">
+    <div class="controller" [class.disconnected]="!state().connected" [class.xbox]="renderType() === 'xbox'"
+      [class.playstation]="renderType() === 'playstation'">
 
       <!-- Triggers (above body) -->
       <div class="trigger trigger-left" [class.active]="state().axes.LT > 0.1">
         <div class="trigger-fill" [style.height.%]="state().axes.LT * 100"></div>
-        <span class="trigger-label">{{ controllerType() === 'xbox' ? 'LT' : 'L2' }}</span>
+        <span class="trigger-label">{{ renderType() === 'xbox' ? 'LT' : 'L2' }}</span>
       </div>
       <div class="trigger trigger-right" [class.active]="state().axes.RT > 0.1">
         <div class="trigger-fill" [style.height.%]="state().axes.RT * 100"></div>
-        <span class="trigger-label">{{ controllerType() === 'xbox' ? 'RT' : 'R2' }}</span>
+        <span class="trigger-label">{{ renderType() === 'xbox' ? 'RT' : 'R2' }}</span>
       </div>
 
       <!-- Controller body -->
@@ -31,16 +31,16 @@
       </div>
 
       <!-- Light bar (PlayStation only) -->
-      @if (controllerType() === 'playstation') {
+      @if (renderType() === 'playstation') {
       <div class="light-bar" [class.connected]="state().connected"></div>
       }
 
       <!-- Bumpers -->
       <div class="bumper bumper-left" [class.active]="state().buttons.LB">
-        {{ controllerType() === 'xbox' ? 'LB' : 'L1' }}
+        {{ renderType() === 'xbox' ? 'LB' : 'L1' }}
       </div>
       <div class="bumper bumper-right" [class.active]="state().buttons.RB">
-        {{ controllerType() === 'xbox' ? 'RB' : 'R1' }}
+        {{ renderType() === 'xbox' ? 'RB' : 'R1' }}
       </div>
 
       <!-- D-pad -->
@@ -53,7 +53,7 @@
       </div>
 
       <!-- Face buttons -->
-      @if (controllerType() === 'xbox') {
+      @if (renderType() === 'xbox') {
       <div class="face-buttons">
         <div class="face-btn btn-y" [class.active]="state().buttons.Y">Y</div>
         <div class="face-btn btn-b" [class.active]="state().buttons.B">B</div>
@@ -84,21 +84,21 @@
       </div>
 
       <!-- Touchpad (PlayStation only) -->
-      @if (controllerType() === 'playstation') {
+      @if (renderType() === 'playstation') {
       <div class="touchpad"></div>
       }
 
       <!-- Share / Options (View / Menu for Xbox) -->
       <div class="meta-btn share-btn" [class.active]="state().buttons.SELECT">
-        {{ controllerType() === 'xbox' ? 'VIEW' : 'SHARE' }}
+        {{ renderType() === 'xbox' ? 'VIEW' : 'SHARE' }}
       </div>
       <div class="meta-btn options-btn" [class.active]="state().buttons.START">
-        {{ controllerType() === 'xbox' ? 'MENU' : 'OPTIONS' }}
+        {{ renderType() === 'xbox' ? 'MENU' : 'OPTIONS' }}
       </div>
 
       <!-- Home button -->
-      <div class="home-btn" [class.active]="state().buttons.HOME" [class.xbox-btn]="controllerType() === 'xbox'"
-        [class.ps-btn]="controllerType() === 'playstation'"></div>
+      <div class="home-btn" [class.active]="state().buttons.HOME" [class.xbox-btn]="renderType() === 'xbox'"
+        [class.ps-btn]="renderType() === 'playstation'"></div>
     </div>
   </div>
 </div>

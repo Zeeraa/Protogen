@@ -6,10 +6,14 @@ import { GamepadAxes, GamepadAxesMessage, GamepadButtons, GamepadButtonMessage, 
 import { GamepadProfile } from "../database/models/gamepad/GamepadProfile.model";
 import { ActionType } from "../actions/ActionType";
 import { FaceRendererId } from "../visor/rendering/renderers/special/face/VisorFaceRender";
+import { writeFile } from "fs/promises";
+import { execAsync } from "../utils/SystemUtils";
 
 const TOPIC_STATUS = "protogen/gamepad/status";
 const TOPIC_BUTTON = "protogen/gamepad/button";
 const TOPIC_AXES = "protogen/gamepad/axes";
+
+const GAMEPAD_CONFIG_PATH = "/home/pi/protogen/gamepad_config.json";
 
 const ANALOG_ACTIVATION_THRESHOLD = 0.50;
 const STICK_CENTER_THRESHOLD = 0.20;
@@ -141,6 +145,8 @@ export class GamepadManager {
       await this.protogen.database.setData(KV_GamepadType, this._type);
     }
 
+    await this.writeGamepadConfig(this._type);
+
     this._enablePreview = (await this.protogen.database.getData(KV_GamepadEnablePreview)) === "true";
 
     const profileRepo = this.protogen.database.dataSource.getRepository(GamepadProfile);
@@ -214,6 +220,11 @@ export class GamepadManager {
     if (updateDatabase) {
       await this.protogen.database.setData(KV_ActiveGamepadProfile, profile?.id ?? null);
     }
+    if (profile != null) {
+      this.protogen.logger.info("GamepadManager", `Active profile set to: ${profile.name} (${profile.id})`);
+    } else {
+      this.protogen.logger.info("GamepadManager", "Active profile cleared");
+    }
   }
 
   public get connected(): boolean {
@@ -225,8 +236,32 @@ export class GamepadManager {
   }
 
   public async setTypePersistently(type: GamepadType): Promise<void> {
+    this.protogen.logger.info("GamepadManager", `Gamepad type changed to: ${type}`);
     this._type = type;
     await this.protogen.database.setData(KV_GamepadType, type);
+    await this.writeGamepadConfig(type);
+    await this.restartGamepadListener();
+  }
+
+  private async writeGamepadConfig(type: GamepadType): Promise<void> {
+    const config = { steam_controller: type === GamepadType.STEAM_CONTROLLER };
+    await writeFile(GAMEPAD_CONFIG_PATH, JSON.stringify(config, null, 2), "utf-8");
+    this.protogen.logger.info("GamepadManager", `Wrote gamepad config for type: ${type}`);
+  }
+
+  private async restartGamepadListener(): Promise<void> {
+    try {
+      await execAsync("sudo systemctl restart gamepad-listener");
+      this.protogen.logger.info("GamepadManager", "Restarted gamepad-listener service");
+    } catch (err) {
+      this.protogen.logger.error("GamepadManager", "Failed to restart gamepad-listener service");
+      console.error(err);
+    }
+  }
+
+  public async restartGamepadListenerService(): Promise<void> {
+    this.protogen.logger.info("GamepadManager", "Gamepad listener restart requested via API");
+    await this.restartGamepadListener();
   }
 
   public get enablePreview(): boolean {
@@ -495,4 +530,5 @@ export class GamepadManager {
 export enum GamepadType {
   PLAYSTATION = "playstation",
   XBOX = "xbox",
+  STEAM_CONTROLLER = "steam_controller",
 }

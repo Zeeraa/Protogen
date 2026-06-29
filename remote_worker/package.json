@@ -44,5 +44,9 @@
     "uuidv7": "^1.0.0",
     "youtube-dl-exec": "^3.1.4",
     "zod": "^3.23.8"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.6.2": true,
+    "youtube-dl-exec@3.1.4": true
   }
 }

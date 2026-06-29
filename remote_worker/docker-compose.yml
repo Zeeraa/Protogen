@@ -1,0 +1,25 @@
+services:
+  protogen-worker:
+    build: .
+    environment:
+      API_KEY: ${API_KEY}
+      AUTO_UPDATE: true
+    networks:
+      - protogen-worker-network
+    expose:
+      - "3000"
+
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - protogen-worker-network
+    depends_on:
+      - protogen-worker
+    restart: unless-stopped
+
+networks:
+  protogen-worker-network:
+    driver: bridge

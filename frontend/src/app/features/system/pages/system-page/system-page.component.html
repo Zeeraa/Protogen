@@ -299,6 +299,23 @@
           <h5 class="mb-0">Appearance</h5>
         </div>
         <div class="card-body">
+          <label class="form-label text-body-secondary">Application Icon</label>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <img [src]="'/api/images/icon/icon.png?v=' + iconPreviewVersion()" alt="App icon" class="rounded border"
+              style="width: 64px; height: 64px; object-fit: contain;">
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-outline-primary btn-sm" (click)="openIconModal()">
+                <i class="bi bi-image"></i> Set Icon
+              </button>
+              <button class="btn btn-outline-danger btn-sm" (click)="resetIcon()">
+                <i class="bi bi-x-circle"></i> Reset Icon
+              </button>
+            </div>
+          </div>
+          <small class="text-body-secondary d-block mb-3">
+            <i class="bi bi-info-circle"></i> A page reload is required for icon changes to appear in the navbar.
+          </small>
+
           <label class="form-label text-body-secondary">Color Mode</label>
           <div class="btn-group d-flex mb-3" role="group">
             <button type="button" class="btn btn-sm" [class.btn-primary]="themeService.theme() === Theme.Light"
@@ -357,6 +374,56 @@
         </div>
       </div>
     </div>
+
+    <!-- Remote Worker -->
+    @if(isSuperUser()) {
+    <div class="masonry-item">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-hdd-network-fill"></i>
+          <h5 class="mb-0">Remote Worker</h5>
+        </div>
+        <div class="card-body">
+          @if(workerConfig() !== null) {
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-body-secondary">Key status</span>
+            @if(workerConfig()!.keyLength !== null) {
+            <span class="badge bg-success">Set ({{workerConfig()!.keyLength}} characters)</span>
+            } @else {
+            <span class="badge bg-secondary">Not set</span>
+            }
+          </div>
+          } @else {
+          <div class="d-flex align-items-center gap-2 mb-3 text-body-secondary">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span>Loading...</span>
+          </div>
+          }
+
+          <div class="mb-3">
+            <label for="workerUrl" class="form-label text-body-secondary">Worker URL</label>
+            <input type="url" class="form-control" id="workerUrl" placeholder="http://worker-host:3005"
+              [ngModel]="workerUrlInput()" (ngModelChange)="workerUrlInput.set($event)">
+          </div>
+
+          <div class="mb-1">
+            <label for="workerKey" class="form-label text-body-secondary">API Key</label>
+            <input type="password" class="form-control" id="workerKey" placeholder="Enter key, or leave blank to clear"
+              [ngModel]="workerKeyInput()" (ngModelChange)="workerKeyInput.set($event)" autocomplete="new-password">
+          </div>
+          <small class="text-body-secondary d-block">
+            <i class="bi bi-shield-lock"></i> The key is write-only and will never be shown after saving. Leave blank to
+            clear the key.
+          </small>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm" (click)="saveWorkerConfig()">
+            <i class="bi bi-save"></i> Save worker config
+          </button>
+        </div>
+      </div>
+    </div>
+    }
 
     <!-- Misc -->
     <div class="masonry-item">
@@ -538,4 +605,33 @@
     }
   </div>
   }
+</ng-template>
+
+<ng-template #iconModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="icon-modal-title">Set Application Icon</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label" for="iconFileInput">Select image</label>
+      <input id="iconFileInput" type="file" class="form-control"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/avif,image/bmp,image/tiff,image/svg+xml,image/heic,image/heif"
+        (change)="onIconFileSelected($event)">
+    </div>
+    @if (iconCropFile()) {
+    <div class="border rounded overflow-hidden" style="max-height: 400px;">
+      <image-cropper [imageFile]="iconCropFile()!" [maintainAspectRatio]="true" [aspectRatio]="1" [roundCropper]="false"
+        output="blob" format="png" (imageCropped)="onIconCropped($event)" style="max-height: 400px;">
+      </image-cropper>
+    </div>
+    <small class="text-body-secondary d-block mt-1">Drag to reposition &bull; Resize handles to adjust crop area</small>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="!iconCroppedBlob()" (click)="applyIcon()">
+      <i class="bi bi-check-lg"></i> Apply
+    </button>
+  </div>
 </ng-template>

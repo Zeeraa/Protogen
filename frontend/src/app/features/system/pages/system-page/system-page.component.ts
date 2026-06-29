@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
-import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice } from '../../../../core/services/api/system-api.service';
+import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice, WorkerConfig } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of, timeout } from 'rxjs';
@@ -8,6 +8,7 @@ import { Title } from '@angular/platform-browser';
 import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
 import { HudApiService } from '../../../../core/services/api/hud-api.service';
 import { BackupApiService } from '../../../../core/services/api/backup-api.service';
+import { FilesApiService } from '../../../../core/services/api/files-api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
 import { form } from '@angular/forms/signals'
@@ -15,6 +16,7 @@ import { hexToRgb, RGBColors, rgbToHex } from '../../../../core/services/utils/U
 import { BootswatchThemes, Theme, ThemeService } from '../../../../core/services/theme.service';
 import { SystemConfigService } from '../../../../core/services/system-config.service';
 import { DevApi } from '../../../../core/services/api/discorvery-api.service';
+import { ImageCroppedEvent } from 'ngx-image-cropper';
 
 @Component({
   selector: 'app-system-page',
@@ -27,6 +29,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private readonly api = inject(SystemApiService);
   private readonly hudApi = inject(HudApiService);
   private readonly backupApi = inject(BackupApiService);
+  private readonly filesApi = inject(FilesApiService);
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
   private readonly auth = inject(AuthService);
@@ -41,6 +44,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected readonly importModalTemplate = viewChild<TemplateRef<any>>("importModal");
   protected readonly importProgressModalTemplate = viewChild<TemplateRef<any>>("importProgressModal");
   protected readonly restartServerModalTemplate = viewChild<TemplateRef<any>>("restartServerModal");
+  protected readonly iconModalTemplate = viewChild<TemplateRef<any>>("iconModal");
 
   private readonly overview = signal<SystemOverview | null>(null);
   private updateInterval: any = null;
@@ -49,6 +53,9 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected readonly networkInterfaces = signal<NetworkInterfaceInfo[]>([]);
   protected readonly audioDevices = signal<AudioDevice[]>([]);
   protected readonly selectedAudioDeviceId = signal<number | null>(null);
+  protected readonly workerConfig = signal<WorkerConfig | null>(null);
+  protected readonly workerUrlInput = signal<string>('');
+  protected readonly workerKeyInput = signal<string>('');
   protected readonly angularVersion = signal<string>("Unknown");
 
   protected readonly importFile = signal<File | null>(null);
@@ -63,7 +70,12 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   private importProgressModalRef: NgbModalRef | null = null;
   private shutdownModalRef: null | NgbModalRef = null;
   private restartServerModalRef: NgbModalRef | null = null;
+  private iconModalRef: NgbModalRef | null = null;
   private restartPollInterval: any = null;
+
+  protected readonly iconPreviewVersion = signal<number>(Date.now());
+  protected readonly iconCropFile = signal<File | null>(null);
+  protected readonly iconCroppedBlob = signal<Blob | null>(null);
 
   protected readonly restartServerStatus = signal<'confirm' | 'waiting-restart' | 'error'>('confirm');
 
@@ -377,6 +389,21 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected saveWorkerConfig() {
+    const url = this.workerUrlInput().trim() || null;
+    const key = this.workerKeyInput() || null;
+    this.api.updateWorkerConfig(url, key).pipe(catchError(err => {
+      this.toastr.error("Failed to save worker configuration");
+      console.error("Failed to save worker configuration", err);
+      return [];
+    })).subscribe(config => {
+      this.workerConfig.set(config);
+      this.workerUrlInput.set(config.url ?? '');
+      this.workerKeyInput.set('');
+      this.toastr.success("Worker configuration saved");
+    });
+  }
+
   ngOnInit(): void {
     this.angularVersion.set(document.querySelector('app-root')?.getAttribute('ng-version') ?? "Unknown");
     this.update();
@@ -435,6 +462,62 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       if (defaultDevice) {
         this.selectedAudioDeviceId.set(defaultDevice.id);
       }
+    });
+
+    this.api.getWorkerConfig().pipe(
+      catchError(err => {
+        this.toastr.error("Failed to fetch worker configuration");
+        console.error("Failed to fetch worker configuration", err);
+        return [];
+      })
+    ).subscribe(config => {
+      this.workerConfig.set(config);
+      this.workerUrlInput.set(config.url ?? '');
+    });
+  }
+
+  protected openIconModal() {
+    this.iconCropFile.set(null);
+    this.iconCroppedBlob.set(null);
+    const template = this.iconModalTemplate();
+    if (template) {
+      this.iconModalRef = this.modal.open(template, { ariaLabelledBy: 'icon-modal-title', size: 'lg' });
+    }
+  }
+
+  protected onIconFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.iconCropFile.set(input.files?.[0] ?? null);
+    this.iconCroppedBlob.set(null);
+  }
+
+  protected onIconCropped(event: ImageCroppedEvent) {
+    this.iconCroppedBlob.set(event.blob ?? null);
+  }
+
+  protected applyIcon() {
+    const blob = this.iconCroppedBlob();
+    if (!blob) return;
+    const file = new File([blob], 'icon.png', { type: 'image/png' });
+    this.filesApi.uploadIcon(file).pipe(catchError(err => {
+      this.toastr.error('Failed to upload icon');
+      console.error(err);
+      return [];
+    })).subscribe(() => {
+      this.iconModalRef?.close();
+      this.iconPreviewVersion.set(Date.now());
+      this.toastr.success('Icon updated');
+    });
+  }
+
+  protected resetIcon() {
+    this.filesApi.clearIcon().pipe(catchError(err => {
+      this.toastr.error('Failed to reset icon');
+      console.error(err);
+      return [];
+    })).subscribe(() => {
+      this.iconPreviewVersion.set(Date.now());
+      this.toastr.success('Icon reset to default');
     });
   }
 

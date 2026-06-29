@@ -18,8 +18,8 @@ export class ProtogenRemoteWorker {
   private get headers(): any {
     const headers: any = {};
 
-    if (this.protogen.config.remoteWorker.key != null) {
-      headers["Authorization"] = this.protogen.config.remoteWorker.key;
+    if (this.protogen.remoteWorkerKey != null) {
+      headers["Authorization"] = this.protogen.remoteWorkerKey;
     }
 
     return headers;
@@ -33,7 +33,7 @@ export class ProtogenRemoteWorker {
    * @returns A promise that resolves to the created video download job.
    */
   public async createJob(url: string, mirror: boolean, flip: boolean): Promise<VideoDownloadJob> {
-    const result = await axios.post(this.config.url + "/video_downloader/job", {
+    const result = await axios.post(this.baseUrl + "/video_downloader/job", {
       url: url,
       mirrorVideo: mirror,
       flipVideo: flip,
@@ -48,7 +48,7 @@ export class ProtogenRemoteWorker {
    */
   public async getJob(jobId: string): Promise<VideoDownloadJob | null> {
     try {
-      const result = await axios.get(this.config.url + "/video_downloader/job/" + jobId, { headers: this.headers });
+      const result = await axios.get(this.baseUrl + "/video_downloader/job/" + jobId, { headers: this.headers });
       return result.data as VideoDownloadJob;
     } catch (err) {
       if (isAxiosError(err)) {
@@ -66,7 +66,7 @@ export class ProtogenRemoteWorker {
         const writer = createWriteStream(path);
 
         const response = await axios({
-          url: this.config.url + "/video_downloader/download/" + hash,
+          url: this.baseUrl + "/video_downloader/download/" + hash,
           method: 'GET',
           responseType: 'stream',
           headers: this.headers,
@@ -82,8 +82,8 @@ export class ProtogenRemoteWorker {
     });
   }
 
-  private get config() {
-    return this.protogen.config.remoteWorker;
+  public get baseUrl() {
+    return this.protogen.remoteWorkerUrl;
   }
 
   public get protogen() {

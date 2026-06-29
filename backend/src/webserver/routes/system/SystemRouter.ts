@@ -3,9 +3,10 @@ import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { FlaschenTaschenWriteConfigParams } from "../../../visor/flaschen-taschen/FlaschenTaschen";
 import { existsSync, readFileSync } from "fs";
-import { KV_Clock24HourFormat, KV_ClockDateColor, KV_ClockShowDate, KV_ClockShowSeconds, KV_ClockTimeColor, KV_EnableSwagger } from "../../../utils/KVDataStorageKeys";
-import { decodeRGB, encodeRGBObject } from "../../../utils/Utils";
+import { KV_Clock24HourFormat, KV_ClockDateColor, KV_ClockShowDate, KV_ClockShowSeconds, KV_ClockTimeColor, KV_EnableSwagger, KV_WorkerKey, KV_WorkerUrl } from "../../../utils/KVDataStorageKeys";
+import { decodeRGB, encodeRGBObject, removeTrailingSlash } from "../../../utils/Utils";
 import { ClockRenderer, ClockRendererId } from "../../../visor/rendering/renderers/special/ClockRenderer";
+import { DefaultWorkerUrl } from "../../../Protogen";
 
 export class SystemRouter extends AbstractRouter {
   constructor(webServer: ProtogenWebServer) {
@@ -457,6 +458,99 @@ export class SystemRouter extends AbstractRouter {
         return this.handleError(err, req, res);
       }
     });
+
+    this.router.get("/worker-config", async (req, res) => {
+      /*
+      #swagger.path = '/system/worker-config'
+      #swagger.tags = ['System'],
+      #swagger.description = "Get remote worker configuration"
+      #swagger.responses[200] = { description: "Ok" }
+
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        let keyLength: number | null = null;
+        if (this.protogen.remoteWorkerKey) {
+          keyLength = this.protogen.remoteWorkerKey.length;
+        }
+
+        const data = {
+          url: this.protogen.remoteWorkerUrl,
+          keyLength,
+        };
+
+        res.json(data);
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
+
+    this.router.post("/worker-config", async (req, res) => {
+      /*
+      #swagger.path = '/system/worker-config'
+      #swagger.tags = ['System'],
+      #swagger.description = "Update remote worker configuration"
+      #swagger.responses[200] = { description: "Ok" }
+      #swagger.responses[400] = { description: "Bad request. See response" }
+      #swagger.responses[403] = { description: "Forbidden. No permission" }
+      #swagger.responses[500] = { description: "An error occured while executing command" }
+      
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Update remote worker configuration',
+        schema: {
+          url: "http://localhost:3005",
+          key: "api key here"
+        }
+      }
+      
+      #swagger.security = [
+        {"apiKeyAuth": []},
+        {"tokenAuth": []}
+      ]
+      */
+      try {
+        if (req.auth.isSuperUser !== true) {
+          res.status(403).send({ message: "Forbidden: insufficient permissions" });
+          return;
+        }
+
+        const parsed = WorkerSettingsModel.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).send({ message: "Bad request: invalid request body", issues: parsed.error.issues });
+          return;
+        }
+
+        const data = parsed.data;
+        let cleanUrl = data.url;
+        if (cleanUrl) {
+          cleanUrl = removeTrailingSlash(cleanUrl.trim());
+        }
+
+        await this.protogen.database.setData(KV_WorkerUrl, cleanUrl);
+        await this.protogen.database.setData(KV_WorkerKey, data.key);
+
+        this.protogen.remoteWorkerUrl = cleanUrl ?? DefaultWorkerUrl;
+        this.protogen.remoteWorkerKey = data.key;
+
+        let keyLength: number | null = null;
+        if (this.protogen.remoteWorkerKey) {
+          keyLength = this.protogen.remoteWorkerKey.length;
+        }
+
+        const result = {
+          url: this.protogen.remoteWorkerUrl,
+          keyLength,
+        };
+
+        res.json(result);
+      } catch (err) {
+        return this.handleError(err, req, res);
+      }
+    });
   }
 }
 
@@ -485,4 +579,9 @@ const FTSettingsSchema = z.object({
 
 const SwaggerSettingsSchema = z.object({
   enabled: z.boolean(),
+});
+
+const WorkerSettingsModel = z.object({
+  url: z.string().url().nullable(),
+  key: z.string().nullable(),
 });
