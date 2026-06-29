@@ -193,7 +193,7 @@ echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | sudo debconf-set-se
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $(pwgen -s -1 128)" | sudo debconf-set-selections
 
-sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv
+sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv libhidapi-dev libudev-dev
 
 # Check if Node.js is installed
 if ! command -v node &>/dev/null; then
@@ -325,6 +325,14 @@ else
     systemctl enable gamepad-listener.service
 fi
 
+if [[ -f "/etc/systemd/system/scwrapper.service" ]]; then
+    echo "scwrapper.service already exists"
+else
+    echo "Creating service scwrapper.service"
+    cp /home/pi/protogen/systemd/scwrapper.service /etc/systemd/system/scwrapper.service
+    systemctl enable scwrapper.service
+fi
+
 # ========== Interface List ==========
 if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
     echo "Installing Interface List..."
@@ -367,6 +375,29 @@ else
     echo "xpadneo installed successfully"
 fi
 sudo chown -R pi:pi /home/pi/xpadneo
+
+# ========== Install scwrapper ==========
+if [[ -f "/home/pi/scwrapper/bin/scwrapper" ]]; then
+    echo "scwrapper binary already found"
+else
+    echo "Building scwrapper for Steam Controller support..."
+    git clone https://github.com/bnpfeife/scwrapper /home/pi/scwrapper
+    cd /home/pi/scwrapper
+    make
+    echo "scwrapper built successfully"
+fi
+sudo chown -R pi:pi /home/pi/scwrapper
+
+# Configure udev rules for Steam Controller
+echo "Configuring udev rules for Steam Controller..."
+sudo tee /etc/udev/rules.d/90-steam-controller-2026.rules > /dev/null <<EOF
+SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+KERNEL=="uinput", MODE="0660", GROUP="pi", OPTIONS+="static_node=uinput"
+EOF
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+echo "udev rules configured"
 
 
 # ========== Final ==========
@@ -433,14 +464,16 @@ else
 fi
 
 a2ensite protogen.conf
-
-service apache2 restart
-
-# Start / restart services
-if [[ "$IS_UPDATE" == "true" ]]; then
-    systemctl restart flaschen-taschen
-    systemctl restart gamepad-listener
-    systemctl restart protogen
+systemctl restart scwrapper
+    if systemctl is-enabled --quiet interface-list 2>/dev/null; then
+        systemctl restart interface-list
+    fi
+else
+    systemctl start flaschen-taschen
+    systemctl start gamepad-listener
+    systemctl start protogen
+    systemctl start mosquitto
+    systemctl start scwrappern
     if systemctl is-enabled --quiet interface-list 2>/dev/null; then
         systemctl restart interface-list
     fi
