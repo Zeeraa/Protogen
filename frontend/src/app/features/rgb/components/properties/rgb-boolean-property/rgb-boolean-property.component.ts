@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RgbPropertySharedClass } from '../RgbPropertySharedClass';
 import { catchError } from 'rxjs';
 
 @Component({
-    selector: 'app-rgb-boolean-property',
-    templateUrl: './rgb-boolean-property.component.html',
-    styleUrl: './rgb-boolean-property.component.scss',
-    standalone: false
+  selector: 'app-rgb-boolean-property',
+  templateUrl: './rgb-boolean-property.component.html',
+  styleUrl: './rgb-boolean-property.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class RgbBooleanPropertyComponent extends RgbPropertySharedClass {
   get type(): string {
@@ -29,7 +30,7 @@ export class RgbBooleanPropertyComponent extends RgbPropertySharedClass {
     const checked = String((event.target as HTMLInputElement).value) == "true";
     this.property.value = checked;
     this.api.setEffectProperty(this.scene.id, this.effect.id, this.property.name, String(checked)).pipe(catchError(err => {
-      this.toastr.error("Failed to update property");
+      this.toast.error("Failed to update property");
       throw err;
     })).subscribe(() => {
       console.debug("Property updated");
@@ -39,7 +40,7 @@ export class RgbBooleanPropertyComponent extends RgbPropertySharedClass {
   onChange(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     this.api.setEffectProperty(this.scene.id, this.effect.id, this.property.name, String(checked)).pipe(catchError(err => {
-      this.toastr.error("Failed to update property");
+      this.toast.error("Failed to update property");
       throw err;
     })).subscribe(() => {
       console.debug("Property updated");

@@ -1,23 +1,24 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
 import { catchError, of } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SystemConfigService } from '../../../../core/services/system-config.service';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-boop-sensor-page',
   standalone: false,
   templateUrl: './boop-sensor-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './boop-sensor-page.component.scss'
 })
 export class BoopSensorPageComponent implements OnInit, OnDestroy {
   private readonly boopSensorApi = inject(BoopSensorApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
   private readonly router = inject(Router);
   private readonly title = inject(Title);
@@ -51,7 +52,7 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   protected setEnabled(enabled: boolean) {
     this.boopSensorApi.setEnabled(enabled).pipe(catchError((err: HttpErrorResponse) => {
       console.error('Failed to set enabled state', err);
-      this.toastr.error("Failed to " + (enabled ? "enable" : "disable") + " sensor");
+      this.toast.error("Failed to " + (enabled ? "enable" : "disable") + " sensor");
       return [];
     })).subscribe(result => {
       this.enabled = result.enabled;
@@ -61,10 +62,10 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   protected resetCounter() {
     this.boopSensorApi.resetCounter().pipe(catchError((err: HttpErrorResponse) => {
       console.error('Failed to reset counter', err);
-      this.toastr.error("Failed to reset counter");
+      this.toast.error("Failed to reset counter");
       return [];
     })).subscribe(() => {
-      this.toastr.success("Counter reset");
+      this.toast.success("Counter reset");
       this.boopCount = 0;
     });
   }
@@ -72,14 +73,14 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   protected deactivate() {
     this.boopSensorApi.deactivateProfile().pipe(catchError((err: HttpErrorResponse) => {
       if (err.status === 404) {
-        this.toastr.info("No active profile to deactivate");
+        this.toast.info("No active profile to deactivate");
         return of(null);
       }
       console.error('Failed to deactivate profile', err);
-      this.toastr.error("Failed to deactivate profile");
+      this.toast.error("Failed to deactivate profile");
       return [];
     })).subscribe(() => {
-      this.toastr.success("Profile deactivated");
+      this.toast.success("Profile deactivated");
       this.activeProfileId = null;
     });
   }
@@ -101,12 +102,12 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
     this.boopSensorApi.createNewProfile({ name }).pipe(catchError((err: HttpErrorResponse) => {
       this.newProfileSaving = false;
       console.error('Failed to create new profile', err);
-      this.toastr.error("Failed to create new profile");
+      this.toast.error("Failed to create new profile");
       return [];
     })).subscribe(profile => {
       this.newProfilePrompt?.close();
       this.newProfileSaving = false;
-      this.toastr.success("Profile created");
+      this.toast.success("Profile created");
       this.profiles.push(profile);
 
       this.router.navigate(['/boop-sensor/profile', profile.id]);
@@ -116,7 +117,7 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
   protected setShowOnHud(state: boolean) {
     this.boopSensorApi.setShowOnHud(state).pipe(catchError((err: HttpErrorResponse) => {
       console.error('Failed to set show on HUD', err);
-      this.toastr.error("Failed to set show on HUD state");
+      this.toast.error("Failed to set show on HUD state");
       return [];
     })).subscribe(result => {
       this.showOnHud = result.showOnHud;
@@ -129,7 +130,7 @@ export class BoopSensorPageComponent implements OnInit, OnDestroy {
 
     this.boopSensorApi.getProfiles().pipe(catchError((err) => {
       console.error('Failed to load Boop Sensor profiles', err);
-      this.toastr.error("Failed to load profiles");
+      this.toast.error("Failed to load profiles");
       return [];
     })).subscribe(profiles => {
       this.profiles = profiles;

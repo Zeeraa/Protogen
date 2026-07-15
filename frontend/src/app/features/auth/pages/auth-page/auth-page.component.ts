@@ -1,19 +1,20 @@
-import { AfterViewInit, Component, inject, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AuthApiService } from '../../../../core/services/api/auth-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { catchError, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-auth-page',
   standalone: false,
   templateUrl: './auth-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './auth-page.component.scss'
 })
 export class AuthPageComponent implements AfterViewInit, OnDestroy {
   private readonly authApi = inject(AuthApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly modal = inject(NgbModal);
@@ -26,7 +27,7 @@ export class AuthPageComponent implements AfterViewInit, OnDestroy {
 
   approveLogin() {
     if (this.code.trim().length != 8) {
-      this.toastr.error("Invalid code");
+      this.toast.error("Invalid code");
       return;
     }
 
@@ -34,15 +35,15 @@ export class AuthPageComponent implements AfterViewInit, OnDestroy {
 
     this.authApi.approveLogin(this.code).pipe(
       catchError(err => {
-        this.toastr.error("Failed to approve login");
+        this.toast.error("Failed to approve login");
         throw err;
       })
     ).subscribe(response => {
       if (response == null) {
-        this.toastr.error("Invalid or expired code");
+        this.toast.error("Invalid or expired code");
       } else {
         this.code = "";
-        this.toastr.success("Login approved");
+        this.toast.success("Login approved");
       }
     })
   }

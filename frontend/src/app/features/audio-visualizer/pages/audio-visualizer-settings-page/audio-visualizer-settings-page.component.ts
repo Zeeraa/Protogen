@@ -1,21 +1,22 @@
-import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
 import { AudioVisualizerApiService } from '../../../../core/services/api/audio-visualizer-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { Title } from '@angular/platform-browser';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-audio-visualizer-settings-page',
   standalone: false,
   templateUrl: './audio-visualizer-settings-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './audio-visualizer-settings-page.component.scss'
 })
 export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly socket = inject(SocketService);
   private readonly audioVisualizerApi = inject(AudioVisualizerApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly title = inject(Title);
 
   private interval?: any;
@@ -129,7 +130,7 @@ export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, 
   rollback() {
     this.audioVisualizerApi.getSettings().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch audio visualizer settings");
+        this.toast.error("Failed to fetch audio visualizer settings");
         throw err;
       })
     ).subscribe(settings => {
@@ -147,11 +148,11 @@ export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, 
       highThreshold: this.highThreshold,
     }).pipe(
       catchError(err => {
-        this.toastr.error("Failed to save audio visualizer settings");
+        this.toast.error("Failed to save audio visualizer settings");
         throw err;
       })
     ).subscribe(() => {
-      this.toastr.success("Settings saved");
+      this.toast.success("Settings saved");
     });
   }
 
@@ -183,7 +184,7 @@ export class AudioVisualizerSettingsPageComponent implements OnInit, OnDestroy, 
 
     this.audioVisualizerApi.getSettings().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch audio visualizer settings");
+        this.toast.error("Failed to fetch audio visualizer settings");
         throw err;
       })
     ).subscribe(settings => {

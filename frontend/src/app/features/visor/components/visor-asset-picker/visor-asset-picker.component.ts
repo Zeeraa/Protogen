@@ -1,7 +1,7 @@
-import { Component, ElementRef, forwardRef, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, forwardRef, inject, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AssetsApiService, BuiltInAsset } from '../../../../core/services/api/assets-api.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { FilesApiService } from '../../../../core/services/api/files-api.service';
 import { catchError } from 'rxjs';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -18,11 +18,12 @@ import { uuidv7 } from 'uuidv7';
       multi: true
     }
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class VisorAssetPickerComponent implements ControlValueAccessor, OnInit, OnDestroy {
   private readonly assetApi = inject(AssetsApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly fileApi = inject(FilesApiService);
   private readonly modal = inject(NgbModal);
 
@@ -79,13 +80,13 @@ export class VisorAssetPickerComponent implements ControlValueAccessor, OnInit, 
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
     if (file) {
-      this.toastr.info("Uploading and processing file. This might take some time...");
+      this.toast.info("Uploading and processing file. This might take some time...");
       this.fileApi.uploadImage(file, { remoteGifProcessing: true }).pipe(catchError((err) => {
-        this.toastr.error("Failed to upload file");
+        this.toast.error("Failed to upload file");
         this.filePicker.nativeElement.value = null;
         throw err;
       })).subscribe((result) => {
-        this.toastr.success("Image upploaded successfully");
+        this.toast.success("Image upploaded successfully");
         this.image = result.resource;
       })
     }
@@ -128,7 +129,7 @@ export class VisorAssetPickerComponent implements ControlValueAccessor, OnInit, 
   ngOnInit(): void {
     console.debug("VisorAssetPickerComponent::ngOnInit()");
     this.assetApi.getAssets(true).pipe(catchError(err => {
-      this.toastr.error("Failed to fetch built-in assets. Image picker might not work correctly.");
+      this.toast.error("Failed to fetch built-in assets. Image picker might not work correctly.");
       throw err;
     })).subscribe(assets => {
       this._assetGroups = [];

@@ -1,22 +1,23 @@
-import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
 import { numberToHexColor } from '../../../../core/services/utils/Utils';
 import { RgbApiService, RgbPreviewConfiguration, RgbPreviewElementType } from '../../../../core/services/api/rgb-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { uuidv7 } from 'uuidv7';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-rgb-preview',
   templateUrl: './rgb-preview.component.html',
   styleUrl: './rgb-preview.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class RgbPreviewComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly socket = inject(SocketService);
   private readonly api = inject(RgbApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
 
   private interval: any;
   private subscription: Subscription | null = null;
@@ -66,7 +67,7 @@ export class RgbPreviewComponent implements OnInit, OnDestroy, AfterViewInit {
 
   loadDefaultSettings() {
     this.api.getRgbPreviewConfig().pipe(catchError(err => {
-      this.toastr.error("Failed to fetch rgb preview config");
+      this.toast.error("Failed to fetch rgb preview config");
       throw err;
     })).subscribe(config => {
       console.log("RGB editor config loaded");
@@ -89,11 +90,11 @@ export class RgbPreviewComponent implements OnInit, OnDestroy, AfterViewInit {
 
   savePreviewSettings() {
     this.api.setRgbPreviewConfig(this.config).pipe(catchError(err => {
-      this.toastr.error("Failed to save config");
+      this.toast.error("Failed to save config");
       throw err;
     })).subscribe(() => {
       this.settingsVisible = false;
-      this.toastr.success("Preview settings saved");
+      this.toast.success("Preview settings saved");
     });
   }
 

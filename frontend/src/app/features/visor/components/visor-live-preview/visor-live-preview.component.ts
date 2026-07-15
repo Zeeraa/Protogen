@@ -1,6 +1,6 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { VisorApiService } from '../../../../core/services/api/visor-api.service';
 import { Subscription } from 'rxjs';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
@@ -9,11 +9,12 @@ import { SocketMessageType } from '../../../../core/services/socket/data/SocketM
   selector: 'app-visor-live-preview',
   templateUrl: './visor-live-preview.component.html',
   styleUrl: './visor-live-preview.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class VisorLivePreviewComponent implements OnInit, OnDestroy {
   private readonly api = inject(VisorApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly socket = inject(SocketService);
 
   private socketSubscription: Subscription | null = null;
@@ -26,7 +27,7 @@ export class VisorLivePreviewComponent implements OnInit, OnDestroy {
       this.previewImage = await this.api.getPreviewBase64();
     } catch (err) {
       console.log(err);
-      this.toastr.error("Failed to fetch visor preview");
+      this.toast.error("Failed to fetch visor preview");
     }
   }
 

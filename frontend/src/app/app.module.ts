@@ -5,9 +5,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ToastrModule } from 'ngx-toastr';
 import { DashboardModule } from './features/dashboard/dashboard.module';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NavbarModule } from './features/navbar/navbar.module';
 import { VisorModule } from './features/visor/visor.module';
 import { VideoPlayerModule } from './features/video-player/video-player.module';
@@ -26,6 +25,7 @@ import { DevModule } from './features/dev/dev.module';
 import { BoopSensorModule } from './features/boop-sensor/boop-sensor.module';
 import { BluetoothModule } from './features/bluetooth/bluetooth.module';
 import { RemoteModule } from './features/remote/remote.module';
+import { provideToastService } from "ngx-yet-another-toast-library";
 
 @NgModule({
   declarations: [
@@ -36,7 +36,6 @@ import { RemoteModule } from './features/remote/remote.module';
     AppRoutingModule,
     NgbModule,
     BrowserAnimationsModule,
-    ToastrModule.forRoot(),
     DashboardModule,
     NavbarModule,
     VisorModule,
@@ -58,7 +57,12 @@ import { RemoteModule } from './features/remote/remote.module';
     RemoteModule,
   ],
   providers: [
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+    provideToastService({
+      defaultOptions: {
+        progressBar: true,
+      }
+    }),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

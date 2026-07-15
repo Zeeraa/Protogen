@@ -1,17 +1,18 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { RgbApiService, RgbEffect, RgbEffectInfo, RgbScene } from '../../../../core/services/api/rgb-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-rgb-effect-card',
   templateUrl: './rgb-effect-card.component.html',
   styleUrl: './rgb-effect-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class RgbEffectCardComponent {
   private readonly rgbApi = inject(RgbApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
 
   @Input({ required: true }) effectList!: RgbEffectInfo[];
   @Input({ required: true }) scene!: RgbScene;
@@ -25,21 +26,21 @@ export class RgbEffectCardComponent {
 
   handleDisplayNameChange() {
     if (this.effect.displayName.trim().length == 0) {
-      this.toastr.warning("Name cant be empty");
+      this.toast.warning("Name cant be empty");
     }
 
     console.debug("New name: " + this.effect.displayName);
     this.rgbApi.updateEffect(this.scene.id, this.effect.id, {
       displayName: this.effect.displayName
     }).pipe(catchError(err => {
-      this.toastr.error("Failed to update effect name");
+      this.toast.error("Failed to update effect name");
       throw err;
     })).subscribe();
   }
 
   remove() {
     this.rgbApi.removeEffect(this.scene.id, this.effect.id).pipe(catchError(err => {
-      this.toastr.error("Failed to remove effect");
+      this.toast.error("Failed to remove effect");
       throw err;
     })).subscribe(() => {
       this.majorChange.emit();

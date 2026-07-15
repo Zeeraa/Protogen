@@ -1,10 +1,11 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
 
 @Component({
   selector: 'app-dashboard-boop-card',
   standalone: false,
   templateUrl: './dashboard-boop-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard-boop-card.component.scss'
 })
 export class DashboardBoopCardComponent {

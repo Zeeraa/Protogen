@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RgbPropertySharedClass } from '../RgbPropertySharedClass';
 import { catchError } from 'rxjs';
 import { hexColorToNumber, numberToHexColor } from '../../../../../core/services/utils/Utils';
 
 @Component({
-    selector: 'app-rgb-color-property',
-    templateUrl: './rgb-color-property.component.html',
-    styleUrl: './rgb-color-property.component.scss',
-    standalone: false
+  selector: 'app-rgb-color-property',
+  templateUrl: './rgb-color-property.component.html',
+  styleUrl: './rgb-color-property.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class RgbColorPropertyComponent extends RgbPropertySharedClass implements OnInit {
   hexColor = "#000000";
@@ -26,7 +27,7 @@ export class RgbColorPropertyComponent extends RgbPropertySharedClass implements
     console.debug("Color changed to " + this.hexColor);
     const color = hexColorToNumber(this.hexColor);
     this.api.setEffectProperty(this.scene.id, this.effect.id, this.property.name, String(color)).pipe(catchError(err => {
-      this.toastr.error("Failed to update property");
+      this.toast.error("Failed to update property");
       throw err;
     })).subscribe(() => {
       console.debug("Property updated");

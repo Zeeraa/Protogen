@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { SharedFaceRbgProperty } from '../SharedFaceRbgProperty';
 import { catchError } from 'rxjs';
 
 @Component({
-    selector: 'app-face-rgb-boolean-property',
-    templateUrl: './face-rgb-boolean-property.component.html',
-    styleUrl: './face-rgb-boolean-property.component.scss',
-    standalone: false
+  selector: 'app-face-rgb-boolean-property',
+  templateUrl: './face-rgb-boolean-property.component.html',
+  styleUrl: './face-rgb-boolean-property.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class FaceRgbBooleanPropertyComponent extends SharedFaceRbgProperty {
   get type(): string {
@@ -29,7 +30,7 @@ export class FaceRgbBooleanPropertyComponent extends SharedFaceRbgProperty {
     const checked = String((event.target as HTMLInputElement).value) == "true";
     this.property.value = checked;
     this.faceApi.setEffectProperty(this.effect.id, this.property.name, String(checked)).pipe(catchError(err => {
-      this.toastr.error("Failed to update property");
+      this.toast.error("Failed to update property");
       throw err;
     })).subscribe(() => {
       console.debug("Property updated");
@@ -39,7 +40,7 @@ export class FaceRgbBooleanPropertyComponent extends SharedFaceRbgProperty {
   onChange(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     this.faceApi.setEffectProperty(this.effect.id, this.property.name, String(checked)).pipe(catchError(err => {
-      this.toastr.error("Failed to update property");
+      this.toast.error("Failed to update property");
       throw err;
     })).subscribe(() => {
       console.debug("Property updated");

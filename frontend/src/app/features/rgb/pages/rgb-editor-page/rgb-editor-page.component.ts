@@ -1,6 +1,6 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { RgbApiService, RgbEffectInfo, RgbScene } from '../../../../core/services/api/rgb-api.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
@@ -11,11 +11,12 @@ import { SystemConfigService } from '../../../../core/services/system-config.ser
   selector: 'app-rgb-editor-page',
   templateUrl: './rgb-editor-page.component.html',
   styleUrl: './rgb-editor-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class RgbEditorPageComponent implements OnInit, OnDestroy {
   private readonly rgbApi = inject(RgbApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly modal = inject(NgbModal);
@@ -47,10 +48,10 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
 
     this.rgbApi.addEffect(this.scene.id, this.selectedEffectToAdd, "New " + this.selectedEffectToAdd)
       .pipe(catchError(err => {
-        this.toastr.error("Failed to add effect");
+        this.toast.error("Failed to add effect");
         throw err;
       })).subscribe(() => {
-        this.toastr.info("Added new effect");
+        this.toast.info("Added new effect");
         this.refresh();
       });
   }
@@ -78,7 +79,7 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
     this.rgbApi.saveSceneData(this.scene.id, {
       name: this.sceneName
     }).pipe(catchError(err => {
-      this.toastr.error("Failed to save changes");
+      this.toast.error("Failed to save changes");
       throw err;
     })).subscribe();
   }
@@ -93,10 +94,10 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
       return;
     }
     this.rgbApi.deleteScene(this.scene.id).pipe(catchError(err => {
-      this.toastr.error("Failed to delete scene");
+      this.toast.error("Failed to delete scene");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Scene deleted");
+      this.toast.success("Scene deleted");
       this.router.navigate(["/rgb"]);
     });
   }
@@ -108,7 +109,7 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
 
     this.lockDelete = true;
     this.rgbApi.getScene(this.scene.id).pipe(catchError(err => {
-      this.toastr.error("Failed to refresh scene data");
+      this.toast.error("Failed to refresh scene data");
       this.router.navigate(["/rgb"]);
       this.lockDelete = false;
       throw err;
@@ -127,7 +128,7 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
       const id = String(params['id']);
 
       this.rgbApi.getEffects().pipe(catchError(err => {
-        this.toastr.error("Failed to fetch effect list");
+        this.toast.error("Failed to fetch effect list");
         throw err;
       })).subscribe((effects) => {
         this.availableEffects = effects;
@@ -138,7 +139,7 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
       });
 
       this.rgbApi.getScene(id).pipe(catchError(err => {
-        this.toastr.error("Failed to fetch scene info");
+        this.toast.error("Failed to fetch scene info");
         this.router.navigate(["/rgb"]);
         throw err;
       })).subscribe((scene) => {
@@ -146,10 +147,10 @@ export class RgbEditorPageComponent implements OnInit, OnDestroy {
         this.sceneName = scene.name;
         this.scene = scene;
         this.rgbApi.activateScene(this.scene.id).pipe(catchError(err => {
-          this.toastr.error("Failed to activate scene for preview");
+          this.toast.error("Failed to activate scene for preview");
           throw err;
         })).subscribe(() => {
-          this.toastr.info("Activated the scene for preview");
+          this.toast.info("Activated the scene for preview");
         });
       });
     });

@@ -1,19 +1,20 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { BluetoothApiService, BluetoothDevice, RfkillStatus } from '../../../../core/services/api/bluetooth-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { Title } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError } from 'rxjs';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-bluetooth-page',
   templateUrl: './bluetooth-page.component.html',
   styleUrl: './bluetooth-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class BluetoothPageComponent implements OnInit, OnDestroy {
   private readonly api = inject(BluetoothApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly title = inject(Title);
 
   private pollInterval: any = null;
@@ -51,7 +52,7 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.api.getPairedDevices().pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to get paired devices");
+        this.toast.error(err.error?.message || "Failed to get paired devices");
         this.loading.set(false);
         return [];
       }),
@@ -62,14 +63,14 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
 
     this.api.getDiscoveredDevices().pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to get discovered devices");
+        this.toast.error(err.error?.message || "Failed to get discovered devices");
         return [];
       }),
     ).subscribe((devices) => this.discoveredDevices.set(devices));
 
     this.api.getScanStatus().pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to get scan status");
+        this.toast.error(err.error?.message || "Failed to get scan status");
         return [];
       }),
     ).subscribe((status) => this.scanning.set(status.scanning));
@@ -79,17 +80,17 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     this.scanning.set(true);
     this.api.startScan(15).pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to start scan");
+        this.toast.error(err.error?.message || "Failed to start scan");
         this.scanning.set(false);
         return [];
       }),
-    ).subscribe(() => this.toastr.info("Scanning for devices..."));
+    ).subscribe(() => this.toast.info("Scanning for devices..."));
   }
 
   protected stopScan(): void {
     this.api.stopScan().pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to stop scan");
+        this.toast.error(err.error?.message || "Failed to stop scan");
         return [];
       }),
     ).subscribe(() => {
@@ -102,12 +103,12 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     this.markBusy(device.macAddress);
     this.api.connectDevice(device.macAddress).pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to connect to device");
+        this.toast.error(err.error?.message || "Failed to connect to device");
         this.unmarkBusy(device.macAddress);
         return [];
       }),
     ).subscribe(() => {
-      this.toastr.success("Connected to " + device.name);
+      this.toast.success("Connected to " + device.name);
       this.unmarkBusy(device.macAddress);
       this.refresh();
     });
@@ -117,12 +118,12 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     this.markBusy(device.macAddress);
     this.api.disconnectDevice(device.macAddress).pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to disconnect from device");
+        this.toast.error(err.error?.message || "Failed to disconnect from device");
         this.unmarkBusy(device.macAddress);
         return [];
       }),
     ).subscribe(() => {
-      this.toastr.success("Disconnected from " + device.name);
+      this.toast.success("Disconnected from " + device.name);
       this.unmarkBusy(device.macAddress);
       this.refresh();
     });
@@ -132,12 +133,12 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     this.markBusy(device.macAddress);
     this.api.pairDevice(device.macAddress).pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to pair device");
+        this.toast.error(err.error?.message || "Failed to pair device");
         this.unmarkBusy(device.macAddress);
         return [];
       }),
     ).subscribe(() => {
-      this.toastr.success("Paired with " + device.name);
+      this.toast.success("Paired with " + device.name);
       this.unmarkBusy(device.macAddress);
       this.refresh();
     });
@@ -147,12 +148,12 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     this.markBusy(device.macAddress);
     this.api.unpairDevice(device.macAddress).pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to unpair device");
+        this.toast.error(err.error?.message || "Failed to unpair device");
         this.unmarkBusy(device.macAddress);
         return [];
       }),
     ).subscribe(() => {
-      this.toastr.success("Removed " + device.name);
+      this.toast.success("Removed " + device.name);
       this.unmarkBusy(device.macAddress);
       this.refresh();
     });
@@ -201,7 +202,7 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
   protected refreshDiscovered(): void {
     this.api.getDiscoveredDevices().pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to get discovered devices");
+        this.toast.error(err.error?.message || "Failed to get discovered devices");
         return [];
       }),
     ).subscribe((devices) => this.discoveredDevices.set(devices));
@@ -219,13 +220,13 @@ export class BluetoothPageComponent implements OnInit, OnDestroy {
     this.rfkillUnblocking.set(true);
     this.api.unblockRfkill().pipe(
       catchError((err: HttpErrorResponse) => {
-        this.toastr.error(err.error?.message || "Failed to unblock Bluetooth");
+        this.toast.error(err.error?.message || "Failed to unblock Bluetooth");
         this.rfkillUnblocking.set(false);
         return [];
       }),
     ).subscribe(() => {
       this.rfkillUnblocking.set(false);
-      this.toastr.success("Bluetooth unblocked");
+      this.toast.success("Bluetooth unblocked");
       this.checkRfkill();
     });
   }

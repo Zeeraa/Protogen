@@ -1,13 +1,13 @@
 import { Directive, inject, Input } from "@angular/core";
 import { RgbApiService, RgbEffect, RgbEffectProperty, RgbScene } from "../../../../core/services/api/rgb-api.service";
-import { ToastrService } from "ngx-toastr";
+import { ToastService } from "ngx-yet-another-toast-library";
 
 @Directive({
   standalone: false
 })
 export abstract class RgbPropertySharedClass {
   protected readonly api = inject(RgbApiService);
-  protected readonly toastr = inject(ToastrService);
+  protected readonly toast = inject(ToastService);
 
   @Input({ required: true }) scene!: RgbScene;
   @Input({ required: true }) effect!: RgbEffect;

@@ -1,7 +1,7 @@
-import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { SavedVideo, SaveVideoPayload, VideoGroup, VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
 import { extractYouTubeVideoId, UrlPattern } from '../../../../core/services/utils/Utils';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { catchError } from 'rxjs';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -10,11 +10,12 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
   selector: 'app-saved-video-card',
   templateUrl: './saved-video-card.component.html',
   styleUrl: './saved-video-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SavedVideoCardComponent implements OnDestroy {
   private readonly api = inject(VideoPlayerApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
 
   @Input({ required: true }) video!: SavedVideo;
@@ -48,10 +49,10 @@ export class SavedVideoCardComponent implements OnDestroy {
   play() {
     this.api.playSavedVideo(this.video.id).pipe(catchError(err => {
       console.error('Failed to play video', err);
-      this.toastr.error("Failed to play video");
+      this.toast.error("Failed to play video");
       return [];
     })).subscribe(result => {
-      this.toastr.success("Playing video " + result.name);
+      this.toast.success("Playing video " + result.name);
     });
   }
 
@@ -59,7 +60,7 @@ export class SavedVideoCardComponent implements OnDestroy {
     this.isDeleting = true;
     this.api.deleteSavedVideo(this.video.id).pipe(catchError(err => {
       this.isDeleting = false;
-      this.toastr.error("Failed to delete video");
+      this.toast.error("Failed to delete video");
       throw err;
     })).subscribe(() => {
       this.savedVideoChanged.emit();
@@ -98,17 +99,17 @@ export class SavedVideoCardComponent implements OnDestroy {
     const groupId = rawGroupId == -1 ? null : parseInt(String(rawGroupId));
 
     if (url == null || !UrlPattern.test(url)) {
-      this.toastr.error("Invalid URL");
+      this.toast.error("Invalid URL");
       return;
     }
 
     if (name == null || name.trim().length == 0) {
-      this.toastr.error("Invalid name");
+      this.toast.error("Invalid name");
       return;
     }
 
     if (sorting == null || isNaN(sorting)) {
-      this.toastr.error("Sorting number is invalid");
+      this.toast.error("Sorting number is invalid");
       return;
     }
 
@@ -125,13 +126,13 @@ export class SavedVideoCardComponent implements OnDestroy {
 
     this.isSaving = true;
     this.api.editSavedVideo(this.video.id, data).pipe(catchError(err => {
-      this.toastr.error("An error occurred while trying to update saved video");
+      this.toast.error("An error occurred while trying to update saved video");
       this.isSaving = false;
       throw err;
     })).subscribe(_ => {
       this.editFormRef?.close();
       this.isSaving = false;
-      this.toastr.success("Video saved");
+      this.toast.success("Video saved");
       this.savedVideoChanged.emit();
     })
   }

@@ -1,25 +1,26 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { catchError, Subscription } from 'rxjs';
 import { DevApi, HardwareEmulationState } from '../../../../core/services/api/dev-api.service';
 import { typeAssert } from '../../../../core/services/utils/Utils';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ToastrService } from 'ngx-toastr';
 import { ClipboardService } from 'ngx-clipboard';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-developer-page',
   standalone: false,
   templateUrl: './developer-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './developer-page.component.scss'
 })
 export class DeveloperPageComponent implements OnInit, OnDestroy {
   protected readonly socket = inject(SocketService);
   private readonly devApi = inject(DevApi);
   private readonly sanitizer = inject(DomSanitizer);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly clipboard = inject(ClipboardService);
   private readonly auth = inject(AuthService);
 
@@ -42,22 +43,22 @@ export class DeveloperPageComponent implements OnInit, OnDestroy {
     const token = this.auth.token;
     if (token) {
       this.clipboard.copy(token);
-      this.toastr.success("Copied auth token to clipboard");
+      this.toast.success("Copied auth token to clipboard");
     } else {
-      this.toastr.error("Not authenticated");
+      this.toast.error("Not authenticated");
     }
   }
 
   toggleBoopSensor() {
     this.devApi.toggleEmulatedBoopSensor().pipe(catchError((error) => {
-      this.toastr.error("Failed to toggle sensor state");
+      this.toast.error("Failed to toggle sensor state");
       console.error(error);
       throw error;
     })).subscribe(result => {
       if (result.success) {
         this._hardwareState.boopSensorState = this._hardwareState.boopSensorState || false;
       } else {
-        this.toastr.error("Emulated sensor unavailable");
+        this.toast.error("Emulated sensor unavailable");
       }
     });
   }

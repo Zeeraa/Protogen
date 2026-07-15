@@ -1,6 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RgbApiService, RgbScene } from '../../../../core/services/api/rgb-api.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { SystemConfigService } from '../../../../core/services/system-config.service';
@@ -9,10 +9,11 @@ import { SystemConfigService } from '../../../../core/services/system-config.ser
   selector: 'app-rgb-dashboard-page',
   templateUrl: './rgb-dashboard-page.component.html',
   styleUrl: './rgb-dashboard-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class RgbDashboardPageComponent implements OnInit {
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly rgbApi = inject(RgbApiService);
   private readonly title = inject(Title);
   protected readonly systemConfig = inject(SystemConfigService);
@@ -25,26 +26,26 @@ export class RgbDashboardPageComponent implements OnInit {
 
   addBlank() {
     this.rgbApi.createNewScene("New scene").pipe(catchError(err => {
-      this.toastr.error("Failed to create new scene");
+      this.toast.error("Failed to create new scene");
       throw err;
     })).subscribe((scene) => {
       this.scenes.push(scene);
-      this.toastr.success("Scene created");
+      this.toast.success("Scene created");
     });
   }
 
   disable() {
     this.rgbApi.deactivate().pipe(catchError(err => {
-      this.toastr.error("Failed to disable rgb");
+      this.toast.error("Failed to disable rgb");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("RGB Disabled");
+      this.toast.success("RGB Disabled");
     });
   }
 
   loadEffects() {
     this.rgbApi.getScenes().pipe(catchError(err => {
-      this.toastr.error("Failed to fetch scenes. Try reloading the page");
+      this.toast.error("Failed to fetch scenes. Try reloading the page");
       throw err;
     })).subscribe(scenes => {
       this.scenes = scenes;

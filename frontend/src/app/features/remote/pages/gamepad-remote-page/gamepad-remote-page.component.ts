@@ -1,22 +1,23 @@
-import { Component, OnDestroy, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, computed, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ControllerType, GamepadApiService, GamepadProfile, GamepadSettings } from '../../../../core/services/api/gamepad-api.service';
 import { catchError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ToastrService } from 'ngx-toastr';
 import { form } from '@angular/forms/signals';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-gamepad-remote-page',
   templateUrl: './gamepad-remote-page.component.html',
   styleUrl: './gamepad-remote-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class GamepadRemotePageComponent implements OnInit, OnDestroy {
   private readonly gamepadApi = inject(GamepadApiService);
   private readonly title = inject(Title);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
 
   protected readonly constollerTypes = signal(Object.values(ControllerType)).asReadonly();
@@ -46,13 +47,13 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
     this.gamepadApi.restartListener().pipe(
       catchError((err: HttpErrorResponse) => {
         console.error("Failed to restart gamepad listener", err);
-        this.toastr.error("Failed to restart gamepad listener");
+        this.toast.error("Failed to restart gamepad listener");
         this.restartingListener.set(false);
         return [];
       })
     ).subscribe(() => {
       this.restartingListener.set(false);
-      this.toastr.success("Gamepad listener restarted");
+      this.toast.success("Gamepad listener restarted");
     });
   }
 
@@ -60,13 +61,13 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
     this.gamepadApi.setSettings(this.settings()).pipe(
       catchError((err: HttpErrorResponse) => {
         console.error("Failed to save gamepad settings", err);
-        this.toastr.error("Failed to save gamepad settings");
+        this.toast.error("Failed to save gamepad settings");
         return [];
       })
     ).subscribe(settings => {
       this.settings.set(settings);
       this.settingsVisible.set(false);
-      this.toastr.success("Gamepad settings saved");
+      this.toast.success("Gamepad settings saved");
     });
   }
 
@@ -74,12 +75,12 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
     this.gamepadApi.activateProfile(profile.id).pipe(
       catchError((err: HttpErrorResponse) => {
         console.error("Failed to activate profile", err);
-        this.toastr.error("Failed to activate profile");
+        this.toast.error("Failed to activate profile");
         return [];
       })
     ).subscribe(() => {
       this.activeProfileId.set(profile.id);
-      this.toastr.success("Profile activated");
+      this.toast.success("Profile activated");
     });
   }
 
@@ -87,12 +88,12 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
     this.gamepadApi.deactivateProfile().pipe(
       catchError((err: HttpErrorResponse) => {
         console.error("Failed to deactivate profile", err);
-        this.toastr.error("Failed to deactivate profile");
+        this.toast.error("Failed to deactivate profile");
         return [];
       })
     ).subscribe(() => {
       this.activeProfileId.set(null);
-      this.toastr.success("Profile deactivated");
+      this.toast.success("Profile deactivated");
     });
   }
 
@@ -116,14 +117,14 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
       catchError((err: HttpErrorResponse) => {
         this.newProfileSaving.set(false);
         console.error("Failed to create profile", err);
-        this.toastr.error("Failed to create profile");
+        this.toast.error("Failed to create profile");
         return [];
       })
     ).subscribe(profile => {
       this.newProfilePrompt?.close();
       this.newProfileSaving.set(false);
       this.profiles.update(list => [...list, profile]);
-      this.toastr.success("Profile created");
+      this.toast.success("Profile created");
     });
   }
 
@@ -133,7 +134,7 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
     this.gamepadApi.getSettings().pipe(
       catchError((err: HttpErrorResponse) => {
         console.error("Failed to load gamepad settings", err);
-        this.toastr.error("Failed to load gamepad settings");
+        this.toast.error("Failed to load gamepad settings");
         return [];
       })
     ).subscribe(settings => {
@@ -143,7 +144,7 @@ export class GamepadRemotePageComponent implements OnInit, OnDestroy {
     this.gamepadApi.getProfiles().pipe(
       catchError((err: HttpErrorResponse) => {
         console.error("Failed to load gamepad profiles", err);
-        this.toastr.error("Failed to load gamepad profiles");
+        this.toast.error("Failed to load gamepad profiles");
         return [];
       })
     ).subscribe(profiles => {

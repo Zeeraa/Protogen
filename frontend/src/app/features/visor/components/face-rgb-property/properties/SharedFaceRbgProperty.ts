@@ -1,13 +1,13 @@
 import { Directive, inject, Input } from "@angular/core";
 import { FaceApiService, FaceColorEffect, FaceColorEffectProperty } from "../../../../../core/services/api/face-api.service";
-import { ToastrService } from "ngx-toastr";
+import { ToastService } from "ngx-yet-another-toast-library";
 
 @Directive({
   standalone: false
 })
 export abstract class SharedFaceRbgProperty {
   protected readonly faceApi = inject(FaceApiService);
-  protected readonly toastr = inject(ToastrService);
+  protected readonly toast = inject(ToastService);
 
   @Input({ required: true }) effect!: FaceColorEffect;
   @Input({ required: true }) property!: FaceColorEffectProperty;

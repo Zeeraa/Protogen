@@ -19,7 +19,7 @@ The client communicates with the backend using both a REST API and a socket.io c
 ### Error Handling
 - API services should NOT include error handling (no `catchError` or `throwError`).
 - Error handling belongs in the consuming component's `subscribe()` callbacks.
-- When making web request anways handle error in the components. This can range from just logging with consile.error to showing a friendly error message in the ui ur usign the toastr library.
+- When making web requests, always handle errors in the components. This can range from just logging with console.error to showing a friendly error message in the UI using the toast notification library ToastService.
 - Use 'return []' when handling http errors to stop the subscription from propagating.
 
 ### Code Style

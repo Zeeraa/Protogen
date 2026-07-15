@@ -1,8 +1,7 @@
-import { Component, OnDestroy, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, computed, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { catchError, forkJoin } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   ActionType,
@@ -21,18 +20,20 @@ import { VideoPlayerApiService } from '../../../../core/services/api/video-playe
 import { FaceApiService } from '../../../../core/services/api/face-api.service';
 import { ActionApiService } from '../../../../core/services/api/action-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-gamepad-profile-editor-page',
   standalone: false,
   templateUrl: './gamepad-profile-editor-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './gamepad-profile-editor-page.component.scss',
 })
 export class GamepadProfileEditorPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly title = inject(Title);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly gamepadApi = inject(GamepadApiService);
   private readonly rgbApi = inject(RgbApiService);
   private readonly visorApi = inject(VisorApiService);
@@ -86,7 +87,7 @@ export class GamepadProfileEditorPageComponent implements OnInit, OnDestroy {
     }).pipe(
       catchError((err: HttpErrorResponse) => {
         console.error('Failed to load profile editor data', err);
-        this.toastr.error('Failed to load profile data');
+        this.toast.error('Failed to load profile data');
         this.loading.set(false);
         return [];
       })
@@ -146,13 +147,13 @@ export class GamepadProfileEditorPageComponent implements OnInit, OnDestroy {
       catchError((err: HttpErrorResponse) => {
         this.deleting.set(false);
         console.error('Failed to delete profile', err);
-        this.toastr.error('Failed to delete profile');
+        this.toast.error('Failed to delete profile');
         return [];
       })
     ).subscribe(() => {
       this.deletePrompt?.close();
       this.deleting.set(false);
-      this.toastr.success('Profile deleted');
+      this.toast.success('Profile deleted');
       this.router.navigate(['/remote/gamepad']);
     });
   }
@@ -163,7 +164,7 @@ export class GamepadProfileEditorPageComponent implements OnInit, OnDestroy {
 
     const name = this.editName().trim();
     if (name.length === 0) {
-      this.toastr.warning('Profile name cannot be empty');
+      this.toast.warning('Profile name cannot be empty');
       return;
     }
 
@@ -176,10 +177,10 @@ export class GamepadProfileEditorPageComponent implements OnInit, OnDestroy {
       catchError((err: HttpErrorResponse) => {
         this.saving.set(false);
         if (err.status === 409) {
-          this.toastr.error('A profile with this name already exists');
+          this.toast.error('A profile with this name already exists');
         } else {
           console.error('Failed to save profile', err);
-          this.toastr.error('Failed to save profile');
+          this.toast.error('Failed to save profile');
         }
         return [];
       })
@@ -187,7 +188,7 @@ export class GamepadProfileEditorPageComponent implements OnInit, OnDestroy {
       this.saving.set(false);
       this.profile.set(updated);
       this.isEditing.set(false);
-      this.toastr.success('Profile saved');
+      this.toast.success('Profile saved');
     });
   }
 

@@ -1,6 +1,5 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AuthApiService, PasswordlessSigninRequest } from '../../../core/services/api/auth-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ClipboardService } from 'ngx-clipboard';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toDataURL } from 'qrcode';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 const BlankImage = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 
@@ -15,11 +15,12 @@ const BlankImage = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
   selector: 'app-passwordless-signin-button',
   standalone: false,
   templateUrl: './passwordless-signin-button.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './passwordless-signin-button.component.scss'
 })
 export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
   private readonly authApi = inject(AuthApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
   private readonly auth = inject(AuthService);
   private readonly clipboard = inject(ClipboardService);
@@ -56,7 +57,7 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
   copyCode() {
     if (this.activeRequest != null) {
       this.clipboard.copy(this.activeRequest.signinKey);
-      this.toastr.success("Code copied to clipboard");
+      this.toast.success("Code copied to clipboard");
     }
   }
 
@@ -66,7 +67,7 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
         this.authApi.checkSigninRequestStatus(this.activeRequest).pipe(
           catchError((err: HttpErrorResponse) => {
             if (err.status == 404) {
-              this.toastr.error("Request expired or not found");
+              this.toast.error("Request expired or not found");
               this.activeRequest = null;
               this.passwordlessSigninPrompt?.close();
             }
@@ -74,17 +75,17 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
           })
         ).subscribe(request => {
           if (request.used) {
-            this.toastr.error("Request already used");
+            this.toast.error("Request already used");
             this.activeRequest = null;
             this.passwordlessSigninPrompt?.close();
           }
 
           if (request.approvedBy != null) {
-            this.toastr.success("Request approved. Logging in...");
+            this.toast.success("Request approved. Logging in...");
             this.pollRequestStatus = false;
             this.authApi.aquireTokenFromPasswordless(request).pipe(
               catchError(err => {
-                this.toastr.error("Failed to aquire token");
+                this.toast.error("Failed to aquire token");
                 this.passwordlessSigninPrompt?.close();
                 throw err;
               })
@@ -116,7 +117,7 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
     this.authApi.beginPasswordlessSignIn().pipe(
       catchError(err => {
         this.disableButton = false;
-        this.toastr.error("Failed to begin passwordless sign in");
+        this.toast.error("Failed to begin passwordless sign in");
         throw err;
       })
     ).subscribe(request => {
@@ -126,7 +127,7 @@ export class PasswordlessSigninButtonComponent implements OnDestroy, OnInit {
       toDataURL(this.qrCodeUrl, { errorCorrectionLevel: 'L', margin: 1 }, (err, url) => {
         if (err) {
           console.error(err);
-          this.toastr.error("Failed to generate QR code");
+          this.toast.error("Failed to generate QR code");
           return;
         }
         this.qrCode = url;

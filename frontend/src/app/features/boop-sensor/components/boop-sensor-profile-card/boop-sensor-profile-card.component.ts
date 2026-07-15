@@ -1,17 +1,18 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-boop-sensor-profile-card',
   standalone: false,
   templateUrl: './boop-sensor-profile-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './boop-sensor-profile-card.component.scss'
 })
 export class BoopeSensorProfileCardComponent {
   private readonly boopSensorApi = inject(BoopSensorApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
 
   @Input({ required: true }) profile!: BoopSensorProfile;
   @Input() active = false;
@@ -20,10 +21,10 @@ export class BoopeSensorProfileCardComponent {
   activate() {
     this.boopSensorApi.activateProfile(this.profile.id).pipe(catchError((err) => {
       console.error('Failed to activate profile', err);
-      this.toastr.error("Failed to activate profile");
+      this.toast.error("Failed to activate profile");
       return [];
     })).subscribe(() => {
-      this.toastr.success("Profile activated");
+      this.toast.success("Profile activated");
       this.profileActivated.next(this.profile);
     });
   }

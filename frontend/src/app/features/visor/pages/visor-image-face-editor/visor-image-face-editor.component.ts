@@ -1,7 +1,7 @@
-import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { SaveCustomisableImageRendererPayload, VisorApiService, VisorRenderer, VisorRendererType } from '../../../../core/services/api/visor-api.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { FilesApiService } from '../../../../core/services/api/files-api.service';
@@ -12,10 +12,11 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
   selector: 'app-visor-image-face-editor',
   templateUrl: './visor-image-face-editor.component.html',
   styleUrl: './visor-image-face-editor.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly title = inject(Title);
@@ -52,13 +53,13 @@ export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
     if (file) {
-      this.toastr.info("Uploading and processing file. This might take some time...");
+      this.toast.info("Uploading and processing file. This might take some time...");
       this.fileApi.uploadImage(file, { remoteGifProcessing: true }).pipe(catchError((err) => {
-        this.toastr.error("Failed to upload file");
+        this.toast.error("Failed to upload file");
         this.filePicker.nativeElement.value = null;
         throw err;
       })).subscribe((result) => {
-        this.toastr.success("Image upploaded successfully");
+        this.toast.success("Image upploaded successfully");
         this.image = result.resource;
       })
     }
@@ -70,10 +71,10 @@ export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
     }
 
     this.visor.deleteCustomisableImageVisor(this.renderer.id).pipe(catchError(err => {
-      this.toastr.error("Failed to delete renderer");
+      this.toast.error("Failed to delete renderer");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Renderer deleted");
+      this.toast.success("Renderer deleted");
       this.router.navigate(["/visor"])
     });
   }
@@ -97,10 +98,10 @@ export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
     };
 
     this.visor.saveCustomisableImageVisor(this.renderer.id, data).pipe(catchError(err => {
-      this.toastr.error("Failed to save data");
+      this.toast.error("Failed to save data");
       throw err;
     })).subscribe(data => {
-      this.toastr.success("Saved");
+      this.toast.success("Saved");
       console.log(data);
     });
   }
@@ -119,17 +120,17 @@ export class VisorImageFaceEditorComponent implements OnInit, OnDestroy {
       this.visor.getRenderer(this.id).pipe(catchError(err => {
         this.isLoading = false;
         console.error('Failed to load renderer', err);
-        this.toastr.error("Failed to load renderer");
+        this.toast.error("Failed to load renderer");
         return [];
       })).subscribe(renderer => {
         this.isLoading = false;
         if (renderer == null) {
-          this.toastr.error("Could not find renderer with the provided id");
+          this.toast.error("Could not find renderer with the provided id");
           return;
         }
 
         if (renderer.type != VisorRendererType.CustomisableImage) {
-          this.toastr.error("Provided renderer id is not of the type \"CustomisableImage\"");
+          this.toast.error("Provided renderer id is not of the type \"CustomisableImage\"");
           return;
         }
 

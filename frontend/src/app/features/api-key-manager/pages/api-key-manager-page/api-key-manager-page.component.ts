@@ -1,21 +1,22 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
 import { ApiKey, ApiKeyApi } from '../../../../core/services/api/api-key-api.service';
 import { catchError, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ClipboardService } from 'ngx-clipboard'
 import { Title } from '@angular/platform-browser';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-api-key-manager-page',
   templateUrl: './api-key-manager-page.component.html',
   styleUrl: './api-key-manager-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly api = inject(ApiKeyApi);
   private readonly modal = inject(NgbModal);
   private readonly clipboard = inject(ClipboardService);
@@ -51,12 +52,12 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
     this.api.getAllKeys().pipe(
       catchError((err: HttpErrorResponse) => {
         if (err.status == 403) {
-          this.toastr.error("You dont have access to view api keys");
+          this.toast.error("You dont have access to view api keys");
           console.error("Got access denied while trying to read api keys");
           return of([]);
         }
 
-        this.toastr.error("Failed to load api keys");
+        this.toast.error("Failed to load api keys");
         throw err;
       })
     ).subscribe(keys => {
@@ -94,7 +95,7 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
 
     if (name.trim().length == 0) {
       this.nameEmpty = true;
-      this.toastr.error("Name can not be empty");
+      this.toast.error("Name can not be empty");
       return;
     }
 
@@ -107,12 +108,12 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
         this.lockInputs = false;
 
         if (err.status == 409) {
-          this.toastr.error("Name already in use by other key");
+          this.toast.error("Name already in use by other key");
           this.nameTaken = true;
           return of(null);
         }
 
-        this.toastr.error("Failed to create key");
+        this.toast.error("Failed to create key");
         throw err;
       })
     ).subscribe(key => {
@@ -121,7 +122,7 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.toastr.success("Api key created");
+      this.toast.success("Api key created");
       this.createKeyPrompt?.close();
       this.apiKeys.push(key);
     });
@@ -140,13 +141,13 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
     this.api.deleteKey(this.deleteKeyKey).pipe(
       catchError((err: HttpErrorResponse) => {
         this.lockInputs = false;
-        this.toastr.error("Failed to delete key");
+        this.toast.error("Failed to delete key");
         throw err;
       })
     ).subscribe(() => {
       this.lockInputs = false;
 
-      this.toastr.success("Api key deleted");
+      this.toast.success("Api key deleted");
       this.deleteKeyPrompt?.close();
       this.apiKeys = this.apiKeys.filter(k => k.apiKey != this.deleteKeyKey);
     });
@@ -154,6 +155,6 @@ export class ApiKeyManagerPageComponent implements OnInit, OnDestroy {
 
   copyText(text: string) {
     this.clipboard.copy(text);
-    this.toastr.success("Text copied to clipboard");
+    this.toast.success("Text copied to clipboard");
   }
 }

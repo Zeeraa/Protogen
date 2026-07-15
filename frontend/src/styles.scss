@@ -1,9 +1,6 @@
 /* Importing Bootstrap SCSS file. */
 @use "bootstrap/scss/bootstrap";
 
-// regular style toast
-@use "ngx-toastr/toastr";
-
 @use "bootstrap-icons/font/bootstrap-icons.scss";
 
 @use "@xterm/xterm/css/xterm.css";

@@ -1,18 +1,19 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { App, AppsApi } from '../../../../core/services/api/apps-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-apps-page',
   standalone: false,
   templateUrl: './apps-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './apps-page.component.scss'
 })
 export class AppsPageComponent implements OnInit, OnDestroy {
   private readonly appsApi = inject(AppsApi);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly title = inject(Title);
 
   protected apps: App[] = [];
@@ -33,7 +34,7 @@ export class AppsPageComponent implements OnInit, OnDestroy {
 
   private loadApps() {
     this.appsApi.getApps().pipe(catchError(err => {
-      this.toastr.error("Error loading apps");
+      this.toast.error("Error loading apps");
       throw err;
     })).subscribe(appList => {
       this.activeApp = appList.activeApp;
@@ -59,12 +60,12 @@ export class AppsPageComponent implements OnInit, OnDestroy {
   closeActiveApp() {
     this.appsApi.deactivateApp().pipe(
       catchError(err => {
-        this.toastr.error("Failed to close app");
+        this.toast.error("Failed to close app");
         throw err;
       }),
     ).subscribe(result => {
       if (result == true) {
-        this.toastr.success("App closed");
+        this.toast.success("App closed");
         this.activeApp = null;
       }
     });

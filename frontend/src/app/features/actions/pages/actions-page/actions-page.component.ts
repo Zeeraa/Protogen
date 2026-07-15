@@ -1,7 +1,6 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
 import { catchError, forkJoin } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -11,16 +10,18 @@ import { VisorApiService } from '../../../../core/services/api/visor-api.service
 import { VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
 import { FaceApiService } from '../../../../core/services/api/face-api.service';
 import { Title } from '@angular/platform-browser';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-actions-page',
   standalone: false,
   templateUrl: './actions-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './actions-page.component.scss'
 })
 export class ActionsPageComponent implements OnInit, OnDestroy {
   private readonly actionApi = inject(ActionApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
   private readonly videoApi = inject(VideoPlayerApiService);
   private readonly visorApi = inject(VisorApiService);
@@ -74,17 +75,17 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
         this.lockInputs = false;
         if (err.status === 409) {
           this.nameTaken = true;
-          this.toastr.error("Name already in use by another action");
+          this.toast.error("Name already in use by another action");
         } else {
           console.error("Failed to create action", err);
-          this.toastr.error("Failed to create action");
+          this.toast.error("Failed to create action");
         }
         throw err;
       })
     ).subscribe(actionSet => {
       this.lockInputs = false;
       this.newActionModal?.close();
-      this.toastr.success("Action created");
+      this.toast.success("Action created");
       this.actionSets.push(actionSet);
     });
   }
@@ -99,7 +100,7 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
 
     forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).pipe(
       catchError(err => {
-        this.toastr.error("Failed fetch action target data");
+        this.toast.error("Failed fetch action target data");
         console.error('Error occurred:', err);
         return [];
       })
@@ -134,7 +135,7 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
   protected undoEdit(actionSet: ActionSet) {
     this.actionApi.getActionSets().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch actions");
+        this.toast.error("Failed to fetch actions");
         console.error("Failed to fetch actions", err);
         return [];
       })
@@ -152,7 +153,7 @@ export class ActionsPageComponent implements OnInit, OnDestroy {
   fetchData() {
     this.actionApi.getActionSets().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch actions");
+        this.toast.error("Failed to fetch actions");
         console.error("Failed to fetch actions", err);
         return [];
       })

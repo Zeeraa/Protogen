@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
 import { FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
@@ -9,20 +9,21 @@ import { BoopSensorApiService, BoopSensorProfile } from '../../../../core/servic
 import { VisorApiService, VisorRenderer } from '../../../../core/services/api/visor-api.service';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
-import { ToastrService } from 'ngx-toastr';
 import { catchError, of, Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SystemConfigService } from '../../../../core/services/system-config.service';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-dashboard-page',
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly title = inject(Title);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly actionApi = inject(ActionApiService);
   private readonly faceApi = inject(FaceApiService);
   private readonly rgbApi = inject(RgbApiService);
@@ -70,7 +71,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.overviewApi.getOverview().pipe(
       catchError(err => {
         console.error("Failed to load overview", err);
-        this.toastr.error("Failed to load overview");
+        this.toast.error("Failed to load overview");
         return [];
       })
     ).subscribe(data => this.overview.set(data));
@@ -78,7 +79,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.actionApi.getActionSets().pipe(
       catchError(err => {
         console.error("Failed to load actions", err);
-        this.toastr.error("Failed to load actions");
+        this.toast.error("Failed to load actions");
         return [];
       })
     ).subscribe(actions => this.actions.set(actions));
@@ -86,7 +87,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.visorApi.getRenderers().pipe(
       catchError(err => {
         console.error("Failed to load renderers", err);
-        this.toastr.error("Failed to load renderers");
+        this.toast.error("Failed to load renderers");
         return [];
       })
     ).subscribe(renderers => this.renderers.set(renderers));
@@ -94,7 +95,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.faceApi.getExpressions().pipe(
       catchError(err => {
         console.error("Failed to load expressions", err);
-        this.toastr.error("Failed to load expressions");
+        this.toast.error("Failed to load expressions");
         return [];
       })
     ).subscribe(expressions => this.expressions.set(expressions));
@@ -103,7 +104,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       this.rgbApi.getScenes().pipe(
         catchError(err => {
           console.error("Failed to load RGB scenes", err);
-          this.toastr.error("Failed to load RGB scenes");
+          this.toast.error("Failed to load RGB scenes");
           return [];
         })
       ).subscribe(scenes => this.rgbScenes.set(scenes));
@@ -112,7 +113,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.faceApi.getFaceColorEffects().pipe(
       catchError(err => {
         console.error("Failed to load face color effects", err);
-        this.toastr.error("Failed to load face color effects");
+        this.toast.error("Failed to load face color effects");
         return [];
       })
     ).subscribe(effects => this.faceRgbEffects.set(effects));
@@ -121,7 +122,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       this.boopApi.getProfiles().pipe(
         catchError(err => {
           console.error("Failed to load boop profiles", err);
-          this.toastr.error("Failed to load boop profiles");
+          this.toast.error("Failed to load boop profiles");
           return [];
         })
       ).subscribe(profiles => this.boopProfiles.set(profiles));
@@ -132,7 +133,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.actionApi.activateActionSet(action.id).pipe(
       catchError(err => {
         console.error("Failed to activate action", err);
-        this.toastr.error("Failed to activate action");
+        this.toast.error("Failed to activate action");
         return [];
       })
     ).subscribe();
@@ -142,7 +143,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.visorApi.activateRenderer(renderer.id).pipe(
       catchError(err => {
         console.error("Failed to activate renderer", err);
-        this.toastr.error("Failed to activate renderer");
+        this.toast.error("Failed to activate renderer");
         return [];
       })
     ).subscribe(() => {
@@ -154,7 +155,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.faceApi.activateExpression(expression.data.uuid, true).pipe(
       catchError(err => {
         console.error("Failed to activate expression", err);
-        this.toastr.error("Failed to activate expression");
+        this.toast.error("Failed to activate expression");
         return [];
       })
     ).subscribe(() => {
@@ -166,7 +167,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.rgbApi.activateScene(scene.id).pipe(
       catchError(err => {
         console.error("Failed to activate RGB scene", err);
-        this.toastr.error("Failed to activate RGB scene");
+        this.toast.error("Failed to activate RGB scene");
         return [];
       })
     ).subscribe(() => {
@@ -178,7 +179,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.rgbApi.deactivate().pipe(
       catchError(err => {
         console.error("Failed to disable RGB", err);
-        this.toastr.error("Failed to disable RGB");
+        this.toast.error("Failed to disable RGB");
         return [];
       })
     ).subscribe(() => {
@@ -190,7 +191,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.faceApi.activateColorEffect(effect.id).pipe(
       catchError(err => {
         console.error("Failed to activate face RGB effect", err);
-        this.toastr.error("Failed to activate face RGB effect");
+        this.toast.error("Failed to activate face RGB effect");
         return [];
       })
     ).subscribe(() => {
@@ -202,7 +203,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.faceApi.activateColorEffect(null).pipe(
       catchError(err => {
         console.error("Failed to disable face RGB", err);
-        this.toastr.error("Failed to disable face RGB");
+        this.toast.error("Failed to disable face RGB");
         return [];
       })
     ).subscribe(() => {
@@ -216,7 +217,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.hudApi.setHudEnabled(newState).pipe(
       catchError(err => {
         console.error("Failed to toggle HUD", err);
-        this.toastr.error("Failed to toggle HUD");
+        this.toast.error("Failed to toggle HUD");
         return [];
       })
     ).subscribe(() => {
@@ -229,7 +230,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.boopApi.setEnabled(newState).pipe(
       catchError(err => {
         console.error("Failed to toggle boop sensor", err);
-        this.toastr.error("Failed to toggle boop sensor");
+        this.toast.error("Failed to toggle boop sensor");
         return [];
       })
     ).subscribe(() => {
@@ -241,7 +242,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.boopApi.activateProfile(profile.id).pipe(
       catchError(err => {
         console.error("Failed to activate boop profile", err);
-        this.toastr.error("Failed to activate boop profile");
+        this.toast.error("Failed to activate boop profile");
         return [];
       })
     ).subscribe(() => {
@@ -256,7 +257,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
           return of(null);
         }
         console.error("Failed to deactivate boop profile", err);
-        this.toastr.error("Failed to deactivate boop profile");
+        this.toast.error("Failed to deactivate boop profile");
         return [];
       })
     ).subscribe(() => {
