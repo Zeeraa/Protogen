@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { Action } from '../../../../core/services/api/action-api.service';
 import { ActionType, translateActionType } from '../../../../core/enum/ActionType';
 import { uuidv7 } from 'uuidv7';
@@ -8,6 +8,7 @@ import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
   selector: 'tr[action-list-entry]',
   standalone: false,
   templateUrl: './action-list-entry.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './action-list-entry.component.scss'
 })
 export class ActionListEntryComponent {

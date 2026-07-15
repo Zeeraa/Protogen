@@ -1,10 +1,11 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { RgbScene } from '../../../../core/services/api/rgb-api.service';
 
 @Component({
   selector: 'app-dashboard-rgb-card',
   standalone: false,
   templateUrl: './dashboard-rgb-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard-rgb-card.component.scss'
 })
 export class DashboardRgbCardComponent {

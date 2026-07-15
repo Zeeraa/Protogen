@@ -1,23 +1,24 @@
-import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Action, ActionApiService, ActionSet } from '../../../../core/services/api/action-api.service';
 import { uuidv7 } from 'uuidv7';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
 import { ActionType } from '../../../../core/enum/ActionType';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-action-card',
   standalone: false,
   templateUrl: './action-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './action-card.component.scss'
 })
 export class ActionCardComponent implements OnDestroy {
   private readonly modal = inject(NgbModal);
   private readonly actionApi = inject(ActionApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
 
   @Input({ required: true }) actionSet!: ActionSet;
   @Input({ required: true }) actionDataSet!: ActionDataSet;
@@ -79,7 +80,7 @@ export class ActionCardComponent implements OnDestroy {
   activate() {
     this.actionApi.activateActionSet(this.actionSet.id).pipe(
       catchError(err => {
-        this.toastr.error("Failed to activate action");
+        this.toast.error("Failed to activate action");
         throw err;
       })
     ).subscribe();
@@ -88,7 +89,7 @@ export class ActionCardComponent implements OnDestroy {
   protected confirmDelete() {
     this.actionApi.deleteActionSet(this.actionSet.id).pipe(
       catchError(err => {
-        this.toastr.error("Failed to delete action");
+        this.toast.error("Failed to delete action");
         throw err;
       })
     ).subscribe(() => {
@@ -131,17 +132,17 @@ export class ActionCardComponent implements OnDestroy {
         this.lockInputs = false;
 
         if (err.status == 409) {
-          this.toastr.error("Name already in use by another action");
+          this.toast.error("Name already in use by another action");
           this.nameTaken = true;
         } else {
-          this.toastr.error("Failed to update action");
+          this.toast.error("Failed to update action");
         }
         throw err;
       })
     ).subscribe(() => {
       this.lockInputs = false;
       this.editEnabled = false;
-      this.toastr.success("Action saved");
+      this.toast.success("Action saved");
     });
   }
 }

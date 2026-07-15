@@ -1,21 +1,22 @@
-import { AfterViewInit, Component, inject } from '@angular/core';
+import { AfterViewInit, Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
-import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthApiService } from '../../../../core/services/api/auth-api.service';
 import { catchError, of } from 'rxjs';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-login-page',
   standalone: false,
   templateUrl: './login-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './login-page.component.scss'
 })
 export class LoginPageComponent implements AfterViewInit {
   protected readonly auth = inject(AuthService);
   private readonly authApi = inject(AuthApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -47,17 +48,17 @@ export class LoginPageComponent implements AfterViewInit {
       const success = await this.auth.login(username, password);
       if (success) {
         console.log("Logged in as " + this.auth.authDetails?.username);
-        this.toastr.success("Logged in as " + this.auth.authDetails?.username);
+        this.toast.success("Logged in as " + this.auth.authDetails?.username);
 
         this.redirectAfterAuth();
       } else {
         console.log("User failed login");
         this.wrongUsernameOrPassword = true;
-        this.toastr.error("Invalid username or password");
+        this.toast.error("Invalid username or password");
       }
     } catch (err) {
       console.error(err);
-      this.toastr.error("An error occurred while logging in");
+      this.toast.error("An error occurred while logging in");
     }
     this.loginForm.enable();
   }

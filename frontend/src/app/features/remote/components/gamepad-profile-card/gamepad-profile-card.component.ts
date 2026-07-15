@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamepadProfile } from '../../../../core/services/api/gamepad-api.service';
 
@@ -6,6 +6,7 @@ import { GamepadProfile } from '../../../../core/services/api/gamepad-api.servic
   selector: 'app-gamepad-profile-card',
   standalone: false,
   templateUrl: './gamepad-profile-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './gamepad-profile-card.component.scss'
 })
 export class GamepadProfileCardComponent {

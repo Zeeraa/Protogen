@@ -1,6 +1,6 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { SavedVideo, SaveVideoPayload, VideoDownloaderJobStatus, VideoGroup, VideoPlayerApiService, VideoPlayerStatus } from '../../../../core/services/api/video-player-api.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { AudioApiService } from '../../../../core/services/api/audio-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -13,10 +13,11 @@ import { SystemConfigService } from '../../../../core/services/system-config.ser
   selector: 'app-video-player-page',
   templateUrl: './video-player-page.component.html',
   styleUrl: './video-player-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class VideoPlayerPageComponent implements OnInit, OnDestroy {
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly api = inject(VideoPlayerApiService);
   private readonly volumeApi = inject(AudioApiService);
   private readonly modal = inject(NgbModal);
@@ -63,10 +64,10 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
 
   deleteGroup(groupId: number) {
     this.api.deleteGroup(groupId).pipe(catchError(err => {
-      this.toastr.error("Failed to delete group");
+      this.toast.error("Failed to delete group");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Group deleted");
+      this.toast.success("Group deleted");
       this.groups = this.groups.filter(g => g.id != groupId);
       this.fetchSavedVideos();
     })
@@ -75,19 +76,19 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   saveGroup() {
     const name = this.createGroupFrom.get("name")?.value || "";
     if (name.length == 0) {
-      this.toastr.error("Name cant be empty");
+      this.toast.error("Name cant be empty");
       return;
     }
 
     this.isSavingGroup = true;
     this.api.createGroup({ name: name }).pipe(catchError(err => {
-      this.toastr.error("Failed to create group");
+      this.toast.error("Failed to create group");
       this.isSavingGroup = false;
       throw err;
     })).subscribe(group => {
       this.groups.push(group);
       this.createGroupModalRef?.close();
-      this.toastr.success("Group created");
+      this.toast.success("Group created");
     })
   }
 
@@ -110,25 +111,25 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
 
   startPlayback() {
     if (!UrlPattern.test(this.videoInputUrl)) {
-      this.toastr.error("Invalid url");
+      this.toast.error("Invalid url");
       return;
     }
 
     if (this.stream) {
       this.api.streamVideo(this.videoInputUrl).pipe(catchError(err => {
         console.error('Failed to start stream', err);
-        this.toastr.error("Failed to start stream");
+        this.toast.error("Failed to start stream");
         return [];
       })).subscribe(_ => {
-        this.toastr.success("Stream started");
+        this.toast.success("Stream started");
       });
     } else {
       this.api.playVideo(this.videoInputUrl, this.mirrorVideo, this.flipVideo).pipe(catchError(err => {
         console.error('Failed to start playback', err);
-        this.toastr.error("Failed to start playback");
+        this.toast.error("Failed to start playback");
         return [];
       })).subscribe(() => {
-        this.toastr.success("Preparing video");
+        this.toast.success("Preparing video");
       });
     }
   }
@@ -136,10 +137,10 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
   stopPlayback() {
     this.api.stopPlayback().pipe(catchError(err => {
       console.error('Failed to stop playback', err);
-      this.toastr.error("Failed to stop playback");
+      this.toast.error("Failed to stop playback");
       return [];
     })).subscribe(() => {
-      this.toastr.success("Stopping playback");
+      this.toast.success("Stopping playback");
     });
   }
 
@@ -165,7 +166,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     this.groups = [];
     this.api.getGroups().pipe(catchError(err => {
       console.error('Failed to fetch video groups', err);
-      this.toastr.error("Failed to load video groups");
+      this.toast.error("Failed to load video groups");
       return [];
     })).subscribe(groups => {
       this.groups = groups;
@@ -179,7 +180,7 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     }
     this.api.getSavedVideos().pipe(catchError(err => {
       console.error('Failed to fetch saved videos', err);
-      this.toastr.error("Failed to load saved videos");
+      this.toast.error("Failed to load saved videos");
       return [];
     })).subscribe(videos => {
       this.nonGroupedVideos = videos.filter(v => v.group == null);
@@ -189,10 +190,10 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
 
   clearCache() {
     this.api.clearCache().pipe(catchError(err => {
-      this.toastr.error("Failed to clear cache");
+      this.toast.error("Failed to clear cache");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Cache cleared");
+      this.toast.success("Cache cleared");
     });
   }
 
@@ -262,17 +263,17 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
     const groupId = rawGroupId == -1 ? null : parseInt(String(rawGroupId));
 
     if (url == null || !UrlPattern.test(url)) {
-      this.toastr.error("Invalid URL");
+      this.toast.error("Invalid URL");
       return;
     }
 
     if (name == null || name.trim().length == 0) {
-      this.toastr.error("Invalid name");
+      this.toast.error("Invalid name");
       return;
     }
 
     if (sorting != undefined && isNaN(sorting)) {
-      this.toastr.error("Sorting number cant be NaN");
+      this.toast.error("Sorting number cant be NaN");
       return;
     }
 
@@ -289,13 +290,13 @@ export class VideoPlayerPageComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
     this.api.saveVideo(data).pipe(catchError(err => {
-      this.toastr.error("An error occurred while trying to save video");
+      this.toast.error("An error occurred while trying to save video");
       this.isSaving = false;
       throw err;
     })).subscribe(_ => {
       this.addFormRef?.close();
       this.isSaving = false;
-      this.toastr.success("Video saved");
+      this.toast.success("Video saved");
       this.fetchSavedVideos();
     })
   }

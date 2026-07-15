@@ -1,21 +1,22 @@
-import { AfterViewInit, ApplicationRef, Component, ElementRef, HostListener, inject, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, ApplicationRef, Component, ElementRef, HostListener, inject, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
 import { AppSocketConnection, AppSocketPacket } from '../../../../../core/apps/AppSocketConnection';
 import { AppsApi } from '../../../../../core/services/api/apps-api.service';
 import { catchError, Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { uuidv4 } from 'uuidv7';
 import { hexToRgb, RGBColor, rgbToHex } from '../../../../../core/services/utils/Utils';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-paint-app-page',
   standalone: false,
   templateUrl: './paint-app-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './paint-app-page.component.scss'
 })
 export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly appsApi = inject(AppsApi);
   private readonly appRef = inject(ApplicationRef);
@@ -73,7 +74,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
 
     const token = this.route.snapshot.queryParams['token'];
     if (!token) {
-      this.toastr.error("No token provided. Please check your url and try again");
+      this.toast.error("No token provided. Please check your url and try again");
       return;
     }
     this.socket = new AppSocketConnection(token);
@@ -83,14 +84,14 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     });
 
     this.connectSubscriptsion = this.socket.connectedObservable.subscribe(() => {
-      this.toastr.success("Connected. Fetching data...");
+      this.toast.success("Connected. Fetching data...");
 
       this.appsApi.getUserAppDetails(token).pipe(
         catchError((err: HttpErrorResponse) => {
           if (err.status == 403) {
-            this.toastr.error(err.error.message);
+            this.toast.error(err.error.message);
           } else {
-            this.toastr.error("An error occurred while fetching app details. Please try again later.");
+            this.toast.error("An error occurred while fetching app details. Please try again later.");
           }
           throw err;
         }),
@@ -99,7 +100,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
         const h = data.metadata.canvas?.height;
 
         if (isNaN(w) || isNaN(h)) {
-          this.toastr.error("Invalid canvas size received");
+          this.toast.error("Invalid canvas size received");
           return;
         }
 

@@ -1,23 +1,24 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, ChangeDetectionStrategy } from '@angular/core';
 import { VisorApiService, VisorRenderer, VisorRendererType } from '../../../../core/services/api/visor-api.service';
 import { catchError } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-renderer-card',
   templateUrl: './renderer-card.component.html',
   styleUrl: './renderer-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class RendererCardComponent {
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly api = inject(VisorApiService);
 
   @Input({ required: true }) renderer!: VisorRenderer;
 
   activate() {
     this.api.activateRenderer(this.renderer.id).pipe(catchError(err => {
-      this.toastr.error("Failed to activate");
+      this.toast.error("Failed to activate");
       throw err;
     })).subscribe();
   }

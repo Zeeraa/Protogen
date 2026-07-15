@@ -1,5 +1,5 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { FaceApiService, FaceColorEffect, FaceColorEffectType, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { catchError } from 'rxjs';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -15,11 +15,12 @@ export const FaceRendererId = "PROTOGEN_FACE";
   selector: 'app-protogen-face-editor',
   templateUrl: './protogen-face-editor.component.html',
   styleUrl: './protogen-face-editor.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
   private readonly faceApi = inject(FaceApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
   private readonly assetsApi = inject(AssetsApiService);
   private readonly visorApi = inject(VisorApiService);
@@ -67,7 +68,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
 
   deactivate() {
     this.faceApi.activateColorEffect(null).pipe(catchError(err => {
-      this.toastr.error("Failed to deactivate effect");
+      this.toast.error("Failed to deactivate effect");
       throw err;
     })).subscribe();
   }
@@ -82,10 +83,10 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     this.faceApi.updateSettings({
       defaultExpressionId: newVal,
     }).pipe(catchError(err => {
-      this.toastr.error("Failed to update default expression");
+      this.toast.error("Failed to update default expression");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Default expression updated");
+      this.toast.success("Default expression updated");
     });
   }
 
@@ -100,7 +101,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
 
   activateSelf() {
     this.visorApi.activateRenderer(FaceRendererId).pipe(catchError(err => {
-      this.toastr.error("Failed to activate renderer");
+      this.toast.error("Failed to activate renderer");
       throw err;
     })).subscribe();
   }
@@ -109,7 +110,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     this.updateVisorStatus();
 
     this.faceApi.getData().pipe(catchError(err => {
-      this.toastr.error("Failed to fetch expressions");
+      this.toast.error("Failed to fetch expressions");
       throw err;
     })).subscribe(data => {
       console.log(data);
@@ -118,7 +119,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     });
 
     this.faceApi.getFaceColorEffects().pipe(catchError(err => {
-      this.toastr.error("Failed to fetch color effects");
+      this.toast.error("Failed to fetch color effects");
       throw err;
     })).subscribe(effects => {
       this.faceColorEffects = effects;
@@ -127,7 +128,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
 
   updateVisorStatus() {
     this.visorApi.getStatus().pipe(catchError(err => {
-      this.toastr.error("Failed to fetch visor status");
+      this.toast.error("Failed to fetch visor status");
       throw err;
     })).subscribe(status => {
       this.visorStatus = status;
@@ -144,14 +145,14 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     this.title.setTitle("Face editor - Protogen");
 
     this.assetsApi.getAssets().pipe(catchError(err => {
-      this.toastr.error("Failed to load built-in assets");
+      this.toast.error("Failed to load built-in assets");
       throw err;
     })).subscribe(assets => {
       this.assets = assets;
     });
 
     this.faceApi.getFaceColorEffectTypes(true).pipe(catchError(err => {
-      this.toastr.error("Failed to load available color effects");
+      this.toast.error("Failed to load available color effects");
       throw err;
     })).subscribe(effects => {
       this.faceColorEffectTypes = effects;
@@ -196,7 +197,7 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
 
     // Checking these here to tell typescript that they are not null
     if (missing || name == null || image == null) {
-      this.toastr.error("Please fill out all fields");
+      this.toast.error("Please fill out all fields");
       return;
     }
 
@@ -214,10 +215,10 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
       this.lockInputs = false;
       this.newExpressionForm.enable();
       if (err.status === 409) {
-        this.toastr.error("Name already in use");
+        this.toast.error("Name already in use");
         this.nameInUse = true;
       } else {
-        this.toastr.error("Failed to add expression");
+        this.toast.error("Failed to add expression");
       }
       throw err;
     })).subscribe(expression => {
@@ -254,14 +255,14 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
 
     if (name.trim().length == 0) {
       this.nameInvalid = true;
-      this.toastr.error("Please enter a name");
+      this.toast.error("Please enter a name");
       return;
     }
 
     const effectType = this.faceColorEffectTypes.find(t => t.name == this.newFaceRgbEffectForm.get("type")?.value);
 
     if (effectType == null) {
-      this.toastr.error("Invalid effect type");
+      this.toast.error("Invalid effect type");
       return;
     }
 
@@ -269,9 +270,9 @@ export class ProtogenFaceEditorComponent implements OnInit, OnDestroy {
     this.faceApi.newFaceColorEffect(name, effectType.name).pipe(catchError((err: HttpErrorResponse) => {
       if (err.status === 409) {
         this.nameInUse = true;
-        this.toastr.error("Name already in use");
+        this.toast.error("Name already in use");
       } else {
-        this.toastr.error("Failed to add effect");
+        this.toast.error("Failed to add effect");
       }
       this.lockInputs = false;
       throw err;

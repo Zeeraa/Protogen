@@ -1,18 +1,19 @@
-import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FaceApiService, FaceColorEffect, FaceColorEffectType } from '../../../../core/services/api/face-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { catchError } from 'rxjs';
 
 @Component({
   selector: 'app-face-color-effect-card',
   templateUrl: './face-color-effect-card.component.html',
   styleUrl: './face-color-effect-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class FaceColorEffectCardComponent implements OnDestroy {
   private readonly api = inject(FaceApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
 
   @Input({ required: true }) effect!: FaceColorEffect;
@@ -37,11 +38,11 @@ export class FaceColorEffectCardComponent implements OnDestroy {
   activate() {
     this.api.activateColorEffect(this.effect.id).pipe(
       catchError(err => {
-        this.toastr.error("Failed to activate effect");
+        this.toast.error("Failed to activate effect");
         throw err;
       })
     ).subscribe(() => {
-      this.toastr.success("Effect activated");
+      this.toast.success("Effect activated");
     });
   }
 
@@ -50,11 +51,11 @@ export class FaceColorEffectCardComponent implements OnDestroy {
       name: this.effect.name,
     }).pipe(
       catchError(err => {
-        this.toastr.error("Failed to update effect");
+        this.toast.error("Failed to update effect");
         throw err;
       })
     ).subscribe(() => {
-      this.toastr.success("Effect updated");
+      this.toast.success("Effect updated");
     });
   }
 
@@ -66,11 +67,11 @@ export class FaceColorEffectCardComponent implements OnDestroy {
   confirmDelete() {
     this.api.removeColorEffect(this.effect.id).pipe(
       catchError(err => {
-        this.toastr.error("Failed to remove effect");
+        this.toast.error("Failed to remove effect");
         throw err;
       })
     ).subscribe(() => {
-      this.toastr.success("Effect removed");
+      this.toast.success("Effect removed");
       this.deleted.emit(this.effect);
       this.deletePromptModa?.close();
     });

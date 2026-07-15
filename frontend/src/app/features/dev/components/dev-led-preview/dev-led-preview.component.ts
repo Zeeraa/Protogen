@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-dev-led-preview',
   standalone: false,
   templateUrl: './dev-led-preview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dev-led-preview.component.scss'
 })
 export class DevLedPreviewComponent {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { BoopSensorAction } from '../../../../core/services/api/boop-sensor-api.service';
 import { uuidv7 } from 'uuidv7';
 import { ActionType, translateActionType } from '../../../../core/enum/ActionType';
@@ -8,6 +8,7 @@ import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
   selector: 'tr[appProfileActionEntry]',
   standalone: false,
   templateUrl: './profile-action-entry.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './profile-action-entry.component.scss'
 })
 export class ProfileActionEntryComponent {

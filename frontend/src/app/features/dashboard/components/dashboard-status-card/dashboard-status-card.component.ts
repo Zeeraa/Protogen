@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { OverviewData } from '../../../../core/services/api/overview-api.service';
 import { SystemConfigService } from '../../../../core/services/system-config.service';
 
@@ -6,6 +6,7 @@ import { SystemConfigService } from '../../../../core/services/system-config.ser
   selector: 'app-dashboard-status-card',
   standalone: false,
   templateUrl: './dashboard-status-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard-status-card.component.scss'
 })
 export class DashboardStatusCardComponent {

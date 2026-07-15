@@ -1,9 +1,8 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { BoopSensorAction, BoopSensorApiService, BoopSensorProfile } from '../../../../core/services/api/boop-sensor-api.service';
 import { catchError, forkJoin, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ToastrService } from 'ngx-toastr';
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
 import { FaceApiService } from '../../../../core/services/api/face-api.service';
 import { VideoPlayerApiService } from '../../../../core/services/api/video-player-api.service';
@@ -14,17 +13,19 @@ import { ActionType } from '../../../../core/enum/ActionType';
 import { ActionApiService } from '../../../../core/services/api/action-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Title } from '@angular/platform-browser';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-boop-sensor-profile-editor-page',
   standalone: false,
   templateUrl: './boop-sensor-profile-editor-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './boop-sensor-profile-editor-page.component.scss'
 })
 export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
   private readonly boopSensorApi = inject(BoopSensorApiService);
   private readonly route = inject(ActivatedRoute);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly rgbApi = inject(RgbApiService);
   private readonly visorApi = inject(VisorApiService);
   private readonly videoApi = inject(VideoPlayerApiService);
@@ -63,7 +64,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
 
     forkJoin([rgbScenesRequest, visorRenderersRequest, videosRequest, faceExpressionsRequest, faceColorEffectsRequest, actionSetsRequest]).pipe(
       catchError(err => {
-        this.toastr.error("Failed fetch action target data. Editor will not fully function");
+        this.toast.error("Failed fetch action target data. Editor will not fully function");
         console.error('Error occurred:', err);
         return [];
       })
@@ -108,7 +109,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     const triggerValues = new Set<number>();
     for (const action of this.profile.actions) {
       if (triggerValues.has(action.triggerAtValue)) {
-        this.toastr.error(`Duplicate trigger value found: ${action.triggerAtValue}. Use Action Sets to execute multiple actions at the same time.`);
+        this.toast.error(`Duplicate trigger value found: ${action.triggerAtValue}. Use Action Sets to execute multiple actions at the same time.`);
         return;
       }
       triggerValues.add(action.triggerAtValue);
@@ -116,7 +117,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
 
     this.isMakingRequest = true;
     this.boopSensorApi.updateProfile(this.profile).pipe(catchError((err: HttpErrorResponse) => {
-      this.toastr.error("Failed to save profile changes");
+      this.toast.error("Failed to save profile changes");
       console.error('Failed to save profile changes', err);
       this.isMakingRequest = false;
       return [];
@@ -124,7 +125,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       this.profile = profile;
       this.sortActions();
       this.isMakingRequest = false;
-      this.toastr.success("Profile saved successfully");
+      this.toast.success("Profile saved successfully");
     })
   }
 
@@ -173,15 +174,15 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
     this.boopSensorApi.deleteProfile(this.profile.id).pipe(catchError((err: HttpErrorResponse) => {
       this.isMakingRequest = false;
       if (err.status === 404) {
-        this.toastr.error("Profile not found");
+        this.toast.error("Profile not found");
         console.error('Profile not found');
         return [];
       }
       console.error('Failed to delete profile', err);
-      this.toastr.error("Failed to delete profile");
+      this.toast.error("Failed to delete profile");
       return [];
     })).subscribe(() => {
-      this.toastr.success("Profile deleted successfully");
+      this.toast.success("Profile deleted successfully");
       this.deleteProfilePrompt?.close();
       this.router.navigate(['/boop-sensor']);
     });
@@ -196,7 +197,7 @@ export class BoopSensorProfileEditorPageComponent implements OnInit, OnDestroy {
       this.fetchSubscription = this.boopSensorApi.getProfileById(id).pipe(catchError((err: HttpErrorResponse) => {
         this.loading = false;
         if (err.status === 404) {
-          this.toastr.error("Profile not found");
+          this.toast.error("Profile not found");
           console.error('Profile not found');
           this.loading = false;
           return [];

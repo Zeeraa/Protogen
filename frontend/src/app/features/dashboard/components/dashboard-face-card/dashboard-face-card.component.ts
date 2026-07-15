@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FaceExpression, FaceColorEffect } from '../../../../core/services/api/face-api.service';
 import { VisorRenderer, VisorRendererType } from '../../../../core/services/api/visor-api.service';
 
@@ -6,6 +6,7 @@ import { VisorRenderer, VisorRendererType } from '../../../../core/services/api/
   selector: 'app-dashboard-face-card',
   standalone: false,
   templateUrl: './dashboard-face-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard-face-card.component.scss'
 })
 export class DashboardFaceCardComponent {

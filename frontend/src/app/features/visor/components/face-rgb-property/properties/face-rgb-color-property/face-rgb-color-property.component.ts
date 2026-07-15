@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SharedFaceRbgProperty } from '../SharedFaceRbgProperty';
 import { hexColorToNumber, numberToHexColor } from '../../../../../../core/services/utils/Utils';
 import { catchError } from 'rxjs';
 
 @Component({
-    selector: 'app-face-rgb-color-property',
-    templateUrl: './face-rgb-color-property.component.html',
-    styleUrl: './face-rgb-color-property.component.scss',
-    standalone: false
+  selector: 'app-face-rgb-color-property',
+  templateUrl: './face-rgb-color-property.component.html',
+  styleUrl: './face-rgb-color-property.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class FaceRgbColorPropertyComponent extends SharedFaceRbgProperty implements OnInit {
   hexColor = "#000000";
@@ -26,7 +27,7 @@ export class FaceRgbColorPropertyComponent extends SharedFaceRbgProperty impleme
     console.debug("Color changed to " + this.hexColor);
     const color = hexColorToNumber(this.hexColor);
     this.faceApi.setEffectProperty(this.effect.id, this.property.name, String(color)).pipe(catchError(err => {
-      this.toastr.error("Failed to update property");
+      this.toast.error("Failed to update property");
       throw err;
     })).subscribe(() => {
       console.debug("Property updated");

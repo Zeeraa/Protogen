@@ -1,19 +1,20 @@
-import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { App, AppsApi } from '../../../../core/services/api/apps-api.service';
-import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { toDataURL } from 'qrcode';
+import { ToastService } from 'ngx-yet-another-toast-library';
 
 @Component({
   selector: 'app-app-card', // Peak naming scheme :3
   standalone: false,
   templateUrl: './app-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-card.component.scss'
 })
 export class AppCardComponent implements OnDestroy {
   private readonly appApi = inject(AppsApi);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
 
   @Input({ required: true }) app!: App;
@@ -29,11 +30,11 @@ export class AppCardComponent implements OnDestroy {
   public startApp() {
     this.appApi.activateApp(this.app.name).pipe(
       catchError(err => {
-        this.toastr.error("Failed to start app");
+        this.toast.error("Failed to start app");
         throw err;
       })
     ).subscribe(() => {
-      this.toastr.success("App started");
+      this.toast.success("App started");
       this.activated.emit(this.app);
     });
   }
@@ -41,7 +42,7 @@ export class AppCardComponent implements OnDestroy {
   public createInvite() {
     this.appApi.getAppToken(this.app.name).pipe(
       catchError(err => {
-        this.toastr.error("Failed to create invite token");
+        this.toast.error("Failed to create invite token");
         throw err;
       })
     ).subscribe((token) => {
@@ -53,7 +54,7 @@ export class AppCardComponent implements OnDestroy {
       toDataURL(fullUrl, { errorCorrectionLevel: 'L' }, (err, url) => {
         if (err) {
           console.error(err);
-          this.toastr.error("Failed to generate QR code");
+          this.toast.error("Failed to generate QR code");
           return;
         }
         this.qrCode = url;

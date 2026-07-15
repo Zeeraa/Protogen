@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ActionType, translateActionType } from '../../../../core/enum/ActionType';
 import { GamepadActionTrigger, translateTriggerName } from '../../../../core/services/api/gamepad-api.service';
 import { ActionDataSet } from '../../../../core/interfaces/ActionDataSet';
@@ -14,6 +14,7 @@ export interface EditableTriggerRow {
   selector: 'tr[gamepad-trigger-row]',
   standalone: false,
   templateUrl: './gamepad-trigger-row.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './gamepad-trigger-row.component.scss',
 })
 export class GamepadTriggerRowComponent {

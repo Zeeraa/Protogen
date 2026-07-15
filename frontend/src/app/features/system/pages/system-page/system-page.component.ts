@@ -1,8 +1,8 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal, TemplateRef, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import { ClockSettings, FlaschenTaschenSettings, NetworkInterfaceInfo, SystemApiService, SystemOverview, AudioDevice, WorkerConfig } from '../../../../core/services/api/system-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { catchError, of, timeout } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { LocalStorageKey_ShowSentitiveNetworkingInfo } from '../../../../core/services/utils/LocalStorageKeys';
@@ -22,10 +22,11 @@ import { ImageCroppedEvent } from 'ngx-image-cropper';
   selector: 'app-system-page',
   templateUrl: './system-page.component.html',
   styleUrl: './system-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SystemPageComponent implements OnInit, OnDestroy {
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly api = inject(SystemApiService);
   private readonly hudApi = inject(HudApiService);
   private readonly backupApi = inject(BackupApiService);
@@ -146,7 +147,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   set hudEnabled(enabled: boolean) {
     this.overview.update(o => o ? { ...o, hudEnabled: enabled } : o);
     this.hudApi.setHudEnabled(enabled).pipe(catchError(err => {
-      this.toastr.error("Failed to toggle hud");
+      this.toast.error("Failed to toggle hud");
       throw err;
     })).subscribe();
   }
@@ -157,10 +158,10 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
   protected set swaggerEnabled(enabled: boolean) {
     this.api.setSwaggerEnabled(enabled).pipe(catchError(err => {
-      this.toastr.error("Failed to " + (enabled ? "enable" : "disable") + " swagger");
+      this.toast.error("Failed to " + (enabled ? "enable" : "disable") + " swagger");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Swagger " + (enabled ? "enabled" : "disabled") + ". The system needs to be restarted before changes take effect");
+      this.toast.success("Swagger " + (enabled ? "enabled" : "disabled") + ". The system needs to be restarted before changes take effect");
     });
   }
 
@@ -263,10 +264,10 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
   protected downloadBackup() {
     this.backupApi.getDownloadToken().pipe(catchError(err => {
-      this.toastr.error('Failed to get backup download token');
+      this.toast.error('Failed to get backup download token');
       throw err;
     })).subscribe(({ token }) => {
-      this.toastr.info('Download started. It might take a bit of time to prepare the file for download.', undefined, { timeOut: 8000 });
+      this.toast.info('Download started. It might take a bit of time to prepare the file for download.', undefined, { duration: 8000 });
       const a = document.createElement('a');
       a.href = this.api.apiBaseUrl + '/backup/download?token=' + encodeURIComponent(token);
       a.download = 'backup.tar.gz';
@@ -285,10 +286,10 @@ export class SystemPageComponent implements OnInit, OnDestroy {
   protected restartFlaschenTaschen() {
     this.api.restartFlaschenTaschen().pipe(catchError(err => {
       console.error(err);
-      this.toastr.error("Failed to run command");
+      this.toast.error("Failed to run command");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Restarting service");
+      this.toast.success("Restarting service");
     });
   }
 
@@ -296,10 +297,10 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     this.api.updateFlaschenTaschenSettings(this.flaschenTaschenSettings())
       .pipe(catchError(err => {
         console.error(err);
-        this.toastr.error("Failed to update settings");
+        this.toast.error("Failed to update settings");
         throw err;
       })).subscribe(() => {
-        this.toastr.success("Settings updated");
+        this.toast.success("Settings updated");
       });
   }
 
@@ -309,7 +310,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
   protected update() {
     this.api.getOverview().pipe(catchError(err => {
-      this.toastr.error("Failed to get system overview");
+      this.toast.error("Failed to get system overview");
       throw err;
     })).subscribe(overview => {
       this.overview.set(overview);
@@ -318,13 +319,13 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
   protected shutdown() {
     this.shutdownModalRef?.close();
-    this.toastr.info("Executing poweroff command...");
+    this.toast.info("Executing poweroff command...");
     this.api.shutdown().pipe(catchError(err => {
       console.error(err);
-      this.toastr.error("Failed to run command");
+      this.toast.error("Failed to run command");
       throw err;
     })).subscribe(() => {
-      this.toastr.success("Shutdown command executed!");
+      this.toast.success("Shutdown command executed!");
     });
   }
 
@@ -370,22 +371,22 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     };
 
     this.api.updateClockSettings(settings).pipe(catchError(err => {
-      this.toastr.error("Failed to save clock settings");
+      this.toast.error("Failed to save clock settings");
       console.error("Failed to save clock settings", err);
       return [];
     })).subscribe(() => {
-      this.toastr.success("Clock settings saved");
+      this.toast.success("Clock settings saved");
     });
   }
 
   protected onAudioDeviceChange(deviceId: number) {
     this.api.setAudioDevice(deviceId).pipe(catchError(err => {
-      this.toastr.error("Failed to set audio device");
+      this.toast.error("Failed to set audio device");
       console.error("Failed to set audio device", err);
       throw err;
     })).subscribe(() => {
       this.selectedAudioDeviceId.set(deviceId);
-      this.toastr.success("Audio device updated");
+      this.toast.success("Audio device updated");
     });
   }
 
@@ -393,14 +394,14 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     const url = this.workerUrlInput().trim() || null;
     const key = this.workerKeyInput() || null;
     this.api.updateWorkerConfig(url, key).pipe(catchError(err => {
-      this.toastr.error("Failed to save worker configuration");
+      this.toast.error("Failed to save worker configuration");
       console.error("Failed to save worker configuration", err);
       return [];
     })).subscribe(config => {
       this.workerConfig.set(config);
       this.workerUrlInput.set(config.url ?? '');
       this.workerKeyInput.set('');
-      this.toastr.success("Worker configuration saved");
+      this.toast.success("Worker configuration saved");
     });
   }
 
@@ -416,7 +417,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
     this.api.getNetworkInterfaces().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch network interfaces");
+        this.toast.error("Failed to fetch network interfaces");
         console.error("Failed to fetch network interfaces", err);
         return [];
       })
@@ -426,7 +427,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
     this.api.getFlaschenTaschenSettings().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch flaschen taschen settings");
+        this.toast.error("Failed to fetch flaschen taschen settings");
         throw err;
       })
     ).subscribe(settings => {
@@ -435,7 +436,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
     this.api.getClockSettings().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch clock settings");
+        this.toast.error("Failed to fetch clock settings");
         console.error("Failed to fetch clock settings", err);
         throw [];
       })
@@ -452,7 +453,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
     this.api.getAudioDevices().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch audio devices");
+        this.toast.error("Failed to fetch audio devices");
         console.error("Failed to fetch audio devices", err);
         return [];
       })
@@ -466,7 +467,7 @@ export class SystemPageComponent implements OnInit, OnDestroy {
 
     this.api.getWorkerConfig().pipe(
       catchError(err => {
-        this.toastr.error("Failed to fetch worker configuration");
+        this.toast.error("Failed to fetch worker configuration");
         console.error("Failed to fetch worker configuration", err);
         return [];
       })
@@ -500,24 +501,24 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     if (!blob) return;
     const file = new File([blob], 'icon.png', { type: 'image/png' });
     this.filesApi.uploadIcon(file).pipe(catchError(err => {
-      this.toastr.error('Failed to upload icon');
+      this.toast.error('Failed to upload icon');
       console.error(err);
       return [];
     })).subscribe(() => {
       this.iconModalRef?.close();
       this.iconPreviewVersion.set(Date.now());
-      this.toastr.success('Icon updated');
+      this.toast.success('Icon updated');
     });
   }
 
   protected resetIcon() {
     this.filesApi.clearIcon().pipe(catchError(err => {
-      this.toastr.error('Failed to reset icon');
+      this.toast.error('Failed to reset icon');
       console.error(err);
       return [];
     })).subscribe(() => {
       this.iconPreviewVersion.set(Date.now());
-      this.toastr.success('Icon reset to default');
+      this.toast.success('Icon reset to default');
     });
   }
 

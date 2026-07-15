@@ -1,8 +1,8 @@
-import { Component, computed, DestroyRef, inject, signal, TemplateRef, viewChild } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal, TemplateRef, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuthApiService, ProtogenUser } from '../../../../core/services/api/auth-api.service';
 import { catchError, of } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -12,12 +12,13 @@ import { Title } from '@angular/platform-browser';
   selector: 'app-user-manager-page',
   templateUrl: './user-manager-page.component.html',
   styleUrl: './user-manager-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class UserManagerPageComponent {
   private readonly auth = inject(AuthService);
   private readonly authApi = inject(AuthApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
   private readonly title = inject(Title);
   private readonly destroyRef = inject(DestroyRef);
@@ -76,7 +77,7 @@ export class UserManagerPageComponent {
 
   protected loadUserList() {
     this.authApi.getUsers().pipe(catchError(err => {
-      this.toastr.error("Failed to fetch users");
+      this.toast.error("Failed to fetch users");
       throw err;
     })).subscribe(users => {
       this.users.set(users);
@@ -115,7 +116,7 @@ export class UserManagerPageComponent {
 
       if (oldPassword.trim().length == 0) {
         didWarn = true;
-        this.toastr.error("Old password needed to change your password");
+        this.toast.error("Old password needed to change your password");
         this.oldPasswordMissing.set(true);
       }
     }
@@ -123,7 +124,7 @@ export class UserManagerPageComponent {
     const password = this.changePasswordForm.get("newPassword")?.value || "";
     if (password.trim().length == 0) {
       if (!didWarn) {
-        this.toastr.error("Password can not be empty");
+        this.toast.error("Password can not be empty");
         didWarn = true;
       }
       this.passwordEmpty.set(true);
@@ -135,7 +136,7 @@ export class UserManagerPageComponent {
 
     const confirmPassword = this.changePasswordForm.get("confirmNewPassword")?.value || "";
     if (password != confirmPassword) {
-      this.toastr.error("Passwords not matching");
+      this.toast.error("Passwords not matching");
       this.passwordsNotMatching.set(true);
       return;
     }
@@ -145,12 +146,12 @@ export class UserManagerPageComponent {
         this.lockInputs.set(false);
 
         if (err.status == 403) {
-          this.toastr.error("Old password incorrect");
+          this.toast.error("Old password incorrect");
           this.oldPasswordWrong.set(true);
           return of(null);
         }
 
-        this.toastr.error("Failed to change password");
+        this.toast.error("Failed to change password");
         throw err;
       })
     ).subscribe(user => {
@@ -162,7 +163,7 @@ export class UserManagerPageComponent {
           window.location.reload();
         }, 5000);
       }
-      this.toastr.success("Password changed");
+      this.toast.success("Password changed");
       this.changePasswordPrompt?.close();
     });
   }
@@ -199,14 +200,14 @@ export class UserManagerPageComponent {
     const username = this.newUserForm.get("username")?.value || "";
     if (username.trim().length == 0) {
       didWarn = true;
-      this.toastr.error("Username can not be empty");
+      this.toast.error("Username can not be empty");
       this.usernameEmpty.set(true);
     }
 
     const password = this.newUserForm.get("password")?.value || "";
     if (password.trim().length == 0) {
       if (!didWarn) {
-        this.toastr.error("Password can not be empty");
+        this.toast.error("Password can not be empty");
         didWarn = true;
       }
       this.passwordEmpty.set(true);
@@ -218,7 +219,7 @@ export class UserManagerPageComponent {
 
     const confirmPassword = this.newUserForm.get("confirmPassword")?.value || "";
     if (password != confirmPassword) {
-      this.toastr.error("Passwords not matching");
+      this.toast.error("Passwords not matching");
       this.passwordsNotMatching.set(true);
       return;
     }
@@ -231,12 +232,12 @@ export class UserManagerPageComponent {
         this.lockInputs.set(false);
 
         if (err.status == 409) {
-          this.toastr.error("Username already taken");
+          this.toast.error("Username already taken");
           this.usernameTaken.set(true);
           return of(null);
         }
 
-        this.toastr.error("Failed to create user");
+        this.toast.error("Failed to create user");
         throw err;
       })
     ).subscribe(user => {
@@ -256,13 +257,13 @@ export class UserManagerPageComponent {
     this.authApi.deleteUser(this.deleteUserId()).pipe(
       catchError(err => {
         this.lockInputs.set(false);
-        this.toastr.error("Failed to delete user");
+        this.toast.error("Failed to delete user");
         throw err;
       })
     ).subscribe(() => {
       this.lockInputs.set(false);
       this.users.update(u => u.filter(user => user.id != this.deleteUserId()));
-      this.toastr.success("User deleted");
+      this.toast.success("User deleted");
     });
     this.deleteUserPrompt?.close();
   }

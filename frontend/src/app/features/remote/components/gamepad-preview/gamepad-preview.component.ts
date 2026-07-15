@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { SocketMessageType } from '../../../../core/services/socket/data/SocketMessageType';
 import { Subscription } from 'rxjs';
@@ -9,6 +9,7 @@ import { ControllerType } from '../../../../core/services/api/gamepad-api.servic
   selector: 'app-gamepad-preview',
   templateUrl: './gamepad-preview.component.html',
   styleUrl: './gamepad-preview.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class GamepadPreviewComponent implements OnInit, OnDestroy {

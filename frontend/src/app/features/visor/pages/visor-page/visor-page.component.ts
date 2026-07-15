@@ -1,7 +1,7 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { VisorApiService, VisorRenderer, VisorStatus } from '../../../../core/services/api/visor-api.service';
 import { catchError } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
@@ -9,11 +9,12 @@ import { Router } from '@angular/router';
   selector: 'app-visor-page',
   templateUrl: './visor-page.component.html',
   styleUrl: './visor-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class VisorPageComponent implements OnInit, OnDestroy {
   private readonly api = inject(VisorApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly title = inject(Title);
   private readonly router = inject(Router);
 
@@ -44,7 +45,7 @@ export class VisorPageComponent implements OnInit, OnDestroy {
 
   fetchRenderers() {
     this.api.getRenderers().pipe(catchError(err => {
-      this.toastr.error("Failed to fetch renderers");
+      this.toast.error("Failed to fetch renderers");
       throw err;
     })).subscribe(renderers => {
       this.renderers = renderers;
@@ -53,7 +54,7 @@ export class VisorPageComponent implements OnInit, OnDestroy {
 
   createNewImageRenderer() {
     this.api.createBlankImageRenderer().pipe(catchError(err => {
-      this.toastr.error("Failed to create renderer");
+      this.toast.error("Failed to create renderer");
       throw err;
     })).subscribe(result => {
       this.router.navigate(["/visor/image/" + result.id]);

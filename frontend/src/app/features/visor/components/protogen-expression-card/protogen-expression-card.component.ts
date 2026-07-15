@@ -1,20 +1,21 @@
-import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { colorEffectToLinkedColorEffect, FaceApiService, FaceColorEffect, FaceExpression } from '../../../../core/services/api/face-api.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { catchError } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from 'ngx-yet-another-toast-library';
 import { uuidv7 } from 'uuidv7';
 
 @Component({
   selector: 'app-protogen-expression-card',
   templateUrl: './protogen-expression-card.component.html',
   styleUrl: './protogen-expression-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class ProtogenExpressionCardComponent implements OnDestroy {
   private readonly modal = inject(NgbModal);
   private readonly api = inject(FaceApiService);
-  private readonly toastr = inject(ToastrService);
+  private readonly toast = inject(ToastService);
   private readonly faceApi = inject(FaceApiService);
 
   @Input({ required: true }) expression!: FaceExpression;
@@ -48,7 +49,7 @@ export class ProtogenExpressionCardComponent implements OnDestroy {
 
   activate() {
     this.api.activateExpression(this.expression.data.uuid).pipe(catchError(err => {
-      this.toastr.error("Failed to activate expression");
+      this.toast.error("Failed to activate expression");
       throw err;
     })).subscribe();
   }
@@ -61,7 +62,7 @@ export class ProtogenExpressionCardComponent implements OnDestroy {
   confirmDelete() {
     this.lockInput = true;
     this.api.deleteExpression(this.expression.data.uuid).pipe(catchError(err => {
-      this.toastr.error("Failed to delete expression");
+      this.toast.error("Failed to delete expression");
       this.deletePrompt?.close();
       this.lockInput = false;
       throw err;
@@ -82,10 +83,10 @@ export class ProtogenExpressionCardComponent implements OnDestroy {
       image: this.expression.data.image,
       linkedColorEffectId: this.expression.data.linkedColorEffect?.uuid || null,
     }).pipe(catchError(err => {
-      this.toastr.error("Failed to save changes");
+      this.toast.error("Failed to save changes");
       throw err;
     })).subscribe(expression => {
-      this.toastr.success("Changes saved");
+      this.toast.success("Changes saved");
       this.expression.preview = expression.preview;
     });
   }
