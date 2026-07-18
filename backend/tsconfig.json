@@ -8,10 +8,10 @@
     "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
+    "rootDir": "./src",
     "outDir": "dist",
-    "baseUrl": ".",
     "sourceMap": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
@@ -22,5 +22,5 @@
   },
   "include": [
     "src/**/*"
-  ],
+  ]
 }

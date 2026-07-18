@@ -52,7 +52,7 @@ export class StandardHardwareImplementation extends HardwareAbstractionLayer {
 
     const parser = this.serial.pipe(new ReadlineParser({ delimiter: '\n' }));
 
-    parser.on('data', (data) => {
+    parser.on('data', (data: any) => {
       const string = String(data);
       if (string.startsWith("OK:RGB")) {
         return;
