@@ -135,7 +135,7 @@ export class ProtogenWebServer {
     }
 
     this.express.use(cors())
-    this.express.use(bodyParser.json());
+    this.express.use(bodyParser.json({ limit: '50mb' }));
 
     this.express.get("/system-config", async (_, res) => {
       /**

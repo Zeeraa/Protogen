@@ -67,6 +67,9 @@ export class SystemPageComponent implements OnInit, OnDestroy {
     this.importFile() !== null && this.importConfirmText().toLowerCase() === 'confirm'
   );
 
+  private readonly CHUNK_SIZE = 50 * 1024 * 1024; // 50MB chunks
+  private readonly USE_CHUNKED_UPLOAD_THRESHOLD = 50 * 1024 * 1024; // Use chunked upload for files > 50MB
+
   private importModalRef: NgbModalRef | null = null;
   private importProgressModalRef: NgbModalRef | null = null;
   private shutdownModalRef: null | NgbModalRef = null;
@@ -197,11 +200,20 @@ export class SystemPageComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Use chunked upload for large files
+    if (file.size > this.USE_CHUNKED_UPLOAD_THRESHOLD) {
+      this.startChunkedImport(file);
+    } else {
+      this.startRegularImport(file);
+    }
+  }
+
+  private startRegularImport(file: File) {
     this.backupApi.importBackup(file).pipe(
       catchError(err => {
         this.importStatus.set('error');
         console.error('Backup import failed', err);
-        throw err;
+        return [];
       })
     ).subscribe(event => {
       if (event.type === HttpEventType.UploadProgress) {
@@ -226,6 +238,100 @@ export class SystemPageComponent implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  private async startChunkedImport(file: File) {
+    try {
+      const totalChunks = Math.ceil(file.size / this.CHUNK_SIZE);
+      let uploadId: string | null = null;
+
+      // Upload chunks sequentially
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const start = chunkIndex * this.CHUNK_SIZE;
+        const end = Math.min(start + this.CHUNK_SIZE, file.size);
+        const chunk = file.slice(start, end);
+
+        // First chunk includes metadata to create the session
+        const isFirstChunk = chunkIndex === 0;
+
+        await new Promise<void>((resolve, reject) => {
+          this.backupApi.uploadChunk(
+            uploadId,
+            chunkIndex,
+            chunk,
+            isFirstChunk ? file.name : undefined,
+            isFirstChunk ? totalChunks : undefined,
+            isFirstChunk ? file.size : undefined
+          ).pipe(
+            catchError(err => {
+              console.error(`Failed to upload chunk ${chunkIndex}`, err);
+              reject(err);
+              return [];
+            })
+          ).subscribe({
+            next: (event) => {
+              if (event.type === HttpEventType.UploadProgress) {
+                // Calculate overall progress: (completed chunks + current chunk progress) / total chunks
+                const chunkProgress = event.total ? (event.loaded / event.total) : 0;
+                const overallProgress = Math.round(((chunkIndex + chunkProgress) / totalChunks) * 100);
+                this.importUploadProgress.set(overallProgress);
+              } else if (event.type === HttpEventType.Response) {
+                if (event.ok && event.body) {
+                  // Store uploadId from the first chunk response
+                  if (isFirstChunk && event.body.uploadId) {
+                    uploadId = event.body.uploadId;
+                  }
+                  resolve();
+                } else {
+                  reject(new Error(`Chunk ${chunkIndex} upload failed with status ${event.status}`));
+                }
+              }
+            },
+            error: (err) => {
+              console.error(`Failed to upload chunk ${chunkIndex}`, err);
+              reject(err);
+            }
+          });
+        });
+      }
+
+      // All chunks uploaded, now complete the upload
+      this.importUploadProgress.set(100);
+      this.importStatus.set('importing');
+
+      if (!uploadId) {
+        throw new Error('Upload ID not received from server');
+      }
+
+      this.backupApi.completeChunkUpload(uploadId).pipe(
+        catchError(err => {
+          this.importStatus.set('error');
+          console.error('Failed to complete chunked upload', err);
+          this.toast.error('Failed to assemble and import backup');
+          return [];
+        })
+      ).subscribe({
+        next: (result) => {
+          this.killIntervals();
+          const autoRestart = result.autoRestart ?? false;
+          if (autoRestart) {
+            this.importStatus.set('waiting-restart');
+            this.startRestartPolling();
+          } else {
+            this.importStatus.set('manual-restart');
+          }
+        },
+        error: (err) => {
+          this.importStatus.set('error');
+          console.error('Failed to complete chunked upload', err);
+          this.toast.error('Failed to assemble and import backup');
+        }
+      });
+    } catch (err) {
+      this.importStatus.set('error');
+      console.error('Chunked import failed', err);
+      this.toast.error('Failed to upload backup file');
+    }
   }
 
   private killIntervals() {
