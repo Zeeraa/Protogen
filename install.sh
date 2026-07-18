@@ -8,18 +8,15 @@ REPO_BRANCH="main"
 
 # ========== Argument parsing ==========
 REINSTALL_FT_ONLY=false
-EXPERIMENTAL_PI5_SUPPORT=false
 for arg in "$@"; do
     case "$arg" in
         --reinstall-ft) REINSTALL_FT_ONLY=true ;;
-        --experimental-pi5-support) EXPERIMENTAL_PI5_SUPPORT=true ;;
     esac
 done
 
 # ========== Functions ==========
 install_flaschen_taschen() {
     local force_reinstall="${1:-false}"
-    local pi5_support="${2:-false}"
     if [[ "$force_reinstall" == "true" ]] && [[ -d "/home/pi/flaschen-taschen" ]]; then
         echo "Removing existing flaschen-taschen directory..."
         rm -rf /home/pi/flaschen-taschen
@@ -30,17 +27,22 @@ install_flaschen_taschen() {
         echo "flaschen-taschen binary not found. Cloning repo and compiling it"
         git clone --recursive https://github.com/hzeller/flaschen-taschen.git /home/pi/flaschen-taschen
         
-        if [[ "$pi5_support" == "true" ]]; then
-            echo "[Experimental] Swapping rgb-matrix submodule to Pi5 fork..."
-            cd /home/pi/flaschen-taschen/server/rgb-matrix
-            git remote add pi5fork https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment.git
-            git fetch pi5fork pi5_support
-            git checkout bbd4cf1
-            echo "[Experimental] rgb-matrix switched to Pi5 fork commit bbd4cf1"
-        fi
+        echo "Pinning flaschen-taschen to specific commit..."
+        cd /home/pi/flaschen-taschen
+        git checkout ef26254ca6e1667650ccb199a4e17f46320eacbf
+        echo "flaschen-taschen pinned to commit ef26254ca6e1667650ccb199a4e17f46320eacbf"
+        
+        echo "Overriding rpi-rgb-led-matrix submodule to specific commit..."
+        cd /home/pi/flaschen-taschen/server/rgb-matrix
+        git fetch origin
+        git checkout 41809e40e912b7f278ad34046f20abf5609b2b07
+        echo "rpi-rgb-led-matrix submodule updated to commit 41809e40e912b7f278ad34046f20abf5609b2b07"
         
         cd /home/pi/flaschen-taschen/server
         make FT_BACKEND=rgb-matrix
+        
+        echo "Setting capabilities on ft-server..."
+        setcap 'cap_sys_nice=eip' /home/pi/flaschen-taschen/server/ft-server
     fi
     chown -R pi:pi /home/pi/flaschen-taschen
 }
@@ -56,7 +58,7 @@ fi
 # ========== Reinstall flaschen-taschen only ==========
 if [[ "$REINSTALL_FT_ONLY" == "true" ]]; then
     echo "Reinstalling flaschen-taschen..."
-    install_flaschen_taschen true "$EXPERIMENTAL_PI5_SUPPORT"
+    install_flaschen_taschen true
     echo "flaschen-taschen reinstall complete."
     exit 0
 fi
@@ -271,8 +273,21 @@ if [[ "$IS_UPDATE" == "false" ]]; then
     echo "DB Password: $GENERATED_DB_PASSWORD"
 fi
 
+# ========== Configure CPU isolation for better real-time performance ==========
+if grep -q "isolcpus" /boot/firmware/cmdline.txt 2>/dev/null; then
+    echo "CPU isolation parameters already configured in cmdline.txt"
+else
+    echo "Configuring CPU isolation parameters in cmdline.txt..."
+    if [[ -f "/boot/firmware/cmdline.txt" ]]; then
+        sed -i '$ s/$/ isolcpus=domain,managed_irq,2,3 nohz_full=2,3 rcu_nocbs=2,3 irqaffinity=0,1 idle=poll/' /boot/firmware/cmdline.txt
+        echo "CPU isolation parameters added. Reboot required for changes to take effect."
+    else
+        echo "Warning: /boot/firmware/cmdline.txt not found. Skipping CPU isolation configuration."
+    fi
+fi
+
 # ========== Build flaschen-taschen ==========
-install_flaschen_taschen false "$EXPERIMENTAL_PI5_SUPPORT"
+install_flaschen_taschen false
 
 
 # ========== Setup protogen frontend and backend ==========

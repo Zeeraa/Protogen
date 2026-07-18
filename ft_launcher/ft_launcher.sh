@@ -44,6 +44,6 @@ fi
 CONFIG_PARAMS=$(cat "$CONFIG_FILE")
 
 # Construct and run the command
-CMD="$FT_BIN $CONFIG_PARAMS"
+CMD="$FT_BIN $CONFIG_PARAMS --led-rp1-pio=1"
 echo "Running: $CMD"
 $CMD
