@@ -29,8 +29,8 @@ import { AssetsRouter } from "./routes/assets/AssetsRouter";
 import { resolve } from "path";
 import { generateNewCertificate, getCertificateExpiry } from "../utils/Utils";
 import { ActionsRouter } from "./routes/actions/ActionsRouter";
+import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualiserRouter";
 import morgan from 'morgan';
-import { AudioVisualiserRouter } from "./routes/audio-visualizer/AudioVisualizerRouter";
 import { AppRouter } from "./routes/apps/AppRouter";
 import { AppSocketPacket, AppUserSocketSession } from "./socket/AppUserSocketSession";
 import { AbstractApp } from "../apps/AbstractApp";
@@ -413,6 +413,7 @@ export class ProtogenWebServer {
       boopSensorProfile,
       hudEnabled: this.protogen.hudManager?.enableHud ?? false,
       boopSensorEnabled: this.protogen.boopSensorManager?.enabled ?? false,
+      audioVisualiserEnabled: this.protogen.audioVisualiser?.config.enabled ?? false,
       hasRenderLock: this.protogen.visor.hasRenderLock,
     }
   }
@@ -426,6 +427,7 @@ export interface OverviewData {
   boopSensorProfile: OverviewNamedObjectData | null;
   hudEnabled: boolean;
   boopSensorEnabled: boolean;
+  audioVisualiserEnabled: boolean;
   hasRenderLock: boolean;
 }
 

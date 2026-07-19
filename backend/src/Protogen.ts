@@ -17,7 +17,7 @@ import { ApiKeyManager } from "./apikeys/ApiKeyManager";
 import { BuiltInAsset, BuiltInAssetSchema } from "./assets/BuiltInAsset";
 import { z } from "zod";
 import { ActionManager } from "./actions/ActionManager";
-import { AudioVisualiser } from "./audio-visualiser/AudioVisualiser";
+import { AudioVisualiserManager } from "./audio-visualiser/AudioVisualiserManager";
 import { magenta, red } from "colors";
 import { AppManager } from "./apps/AppManager";
 import { PaintApp } from "./apps/paint/PaintApp";
@@ -59,7 +59,7 @@ export class Protogen {
   public readonly tempDirectory: string;
   public readonly builtInAssets: BuiltInAsset[] = [];
   public readonly actionManager: ActionManager;
-  public readonly audioVisualiser: AudioVisualiser;
+  public readonly audioVisualiser: AudioVisualiserManager;
   public readonly versionNumber: string;
   public readonly integrationStateReportingKey: string;
   public readonly appManager: AppManager;
@@ -179,9 +179,9 @@ export class Protogen {
     } else {
       this.rgb = null;
     }
-    this.audioVisualiser = new AudioVisualiser(this);
     this.networkManager = new NetworkManager(this);
     this.actionManager = new ActionManager(this);
+    this.audioVisualiser = new AudioVisualiserManager(this);
     this.appManager = new AppManager(this);
     if (this.config.systemFeatures.boopSensor) {
       this.boopSensorManager = new BoopSensorManager(this);
@@ -241,15 +241,15 @@ export class Protogen {
       await this.boopSensorManager?.init();
     }
 
-    await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
-    await this.audioVisualiser.init();
-
     await this.visor.tryRenderTextFrame("BOOTING...\nInit apps", BootMessageColor);
     await this.appManager.registerApp(new PaintApp(this.appManager));
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit MQTT", BootMessageColor);
     await this.mqttManager.init();
     await this.gamepadManager.init();
+
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
+    await this.audioVisualiser.init();
 
     process.on('SIGINT', () => this.gracefulShutdown());
     process.on('SIGTERM', () => this.gracefulShutdown());

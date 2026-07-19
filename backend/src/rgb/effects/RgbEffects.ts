@@ -4,8 +4,8 @@ import { StaticRgbEffect } from "./implementations/StaticRgbEffect";
 import { RgbWaveEffect } from "./implementations/RgbWaveEffect";
 import { ColorShiftEffect } from "./implementations/ColorShiftEffect";
 import { Protogen } from "../../Protogen";
-import { AudioVisualizerEffect } from "./implementations/AudioVisualizerEffect";
 import { TwinkleEffect } from "./implementations/TwinkleEffect";
+import { AudioReactiveEffect } from "./implementations/AudioReactiveEffect";
 
 export const RgbEffects: RgbEffect[] = [
   {
@@ -24,14 +24,14 @@ export const RgbEffects: RgbEffect[] = [
     class: ColorShiftEffect,
   },
   {
-    name: "Audio Visualizer",
-    description: "An audio visualizer showing the audio level from the remote microphone",
-    class: AudioVisualizerEffect,
-  },
-  {
     name: "Twinkle Glow",
     description: "A twinkle glow effect that fades in and out pixels",
     class: TwinkleEffect,
+  },
+  {
+    name: "Audio Reactive",
+    description: "Reactive lighting that responds to music and audio input with multiple visualization modes",
+    class: AudioReactiveEffect,
   }
 ]
 

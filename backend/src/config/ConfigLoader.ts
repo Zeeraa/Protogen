@@ -222,6 +222,7 @@ export function loadConfiguration(): Configuration {
     boopSensor: hasBoopSensor,
     videoPlayback: hasVideoPlayback,
     systemd,
+    audioVisualizer: true, // Always available as a system capability
   };
 
   if (!hasSerial) {

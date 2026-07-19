@@ -11,6 +11,7 @@ export interface SystemFeatures {
   boopSensor: boolean;
   videoPlayback: boolean;
   systemd: boolean;
+  audioVisualizer?: boolean;
 }
 
 export interface SystemConfig {

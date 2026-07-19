@@ -4,7 +4,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NavbarModule } from './features/navbar/navbar.module';
@@ -35,7 +34,6 @@ import { provideToastService } from "ngx-yet-another-toast-library";
     BrowserModule,
     AppRoutingModule,
     NgbModule,
-    BrowserAnimationsModule,
     DashboardModule,
     NavbarModule,
     VisorModule,
