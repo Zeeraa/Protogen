@@ -1,0 +1,300 @@
+<div class="container mt-4">
+  <div class="row mb-3">
+    <div class="col d-flex justify-content-between align-items-center">
+      <h1>Wi-Fi Networks</h1>
+      <button class="btn btn-primary d-flex align-items-center gap-2" (click)="openAddModal()">
+        <i class="bi bi-plus-circle-fill"></i> Add Network
+      </button>
+    </div>
+  </div>
+
+  <!-- Wi-Fi Connection Card -->
+  <div class="row">
+    <div class="col">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-wifi text-primary fs-5"></i>
+            <h5 class="mb-0">Saved Profiles</h5>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" (click)="refresh()" [disabled]="loading()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+        <div class="card-body p-0">
+          @if (loading()) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2 mb-0">Scanning saved connection profiles...</p>
+          </div>
+          } @else if (savedNetworks().length === 0) {
+          <div class="text-center py-5 px-3">
+            <i class="bi bi-wifi-off text-muted display-4"></i>
+            <p class="text-muted mt-2 mb-0">No saved Wi-Fi profiles found. Click "Add Network" to get configured!</p>
+          </div>
+          } @else {
+          <div class="list-group list-group-flush">
+            @for (profile of savedNetworks(); track profile.uuid) {
+            <div
+              class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 p-3">
+              <div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <strong class="fs-5">{{ profile.name }}</strong>
+
+                  @if (profile.status === 'connected') {
+                  <span class="badge bg-success d-flex align-items-center gap-1">
+                    <i class="bi bi-check-circle-fill"></i> Connected
+                  </span>
+                  } @else if (profile.status === 'connecting') {
+                  <span class="badge bg-info text-dark d-flex align-items-center gap-1">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Connecting...
+                  </span>
+                  }
+                </div>
+                <div class="text-muted mt-1 small d-flex flex-wrap gap-2 gap-md-3">
+                  <span><i class="bi bi-broadcast me-1"></i>SSID: <strong>{{ profile.ssid }}</strong></span>
+                  <span>
+                    <i class="bi bi-shield-lock me-1"></i>
+                    {{ profile.security === 'wpa-psk' ? 'WPA-PSK Secured' : 'Open Network' }}
+                  </span>
+                  @if (profile.autoconnect) {
+                  <span>
+                    <i class="bi bi-sort-down me-1"></i>
+                    Priority: <strong>{{ profile.autoconnectPriority }}</strong>
+                  </span>
+                  <span>
+                    <i class="bi bi-arrow-repeat me-1"></i>
+                    Auto Connect:
+                    <span class="text-success fw-bold">Enabled</span>
+                  </span>
+                  }
+                </div>
+              </div>
+
+              <!-- Connection Control and Management Buttons -->
+              <div class="d-flex align-items-center gap-2 w-100 w-md-auto justify-content-end">
+                <!-- Connect/Disconnect Control -->
+                @if (profile.status === 'connected') {
+                <button class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1"
+                  (click)="openDisconnectModal(profile)">
+                  <i class="bi bi-power"></i>
+                  Disconnect
+                </button>
+                } @else {
+                <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
+                  (click)="connectNetwork(profile)" [disabled]="profile.status === 'connecting'">
+                  <i class="bi bi-wifi"></i>
+                  Connect
+                </button>
+                }
+
+                <!-- Edit Profile -->
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                  (click)="openEditModal(profile)">
+                  <i class="bi bi-pencil-fill"></i> Edit
+                </button>
+
+                <!-- Delete Profile -->
+                <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1"
+                  (click)="openDeleteModal(profile)">
+                  <i class="bi bi-trash-fill"></i> Delete
+                </button>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Wi-Fi Connection Modal -->
+<ng-template #networkModal let-modal>
+  <form [formRoot]="wifiForm" (submit)="saveNetwork(); $event.preventDefault()">
+    <div class="modal-header">
+      <h5 class="modal-title">{{ modalTitle() }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <!-- Active Connection Editing Alert -->
+      @if (isEditing() && (editingProfile()?.status === 'connected' || editingProfile()?.status === 'connecting')) {
+      <div class="alert alert-warning mb-3 d-flex align-items-start gap-2 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 mt-0 text-warning"></i>
+        <div>
+          <strong class="d-block mb-1">Editing Active Connection!</strong>
+          You are changing settings for the active Wi-Fi profile (<strong>{{ editingProfile()?.name }}</strong>).
+          Applying these changes may cause your link to reset or drop temporarily.
+        </div>
+      </div>
+      }
+
+      <!-- SSID -->
+      <div class="mb-3">
+        <label for="ssidInput" class="form-label fw-semibold">SSID (Network Name)</label>
+        <input type="text" class="form-control" id="ssidInput" [formField]="wifiForm.ssid"
+          placeholder="e.g. MySpectrumWifi_5G" />
+        @if (wifiForm.ssid().touched() && wifiForm.ssid().invalid()) {
+        <div class="text-danger small mt-1">
+          @for (error of wifiForm.ssid().errors(); track error) {
+          <div><i class="bi bi-exclamation-circle me-1"></i>{{ error.message }}</div>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Security Type -->
+      <div class="mb-3">
+        <label for="securitySelect" class="form-label fw-semibold">Security Type</label>
+        <select class="form-select" id="securitySelect" [formField]="wifiForm.security">
+          <option value="wpa-psk">WPA-PSK (Secured)</option>
+          <option value="open">Open (Unsecured)</option>
+        </select>
+        @if (wifiForm.security().touched() && wifiForm.security().invalid()) {
+        <div class="text-danger small mt-1">
+          @for (error of wifiForm.security().errors(); track error) {
+          <div><i class="bi bi-exclamation-circle me-1"></i>{{ error.message }}</div>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Password (WPA-PSK only) -->
+      @if (fifiFormModel().security === 'wpa-psk') {
+      <div class="mb-3">
+        <label for="passwordInput" class="form-label fw-semibold">Secret Password</label>
+        <input type="password" class="form-control" id="passwordInput" [formField]="wifiForm.password"
+          placeholder="••••••••" />
+        @if (wifiForm.password().touched() && wifiForm.password().invalid()) {
+        <div class="text-danger small mt-1">
+          @for (error of wifiForm.password().errors(); track error) {
+          <div><i class="bi bi-exclamation-circle me-1"></i>{{ error.message }}</div>
+          }
+        </div>
+        }
+        <div class="form-text text-muted">
+          For existing profiles, leave as-is to preserve the saved password securely!
+        </div>
+      </div>
+      }
+
+      <!-- Autoconnect toggle -->
+      <div class="mb-3 form-check form-switch card p-3 bg-light-subtle">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <label class="form-check-label fw-semibold d-block" for="autoconnectInput">Auto-Connect</label>
+            <span class="text-muted small">Connect automatically when network range is detected.</span>
+          </div>
+          <input type="checkbox" class="form-check-input ms-3" id="autoconnectInput"
+            [formField]="wifiForm.autoconnect" />
+        </div>
+      </div>
+
+      <!-- Autoconnect priority -->
+      @if (fifiFormModel().autoconnect) {
+      <div class="mb-3">
+        <label for="priorityInput" class="form-label fw-semibold">Auto-Connect Priority</label>
+        <input type="number" class="form-control" id="priorityInput" [formField]="wifiForm.autoconnectPriority"
+          placeholder="0" />
+        <div class="form-text">
+          Higher priority values are checked first (e.g. prioritize home networks over public hot-spots).
+        </div>
+      </div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="wifiForm().invalid()">
+        <i class="bi bi-save-fill me-1"></i> Save Network
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Delete Connection Profile</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Active Connection Deletion Alert -->
+    @if (deletingProfile()?.status === 'connected' || deletingProfile()?.status === 'connecting') {
+    <div class="alert alert-danger mb-3 d-flex align-items-start gap-2 shadow-sm" role="alert">
+      <i class="bi bi-exclamation-octagon-fill fs-5 flex-shrink-0 mt-0"></i>
+      <div>
+        <strong class="d-block mb-1">CRITICAL WARNING!</strong>
+        You are deleting the active Wi-Fi profile (<strong>{{ deletingProfile()?.name }}</strong>).
+        If you continue, the wireless link will immediately drop, and wireless control might be lost!
+      </div>
+    </div>
+    }
+
+    <p>Are you sure you want to completely delete the saved network profile "<strong>{{ deletingProfile()?.name
+        }}</strong>"?</p>
+    <p class="text-muted small mb-0">This deletes the configuration file from your Raspberry Pi's network settings
+      permanent-like.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+    <button type="button" class="btn btn-danger d-flex align-items-center gap-1" (click)="confirmDelete()">
+      <i class="bi bi-trash-fill"></i> Delete Connection anyways
+    </button>
+  </div>
+</ng-template>
+
+<!-- Disconnect Confirmation Modal -->
+<ng-template #disconnectModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Disconnect Wi-Fi</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-warning mb-3 d-flex align-items-start gap-2 shadow-sm" role="alert">
+      <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 mt-0 text-warning"></i>
+      <div>
+        <strong class="d-block mb-1">WARNING!</strong>
+        You are about to disconnect from <strong>{{ disconnectingProfile()?.name }}</strong>.
+        If this is the only network nearby, or if you don't have any other saved networks configured with automatic
+        connection, you might not be able to access the system remotely!
+      </div>
+    </div>
+    <p>Are you sure you want to disconnect from "<strong>{{ disconnectingProfile()?.name }}</strong>"?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+    <button type="button" class="btn btn-warning d-flex align-items-center gap-1" (click)="confirmDisconnect()">
+      <i class="bi bi-power"></i> Yes, Disconnect
+    </button>
+  </div>
+</ng-template>
+
+<!-- Switch Network Confirmation Modal -->
+<ng-template #switchModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title text-warning"><i class="bi bi-arrow-left-right"></i> Switch Wi-Fi Network</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-warning mb-3 d-flex align-items-start gap-2 shadow-sm" role="alert">
+      <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 mt-0 text-warning"></i>
+      <div>
+        <strong class="d-block mb-1">WARNING!</strong>
+        You are currently connected to <strong>{{ switchingCurrentProfile()?.name }}</strong> and are about to switch to
+        <strong>{{ switchingTargetProfile()?.name }}</strong>.
+        This will cause a temporary drop of your connection. If the new network fails to connect or is unreachable, the
+        system will try to recover connectivity by reconnecting to the previous network automatically.
+      </div>
+    </div>
+    <p>Are you sure you want to transition from "<strong>{{ switchingCurrentProfile()?.name }}</strong>" to "<strong>{{
+        switchingTargetProfile()?.name }}</strong>"?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+    <button type="button" class="btn btn-primary d-flex align-items-center gap-1" (click)="confirmSwitchNetwork()">
+      <i class="bi bi-arrow-left-right"></i> Yes, Switch Network
+    </button>
+  </div>
+</ng-template>

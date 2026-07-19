@@ -37,6 +37,7 @@ import { AbstractApp } from "../apps/AbstractApp";
 import { DevRouter } from "./routes/dev/DevRouter";
 import { BoopSensorRouter } from "./routes/boop-sensor/BoopSensorRouter";
 import { BluetoothRouter } from "./routes/bluetooth/BluetoothRouter";
+import { WifiRouter } from "./routes/wifi/WifiRouter";
 import { OverviewRouter } from "./routes/overview/OverviewRouter";
 import { GamepadRouter } from "./routes/gamepad/GamepadRouter";
 import { BackupRouter } from "./routes/backup/BackupRouter";
@@ -169,6 +170,7 @@ export class ProtogenWebServer {
     new DevRouter(this).register();
     new BoopSensorRouter(this).register();
     new BluetoothRouter(this).register();
+    new WifiRouter(this).register();
     new OverviewRouter(this).register();
     new GamepadRouter(this).register();
     new BackupRouter(this).register({ noAuth: true });
