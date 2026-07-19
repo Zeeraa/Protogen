@@ -256,6 +256,25 @@ class AudioVisualizer:
                 # Clamp ceiling to avoid extreme amplification of mic hum
                 min_ceiling = max(0.005, self.low_threshold * 1.5)
                 dynamic_ceiling = max(min_ceiling, dynamic_ceiling)
+
+                # Calculate specific individual band ceilings so that loud frequency sections
+                # don't pin all bands to 100%! Each band scales on its own dynamic range.
+                if not hasattr(self, '_band_ceilings'):
+                    self._band_ceilings = {band: 0.05 for band in FREQUENCY_BANDS.keys()}
+
+                for band_name, energy in band_energies_raw.items():
+                    if energy > self._band_ceilings[band_name]:
+                        self._band_ceilings[band_name] = energy
+                    else:
+                        # Decay band ceilings slowly (decay factor 0.994) to hold individual band headroom high
+                        self._band_ceilings[band_name] = max(0.005, self._band_ceilings[band_name] * 0.994 + energy * 0.006)
+
+                # Clamp band ceilings to avoid extreme amplification of background noise
+                band_attenuations = {}
+                for band_name, b_ceiling in self._band_ceilings.items():
+                    b_min_ceiling = max(0.005, self.low_threshold * 1.5)
+                    b_range = max(0.002, max(b_ceiling, b_min_ceiling) - self.low_threshold)
+                    band_attenuations[band_name] = 1.0 / b_range
                 
                 # Determine how active/quiet the music is based on recent rolling data vs long-term values.
                 # 2) "Slow & Calm" Track Detection:
@@ -333,9 +352,11 @@ class AudioVisualizer:
                 # Apply noise-gate cutoff, scale, and dynamic attenuation to individual bands
                 # We multiply the normalized 0.0-1.0 signal by scaled_intensity to let the user scale it up/down,
                 # while applying the vibe_scalar to automatically adapt to slow/quiet blocks or boost on heavy peaks!
+                # Note: We now utilize independent dynamic band_attenuations ceilings to prevent single-frequency pinning!
                 band_energies = {}
                 for band_name, energy in band_energies_raw.items():
-                    raw_val = self.process_value(energy, self.low_threshold, 1.0) * attenuation * scaled_intensity
+                    b_attenuation = band_attenuations[band_name]
+                    raw_val = self.process_value(energy, self.low_threshold, 1.0) * b_attenuation * scaled_intensity
                     normalized = max(0.0, min(1.0, raw_val))
                     band_energies[band_name] = round(normalized, 3)
                 
