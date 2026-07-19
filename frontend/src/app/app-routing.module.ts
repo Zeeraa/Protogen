@@ -13,7 +13,7 @@ import { ApiKeyManagerPageComponent } from './features/api-key-manager/pages/api
 import { ProtogenFaceEditorComponent } from './features/visor/pages/protogen-face-editor/protogen-face-editor.component';
 import { ActionsPageComponent } from './features/actions/pages/actions-page/actions-page.component';
 import { AuthPageComponent } from './features/auth/pages/auth-page/auth-page.component';
-import { AudioVisualizerSettingsPageComponent } from './features/audio-visualizer/pages/audio-visualizer-settings-page/audio-visualizer-settings-page.component';
+import { AudioVisualizerPageComponent } from './features/audio-visualizer/pages/audio-visualizer-page/audio-visualizer-page.component';
 import { AuthGuard } from './core/guards/auth-guard.guard';
 import { LoginPageComponent } from './features/auth/pages/login-page/login-page.component';
 import { AppsPageComponent } from './features/apps/pages/apps-page/apps-page.component';
@@ -108,7 +108,7 @@ export const routes: Routes = [
   },
   {
     path: "audio-visualizer",
-    component: AudioVisualizerSettingsPageComponent,
+    component: AudioVisualizerPageComponent,
     canActivate: [AuthGuard],
   },
   {

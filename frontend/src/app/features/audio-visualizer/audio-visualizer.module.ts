@@ -1,18 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { NgbProgressbarModule } from '@ng-bootstrap/ng-bootstrap';
+import { AudioVisualizerPageComponent } from './pages/audio-visualizer-page/audio-visualizer-page.component';
 import { FormsModule } from '@angular/forms';
-import { AudioVisualizerSettingsPageComponent } from './pages/audio-visualizer-settings-page/audio-visualizer-settings-page.component';
 
 @NgModule({
   declarations: [
-    AudioVisualizerSettingsPageComponent,
+    AudioVisualizerPageComponent
   ],
   imports: [
     CommonModule,
-    NgbProgressbarModule,
-    FormsModule,
+    FormsModule
   ]
 })
 export class AudioVisualizerModule { }

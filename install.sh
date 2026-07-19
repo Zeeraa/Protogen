@@ -195,7 +195,7 @@ echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | sudo debconf-set-se
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $(pwgen -s -1 128)" | sudo debconf-set-selections
 
-sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv libhidapi-dev libudev-dev
+sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv libhidapi-dev libudev-dev portaudio19-dev
 
 # Check if Node.js is installed
 if ! command -v node &>/dev/null; then
@@ -346,9 +346,18 @@ fi
 venv/bin/pip install -r requirements.txt
 sudo chown -R pi:pi /home/pi/protogen/gamepad_listener
 
+# ========== Audio Visualizer ==========
+echo "Setting up Audio Visualizer..."
+cd /home/pi/protogen/audio_visualizer
+if [[ ! -d "venv" ]]; then
+    python3 -m venv venv
+fi
+venv/bin/pip install -r requirements.txt
+sudo chown -R pi:pi /home/pi/protogen/audio_visualizer
+
 # ========== Configure Mosquitto ==========
 echo "Configuring Mosquitto MQTT broker..."
-cp /home/pi/protogen/gamepad_listener/mosquitto.conf /etc/mosquitto/conf.d/protogen.conf
+cp /home/pi/protogen/mosquitto.conf /etc/mosquitto/conf.d/protogen.conf
 systemctl enable mosquitto
 systemctl restart mosquitto
 

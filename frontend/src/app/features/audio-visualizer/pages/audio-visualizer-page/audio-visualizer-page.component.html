@@ -1,0 +1,230 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Beta Disclaimer Banner -->
+      <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+        <div>
+          <strong>Under Development:</strong> The audio visualizer feature is currently in an early development phase. Some aspects might be unstable, latency may vary, or performance profile configurations might not work perfectly under all situations.
+        </div>
+      </div>
+
+      <h1 class="mb-4">
+        <i class="bi bi-soundwave"></i>
+        Audio Visualizer
+      </h1>
+    </div>
+  </div>
+
+  @if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  } @else {
+  <!-- Status Card -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-3">
+              <h5 class="mb-2">Enabled</h5>
+              <h3 [class]="config().enabled ? 'text-success' : 'text-muted'">
+                <i class="bi" [class.bi-check-circle-fill]="config().enabled"
+                  [class.bi-x-circle-fill]="!config().enabled"></i>
+                {{ config().enabled ? 'Yes' : 'No' }}
+              </h3>
+            </div>
+            <div class="col-md-3">
+              <h5 class="mb-2">Status</h5>
+              <h3 [class]="statusClass()">
+                <i class="bi" [class.bi-check-circle-fill]="isRunning()" [class.bi-x-circle-fill]="!isRunning()"></i>
+                {{ statusText() }}
+              </h3>
+            </div>
+            <div class="col-md-3">
+              <h5 class="mb-2">Music Style</h5>
+              <h4 class="text-info">
+                <i class="bi bi-music-note-beamed"></i>
+                {{ musicStyleText() }}
+              </h4>
+            </div>
+            <div class="col-md-3">
+              <h5 class="mb-2">Intensity</h5>
+              @if (latestData()) {
+              <div class="progress" style="height: 30px;">
+                <div class="progress-bar bg-gradient" role="progressbar"
+                  [style.width.%]="(latestData()?.intensity ?? 0) * 100"
+                  [attr.aria-valuenow]="(latestData()?.intensity ?? 0) * 100" aria-valuemin="0" aria-valuemax="100">
+                  {{ ((latestData()?.intensity ?? 0) * 100).toFixed(0) }}%
+                </div>
+              </div>
+              } @else {
+              <p class="text-muted mb-0">No data</p>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Spectrum Visualization -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-bar-chart"></i>
+            Live Audio Spectrum
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="canvas-container">
+            <canvas #spectrumCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frequency Bands Details -->
+  @if (latestData()) {
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-sliders"></i>
+            Frequency Bands
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4 col-lg-3">
+              <div class="band-card p-3 rounded" style="border-left: 4px solid #8B00FF;">
+                <h6 class="text-uppercase mb-2">Sub Bass</h6>
+                <p class="mb-1 small text-muted">20-60 Hz</p>
+                <h4 class="mb-0">{{ (latestData()!.bands.sub_bass * 100).toFixed(0) }}%</h4>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+              <div class="band-card p-3 rounded" style="border-left: 4px solid #FF0080;">
+                <h6 class="text-uppercase mb-2">Bass</h6>
+                <p class="mb-1 small text-muted">60-250 Hz</p>
+                <h4 class="mb-0">{{ (latestData()!.bands.bass * 100).toFixed(0) }}%</h4>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+              <div class="band-card p-3 rounded" style="border-left: 4px solid #FF4500;">
+                <h6 class="text-uppercase mb-2">Low Mids</h6>
+                <p class="mb-1 small text-muted">250-500 Hz</p>
+                <h4 class="mb-0">{{ (latestData()!.bands.low_mids * 100).toFixed(0) }}%</h4>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+              <div class="band-card p-3 rounded" style="border-left: 4px solid #FFD700;">
+                <h6 class="text-uppercase mb-2">Mids</h6>
+                <p class="mb-1 small text-muted">500-2000 Hz</p>
+                <h4 class="mb-0">{{ (latestData()!.bands.mids * 100).toFixed(0) }}%</h4>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+              <div class="band-card p-3 rounded" style="border-left: 4px solid #00FF00;">
+                <h6 class="text-uppercase mb-2">High Mids</h6>
+                <p class="mb-1 small text-muted">2000-4000 Hz</p>
+                <h4 class="mb-0">{{ (latestData()!.bands.high_mids * 100).toFixed(0) }}%</h4>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+              <div class="band-card p-3 rounded" style="border-left: 4px solid #00BFFF;">
+                <h6 class="text-uppercase mb-2">Highs</h6>
+                <p class="mb-1 small text-muted">4000-8000 Hz</p>
+                <h4 class="mb-0">{{ (latestData()!.bands.highs * 100).toFixed(0) }}%</h4>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+              <div class="band-card p-3 rounded" style="border-left: 4px solid #FF1493;">
+                <h6 class="text-uppercase mb-2">Presence</h6>
+                <p class="mb-1 small text-muted">8000-16000 Hz</p>
+                <h4 class="mb-0">{{ (latestData()!.bands.presence * 100).toFixed(0) }}%</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Configuration Card -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-gear"></i>
+            Configuration
+          </h5>
+        </div>
+        <div class="card-body">
+          <form>
+            <div class="row g-3">
+              <!-- Enable/Disable Toggle -->
+              <div class="col-12">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="enabledSwitch"
+                    [checked]="config().enabled" (change)="onToggleEnabled($event)" [disabled]="saving()">
+                  <label class="form-check-label" for="enabledSwitch">
+                    <strong>Enable Audio Visualizer</strong>
+                  </label>
+                </div>
+                <div class="form-text">
+                  Toggle to start or stop the audio visualizer. Turn off to save processing power when not in use.
+                </div>
+              </div>
+
+              <!-- Audio Device -->
+              <div class="col-md-6">
+                <label for="deviceSelect" class="form-label">Audio Input Device</label>
+                <select id="deviceSelect" class="form-select"
+                  (change)="onDeviceChange($event)" [disabled]="saving()">
+                  <option value="null" [selected]="config().deviceIndex === null">Default Device</option>
+                  @for (device of devices(); track device.index) {
+                  <option [value]="device.index" [selected]="config().deviceIndex === device.index">
+                    {{ device.name }}
+                    @if (device.sampleRate) {
+                    ({{ device.sampleRate }} Hz)
+                    }
+                  </option>
+                  }
+                </select>
+                <div class="form-text">
+                  Select the microphone or audio input device to use. Changes are saved automatically and require
+                  restart.
+                </div>
+              </div>
+
+              <!-- Sensitivity -->
+              <div class="col-md-6">
+                <label for="sensitivityRange" class="form-label">
+                  Sensitivity: <strong>{{ config().sensitivity.toFixed(1) }}</strong>
+                </label>
+                <input type="range" class="form-range" id="sensitivityRange" min="0.1" max="5" step="0.1"
+                  [value]="config().sensitivity" (input)="onSensitivityChange($event)"
+                  (change)="onSensitivityChangeEnd($event)" [disabled]="saving()">
+                <div class="form-text">
+                  Adjust how responsive the visualizer is to audio input. Higher values = more sensitive. Changes are
+                  saved automatically.
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>

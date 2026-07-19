@@ -120,22 +120,6 @@ export class UserSocketSession {
     } else if (type == SocketMessageType.C2S_EnableGamepadPreview) {
       const enable = message.data === true;
       this._enableGamepadPreview = enable;
-    } else if (type == SocketMessageType.C2S_AudioVisualiserSettings) {
-      const settings = AudioVisualiserSettingsModel.safeParse(message.data);
-      if (!settings.success) {
-        console.error("Rejecting invalid audio visualiser settings message from socket: ", message);
-        return;
-      }
-
-      this.protogen.audioVisualiser.rawAmplification = settings.data.rawAmplification;
-      this.protogen.audioVisualiser.lowThreshold = settings.data.lowThreshold;
-      this.protogen.audioVisualiser.highThreshold = settings.data.highThreshold;
     }
   }
 }
-
-const AudioVisualiserSettingsModel = z.object({
-  rawAmplification: z.number().min(0).max(100),
-  lowThreshold: z.number().min(0).max(100),
-  highThreshold: z.number().min(0).max(100)
-});
