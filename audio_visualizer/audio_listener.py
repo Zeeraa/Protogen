@@ -222,33 +222,77 @@ class AudioVisualizer:
                 rms_intensity = float(np.linalg.norm(audio_array) / np.sqrt(len(audio_array)))
                 
                 # Active music event adaptive scale (Dynamic Range AGC)
-                if not hasattr(self, '_volume_history'):
-                    # Keep rolling history of active unattenuated levels (~2 seconds / 80-90 frames)
-                    self._volume_history = deque(maxlen=85)
-                
-                # Filter out absolute noise floor when building history
-                if rms_intensity > self.low_threshold:
-                    self._volume_history.append(rms_intensity)
+                # To maintain a highly punchy, non-clipping signal, we use a true peak envelope follower.
+                # In order to avoid pinning at 100% when the music gets really loud, the peak detector
+                # tracks the maximum volume peak with an instant attack coefficient and a moderate decay.
+                # At 50fps, a decay factor of 0.993 lets the peak hold the volume ceiling across beats,
+                # decaying slowly (~2 seconds) so that the relative dynamic range is preserved.
+                # To make the visualizer highly adaptive across all music styles (metal, pop, vocal, electro),
+                # we want plenty of energetic flashing no matter what mode or volume we are on, while also
+                # gracefully dimming down and calming the general visuals when the song gets slow and calm.
+                #
+                # 1) Dynamic Ceiling Follower:
+                #    We track the local raw RMS volume peak with an instant attack and moderate decay model.
+                if not hasattr(self, '_agc_ceiling'):
+                    self._agc_ceiling = 0.05
+                if not hasattr(self, '_volume_history_for_bpm'):
+                    # A longer rolling window (~6 seconds) to detect if the overall song is calm or high-energy
+                    self._volume_history_for_bpm = deque(maxlen=300)
+                if not hasattr(self, '_beat_timestamps'):
+                    self._beat_timestamps = deque(maxlen=20)
+
+                target_vol = max(rms_intensity, self.low_threshold)
+                self._volume_history_for_bpm.append(target_vol)
+
+                if target_vol > self._agc_ceiling:
+                    # Instant tracking of loud transient peaks
+                    self._agc_ceiling = target_vol
                 else:
-                    # Slow-decay dummy entry to prevent instant gain flare on absolute silence
-                    if len(self._volume_history) > 0:
-                        self._volume_history.append(self._volume_history[-1] * 0.98)
-                
-                # Compute current dynamic ceiling from rolling history
-                if len(self._volume_history) > 5:
-                    # Use 90th percentile to ignore short high-frequency noise spikes or clicks
-                    dynamic_ceiling = float(np.percentile(self._volume_history, 90))
-                else:
-                    dynamic_ceiling = rms_intensity
+                    # Slow decay (decay factor 0.995) to hold reference ceiling high during normal playback
+                    self._agc_ceiling = max(0.005, self._agc_ceiling * 0.995 + target_vol * 0.005)
+
+                dynamic_ceiling = self._agc_ceiling
                 
                 # Clamp ceiling to avoid extreme amplification of mic hum
                 min_ceiling = max(0.005, self.low_threshold * 1.5)
                 dynamic_ceiling = max(min_ceiling, dynamic_ceiling)
                 
-                # Attenuation divisor dynamically maps ceiling to comfortable full-range [0, 1] limits
-                # This ensures values never clip at 100% pin, but self-boosts instantly when music drops!
-                attenuation = 1.0 / (dynamic_ceiling * self.intensity)
+                # Determine how active/quiet the music is based on recent rolling data vs long-term values.
+                # 2) "Slow & Calm" Track Detection:
+                #    If the average volume level is very low relative to its noise floor, or if there's very low energy,
+                #    or if the rate of beats (BPM equivalent) is very sparse, we decrease the gain scaling.
+                avg_recent_vol = float(np.mean(self._volume_history_for_bpm)) if len(self._volume_history_for_bpm) > 0 else target_vol
                 
+                # Calculate active range & base attenuation
+                active_range = max(0.002, dynamic_ceiling - self.low_threshold)
+                attenuation = 1.0 / active_range
+
+                # 3) Flash-vibrancy Adaptation Factor ("Vibe Scalar"):
+                #    We want the general visual rendering output to feel highly lively (plenty of movement).
+                #    If we are playing high-intensity music, we boost the scaling to make it flash intensely.
+                #    If the song transitions to a slow/calm segment, we dynamically dial down the scale multiplier.
+                # Let's count beats in the last 5 seconds to estimate energy.
+                current_time = time.time()
+                recent_beats = [t for t in self._beat_timestamps if current_time - t < 5.0]
+                beat_count_5s = len(recent_beats)
+
+                vibe_scalar = 1.0
+                
+                # If there are very few beats/pulses detected or the average long-term volume is very low,
+                # it means the song is slow, quiet, or calm. We dim the scalar (down to 0.4x) so the LEDs calm down.
+                if len(self._volume_history_for_bpm) >= 100:
+                    vol_std = float(np.std(self._volume_history_for_bpm))
+                    # Very quiet transitions/ambient tracks have low variance and small averages
+                    if avg_recent_vol < (self.low_threshold * 1.8) or vol_std < 0.002:
+                        vibe_scalar = 0.45  # Quiet/Ambient: dim down to smooth glowing visuals
+                    elif beat_count_5s < 3:
+                        vibe_scalar = 0.65  # Slow/Chill: mellow/controlled movement
+                    elif beat_count_5s >= 8:
+                        vibe_scalar = 1.25  # High-energy / Drops: super flashy, maximum activity!
+
+                # Apply vibe_scalar to final attenuation multiplier
+                scaled_intensity = self.intensity * vibe_scalar
+
                 # Dynamic Style Adaptation:
                 # If a song is heavily vocal/high-end and lacks bass, we self-compensate the band ratios
                 # Calculate energy sums for Bass versus High sections
@@ -287,18 +331,22 @@ class AudioVisualizer:
                 self.bass_history.append(beat_energy_source)
                 
                 # Apply noise-gate cutoff, scale, and dynamic attenuation to individual bands
+                # We multiply the normalized 0.0-1.0 signal by scaled_intensity to let the user scale it up/down,
+                # while applying the vibe_scalar to automatically adapt to slow/quiet blocks or boost on heavy peaks!
                 band_energies = {}
                 for band_name, energy in band_energies_raw.items():
-                    raw_val = self.process_value(energy, self.low_threshold, 1.0) * attenuation
+                    raw_val = self.process_value(energy, self.low_threshold, 1.0) * attenuation * scaled_intensity
                     normalized = max(0.0, min(1.0, raw_val))
                     band_energies[band_name] = round(normalized, 3)
                 
                 # Apply cutoff, scale, and dynamic attenuation to overall intensity
-                raw_intensity = self.process_value(rms_intensity, self.low_threshold, 1.0) * attenuation
+                raw_intensity = self.process_value(rms_intensity, self.low_threshold, 1.0) * attenuation * scaled_intensity
                 processed_intensity = max(0.0, min(1.0, raw_intensity))
                 
                 # Detect beats (relative transient spike in chosen energy source)
                 is_beat = self.detect_beat(beat_energy_source)
+                if is_beat:
+                    self._beat_timestamps.append(current_time)
                 
                 # Throttle publishing or keep it paced
                 current_time = time.time()
