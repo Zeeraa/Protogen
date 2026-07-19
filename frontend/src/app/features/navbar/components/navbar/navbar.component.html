@@ -71,6 +71,12 @@
               <a class="dropdown-item" routerLink="/bluetooth">Bluetooth</a>
             </li>
 
+            @if(isAdminUser) {
+            <li>
+              <a class="dropdown-item" routerLink="/wifi">Wi-Fi</a>
+            </li>
+            }
+
             <li>
               <hr class="dropdown-divider">
             </li>

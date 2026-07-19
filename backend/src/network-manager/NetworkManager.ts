@@ -1,6 +1,8 @@
 import axios from "axios";
 import { Protogen } from "../Protogen";
 import { networkInterfaces } from "os";
+import { WifiConfigProvider } from "./WifiConfigProvider";
+import { NmcliWifiConfigProvider } from "./NmcliWifiConfigProvider";
 
 /**
  * Manages network connectivity status
@@ -10,12 +12,18 @@ export class NetworkManager {
   private _hasConnectivity: boolean = false;
   private _ip: string | null = null;
   private _isp: string | null = null;
+  private _wifiProvider: WifiConfigProvider;
 
   constructor(protogen: Protogen) {
     this._protogen = protogen;
+    this._wifiProvider = new NmcliWifiConfigProvider();
     setInterval(() => {
       this.runConnectivityCheck();
     }, 1000 * 20);
+  }
+
+  public get wifiProvider(): WifiConfigProvider {
+    return this._wifiProvider;
   }
 
   private get protogen() {

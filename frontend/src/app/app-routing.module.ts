@@ -22,6 +22,7 @@ import { DeveloperPageComponent } from './features/dev/pages/developer-page/deve
 import { BoopSensorPageComponent } from './features/boop-sensor/pages/boop-sensor-page/boop-sensor-page.component';
 import { BoopSensorProfileEditorPageComponent } from './features/boop-sensor/pages/boop-sensor-profile-editor-page/boop-sensor-profile-editor-page.component';
 import { BluetoothPageComponent } from './features/bluetooth/pages/bluetooth-page/bluetooth-page.component';
+import { WifiPageComponent } from './features/wifi/pages/wifi-page/wifi-page.component';
 import { GamepadRemotePageComponent } from './features/remote/pages/gamepad-remote-page/gamepad-remote-page.component';
 import { GamepadProfileEditorPageComponent } from './features/remote/pages/gamepad-profile-editor-page/gamepad-profile-editor-page.component';
 import { NotFoundPageComponent } from './features/not-found/pages/not-found-page/not-found-page.component';
@@ -147,6 +148,11 @@ export const routes: Routes = [
   {
     path: "bluetooth",
     component: BluetoothPageComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: "wifi",
+    component: WifiPageComponent,
     canActivate: [AuthGuard],
   },
   {

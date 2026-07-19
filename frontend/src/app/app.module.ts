@@ -23,6 +23,7 @@ import { AppsModule } from './features/apps/apps.module';
 import { DevModule } from './features/dev/dev.module';
 import { BoopSensorModule } from './features/boop-sensor/boop-sensor.module';
 import { BluetoothModule } from './features/bluetooth/bluetooth.module';
+import { WifiModule } from './features/wifi/wifi.module';
 import { RemoteModule } from './features/remote/remote.module';
 import { provideToastService } from "ngx-yet-another-toast-library";
 
@@ -52,6 +53,7 @@ import { provideToastService } from "ngx-yet-another-toast-library";
     DevModule,
     BoopSensorModule,
     BluetoothModule,
+    WifiModule,
     RemoteModule,
   ],
   providers: [

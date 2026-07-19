@@ -47,6 +47,10 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.auth.loggedIn && !this.auth.loginNeeded;
   }
 
+  protected get isAdminUser() {
+    return this.auth.authDetails?.isSuperUser === true;
+  }
+
   protected toggleTheme() {
     this.theme.toggleTheme();
   }
