@@ -12,5 +12,6 @@ import { SystemConfigService } from '../../../../core/services/system-config.ser
 export class DashboardStatusCardComponent {
   readonly overview = input<OverviewData | null>(null);
   readonly toggleHud = output<void>();
+  readonly toggleAudio = output<void>();
   protected readonly systemConfig = inject(SystemConfigService);
 }

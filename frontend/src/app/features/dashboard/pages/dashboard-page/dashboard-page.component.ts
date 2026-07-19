@@ -14,6 +14,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { SystemConfigService } from '../../../../core/services/system-config.service';
 import { ToastService } from 'ngx-yet-another-toast-library';
 
+import { AudioVisualizerApiService } from '../../../../core/services/api/audio-visualizer-api.service';
+
 @Component({
   selector: 'app-dashboard-page',
   templateUrl: './dashboard-page.component.html',
@@ -31,6 +33,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly hudApi = inject(HudApiService);
   private readonly boopApi = inject(BoopSensorApiService);
   private readonly visorApi = inject(VisorApiService);
+  private readonly audioVisualizerApi = inject(AudioVisualizerApiService);
   private readonly socket = inject(SocketService);
   protected readonly systemConfig = inject(SystemConfigService);
 
@@ -222,6 +225,23 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       })
     ).subscribe(() => {
       this.overview.update(o => o ? { ...o, hudEnabled: newState } : o);
+    });
+  }
+
+  protected toggleAudioVisualizer(): void {
+    const isRunning = this.overview()?.audioVisualiserEnabled ?? false;
+    const request = isRunning ? this.audioVisualizerApi.stop() : this.audioVisualizerApi.start();
+
+    request.pipe(
+      catchError(err => {
+        console.error("Failed to toggle audio visualizer", err);
+        this.toast.error("Failed to toggle audio visualizer");
+        return [];
+      })
+    ).subscribe((res) => {
+      const activeState = (res as any).isRunning;
+      this.overview.update(o => o ? { ...o, audioVisualiserEnabled: activeState } : o);
+      this.toast.success(activeState ? "Audio visualizer started" : "Audio visualizer stopped");
     });
   }
 

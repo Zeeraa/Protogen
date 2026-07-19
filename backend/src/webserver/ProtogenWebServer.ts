@@ -413,6 +413,7 @@ export class ProtogenWebServer {
       boopSensorProfile,
       hudEnabled: this.protogen.hudManager?.enableHud ?? false,
       boopSensorEnabled: this.protogen.boopSensorManager?.enabled ?? false,
+      audioVisualiserEnabled: this.protogen.audioVisualiser?.config.enabled ?? false,
       hasRenderLock: this.protogen.visor.hasRenderLock,
     }
   }
@@ -426,6 +427,7 @@ export interface OverviewData {
   boopSensorProfile: OverviewNamedObjectData | null;
   hudEnabled: boolean;
   boopSensorEnabled: boolean;
+  audioVisualiserEnabled: boolean;
   hasRenderLock: boolean;
 }
 

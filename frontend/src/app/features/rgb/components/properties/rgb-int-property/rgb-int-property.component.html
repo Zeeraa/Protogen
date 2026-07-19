@@ -10,8 +10,8 @@
   }
 </label>
 @if(type == "DEFAULT") {
-<input type="number" [placeholder]="property.name" class="form-control" [min]="min" [max]="max" [id]="inputId" [(ngModel)]="property.value"
-  (change)="onChange($event)">
+<input type="number" [placeholder]="property.name" class="form-control" [min]="min" [max]="max" [id]="inputId"
+  [(ngModel)]="property.value" (change)="onChange($event)">
 } @else if (type == "SLIDER") {
 <input type="range" class="form-range" [min]="min" [max]="max" step="1" [id]="inputId" [(ngModel)]="property.value"
   (change)="onChange($event)">

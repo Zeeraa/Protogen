@@ -3,6 +3,7 @@ import { RgbScene } from "../../../rgb/scenes/RgbScene";
 import { AbstractRouter } from "../../AbstractRouter";
 import { ProtogenWebServer } from "../../ProtogenWebServer";
 import { constructRgbEffect, RgbEffects } from "../../../rgb/effects/RgbEffects";
+import { RgbSceneEffect } from "../../../database/models/rgb/RgbSceneEffect.model";
 import { RgbSceneEffectProperty } from "../../../database/models/rgb/RgbSceneEffectProperty.model";
 import { Equal } from "typeorm";
 import { RgbEditorPreviewElement } from "../../../database/models/rgb/RgbEditorConfig.model";
@@ -649,7 +650,26 @@ export class RgbRouter extends AbstractRouter {
 
             await repo.save(prop);
           } else {
-            this.protogen.logger.warn("RgbRouter", "Failed to fetch property " + req.params.property + " for saving");
+            const effectRepo = this.protogen.database.dataSource.getRepository(RgbSceneEffect);
+            const dbEffect = await effectRepo.findOne({
+              where: {
+                id: Equal(effect.id),
+                scene: {
+                  id: Equal(scene.id)
+                }
+              }
+            });
+
+            if (dbEffect != null) {
+              const newProp = new RgbSceneEffectProperty();
+              newProp.key = req.params.property;
+              newProp.value = result.property.stringifyValue();
+              newProp.effect = dbEffect;
+
+              await repo.save(newProp);
+            } else {
+              this.protogen.logger.warn("RgbRouter", "Failed to fetch effect " + effect.id + " to associate with new property " + req.params.property);
+            }
           }
         }
 

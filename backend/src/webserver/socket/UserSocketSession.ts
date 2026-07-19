@@ -4,7 +4,6 @@ import { Socket } from "socket.io";
 import { SocketMessageType } from "./SocketMessageType";
 import { SocketMessage } from "./SocketMessage";
 import { AuthData } from "../middleware/AuthMiddleware";
-import { z } from "zod";
 
 export class UserSocketSession {
   private _protogen;

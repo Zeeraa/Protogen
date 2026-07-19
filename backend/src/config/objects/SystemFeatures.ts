@@ -5,4 +5,5 @@ export interface SystemFeatures {
   rgb: boolean;
   videoPlayback: boolean;
   systemd: boolean;
+  audioVisualizer: boolean;
 }

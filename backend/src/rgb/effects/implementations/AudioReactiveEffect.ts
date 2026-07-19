@@ -199,11 +199,11 @@ export class AudioReactiveEffect extends AbstractRgbEffect {
     }
 
     const { r, g, b } = hueToRGB(finalHue);
-    
+
     // Apply MaxBrightness scale adjustment (1-255 scaling)
     const maxB = this._maxBrightnessProperty.value;
     const scale = maxB / 255.0;
-    
+
     return encodeRGB(
       Math.round(r * scale),
       Math.round(g * scale),

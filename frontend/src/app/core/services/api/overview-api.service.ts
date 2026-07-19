@@ -18,6 +18,7 @@ export interface OverviewData {
   boopSensorProfile: OverviewNamedObjectData | null;
   hudEnabled: boolean;
   boopSensorEnabled: boolean;
+  audioVisualiserEnabled: boolean;
   hasRenderLock: boolean;
 }
 
