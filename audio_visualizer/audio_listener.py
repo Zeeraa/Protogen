@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Audio Visualizer Listener
-Captures audio from microphone, performs FFT analysis, and publishes data to MQTT
+Audio Visualizer Listener (sounddevice version)
+Captures audio from microphone using sounddevice, performs FFT analysis, and publishes data to MQTT.
+Supports user-defined low-threshold and intensity parameters instead of history-based volume adaptation.
 """
 
 import argparse
 import json
 import numpy as np
-import pyaudio
+import sounddevice as sd
 import paho.mqtt.client as mqtt
 import time
 import sys
-import os
 import queue
 from collections import deque
 from typing import Dict, Any, Optional
@@ -25,9 +25,7 @@ except ImportError:
 
 # Audio settings
 CHUNK_SIZE = 1024
-FORMAT = pyaudio.paInt16
 SAMPLE_RATE = 44100
-MAX_INT16 = 32768.0
 
 # Frequency band definitions (Hz)
 FREQUENCY_BANDS = {
@@ -40,26 +38,24 @@ FREQUENCY_BANDS = {
     'presence': (8000, 16000)
 }
 
-# Adaptive settings
-HISTORY_SIZE = 60  # Number of frames to keep for adaptation
-BEAT_THRESHOLD_MULTIPLIER = 1.3  # Beat detection threshold
+# Beat detection settings
+BEAT_HISTORY_SIZE = 15
+BEAT_THRESHOLD_MULTIPLIER = 1.35
 
 
 class AudioVisualizer:
-    def __init__(self, device_index: Optional[int], sensitivity: float, 
+    def __init__(self, device_index: Optional[int], low_threshold: float, intensity: float,
                  mqtt_host: str, mqtt_port: int, mqtt_topic: str, mqtt_config_topic: str):
         self.device_index = device_index
-        self.selected_device_name = None
-        self.sensitivity = sensitivity
+        self.low_threshold = low_threshold
+        self.intensity = intensity
         self.mqtt_host = mqtt_host
         self.mqtt_port = mqtt_port
         self.mqtt_topic = mqtt_topic
         self.mqtt_config_topic = mqtt_config_topic
         
         # Audio components
-        self.audio = pyaudio.PyAudio()
         self.stream = None
-        self.stream_healthy = False
         self.audio_queue = queue.Queue()
         
         # MQTT client (use API v2 if available to avoid deprecation warning)
@@ -71,24 +67,21 @@ class AudioVisualizer:
         self.mqtt_client.on_message = self.on_mqtt_message
         self.mqtt_connected = False
         
-        # Adaptive tracking
-        self.energy_history = deque(maxlen=HISTORY_SIZE)
-        self.bass_history = deque(maxlen=HISTORY_SIZE)
+        # Beat tracking (short rolling window for transient spike detection only)
+        self.bass_history = deque(maxlen=BEAT_HISTORY_SIZE)
         
-        # Current settings (can be updated via MQTT)
+        # Current settings
         self.enabled = True
-        self.current_sensitivity = sensitivity
         
         # Performance tracking
         self.last_publish_time = 0
-        self.publish_interval = 0.02  # Max publish rate ~50 Hz (actually limited by CHUNK_SIZE to 43 Hz)
+        self.publish_interval = 0.02  # Max publish rate ~50 Hz
         
     def on_mqtt_connect(self, client, userdata, flags, rc, properties=None):
         """Called when connected to MQTT broker"""
         if rc == 0:
             print(f"Connected to MQTT broker at {self.mqtt_host}:{self.mqtt_port}")
             self.mqtt_connected = True
-            # Subscribe to config updates
             client.subscribe(self.mqtt_config_topic)
         else:
             print(f"Failed to connect to MQTT broker, code: {rc}")
@@ -97,126 +90,55 @@ class AudioVisualizer:
         """Handle incoming MQTT config messages"""
         try:
             config = json.loads(msg.payload.decode())
-            if 'sensitivity' in config:
-                self.current_sensitivity = float(config['sensitivity'])
-                print(f"Updated sensitivity to {self.current_sensitivity}")
+            if 'lowThreshold' in config:
+                self.low_threshold = float(config['lowThreshold'])
+                print(f"Updated low_threshold to {self.low_threshold}")
+            if 'intensity' in config:
+                self.intensity = float(config['intensity'])
+                print(f"Updated intensity to {self.intensity}")
             if 'enabled' in config:
                 self.enabled = bool(config['enabled'])
                 print(f"Audio visualizer {'enabled' if self.enabled else 'disabled'}")
-            if 'device_index' in config:
-                new_device = config['device_index']
-                if new_device != self.device_index:
-                    print(f"Changing audio device to {new_device}")
-                    self.restart_audio_stream(new_device)
         except Exception as e:
             print(f"Error processing config update: {e}")
-    
-    def restart_audio_stream(self, new_device_index: Optional[int]):
-        """Restart audio stream with new device and reset name anchor"""
-        if self.stream:
-            try:
-                self.stream.stop_stream()
-                self.stream.close()
-            except:
-                pass
-            self.stream = None
-        self.device_index = new_device_index
-        self.selected_device_name = None  # Reset selection name to anchor new index
-        self.start_audio_stream()
-    
-    def start_audio_stream(self):
-        """Initialize and start audio input stream with stale list clearance and index auto-recovery"""
-        if self.stream:
-            try:
-                self.stream.stop_stream()
-                self.stream.close()
-            except:
-                pass
-            self.stream = None
             
-        # Re-create PyAudio instance to clear out PortAudio's cached device lists.
-        # This is vital on Raspberry Pi because dynamic USB dropouts won't be seen by a cached list object.
-        try:
-            self.audio.terminate()
-        except:
+    def audio_callback(self, indata, frames, time_info, status):
+        """sounddevice input stream audio callback"""
+        if status:
             pass
-        try:
-            self.audio = pyaudio.PyAudio()
-        except Exception as e:
-            print(f"Error re-initializing PyAudio context: {e}")
-            self.stream_healthy = False
-            return
-
-        # Auto-detect if device index changed due to USB re-plugging (card re-enumeration)
-        if self.device_index is not None:
-            device_found = False
-            device_count = self.audio.get_device_count()
+        if self.enabled:
+            # Put first channel data copy into the queue
+            self.audio_queue.put(indata[:, 0].copy())
             
-            # Step A: If we already knew the name, look for a device matching that exact name or substring
-            if self.selected_device_name:
-                for i in range(device_count):
-                    try:
-                        info = self.audio.get_device_info_by_index(i)
-                        if info['maxInputChannels'] > 0 and info['name'] == self.selected_device_name:
-                            if self.device_index != i:
-                                print(f"USB Re-plug/migration detected! Dynamically migrating device index from {self.device_index} to {i} (matching name: {info['name']})")
-                                self.device_index = i
-                            device_found = True
-                            break
-                    except:
-                        continue
-            
-            # Step B: If exact name match wasn't found or not set yet, but current index is invalid, try to find any USB input device
-            if not device_found:
-                try:
-                    # Test if current index works
-                    info = self.audio.get_device_info_by_index(self.device_index)
-                    if info['maxInputChannels'] > 0:
-                        device_found = True
-                        if not self.selected_device_name:
-                            self.selected_device_name = info['name']
-                except:
-                    # Index is dead or invalid. Search for any standard USB card
-                    for i in range(device_count):
-                        try:
-                            info = self.audio.get_device_info_by_index(i)
-                            if info['maxInputChannels'] > 0 and ("USB" in info['name'] or "Mic" in info['name']):
-                                print(f"Selected index was offline. Found substitute USB device at index {i}: {info['name']}")
-                                self.device_index = i
-                                self.selected_device_name = info['name']
-                                device_found = True
-                                break
-                        except:
-                            continue
-                            
-        # Try to open the stream
-        try:
-            self.stream = self.audio.open(
-                format=FORMAT,
-                channels=1,
-                rate=SAMPLE_RATE,
-                input=True,
-                input_device_index=self.device_index,
-                frames_per_buffer=CHUNK_SIZE
-            )
-            self.stream_healthy = True
-            
-            # Store the device name on first success so we can find it again if it drops
-            if self.device_index is not None and not self.selected_device_name:
-                try:
-                    info = self.audio.get_device_info_by_index(self.device_index)
-                    self.selected_device_name = info['name']
-                    print(f"Locked on device name: {self.selected_device_name}")
-                except:
-                    pass
-                    
-            print(f"Audio stream started on device {self.device_index} (polling mode)")
-        except Exception as e:
-            print(f"Error starting audio stream: {e}")
-            print("Audio visualizer will continue but without audio input")
-            self.stream_healthy = False
+    def start_audio_stream(self):
+        """Initialize and start sounddevice input stream"""
+        if self.stream:
+            try:
+                self.stream.stop()
+                self.stream.close()
+            except:
+                pass
             self.stream = None
-    
+            
+        try:
+            # Print chosen device details
+            device_info = sd.query_devices(self.device_index, 'input')
+            print(f"Opening audio stream on device {self.device_index if self.device_index is not None else 'Default'}: {device_info['name']}")
+            
+            self.stream = sd.InputStream(
+                device=self.device_index,
+                channels=1,
+                samplerate=SAMPLE_RATE,
+                blocksize=CHUNK_SIZE,
+                callback=self.audio_callback
+            )
+            self.stream.start()
+            print("Audio stream started successfully (sounddevice mode)")
+        except Exception as e:
+            print(f"Error starting sounddevice audio stream: {e}")
+            print("Audio visualizer running without audio input")
+            self.stream = None
+            
     def connect_mqtt(self):
         """Connect to MQTT broker"""
         try:
@@ -225,95 +147,44 @@ class AudioVisualizer:
         except Exception as e:
             print(f"Error connecting to MQTT: {e}")
             sys.exit(1)
-    
+            
     def calculate_fft(self, audio_data: np.ndarray) -> np.ndarray:
         """Perform FFT on audio data"""
-        # Apply Hamming window to reduce spectral leakage
         windowed = audio_data * np.hamming(len(audio_data))
-        # Compute FFT
         fft = np.fft.rfft(windowed)
-        # Get magnitude spectrum
         magnitude = np.abs(fft)
         return magnitude
-    
+        
     def get_frequency_band_energy(self, magnitude: np.ndarray, freq_range: tuple) -> float:
         """Calculate energy in a specific frequency band"""
         freqs = np.fft.rfftfreq(CHUNK_SIZE, 1.0 / SAMPLE_RATE)
         mask = (freqs >= freq_range[0]) & (freqs <= freq_range[1])
-        band_energy = np.sum(magnitude[mask] ** 2)
-        return float(band_energy)
-    
-    def normalize_value(self, value: float, history: deque, sensitivity: float) -> float:
-        """Normalize value based on recent history with a noise floor threshold"""
-        # Noise floor: If value or average history is extremely low, clamp to 0 to avoid amplifying silence
-        MIN_NOISE_THRESHOLD = 0.005
-        
-        if len(history) < 5:
-            if value < MIN_NOISE_THRESHOLD:
-                return 0.0
-            return float(min(value * sensitivity, 1.0))
-        
-        # Calculate adaptive range
-        avg = float(np.mean(history))
-        max_val = float(np.max(history))
-        
-        # If the environment is extremely quiet, don't auto-amplify the silence
-        if max_val < MIN_NOISE_THRESHOLD or value < MIN_NOISE_THRESHOLD:
+        if not np.any(mask):
             return 0.0
+        # Use mean magnitude inside the band logic
+        band_energy = np.mean(magnitude[mask])
+        return float(band_energy)
         
-        if max_val > 0:
-            # Normalize to 0-1 range with sensitivity adjustment
-            normalized = (value / max_val) * sensitivity
-            return float(min(normalized, 1.0))
-        return 0.0
-    
+    def process_value(self, raw_value: float, threshold: float, multiplier: float) -> float:
+        """Process value using low threshold and multiplier"""
+        if raw_value < threshold:
+            return 0.0
+        # Map values above threshold to [0.0, 1.0]
+        val = (raw_value - threshold) * multiplier
+        return float(max(0.0, min(1.0, val)))
+        
     def detect_beat(self, bass_energy: float) -> bool:
-        """Simple beat detection based on bass energy spike"""
-        if len(self.bass_history) < 10:
+        """Simple beat detection based on relative recruiting bass energy spike"""
+        if len(self.bass_history) < 5:
             return False
-        
         avg_bass = float(np.mean(self.bass_history))
+        if avg_bass < 0.001:
+            return False
         return bool(bass_energy > (avg_bass * BEAT_THRESHOLD_MULTIPLIER))
-    
-    def detect_music_style(self, band_energies: Dict[str, float]) -> str:
-        """Detect music style based on frequency distribution with smoothing/hysteresis"""
-        total_energy = sum(band_energies.values())
-        if total_energy == 0:
-            return 'silence'
         
-        # Calculate energy ratios
-        bass_ratio = (band_energies['sub_bass'] + band_energies['bass']) / total_energy
-        mid_ratio = (band_energies['low_mids'] + band_energies['mids']) / total_energy
-        high_ratio = (band_energies['high_mids'] + band_energies['highs'] + band_energies['presence']) / total_energy
-        
-        # Determine the raw dominant band
-        current_style = 'balanced'
-        if bass_ratio > 0.45:
-            current_style = 'bass_heavy'
-        elif mid_ratio > 0.45:
-            current_style = 'vocal'
-        elif high_ratio > 0.35:
-            current_style = 'bright'
-        elif total_energy < 0.01:
-            current_style = 'quiet'
-            
-        # Initialize style history if not exists
-        if not hasattr(self, '_style_history'):
-            self._style_history = deque(maxlen=25) # Smooth over ~25 frames (~0.5 seconds)
-            
-        self._style_history.append(current_style)
-        
-        # Return the most common style in the history (majority vote)
-        styles_list = list(self._style_history)
-        return max(set(styles_list), key=styles_list.count)
-    
     def process_audio(self):
         """Main audio processing loop"""
         print("Starting audio processing...")
-        
-        consecutive_errors = 0
-        max_consecutive_errors = 10
-        last_data_receive_time = time.time()
         
         while True:
             try:
@@ -321,108 +192,126 @@ class AudioVisualizer:
                     time.sleep(0.1)
                     continue
                 
-                # Check if stream is healthy or if we haven't received data in a while
-                current_time = time.time()
-                is_stalled = (self.stream_healthy and self.stream is not None and (current_time - last_data_receive_time > 2.0))
-                
-                if not self.stream_healthy or self.stream is None or is_stalled:
-                    if is_stalled:
-                        print("Audio stream stall detected (no data received for 2 seconds)")
-                        self.stream_healthy = False
-                        
-                    # Send zero data to indicate no audio
+                # Retrieve audio block from queue
+                try:
+                    audio_array = self.audio_queue.get(timeout=0.2)
+                except queue.Empty:
+                    # If stream is down or silent, publish zero data to keep UI alive
+                    current_time = time.time()
                     if current_time - self.last_publish_time >= self.publish_interval:
                         self.last_publish_time = current_time
                         zero_data = {
                             'timestamp': current_time,
                             'intensity': 0.0,
                             'bands': {band: 0.0 for band in FREQUENCY_BANDS.keys()},
-                            'beat': False,
-                            'style': 'silence'
+                            'beat': False
                         }
                         if self.mqtt_connected:
                             self.mqtt_client.publish(self.mqtt_topic, json.dumps(zero_data))
-                    
-                    time.sleep(0.1)
-                    
-                    # Try to restart stream immediately on first failure, then every 1 second
-                    if consecutive_errors == 1 or (consecutive_errors % 10 == 0 and consecutive_errors > 0):
-                        print("Attempting to restart audio stream...")
-                        self.start_audio_stream()
-                        last_data_receive_time = time.time()  # Reset timeout
-                    consecutive_errors += 1
                     continue
-                
-                # Read audio data with error protection
-                try:
-                    audio_data = self.stream.read(CHUNK_SIZE, exception_on_overflow=False)
-                    last_data_receive_time = time.time()  # Successfully got data!
-                    consecutive_errors = 0  # Reset error counter on successful read
-                except IOError as e:
-                    # In standard USB audio, input overflow error sequence uses [Errno -9981] Input overflowed
-                    # It's completely normal when CPU is loaded on Raspberry Pi and doesn't mean stream is dead
-                    if hasattr(e, 'errno') and e.errno == pyaudio.paInputOverflowed:
-                        # Keep receipt timer alive since the card is actively talking to us and giving us overflow flags
-                        last_data_receive_time = time.time()
-                        # Skip this frame and continue instead of declaring stream dead!
-                        time.sleep(0.01)
-                        continue
-                        
-                    print(f"Stream read error: {e}")
-                    self.stream_healthy = False
-                    consecutive_errors += 1
-                    if consecutive_errors >= max_consecutive_errors:
-                        print("Too many consecutive errors, marking stream as unhealthy")
-                    time.sleep(0.1)
-                    continue
-                
-                audio_array = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / MAX_INT16
                 
                 # Calculate FFT
                 magnitude = self.calculate_fft(audio_array)
                 
-                # Calculate energy for each frequency band
+                # Calculate raw energy for each band
                 band_energies_raw = {}
                 for band_name, freq_range in FREQUENCY_BANDS.items():
-                    energy = self.get_frequency_band_energy(magnitude, freq_range)
-                    band_energies_raw[band_name] = energy
+                    band_energies_raw[band_name] = self.get_frequency_band_energy(magnitude, freq_range)
                 
-                # Calculate overall energy
-                total_energy = sum(band_energies_raw.values())
-                self.energy_history.append(total_energy)
+                # Calculate overall raw energy as Root Mean Square (RMS)
+                rms_intensity = float(np.linalg.norm(audio_array) / np.sqrt(len(audio_array)))
                 
-                # Track bass for beat detection
-                bass_energy = band_energies_raw['bass'] + band_energies_raw['sub_bass']
-                self.bass_history.append(bass_energy)
+                # Active music event adaptive scale (Dynamic Range AGC)
+                if not hasattr(self, '_volume_history'):
+                    # Keep rolling history of active unattenuated levels (~2 seconds / 80-90 frames)
+                    self._volume_history = deque(maxlen=85)
                 
-                # Normalize band energies
+                # Filter out absolute noise floor when building history
+                if rms_intensity > self.low_threshold:
+                    self._volume_history.append(rms_intensity)
+                else:
+                    # Slow-decay dummy entry to prevent instant gain flare on absolute silence
+                    if len(self._volume_history) > 0:
+                        self._volume_history.append(self._volume_history[-1] * 0.98)
+                
+                # Compute current dynamic ceiling from rolling history
+                if len(self._volume_history) > 5:
+                    # Use 90th percentile to ignore short high-frequency noise spikes or clicks
+                    dynamic_ceiling = float(np.percentile(self._volume_history, 90))
+                else:
+                    dynamic_ceiling = rms_intensity
+                
+                # Clamp ceiling to avoid extreme amplification of mic hum
+                min_ceiling = max(0.005, self.low_threshold * 1.5)
+                dynamic_ceiling = max(min_ceiling, dynamic_ceiling)
+                
+                # Attenuation divisor dynamically maps ceiling to comfortable full-range [0, 1] limits
+                # This ensures values never clip at 100% pin, but self-boosts instantly when music drops!
+                attenuation = 1.0 / (dynamic_ceiling * self.intensity)
+                
+                # Dynamic Style Adaptation:
+                # If a song is heavily vocal/high-end and lacks bass, we self-compensate the band ratios
+                # Calculate energy sums for Bass versus High sections
+                bass_side = band_energies_raw['sub_bass'] + band_energies_raw['bass']
+                mids_high_side = (band_energies_raw['low_mids'] + band_energies_raw['mids'] + 
+                                  band_energies_raw['high_mids'] + band_energies_raw['highs'] + 
+                                  band_energies_raw['presence'])
+                
+                # Track rolling ratio history of Bass to Highs to adapt style changes
+                if not hasattr(self, '_style_ratio_history'):
+                    self._style_ratio_history = deque(maxlen=60) # ~1.5 sec lookback
+                
+                total_energy = bass_side + mids_high_side
+                if total_energy > 0.005:
+                    current_ratio = bass_side / total_energy
+                    self._style_ratio_history.append(current_ratio)
+                
+                # If average bass energy is very low (< 12% of total spectral power),
+                # we are listening to vocal, ambient, high-end synth, or quiet transitions.
+                # In that case, we dynamically switch the beat detection to also trigger
+                # on mid/high transient frequency energy spikes! This ensures the face still
+                # flashes and pulses dynamically even when there's no boom-boom bass!
+                is_bass_heavy_style = True
+                if len(self._style_ratio_history) > 5:
+                    avg_bass_pct = float(np.mean(self._style_ratio_history))
+                    if avg_bass_pct < 0.12:
+                        is_bass_heavy_style = False
+                
+                # Track rolling bass energy (or treble energy if bass is absent) for beat detection
+                if is_bass_heavy_style:
+                    beat_energy_source = band_energies_raw['bass'] + band_energies_raw['sub_bass']
+                else:
+                    # Target voice, snare, high synths, and presence crispness to fuel flash triggers
+                    beat_energy_source = band_energies_raw['mids'] + band_energies_raw['high_mids'] + band_energies_raw['low_mids']
+                
+                self.bass_history.append(beat_energy_source)
+                
+                # Apply noise-gate cutoff, scale, and dynamic attenuation to individual bands
                 band_energies = {}
                 for band_name, energy in band_energies_raw.items():
-                    normalized = self.normalize_value(energy, self.energy_history, self.current_sensitivity)
-                    band_energies[band_name] = round(float(normalized), 3)
+                    raw_val = self.process_value(energy, self.low_threshold, 1.0) * attenuation
+                    normalized = max(0.0, min(1.0, raw_val))
+                    band_energies[band_name] = round(normalized, 3)
                 
-                # Overall intensity (0-1)
-                intensity = self.normalize_value(total_energy, self.energy_history, self.current_sensitivity)
+                # Apply cutoff, scale, and dynamic attenuation to overall intensity
+                raw_intensity = self.process_value(rms_intensity, self.low_threshold, 1.0) * attenuation
+                processed_intensity = max(0.0, min(1.0, raw_intensity))
                 
-                # Beat detection
-                is_beat = self.detect_beat(bass_energy)
+                # Detect beats (relative transient spike in chosen energy source)
+                is_beat = self.detect_beat(beat_energy_source)
                 
-                # Music style detection
-                music_style = self.detect_music_style(band_energies_raw)
-                
-                # Throttle publishing
+                # Throttle publishing or keep it paced
                 current_time = time.time()
                 if current_time - self.last_publish_time < self.publish_interval:
                     continue
                 self.last_publish_time = current_time
                 
-                # Prepare data payload
+                # Prepare data payload (without music style system)
                 data = {
                     'timestamp': float(current_time),
-                    'intensity': round(float(intensity), 3),
+                    'intensity': round(processed_intensity, 3),
                     'bands': band_energies,
-                    'beat': bool(is_beat),
-                    'style': str(music_style)
+                    'beat': bool(is_beat)
                 }
                 
                 # Publish to MQTT
@@ -433,132 +322,77 @@ class AudioVisualizer:
                 print("\nShutting down...")
                 break
             except Exception as e:
-                print(f"Error processing audio: {e}")
-                consecutive_errors += 1
-                if consecutive_errors >= max_consecutive_errors:
-                    print("Too many errors, marking stream as unhealthy")
-                    self.stream_healthy = False
+                print(f"Error processing audio in main loop: {e}")
                 time.sleep(0.1)
-    
+                
     def cleanup(self):
         """Clean up resources"""
         if self.stream:
             try:
-                self.stream.stop_stream()
+                self.stream.stop()
                 self.stream.close()
             except Exception as e:
                 print(f"Error closing stream: {e}")
         try:
-            self.audio.terminate()
-        except Exception as e:
-            print(f"Error terminating audio: {e}")
-        try:
             self.mqtt_client.loop_stop()
-            self.mqtt_client.disconnect()
-        except Exception as e:
-            print(f"Error disconnecting MQTT: {e}")
-        print("Cleanup complete")
-
-
-def list_audio_devices():
-    """List all available audio input devices"""
-    # Suppress ALSA warnings
-    devnull = os.open(os.devnull, os.O_WRONLY)
-    old_stderr = os.dup(2)
-    os.dup2(devnull, 2)
-    
-    try:
-        audio = pyaudio.PyAudio()
-        
-        # Restore stderr for printing
-        os.dup2(old_stderr, 2)
-        print("\nAvailable audio input devices:")
-        print("-" * 60)
-        
-        device_count = audio.get_device_count()
-        found_devices = False
-        
-        # Suppress ALSA again for device enumeration
-        os.dup2(devnull, 2)
-        
-        for i in range(device_count):
-            try:
-                info = audio.get_device_info_by_index(i)
-                if info['maxInputChannels'] > 0:
-                    found_devices = True
-                    # Restore stderr for printing device info
-                    os.dup2(old_stderr, 2)
-                    print(f"Device {i}: {info['name']}")
-                    print(f"  Sample Rate: {int(info['defaultSampleRate'])} Hz")
-                    print(f"  Input Channels: {info['maxInputChannels']}")
-                    print()
-                    # Suppress again for next iteration
-                    os.dup2(devnull, 2)
-            except Exception:
-                # Skip devices that can't be queried
-                continue
-        
-        # Restore stderr
-        os.dup2(old_stderr, 2)
-        
-        if not found_devices:
-            print("No audio input devices found")
-        
-        audio.terminate()
-    except Exception as e:
-        os.dup2(old_stderr, 2)
-        print(f"Error listing audio devices: {e}")
-        sys.exit(1)
-    finally:
-        try:
-            os.dup2(old_stderr, 2)
-            os.close(devnull)
-            os.close(old_stderr)
         except:
             pass
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Audio Visualizer Listener')
-    parser.add_argument('--device', type=int, default=None, help='Audio input device index')
-    parser.add_argument('--list-devices', action='store_true', help='List available audio devices')
-    parser.add_argument('--sensitivity', type=float, default=1.5, help='Sensitivity multiplier (default: 1.5)')
-    parser.add_argument('--mqtt-host', type=str, default='localhost', help='MQTT broker host')
-    parser.add_argument('--mqtt-port', type=int, default=1883, help='MQTT broker port')
-    parser.add_argument('--mqtt-topic', type=str, default='protogen/audio-visualizer/data', 
-                       help='MQTT topic for audio data')
-    parser.add_argument('--mqtt-config-topic', type=str, default='protogen/audio-visualizer/config',
-                       help='MQTT topic for config updates')
+    parser = argparse.ArgumentParser(description="Audio Visualizer sounddevice Listener")
+    
+    parser.add_argument("--device", type=int, default=None, help="Input device index")
+    parser.add_argument("--low-threshold", type=float, default=0.02, help="Noise floor cutoff threshold")
+    parser.add_argument("--intensity", type=float, default=2.0, help="Volume gain multiplier")
+    parser.add_argument("--mqtt-host", type=str, default="localhost", help="MQTT broker host")
+    parser.add_argument("--mqtt-port", type=int, default=1883, help="MQTT broker port")
+    parser.add_argument("--mqtt-topic", type=str, default="protogen/audio-visualizer/data", help="MQTT topic to publish data")
+    parser.add_argument("--mqtt-config-topic", type=str, default="protogen/audio-visualizer/config", help="MQTT topic to listen for configs")
+    parser.add_argument("--list-devices", action="store_true", help="List all available audio input devices and exit")
+    
+    # Keep compatibility with --sensitivity as a fallback
+    parser.add_argument("--sensitivity", type=float, default=None, help="Deprecated sensitivity multiplier")
     
     args = parser.parse_args()
     
     if args.list_devices:
-        list_audio_devices()
-        return
-    
-    print("Audio Visualizer Listener Starting...")
-    print(f"Device: {args.device if args.device is not None else 'default'}")
-    print(f"Sensitivity: {args.sensitivity}")
-    print(f"MQTT: {args.mqtt_host}:{args.mqtt_port}")
-    print(f"Data Topic: {args.mqtt_topic}")
-    print(f"Config Topic: {args.mqtt_config_topic}")
-    
+        try:
+            devices = sd.query_devices()
+            for i, dev in enumerate(devices):
+                if dev['max_input_channels'] > 0:
+                    print(f"Device {i}: {dev['name']}")
+                    print(f"  Sample Rate: {int(dev['default_samplerate'])} Hz")
+                    print(f"  Input Channels: {dev['max_input_channels']}")
+        except Exception as e:
+            print(f"Error listing devices: {e}")
+            sys.exit(1)
+        sys.exit(0)
+        
+    final_intensity = args.intensity
+    if args.sensitivity is not None:
+        final_intensity = args.sensitivity  # backwards-compatible mapping
+        
     visualizer = AudioVisualizer(
         device_index=args.device,
-        sensitivity=args.sensitivity,
+        low_threshold=args.low_threshold,
+        intensity=final_intensity,
         mqtt_host=args.mqtt_host,
         mqtt_port=args.mqtt_port,
         mqtt_topic=args.mqtt_topic,
         mqtt_config_topic=args.mqtt_config_topic
     )
     
+    visualizer.connect_mqtt()
+    visualizer.start_audio_stream()
+    
     try:
-        visualizer.connect_mqtt()
-        visualizer.start_audio_stream()
         visualizer.process_audio()
+    except KeyboardInterrupt:
+        pass
     finally:
         visualizer.cleanup()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

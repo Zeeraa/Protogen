@@ -20,8 +20,9 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
   private readonly canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('spectrumCanvas');
 
   // State signals
-  protected readonly config = signal<AudioVisualizerConfig>({ enabled: false, deviceIndex: null, sensitivity: 1.5 });
+  protected readonly config = signal<AudioVisualizerConfig>({ enabled: false, deviceIndex: null, lowThreshold: 0.02, intensity: 2.0 });
   protected readonly isRunning = signal<boolean>(false);
+  protected readonly refreshRate = signal<number>(30);
   protected readonly devices = signal<AudioDevice[]>([]);
   protected readonly latestData = signal<AudioVisualizerData | null>(null);
   protected readonly loading = signal<boolean>(true);
@@ -36,35 +37,11 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
     return this.isRunning() ? 'text-success' : 'text-danger';
   });
 
-  protected readonly musicStyleText = computed(() => {
-    const data = this.latestData();
-    if (!data) return 'No data';
-
-    switch (data.style) {
-      case 'bass_heavy': return 'Bass Heavy';
-      case 'vocal': return 'Vocal';
-      case 'bright': return 'Bright';
-      case 'balanced': return 'Balanced';
-      case 'quiet': return 'Quiet';
-      case 'silence': return 'Silence';
-      default: return data.style;
-    }
-  });
-
   // Canvas rendering
   private canvasContext: CanvasRenderingContext2D | null = null;
   private animationFrameId: number | null = null;
-
-  // Band colors
-  private readonly bandColors = {
-    sub_bass: '#8B00FF',    // Purple
-    bass: '#FF0080',        // Pink
-    low_mids: '#FF4500',    // Orange-red
-    mids: '#FFD700',        // Gold
-    high_mids: '#00FF00',   // Green
-    highs: '#00BFFF',       // Deep sky blue
-    presence: '#FF1493'     // Deep pink
-  };
+  private lastRenderTime = 0;
+  private lastDataTimestamp = 0;
 
   constructor() {
     // Setup canvas rendering when canvas becomes available
@@ -95,6 +72,9 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.config.set(response.config);
         this.isRunning.set(response.isRunning);
+        if (response.refreshRate) {
+          this.refreshRate.set(response.refreshRate);
+        }
         this.loading.set(false);
       },
       error: (err) => {
@@ -155,64 +135,86 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
   private renderSpectrum(): void {
     if (!this.canvasContext) return;
 
+    // Schedule next frame
+    this.animationFrameId = requestAnimationFrame(() => this.renderSpectrum());
+
+    const now = performance.now();
+    const fps = this.refreshRate();
+    const interval = 1000 / fps;
+
+    if (now - this.lastRenderTime < interval) {
+      return;
+    }
+
+    const data = this.latestData();
+    if (!data || data.timestamp === this.lastDataTimestamp) {
+      return;
+    }
+
+    this.lastRenderTime = now;
+    this.lastDataTimestamp = data.timestamp;
+
     const canvas = this.canvasContext.canvas;
     const ctx = this.canvasContext;
-    const data = this.latestData();
 
     // Clear canvas
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (data) {
-      const bands = Object.entries(data.bands);
-      const barWidth = canvas.width / bands.length;
-      const barSpacing = 4;
+    const bands = [
+      ['SUB BASS', data.bands.sub_bass, '#8B00FF'],
+      ['BASS', data.bands.bass, '#FF0080'],
+      ['LOW MIDS', data.bands.low_mids, '#FF4500'],
+      ['MIDS', data.bands.mids, '#FFD700'],
+      ['HIGH MIDS', data.bands.high_mids, '#00FF00'],
+      ['HIGHS', data.bands.highs, '#00BFFF'],
+      ['PRESENCE', data.bands.presence, '#FF1493']
+    ];
 
-      bands.forEach(([name, value], index) => {
-        const barHeight = value * (canvas.height - 20);
-        const x = index * barWidth;
-        const y = canvas.height - barHeight;
+    const barWidth = canvas.width / bands.length;
+    const barSpacing = 6;
+    const activeHeight = canvas.height - 35; // Leave room for parameters labels and bottom text
 
-        // Draw bar
-        ctx.fillStyle = this.bandColors[name as keyof typeof this.bandColors];
-        ctx.fillRect(x + barSpacing / 2, y, barWidth - barSpacing, barHeight);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
 
-        // Draw bar outline
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.strokeRect(x + barSpacing / 2, y, barWidth - barSpacing, barHeight);
+    bands.forEach(([label, value, color], index) => {
+      const val = value as number;
+      const barHeight = val * activeHeight;
+      const x = index * barWidth + barSpacing / 2;
+      const y = canvas.height - 20 - barHeight;
+      const w = barWidth - barSpacing;
 
-        // Draw label
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.font = '10px monospace';
-        ctx.textAlign = 'center';
-        const label = name.replace(/_/g, ' ').toUpperCase();
-        ctx.fillText(label, x + barWidth / 2, canvas.height - 5);
-      });
+      // Draw frequency bar
+      ctx.fillStyle = color as string;
+      ctx.fillRect(x, y, w, barHeight);
 
-      // Draw beat indicator
-      if (data.beat) {
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#FF0000';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText('BEAT', canvas.width - 10, 30);
-      }
+      // Draw bar border
+      ctx.strokeRect(x, y, w, barHeight);
 
-      // Draw intensity bar at top
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.fillRect(0, 0, canvas.width, 10);
+      // Draw label
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(label as string, index * barWidth + barWidth / 2, canvas.height - 5);
+    });
 
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-      gradient.addColorStop(0, '#00FF00');
-      gradient.addColorStop(0.5, '#FFFF00');
-      gradient.addColorStop(1, '#FF0000');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width * data.intensity, 10);
+    // Draw beat indicator overlay if beat is highlighted
+    if (data.beat) {
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#FF3333';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('BEAT', canvas.width - 15, 25);
     }
 
-    // Continue rendering
-    this.animationFrameId = requestAnimationFrame(() => this.renderSpectrum());
+    // Draw overall intensity bar at the top
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, 8);
+
+    // Color code based on range limits
+    ctx.fillStyle = data.intensity > 0.8 ? '#FF3333' : data.intensity > 0.5 ? '#FFFF33' : '#33FF33';
+    ctx.fillRect(0, 0, canvas.width * data.intensity, 8);
   }
 
   protected onToggleEnabled(event: Event): void {
@@ -220,11 +222,11 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
     const currentConfig = this.config();
     const newEnabled = checkbox.checked;
 
-    // Immediately save the enabled state
     this.saving.set(true);
     this.api.updateConfig({
       deviceIndex: currentConfig.deviceIndex,
-      sensitivity: currentConfig.sensitivity,
+      lowThreshold: currentConfig.lowThreshold,
+      intensity: currentConfig.intensity,
       enabled: newEnabled
     }).subscribe({
       next: (response) => {
@@ -236,7 +238,6 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Failed to update enabled state:', err);
         this.toast.error('Failed to update audio visualizer');
-        // Revert checkbox on error
         checkbox.checked = !newEnabled;
         this.saving.set(false);
         return [];
@@ -250,11 +251,11 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
     const currentConfig = this.config();
     const newDeviceIndex = value === 'null' ? null : parseInt(value);
 
-    // Immediately save the device change
     this.saving.set(true);
     this.api.updateConfig({
       deviceIndex: newDeviceIndex,
-      sensitivity: currentConfig.sensitivity,
+      lowThreshold: currentConfig.lowThreshold,
+      intensity: currentConfig.intensity,
       enabled: currentConfig.enabled
     }).subscribe({
       next: (response) => {
@@ -272,39 +273,76 @@ export class AudioVisualizerPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected onSensitivityChange(event: Event): void {
+  protected onLowThresholdChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const currentConfig = this.config();
-    const newSensitivity = parseFloat(input.value);
+    const val = parseFloat(input.value);
 
-    // Update local state immediately for responsive UI
     this.config.set({
       ...currentConfig,
-      sensitivity: newSensitivity
+      lowThreshold: val
     });
   }
 
-  protected onSensitivityChangeEnd(event: Event): void {
-    // Save when user releases the slider
+  protected onLowThresholdChangeEnd(event: Event): void {
     const input = event.target as HTMLInputElement;
     const currentConfig = this.config();
-    const newSensitivity = parseFloat(input.value);
+    const val = parseFloat(input.value);
 
     this.saving.set(true);
     this.api.updateConfig({
       deviceIndex: currentConfig.deviceIndex,
-      sensitivity: newSensitivity,
+      lowThreshold: val,
+      intensity: currentConfig.intensity,
       enabled: currentConfig.enabled
     }).subscribe({
       next: (response) => {
         this.config.set(response.config);
         this.isRunning.set(response.isRunning);
-        this.toast.success('Sensitivity updated');
+        this.toast.success('Low threshold noise-gate updated');
         this.saving.set(false);
       },
       error: (err) => {
-        console.error('Failed to update sensitivity:', err);
-        this.toast.error('Failed to update sensitivity');
+        console.error('Failed to update low threshold:', err);
+        this.toast.error('Failed to update low threshold');
+        this.saving.set(false);
+        return [];
+      }
+    });
+  }
+
+  protected onIntensityChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const currentConfig = this.config();
+    const val = parseFloat(input.value);
+
+    this.config.set({
+      ...currentConfig,
+      intensity: val
+    });
+  }
+
+  protected onIntensityChangeEnd(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const currentConfig = this.config();
+    const val = parseFloat(input.value);
+
+    this.saving.set(true);
+    this.api.updateConfig({
+      deviceIndex: currentConfig.deviceIndex,
+      lowThreshold: currentConfig.lowThreshold,
+      intensity: val,
+      enabled: currentConfig.enabled
+    }).subscribe({
+      next: (response) => {
+        this.config.set(response.config);
+        this.isRunning.set(response.isRunning);
+        this.toast.success('Intensity multiplier updated');
+        this.saving.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to update intensity multiplier:', err);
+        this.toast.error('Failed to update intensity multiplier');
         this.saving.set(false);
         return [];
       }

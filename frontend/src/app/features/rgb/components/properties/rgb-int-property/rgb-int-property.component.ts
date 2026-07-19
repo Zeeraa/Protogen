@@ -23,9 +23,28 @@ export class RgbIntPropertyComponent extends RgbPropertySharedClass {
     return undefinedToNull(this.getRestriction("max") as number);
   }
 
+  get selectOptions(): { label: string; value: number }[] {
+    return this.getMetadata("selectOptions") as { label: string; value: number }[] || [];
+  }
+
+  get valueSelect(): string {
+    return String(this.property.value);
+  }
+
   onChange(event: Event) {
     const valueString = String((event.target as HTMLInputElement).value);
     this.api.setEffectProperty(this.scene.id, this.effect.id, this.property.name, valueString).pipe(catchError(err => {
+      this.toast.error("Failed to update property");
+      throw err;
+    })).subscribe(() => {
+      console.debug("Property updated");
+    });
+  }
+
+  onChangeParse(event: Event) {
+    const intVal = parseInt((event.target as HTMLSelectElement).value, 10);
+    this.property.value = intVal;
+    this.api.setEffectProperty(this.scene.id, this.effect.id, this.property.name, String(intVal)).pipe(catchError(err => {
       this.toast.error("Failed to update property");
       throw err;
     })).subscribe(() => {

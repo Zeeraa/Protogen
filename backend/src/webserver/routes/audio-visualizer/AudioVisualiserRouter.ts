@@ -23,6 +23,7 @@ export class AudioVisualiserRouter extends AbstractRouter {
         res.json({
           config: this.protogen.audioVisualiser.config,
           isRunning: this.protogen.audioVisualiser.isRunning,
+          refreshRate: this.protogen.rgb?.refreshRate ?? 30,
         });
       } catch (err) {
         this.handleError(err, _, res);
@@ -50,11 +51,17 @@ export class AudioVisualiserRouter extends AbstractRouter {
           return;
         }
 
-        await this.protogen.audioVisualiser.updateConfig(parsed.data);
+        const data: any = { ...parsed.data };
+        if (data.sensitivity !== undefined && data.intensity === undefined) {
+          data.intensity = data.sensitivity;
+        }
+
+        await this.protogen.audioVisualiser.updateConfig(data);
 
         res.json({
           config: this.protogen.audioVisualiser.config,
           isRunning: this.protogen.audioVisualiser.isRunning,
+          refreshRate: this.protogen.rgb?.refreshRate ?? 30,
         });
       } catch (err) {
         this.handleError(err, req, res);
@@ -160,6 +167,8 @@ export class AudioVisualiserRouter extends AbstractRouter {
 
 const UpdateConfigModel = z.object({
   deviceIndex: z.number().nullable().optional(),
-  sensitivity: z.number().min(0.1).max(10).optional(),
+  lowThreshold: z.number().min(0.0).max(1.0).optional(),
+  intensity: z.number().min(0.1).max(20.0).optional(),
+  sensitivity: z.number().min(0.1).max(20.0).optional(),
   enabled: z.boolean().optional(),
 });

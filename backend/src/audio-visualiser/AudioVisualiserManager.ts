@@ -20,13 +20,13 @@ export interface AudioVisualizerData {
     presence: number;
   };
   beat: boolean;
-  style: 'bass_heavy' | 'vocal' | 'bright' | 'balanced' | 'quiet' | 'silence';
 }
 
 export interface AudioVisualizerConfig {
   enabled: boolean;
   deviceIndex: number | null;
-  sensitivity: number;
+  lowThreshold: number;
+  intensity: number;
 }
 
 export class AudioVisualiserManager {
@@ -43,7 +43,8 @@ export class AudioVisualiserManager {
     this._config = {
       enabled: false,
       deviceIndex: null,
-      sensitivity: 1.5,
+      lowThreshold: 0.02,
+      intensity: 2.0,
     };
 
     // Use venv python if available, fallback to system python3
@@ -110,7 +111,8 @@ export class AudioVisualiserManager {
 
     const args = [
       this._pythonScriptPath,
-      "--sensitivity", String(this._config.sensitivity),
+      "--low-threshold", String(this._config.lowThreshold),
+      "--intensity", String(this._config.intensity),
       "--mqtt-host", this._protogen.config.mqtt.host,
       "--mqtt-port", String(this._protogen.config.mqtt.port),
       "--mqtt-topic", DATA_TOPIC,
@@ -200,8 +202,11 @@ export class AudioVisualiserManager {
     if (config.deviceIndex !== undefined) {
       this._config.deviceIndex = config.deviceIndex;
     }
-    if (config.sensitivity !== undefined) {
-      this._config.sensitivity = config.sensitivity;
+    if (config.lowThreshold !== undefined) {
+      this._config.lowThreshold = config.lowThreshold;
+    }
+    if (config.intensity !== undefined) {
+      this._config.intensity = config.intensity;
     }
     if (config.enabled !== undefined) {
       this._config.enabled = config.enabled;
@@ -229,7 +234,8 @@ export class AudioVisualiserManager {
       } else {
         // Push live config update via MQTT
         this._protogen.mqttManager.publish(CONFIG_TOPIC, JSON.stringify({
-          sensitivity: this._config.sensitivity,
+          lowThreshold: this._config.lowThreshold,
+          intensity: this._config.intensity,
           enabled: this._config.enabled,
         }));
       }
@@ -307,6 +313,8 @@ export class AudioVisualiserManager {
   private async loadConfigFromDatabase(): Promise<void> {
     const enabled = await this._protogen.database.getData("AudioVisualiser_Enabled");
     const deviceIndex = await this._protogen.database.getData("AudioVisualiser_DeviceIndex");
+    const lowThreshold = await this._protogen.database.getData("AudioVisualiser_LowThreshold");
+    const intensity = await this._protogen.database.getData("AudioVisualiser_Intensity");
     const sensitivity = await this._protogen.database.getData("AudioVisualiser_Sensitivity");
 
     if (enabled !== null) {
@@ -315,15 +323,23 @@ export class AudioVisualiserManager {
     if (deviceIndex !== null && deviceIndex !== "null") {
       this._config.deviceIndex = parseInt(deviceIndex);
     }
-    if (sensitivity !== null) {
-      this._config.sensitivity = parseFloat(sensitivity);
+
+    this._config.lowThreshold = lowThreshold !== null ? parseFloat(lowThreshold) : 0.02;
+
+    if (intensity !== null) {
+      this._config.intensity = parseFloat(intensity);
+    } else if (sensitivity !== null) {
+      this._config.intensity = parseFloat(sensitivity);
+    } else {
+      this._config.intensity = 2.0;
     }
   }
 
   private async saveConfigToDatabase(): Promise<void> {
     await this._protogen.database.setData("AudioVisualiser_Enabled", String(this._config.enabled));
     await this._protogen.database.setData("AudioVisualiser_DeviceIndex", this._config.deviceIndex === null ? "null" : String(this._config.deviceIndex));
-    await this._protogen.database.setData("AudioVisualiser_Sensitivity", String(this._config.sensitivity));
+    await this._protogen.database.setData("AudioVisualiser_LowThreshold", String(this._config.lowThreshold));
+    await this._protogen.database.setData("AudioVisualiser_Intensity", String(this._config.intensity));
   }
 
   public async shutdown(): Promise<void> {

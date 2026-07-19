@@ -46,6 +46,10 @@ export class RgbManager {
     return this.protogen.config.rgb;
   }
 
+  public get refreshRate() {
+    return this.config.refreshRate;
+  }
+
   /**
    * Initializes the RGB manager and fetches data from the database.
    */

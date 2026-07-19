@@ -1,5 +1,4 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiBaseService } from '../api-base.service';
 
@@ -35,12 +34,14 @@ export class AudioVisualizerApiService extends ApiBaseService {
 export interface AudioVisualizerConfigResponse {
   config: AudioVisualizerConfig;
   isRunning: boolean;
+  refreshRate?: number;
 }
 
 export interface AudioVisualizerConfig {
   enabled: boolean;
   deviceIndex: number | null;
-  sensitivity: number;
+  lowThreshold: number;
+  intensity: number;
 }
 
 export interface AudioVisualizerData {
@@ -56,7 +57,6 @@ export interface AudioVisualizerData {
     presence: number;
   };
   beat: boolean;
-  style: 'bass_heavy' | 'vocal' | 'bright' | 'balanced' | 'quiet' | 'silence';
 }
 
 export interface AudioDevice {

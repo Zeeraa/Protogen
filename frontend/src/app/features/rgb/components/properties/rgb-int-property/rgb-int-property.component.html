@@ -15,6 +15,12 @@
 } @else if (type == "SLIDER") {
 <input type="range" class="form-range" [min]="min" [max]="max" step="1" [id]="inputId" [(ngModel)]="property.value"
   (change)="onChange($event)">
+} @else if (type == "SELECT") {
+<select class="form-select" [id]="inputId" [value]="valueSelect" (change)="onChangeParse($event)">
+  @for (option of selectOptions; track option.value) {
+  <option [value]="option.value">{{option.label}}</option>
+  }
+</select>
 } @else {
 <span class="text-danger" [id]="inputId">
   Invalid input type {{type}}

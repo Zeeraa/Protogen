@@ -44,6 +44,7 @@ export class RgbEffectIntProperty extends AbstractRgbEffectProperty<number> {
   public override get metadata() {
     return {
       intInputType: this._options.inputType || IntPropInputType.Default,
+      selectOptions: this._options.selectOptions,
     }
   }
 }
@@ -52,9 +53,11 @@ interface IntPropOptions {
   min?: number;
   max?: number;
   inputType?: IntPropInputType;
+  selectOptions?: { label: string; value: number }[];
 }
 
 export enum IntPropInputType {
   Default = "DEFAULT",
   Slider = "SLIDER",
+  Select = "SELECT",
 }
