@@ -190,7 +190,7 @@ export class RgbManager {
     const repo = this.protogen.database.dataSource.getRepository(StoredRgbScene);
 
     const scenes = await repo.find({
-      relations: ["effects", "effects.properties"]
+      relations: { effects: { properties: true } }
     });
 
     scenes.forEach(scene => {
@@ -230,7 +230,7 @@ export class RgbManager {
       where: {
         id: Equal(scene.id),
       },
-      relations: ["effects", "effects.properties"]
+      relations: { effects: { properties: true } }
     });
 
     let dbScene;

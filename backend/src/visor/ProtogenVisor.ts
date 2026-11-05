@@ -170,7 +170,7 @@ export class ProtogenVisor {
       create: {
         width: panelW * 2,
         height: this.config.height,
-        channels: frameMetadata.channels!,
+        channels: 4,
         background: { r: 0, g: 0, b: 0, alpha: 0 }
       }
     }).composite([

@@ -227,7 +227,7 @@ export class VisorFaceRenderer extends VisorRenderer {
       where: {
         uuid: Equal(effect.id),
       },
-      relations: ["properties"]
+      relations: { properties: true }
     });
 
     if (dbEffect == null) {
@@ -268,7 +268,7 @@ export class VisorFaceRenderer extends VisorRenderer {
     this._availableColorEffects = [];
 
     const effects = await repo.find({
-      relations: ["properties"],
+      relations: { properties: true },
     });
 
 

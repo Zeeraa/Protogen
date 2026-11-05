@@ -124,7 +124,7 @@ export class Database {
       where: {
         key: Equal(key),
       },
-      select: ["key"],
+      select: { key: true },
     });
     if (entry == null) {
       entry = new KVDataStoreEntry();
@@ -161,7 +161,7 @@ export class Database {
       where: {
         key: Equal(key),
       },
-      select: ["value"],
+      select: { value: true },
     });
     return entry == null ? null : entry.value;
   }
@@ -178,7 +178,7 @@ export class Database {
       where: {
         key: Equal(key),
       },
-      select: ["key"],
+      select: { key: true },
     });
     return entry != null;
   }

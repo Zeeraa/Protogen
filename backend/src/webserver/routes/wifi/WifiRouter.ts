@@ -67,7 +67,7 @@ export class WifiRouter extends AbstractRouter {
       try {
         const parsed = WifiCredentialsModel.safeParse(req.body);
         if (!parsed.success) {
-          res.status(400).json({ message: "Invalid request body", errors: parsed.error.errors });
+          res.status(400).json({ message: "Invalid request body", errors: parsed.error.issues });
           return;
         }
 
@@ -115,7 +115,7 @@ export class WifiRouter extends AbstractRouter {
         const uuid = req.params.uuid;
         const parsed = WifiCredentialsModel.safeParse(req.body);
         if (!parsed.success) {
-          res.status(400).json({ message: "Invalid request body", errors: parsed.error.errors });
+          res.status(400).json({ message: "Invalid request body", errors: parsed.error.issues });
           return;
         }
 

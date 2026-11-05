@@ -189,7 +189,7 @@ export class VideoPlayerRouter extends AbstractRouter {
             sortingNumber: "ASC",
             id: "ASC",
           },
-          relations: ["group"]
+          relations: { group: true }
         });
         res.json(result);
       } catch (err) {
