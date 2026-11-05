@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
-COPY --from=build /swagger.json ./swagger.json
+COPY --from=build /app/swagger.json ./swagger.json
 
 # Expose ports
 EXPOSE 80
