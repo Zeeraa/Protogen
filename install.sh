@@ -195,7 +195,7 @@ echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | sudo debconf-set-se
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $(pwgen -s -1 128)" | sudo debconf-set-selections
 
-sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv libhidapi-dev libudev-dev portaudio19-dev
+sudo apt install -y dkms vlc ffmpeg btop git build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev apache2 mariadb-server mariadb-client php php-mbstring php-zip php-gd php-json php-curl phpmyadmin wpasupplicant wireless-tools iproute2 mosquitto python3 python3-venv libhidapi-dev libudev-dev portaudio19-dev dosbox xvfb
 
 # Check if Node.js is installed
 if ! command -v node &>/dev/null; then

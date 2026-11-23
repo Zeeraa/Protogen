@@ -33,6 +33,7 @@ import { InitialSetup } from "./initial-setup/InitialSetup";
 import { GamepadManager } from "./gamepadmanager/GamepadManager";
 import { MqttManager } from "./mqtt/MqttManager";
 import { KV_WorkerKey, KV_WorkerUrl } from "./utils/KVDataStorageKeys";
+import { DosboxManager } from "./dosbox/DosboxManager";
 
 export const BootMessageColor = "#00FF00";
 export const JwtKeyLength = 64;
@@ -70,6 +71,7 @@ export class Protogen {
   public readonly hudManager: HUDManager | null;
   public readonly hardwareAbstractionLayer: HardwareAbstractionLayer;
   public readonly sensorManager: SensorManager;
+  public readonly dosboxManager: DosboxManager;
   public remoteWorkerUrl: string;
   public remoteWorkerKey: string | null;
   public interuptLoops = false;
@@ -165,6 +167,7 @@ export class Protogen {
     this.webServer = new ProtogenWebServer(this);
     this.flaschenTaschen = new FlaschenTaschen(this);
     this.visor = new ProtogenVisor(this);
+    this.dosboxManager = new DosboxManager(this);
     if (this.config.systemFeatures.hud) {
       this.hudManager = new HUDManager(this);
     } else {
@@ -247,6 +250,9 @@ export class Protogen {
     await this.visor.tryRenderTextFrame("BOOTING...\nInit MQTT", BootMessageColor);
     await this.mqttManager.init();
     await this.gamepadManager.init();
+
+    await this.visor.tryRenderTextFrame("BOOTING...\nInit DOSBox", BootMessageColor);
+    await this.dosboxManager.loadApplications();
 
     await this.visor.tryRenderTextFrame("BOOTING...\nInit audio\nvisualizer", BootMessageColor);
     await this.audioVisualiser.init();

@@ -144,6 +144,29 @@ export class AppManager {
     this.protogen.logger.info("AppManager", `Registered app ${app.name}`);
   }
 
+  /**
+   * Unregisters an app, deactivating it first if it is currently active.
+   * @returns True if the app was unregistered, false if it was not registered or deactivation failed
+   */
+  public async unregisterApp(app: AbstractApp): Promise<boolean> {
+    if (!this._apps.includes(app)) {
+      return false;
+    }
+
+    if (this._activeApp === app && !(await this.deactivateApp())) {
+      return false;
+    }
+
+    const appIndex = this._apps.indexOf(app);
+    if (appIndex === -1) {
+      return false;
+    }
+
+    this._apps.splice(appIndex, 1);
+    this.protogen.logger.info("AppManager", `Unregistered app ${app.name}`);
+    return true;
+  }
+
   public async activateApp(name: string) {
     const app = this.getAppByName(name);
     if (!app) {

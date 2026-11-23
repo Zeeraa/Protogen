@@ -113,3 +113,15 @@ export function removeTrailingSlash(url: string): string {
   }
   return url;
 }
+
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  try {
+    return JSON.stringify(error) ?? String(error);
+  } catch {
+    return String(error);
+  }
+}
