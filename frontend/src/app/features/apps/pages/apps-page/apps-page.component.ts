@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { App, AppsApi } from '../../../../core/services/api/apps-api.service';
 import { catchError } from 'rxjs';
 import { Title } from '@angular/platform-browser';
@@ -16,9 +16,9 @@ export class AppsPageComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private readonly title = inject(Title);
 
-  protected apps: App[] = [];
-  protected activeApp: App | null = null;
-  private interval: any = null;
+  protected readonly apps = signal<App[]>([]);
+  protected readonly activeApp = signal<App | null>(null);
+  private interval?: ReturnType<typeof setInterval>;
 
   ngOnInit(): void {
     this.title.setTitle("Apps - Protogen");
@@ -37,8 +37,8 @@ export class AppsPageComponent implements OnInit, OnDestroy {
       this.toast.error("Error loading apps");
       throw err;
     })).subscribe(appList => {
-      this.activeApp = appList.activeApp;
-      this.apps = appList.apps;
+      this.activeApp.set(appList.activeApp);
+      this.apps.set(appList.apps);
     });
   }
 
@@ -49,12 +49,12 @@ export class AppsPageComponent implements OnInit, OnDestroy {
         return [];
       })
     ).subscribe(activeApp => {
-      this.activeApp = activeApp;
+      this.activeApp.set(activeApp);
     });
   }
 
   protected appActivated(app: App) {
-    this.activeApp = app;
+    this.activeApp.set(app);
   }
 
   closeActiveApp() {
@@ -66,7 +66,7 @@ export class AppsPageComponent implements OnInit, OnDestroy {
     ).subscribe(result => {
       if (result == true) {
         this.toast.success("App closed");
-        this.activeApp = null;
+        this.activeApp.set(null);
       }
     });
   }

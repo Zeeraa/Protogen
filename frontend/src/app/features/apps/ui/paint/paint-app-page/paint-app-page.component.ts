@@ -1,4 +1,4 @@
-import { AfterViewInit, ApplicationRef, Component, ElementRef, HostListener, inject, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ApplicationRef, ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AppSocketConnection, AppSocketPacket } from '../../../../../core/apps/AppSocketConnection';
 import { AppsApi } from '../../../../../core/services/api/apps-api.service';
@@ -24,22 +24,25 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   private socket: AppSocketConnection | null = null;
   private connectSubscriptsion?: Subscription;
   private socketSubscriptsion?: Subscription;
+  private disconnectedSubscriptsion?: Subscription;
 
   private pixelSize = 10;
 
-  private width = 128;
-  private height = 32;
+  private readonly width = signal(128);
+  private readonly height = signal(32);
 
-  private isReady = false;
-  private isDrawing = false;
+  private readonly isReady = signal(false);
+  private readonly isDrawing = signal(false);
+  protected readonly disconnected = signal(false);
+  protected readonly selectedColor = signal("#FFFFFF");
+  protected readonly canvasWidth = computed(() => this.width() * this.pixelSize);
+  protected readonly canvasHeight = computed(() => this.height() * this.pixelSize);
   // Postions we have already drawn on the canvas
   private preventDrawPositions: Position[] = [];
 
-  selectedColor = "#FFFFFF"
-
   private sessionId = uuidv4();
 
-  @ViewChild("paintCanvas") private canvas!: ElementRef<HTMLCanvasElement>;
+  private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>("paintCanvas");
   private ctx!: CanvasRenderingContext2D;
 
   constructor() {
@@ -48,22 +51,10 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
     this.onTouchEnd = this.onTouchEnd.bind(this);
   }
 
-  get canvasWidth() {
-    return this.width * this.pixelSize;
-  }
-
-  get canvasHeight() {
-    return this.height * this.pixelSize;
-  }
-
-  get disconnected() {
-    return this.socket?.disconnected ?? false;
-  }
-
   ngAfterViewInit(): void {
     console.log("PaintAppPageComponent::ngAfterViewInit()");
 
-    const canvasEl = this.canvas.nativeElement;
+    const canvasEl = this.canvas().nativeElement;
     this.ctx = canvasEl.getContext('2d')!;
     this.clearCanvas();
 
@@ -78,6 +69,9 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.socket = new AppSocketConnection(token);
+    this.disconnectedSubscriptsion = this.socket.disconnectedObservable.subscribe(disconnected => {
+      this.disconnected.set(disconnected);
+    });
 
     this.socketSubscriptsion = this.socket.messageObservable.subscribe((message) => {
       this.handleMessage(message);
@@ -104,8 +98,8 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
           return;
         }
 
-        this.width = w;
-        this.height = h;
+        this.width.set(w);
+        this.height.set(h);
 
         console.log("Got canvas size W:", w, "H:", h);
 
@@ -116,12 +110,12 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
         const image = new Image();
         image.onload = () => {
           this.ctx.imageSmoothingEnabled = false;
-          this.ctx.drawImage(image, 0, 0, this.canvasWidth, this.canvasHeight);
+          this.ctx.drawImage(image, 0, 0, this.canvasWidth(), this.canvasHeight());
           // Ugly workaround since otherwise the brightness of the grid increases while drawing
           for (let i = 0; i < 5; i++) {
             this.drawGrid();
           }
-          this.isReady = true;
+          this.isReady.set(true);
         };
         image.src = data.metadata.image;
       });
@@ -131,7 +125,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   }
 
   getCanvasCoordinates(event: MouseEvent | TouchEvent): Position {
-    const canvas = this.canvas.nativeElement;
+    const canvas = this.canvas().nativeElement;
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -156,17 +150,17 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
 
   onCanvasMouseDown(event: MouseEvent | TouchEvent) {
     const pos = this.getCanvasCoordinates(event);
-    if (!this.isDrawing) {
+    if (!this.isDrawing()) {
       this.preventDrawPositions = [];
       console.log("Begin drawing");
     }
     event.preventDefault();
-    this.isDrawing = true;
+    this.isDrawing.set(true);
     this.userDrawAt(pos);
   }
 
   onCanvasMouseMove(event: MouseEvent | TouchEvent) {
-    if (this.isDrawing) {
+    if (this.isDrawing()) {
       event.preventDefault();
       const pos = this.getCanvasCoordinates(event);
       this.userDrawAt(pos);
@@ -175,27 +169,27 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('document:mouseup', ['$event'])
   onGlobalMouseUp(_event: MouseEvent) {
-    if (this.isDrawing) {
-      this.isDrawing = false;
+    if (this.isDrawing()) {
+      this.isDrawing.set(false);
       this.preventDrawPositions = [];
     }
   }
 
   onTouchEnd() {
-    if (this.isDrawing) {
-      this.isDrawing = false;
+    if (this.isDrawing()) {
+      this.isDrawing.set(false);
       this.preventDrawPositions = [];
     }
   }
 
   userDrawAt(canvasPos: Position) {
-    if (this.socket?.connected !== true || !this.isReady) {
+    if (this.socket?.connected !== true || !this.isReady()) {
       return; // Don't draw if we are not connected
     }
 
-    const rgb = hexToRgb(this.selectedColor);
+    const rgb = hexToRgb(this.selectedColor());
     if (!rgb) {
-      console.error("Invalid color selected:", this.selectedColor);
+      console.error("Invalid color selected:", this.selectedColor());
       return;
     }
 
@@ -231,7 +225,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
 
   private clearCanvas() {
     this.ctx.fillStyle = "#000000";
-    this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    this.ctx.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
 
     // Ugly workaround since otherwise the brightness of the grid increases while drawing
     for (let i = 0; i < 5; i++) {
@@ -242,25 +236,25 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   private drawGrid() {
     this.ctx.strokeStyle = "#555555";
     this.ctx.lineWidth = 1;
-    for (let x = 0; x < this.canvasWidth; x += this.pixelSize) {
+    for (let x = 0; x < this.canvasWidth(); x += this.pixelSize) {
       this.ctx.beginPath();
       this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, this.canvasHeight);
+      this.ctx.lineTo(x, this.canvasHeight());
       this.ctx.stroke();
     }
 
-    for (let y = 0; y < this.canvasHeight; y += this.pixelSize) {
+    for (let y = 0; y < this.canvasHeight(); y += this.pixelSize) {
       this.ctx.beginPath();
       this.ctx.moveTo(0, y);
-      this.ctx.lineTo(this.canvasWidth, y);
+      this.ctx.lineTo(this.canvasWidth(), y);
       this.ctx.stroke();
     }
 
     this.ctx.strokeStyle = "#550000";
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
-    this.ctx.moveTo(this.canvasWidth / 2, 0);
-    this.ctx.lineTo(this.canvasWidth / 2, this.canvasHeight);
+    this.ctx.moveTo(this.canvasWidth() / 2, 0);
+    this.ctx.lineTo(this.canvasWidth() / 2, this.canvasHeight());
     this.ctx.stroke();
   }
 
@@ -281,7 +275,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   }
 
   userClearCanvas() {
-    if (this.socket?.connected !== true || !this.isReady) {
+    if (this.socket?.connected !== true || !this.isReady()) {
       return; // Don't draw if we are not connected
     }
 
@@ -300,6 +294,7 @@ export class PaintAppPageComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.connectSubscriptsion?.unsubscribe();
     this.socketSubscriptsion?.unsubscribe();
+    this.disconnectedSubscriptsion?.unsubscribe();
     this.socket?.destroy();
   }
 }

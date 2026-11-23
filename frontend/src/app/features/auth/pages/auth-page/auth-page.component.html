@@ -7,6 +7,17 @@
 
   <div class="row">
     <p>Enter the code from the other device in the box below to log them in</p>
+    <div class="mb-3">
+      <video #qrVideo class="auth-qr-scanner-video mb-2" [class.d-none]="!isScanning()" autoplay muted playsinline></video>
+      @if (isScanning()) {
+      <button type="button" class="btn btn-outline-secondary" (click)="stopQrScanner()">Stop QR scanner</button>
+      } @else {
+      <button type="button" class="btn btn-outline-primary" (click)="startQrScanner()">Scan QR code</button>
+      }
+      @if (scannerError()) {
+      <p class="text-danger mt-2">{{scannerError()}}</p>
+      }
+    </div>
     <div class="input-group mt-2">
       <div class="col">
         <input type="text" class="form-control" placeholder="Code" [(ngModel)]="code"

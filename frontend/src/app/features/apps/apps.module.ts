@@ -4,6 +4,7 @@ import { AppsPageComponent } from './pages/apps-page/apps-page.component';
 import { AppCardComponent } from './components/app-card/app-card.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PaintModule } from './ui/paint/paint.module';
+import { DosboxModule } from './ui/dosbox/dosbox.module';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { PaintModule } from './ui/paint/paint.module';
     FormsModule,
     ReactiveFormsModule,
     PaintModule,
+    DosboxModule,
   ]
 })
 export class AppsModule { }

@@ -21,11 +21,6 @@ export class PaintApp extends AbstractApp {
     this.regenerateInteractionKey();
   }
 
-  clearCanvas() {
-    this.appCanvasCtx.fillStyle = "black";
-    this.appCanvasCtx.fillRect(0, 0, this.appCanvas.width, this.appCanvas.height);
-  }
-
   public getMetadata() {
     const imageB64 = this.appCanvas.toDataURL("image/png");
 

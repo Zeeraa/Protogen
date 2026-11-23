@@ -26,6 +26,7 @@ import { WifiPageComponent } from './features/wifi/pages/wifi-page/wifi-page.com
 import { GamepadRemotePageComponent } from './features/remote/pages/gamepad-remote-page/gamepad-remote-page.component';
 import { GamepadProfileEditorPageComponent } from './features/remote/pages/gamepad-profile-editor-page/gamepad-profile-editor-page.component';
 import { NotFoundPageComponent } from './features/not-found/pages/not-found-page/not-found-page.component';
+import { DosboxAppPageComponent } from './features/apps/ui/dosbox/dosbox-app-page/dosbox-app-page.component';
 
 export const routes: Routes = [
   {
@@ -123,6 +124,10 @@ export const routes: Routes = [
       {
         path: "paint",
         component: PaintAppPageComponent,
+      },
+      {
+        path: "dosbox/:appName",
+        component: DosboxAppPageComponent,
       }
     ]
   },

@@ -5,7 +5,7 @@
     </div>
   </div>
 
-  @if(disconnected) {
+  @if(disconnected()) {
   <div class="row mt-2">
     <div class="col">
       <div class="alert alert-danger">Socket disconnected. Try reloading and check that your invite is still valid</div>
@@ -15,7 +15,8 @@
 
   <div class="row mt-2">
     <div class="col-auto">
-      <input type="color" class="form-control form-control-color" id="paintColorPicker" [(ngModel)]="selectedColor"
+      <input type="color" class="form-control form-control-color" [ngModel]="selectedColor()"
+        (ngModelChange)="selectedColor.set($event)"
         title="Select color">
     </div>
 
@@ -26,7 +27,7 @@
 
   <div class="row mt-2">
     <div class="col">
-      <canvas class="w-100 protogen-paint-app-canvas" [width]="canvasWidth" [height]="canvasHeight"
+      <canvas class="w-100 protogen-paint-app-canvas" [width]="canvasWidth()" [height]="canvasHeight()"
         (mousedown)="onCanvasMouseDown($event)" (mousemove)="onCanvasMouseMove($event)" #paintCanvas></canvas>
     </div>
   </div>

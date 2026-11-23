@@ -287,6 +287,8 @@ export class Protogen {
     this.logger.info("Protogen", "Beginning graceful shutdown...");
     this.interuptLoops = true;
 
+    this.dosboxManager?.kill();
+
     if (this.hudManager) {
       await this.hudManager.shutdown();
     }

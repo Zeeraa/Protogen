@@ -1,4 +1,4 @@
-import { Subject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import { io, Socket } from "socket.io-client";
 
 export class AppSocketConnection {
@@ -8,6 +8,7 @@ export class AppSocketConnection {
   private _disconnected = false;
 
   private _connectedSubject = new Subject<void>();
+  private _disconnectedSubject = new BehaviorSubject<boolean>(false);
   private _messageSubject = new Subject<AppSocketPacket<any>>();
 
   constructor(token: string) {
@@ -22,6 +23,10 @@ export class AppSocketConnection {
 
   public get connectedObservable() {
     return this._connectedSubject.asObservable();
+  }
+
+  public get disconnectedObservable() {
+    return this._disconnectedSubject.asObservable();
   }
 
   public get messageObservable() {
@@ -42,6 +47,7 @@ export class AppSocketConnection {
     }
 
     this._disconnected = false;
+    this._disconnectedSubject.next(false);
 
     this._socket = io({
       reconnection: true,
@@ -59,12 +65,14 @@ export class AppSocketConnection {
       console.error('Socket connection error:', error);
       this._disconnected = true;
       this._connected = false;
+      this._disconnectedSubject.next(true);
     });
 
     this._socket.on('disconnect', (reason) => {
       console.warn('Socket disconnected:', reason);
       this._disconnected = true;
       this._connected = false;
+      this._disconnectedSubject.next(true);
     });
 
     this._socket.on('message', (msg: any) => {

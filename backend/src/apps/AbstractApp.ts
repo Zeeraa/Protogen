@@ -170,6 +170,15 @@ export abstract class AbstractApp {
   }
 
   /**
+   * Clear the canvas
+   * @param color The color to use. Default: black
+   */
+  clearCanvas(color = "black") {
+    this.appCanvasCtx.fillStyle = color;
+    this.appCanvasCtx.fillRect(0, 0, this.appCanvas.width, this.appCanvas.height);
+  }
+
+  /**
    * Called when the app receives a message from the web interface. The data object is unfiltered and should not be trusted without input validation
    * @param data Unfiltered data from the user
    */
