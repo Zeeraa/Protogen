@@ -167,7 +167,7 @@ export class AppManager {
     return true;
   }
 
-  public async activateApp(name: string) {
+  public async activateApp(name: string, params: Record<string, any> = {}) {
     const app = this.getAppByName(name);
     if (!app) {
       throw new Error(`App ${name} not found`);
@@ -182,7 +182,7 @@ export class AppManager {
       if (app.options.useRenderLock || app.options.useRenderer) {
         this.protogen.visor.appendRenderLock(AppRenderLockName);
       }
-      await this._activeApp.onActivated();
+      await this._activeApp.onActivated(params);
       return true;
     } catch (err) {
       console.error(err);

@@ -1,5 +1,5 @@
 import { DosboxApplication } from "../../dosbox/DosboxApplication";
-import { AbstractApp } from "../AbstractApp";
+import { AbstractApp, AppAdditionalButtonEnableRule, AppAdditionalButtonType } from "../AbstractApp";
 import { AppManager } from "../AppManager";
 import { CanvasRenderingContext2D } from "canvas";
 
@@ -10,15 +10,29 @@ export class WrappedDosboxApp extends AbstractApp {
   constructor(appManager: AppManager, dosboxApp: DosboxApplication) {
     super(appManager, "dosbox_" + dosboxApp.name, dosboxApp.displayName, { useRenderer: true, useRenderLock: true, webPath: "/apps/dosbox/" + dosboxApp.name });
     this.dosboxApp = dosboxApp;
+    if (dosboxApp.allowMaintenanceMode) {
+      this.additionalButtons.push({
+        type: AppAdditionalButtonType.StartWithParams,
+        style: "btn-secondary",
+        text: "Maintenance",
+        enableRule: AppAdditionalButtonEnableRule.WhenInactive,
+        metadata: {
+          maintenance: true
+        }
+      });
+    }
   }
 
   async onInit() {
     this.clearCanvas();
   }
 
-  public async onActivated() {
+  public async onActivated(params: Record<string, any>) {
     this.clearCanvas();
     this.regenerateInteractionKey();
+
+    const maintenanceMode = params?.maintenance === true;
+
     try {
       // When process exits deactivate the current app
       this.protogen.dosboxManager.setExitCallbackHandler(() => {
@@ -26,7 +40,7 @@ export class WrappedDosboxApp extends AbstractApp {
       });
 
       //TODO: figure out maintenance mode
-      await this.protogen.dosboxManager.launch(this.dosboxApp, false);
+      await this.protogen.dosboxManager.launch(this.dosboxApp, maintenanceMode);
       this.protogen.logger.info("DosBoxApp", "Launched DOSBox app: " + this.dosboxApp.name);
     } catch (error) {
       console.error(error);

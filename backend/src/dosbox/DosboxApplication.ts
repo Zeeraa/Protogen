@@ -3,19 +3,21 @@ import { DosboxApplicationType } from "./DosboxApplicationType";
 
 export class DosboxApplication {
   private readonly dosbox: DosboxManager;
+  public readonly allowMaintenanceMode: boolean;
   public readonly type: DosboxApplicationType;
   public readonly name: string;
   public readonly mountpoint: string | null;
   public displayName: string;
   public applicationCommandline: string[] = [];
 
-  constructor(dosbox: DosboxManager, type: DosboxApplicationType, name: string, mountpoint: string | null, displayName: string, applicationCommandline: string[]) {
+  constructor(dosbox: DosboxManager, type: DosboxApplicationType, name: string, mountpoint: string | null, displayName: string, applicationCommandline: string[], allowMaintenanceMode: boolean) {
     this.dosbox = dosbox;
     this.type = type;
     this.name = name;
     this.mountpoint = mountpoint;
     this.displayName = displayName;
     this.applicationCommandline = applicationCommandline;
+    this.allowMaintenanceMode = allowMaintenanceMode;
   }
 
   /**

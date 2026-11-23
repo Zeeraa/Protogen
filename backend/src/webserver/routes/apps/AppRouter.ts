@@ -162,8 +162,8 @@ export class AppRouter extends AbstractRouter {
       /*
       #swagger.path = '/apps/{name}/activate'
       #swagger.tags = ['Apps'],
-      #swagger.description = "Get app by name"
-      #swagger.responses[200] = { description: "App activated" }
+      #swagger.description = "Activate app by name"
+      #swagger.responses[200] = { description: "App activated successfully" }
       #swagger.responses[404] = { description: "App not found" }
       #swagger.responses[500] = { description: "Failed to activate app" }
 
@@ -179,7 +179,7 @@ export class AppRouter extends AbstractRouter {
           return;
         }
 
-        const result = await this.protogen.appManager.activateApp(app.name);
+        const result = await this.protogen.appManager.activateApp(app.name, req.body ?? {});
         if (!result) {
           res.status(500).json({ message: "Failed to activate app" });
           return;
@@ -235,6 +235,7 @@ function appToDTO(app: AbstractApp) {
     name: app.name,
     displayName: app.displayName,
     options: app.options,
+    additionalButtons: app.additionalButtons,
     metadata: app.getMetadata(),
   }
 }

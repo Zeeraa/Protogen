@@ -13,6 +13,11 @@
     @if(hasWebUiPage()) {
     <button class="btn btn-primary me-1 mb-1" (click)="createInvite()" [disabled]="!isActive()">Open</button>
     }
+
+    @for (additionalButton of app().additionalButtons; track $index) {
+    <app-additional-button (appActivated)="activated.emit($event)" [app]="app()" [additionalButton]="additionalButton"
+      [appIsRunning]="isActive()" />
+    }
   </div>
 </div>
 

@@ -10,8 +10,8 @@ export class AppsApi extends ApiBaseService {
     return this.http.get<AppList>(this.apiBaseUrl + "/apps");
   }
 
-  activateApp(name: string) {
-    return this.http.post<App>(this.apiBaseUrl + "/apps/" + name + "/activate", {});
+  activateApp(name: string, params: Record<string, any> = {}) {
+    return this.http.post<App>(this.apiBaseUrl + "/apps/" + name + "/activate", params);
   }
 
   getAppToken(name: string) {
@@ -59,8 +59,28 @@ export interface App {
   name: string;
   displayName: string;
   options: AppOptions;
+  additionalButtons: AppAdditionalButton[];
   metadata: any;
 }
+
+export interface AppAdditionalButton {
+  text: string;
+  style: string;
+  type: AppAdditionalButtonType;
+  enableRule: AppAdditionalButtonEnableRule;
+  metadata?: any;
+}
+
+export enum AppAdditionalButtonType {
+  StartWithParams = "StartWithParams",
+}
+
+export enum AppAdditionalButtonEnableRule {
+  Always = "Always",
+  WhenActive = "WhenActive",
+  WhenInactive = "WhenInactive",
+}
+
 
 
 export interface AppOptions {

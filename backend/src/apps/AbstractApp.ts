@@ -1,3 +1,4 @@
+import { BootstrapButtonType } from "../utils/BoostrapButtonStyle";
 import { generateSecretKey } from "../utils/Utils";
 import { AppSocketPacket } from "../webserver/socket/AppUserSocketSession";
 import { AppManager } from "./AppManager";
@@ -14,6 +15,7 @@ export abstract class AbstractApp {
   private readonly _options;
   private readonly _appCanvas;
   private readonly _appCanvasCtx;
+  public readonly additionalButtons: AppAdditionalButton[] = [];
   private _interactionKey: string;
 
   constructor(appManager: AppManager, name: string, displayName: string, options: AppOptions = {}) {
@@ -129,9 +131,11 @@ export abstract class AbstractApp {
   }
 
   /**
-   * Called when the app is activated
+   * Called when the app is activated.
+   * @param params Parameters passed during activation
    */
-  public async onActivated() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async onActivated(params: Record<string, any> = {}) {
   }
 
   /**
@@ -149,8 +153,8 @@ export abstract class AbstractApp {
   /**
    * Activates the app if its not already active
    */
-  public async activate() {
-    await this.appManager.activateApp(this.name);
+  public async activate(params: Record<string, any> = {}) {
+    await this.appManager.activateApp(this.name, params);
   }
 
   /**
@@ -184,4 +188,22 @@ export abstract class AbstractApp {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async onAppMessage(data: AppSocketPacket<any>) { }
+}
+
+export interface AppAdditionalButton {
+  text: string;
+  style: BootstrapButtonType;
+  type: AppAdditionalButtonType;
+  enableRule: AppAdditionalButtonEnableRule;
+  metadata?: any;
+}
+
+export enum AppAdditionalButtonType {
+  StartWithParams = "StartWithParams",
+}
+
+export enum AppAdditionalButtonEnableRule {
+  Always = "Always",
+  WhenActive = "WhenActive",
+  WhenInactive = "WhenInactive",
 }

@@ -44,8 +44,18 @@ export class DosboxManager {
   }
 
   public async loadApplications() {
+    this.protogen.logger.info("DosboxManager", "Loading DOSBox applications");
     this._dosboxApplications = [];
-    this._dosboxApplications.push(new DosboxApplication(this, DosboxApplicationType.SystemApp, "dosbox", null, "DOSBox", []));
+    this._dosboxApplications.push(new DosboxApplication(this, DosboxApplicationType.SystemApp, "dosbox", null, "DOSBox", [], false));
+
+    // Hard coded test
+    this._dosboxApplications.push(new DosboxApplication(this, DosboxApplicationType.SystemApp, "doom_test", null, "DOOM", [
+      "-c", "c:",
+      "-c", "cd \\DOOMS",
+      "-c", "doom",
+      "-c", "exit",
+    ], true));
+
     this.registerApplicationWrappers();
   }
 
@@ -60,6 +70,7 @@ export class DosboxManager {
 
     // Construct wrappers
     this._dosboxApplications.forEach(dosboxApp => {
+      this.protogen.logger.info("DosboxManager", "Registering wrapper for " + dosboxApp.name);
       const wrapper = new WrappedDosboxApp(this.protogen.appManager, dosboxApp);
       this.protogen.appManager.registerApp(wrapper);
     });
@@ -100,6 +111,7 @@ export class DosboxManager {
     const { width, height } = this.protogen.config.ledMatrix;
     const panelWidth = width / 2;
 
+    this.protogen.logger.info("DosboxManager", "Preparing to start " + dosboxApp.name + ". Maintenance mode: " + maintenanceMode);
     try {
       // First start xvfb
       this._xvfbProcess = spawn("Xvfb", [":99", "-screen", "0", `${XvfbWidth}x${XvfbHeight}x16`], { stdio: ["ignore", "inherit", "inherit"] });
@@ -174,7 +186,6 @@ export class DosboxManager {
         this._xvfbProcess = null;
         this.runExitCallbackHandler();
       });
-
     } catch (error) {
       this.kill();
       this._runningApplication = null;

@@ -1,0 +1,3 @@
+<button class="btn mb-1 me-1" [ngClass]="additionalButton().style"
+  (click)="handleAdditionalButtonClick(additionalButton())"
+  [disabled]="isDisabled()">{{additionalButton().text}}</button>

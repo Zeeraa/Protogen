@@ -5,11 +5,13 @@ import { AppCardComponent } from './components/app-card/app-card.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PaintModule } from './ui/paint/paint.module';
 import { DosboxModule } from './ui/dosbox/dosbox.module';
+import { AdditionalButtonComponent } from './components/app-card/additional-button/additional-button.component';
 
 @NgModule({
   declarations: [
     AppsPageComponent,
-    AppCardComponent
+    AppCardComponent,
+    AdditionalButtonComponent
   ],
   imports: [
     CommonModule,

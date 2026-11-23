@@ -28,8 +28,8 @@ export class AppCardComponent implements OnDestroy {
   protected readonly appLink = signal("");
   protected readonly hasWebUiPage = computed(() => this.app().options.webPath != null);
 
-  public startApp() {
-    this.appApi.activateApp(this.app().name).pipe(
+  public startApp(params = {}) {
+    this.appApi.activateApp(this.app().name, params).pipe(
       catchError(err => {
         this.toast.error("Failed to start app");
         throw err;
