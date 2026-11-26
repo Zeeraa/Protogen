@@ -526,7 +526,13 @@ else
 fi
 
 a2ensite protogen.conf
-systemctl restart scwrapper
+
+if [[ "$IS_UPDATE" == "true" ]]; then
+    systemctl restart flaschen-taschen
+    systemctl restart gamepad-listener
+    systemctl restart protogen
+    systemctl restart mosquitto
+    systemctl restart scwrapper
     if systemctl is-enabled --quiet interface-list 2>/dev/null; then
         systemctl restart interface-list
     fi
@@ -535,15 +541,7 @@ else
     systemctl start gamepad-listener
     systemctl start protogen
     systemctl start mosquitto
-    systemctl start scwrappern
-    if systemctl is-enabled --quiet interface-list 2>/dev/null; then
-        systemctl restart interface-list
-    fi
-else
-    systemctl start flaschen-taschen
-    systemctl start gamepad-listener
-    systemctl start protogen
-    systemctl start mosquitto
+    systemctl start scwrapper
     if [[ "$INSTALL_INTERFACE_LIST" == "true" ]]; then
         systemctl start interface-list
     fi
